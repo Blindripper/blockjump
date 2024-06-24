@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Tower</title>
+    <style>
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: #e94560;
+        }
+        #gameContainer {
+            position: relative;
+        }
+        #gameCanvas {
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.5);
+        }
+        #floorCounter {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            padding: 10px 20px;
+            background-color: #e94560;
+            color: #16213e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #startButton:hover {
+            background-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div id="floorCounter">Floor: 00000</div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <button id="startButton">Start Game</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const floorCounter = document.getElementById('floorCounter');
+        const startButton = document.getElementById('startButton');
+
+        // Load Tezos sprite
+        const playerSprite = new Image();
+        playerSprite.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzJjN2RmYSIgZD0iTTE3LjU4OCAyLjU4MWMtLjQ0My0uNDQzLTEuMDQtLjcwNC0xLjY4LS43MjNsLTYuOTc4LS4wMmMtMS4zMjQgMC0yLjM5OCAxLjA3NC0yLjM5OCAyLjM5OHYxNS4yMDRjMCAxLjMyNCAxLjA3NCAyLjM5OCAyLjM5OCAyLjM5OGg3Ljc3NGMxLjMyNCAwIDIuMzk4LTEuMDc0IDIuMzk4LTIuMzk4VjguNDU0YS45NS45NSAwIDAwLS4yOC0uNjczbC0xLjIzNC0xLjIzNHpNMTYuNDU0IDUuNDY2bC4yODEuMjgxSDEzLjkxdi0yLjgyNWwuMjgxLjI4MSAxLjEzMiAxLjEzMiAxLjEzMSAxLjEzMXpNMTAuMzcyIDMuODU4aDEuOTk1djMuMzNhLjk1Ljk1IDAgMDAuOTUuOTVoMy4zM3Y5LjI5MmEuNS41IDAgMDEtLjUuNUg5Ljg3MmEuNS41IDAgMDEtLjUtLjVWNC4zNThhLjUuNSAwIDAxLjUtLjV6Ii8+PC9zdmc+';
+
+        // Background images
+        const backgrounds = Array.from({ length: 16 }, (_, i) => ({
+            image: new Image(),
+            floorStart: i * 100
+        }));
+
+        // Load all background images from jsDelivr CDN
+        const cdnUrl = 'https://cdn.jsdelivr.net/gh/your-username/your-repository@branch-name/';
+        backgrounds.forEach((bg, index) => {
+            bg.image.src = `${cdnUrl}background${index + 1}.jpg`; // Adjust the file names as needed
+            bg.image.onload = () => console.log(`Background ${index + 1} loaded`);
+            bg.image.onerror = () => console.error(`Failed to load background ${index + 1}`);
+        });
+
+        // Game variables
+        let player = {
+            x: 375,
+            y: 530,
+            width: 50,
+            height: 50,
+            speed: 7,
+            jumpForce: 15,
+            velocityY: 0,
+            isJumping: false
+        };
+
+        let platforms = [];
+        let bottomPlatform = {
+            x: 0,
+            y: 580,
+            width: 800,
+            height: 20
+        };
+        let score = 0;
+        let keys = {};
+        let gameRunning = false;
+        let gameOver = false;
+        let hasLeftGround = false;
+        let currentBackgroundIndex = 0;
+        let fadeAlpha = 0;
+        let isFading = false;
+
+        function initGame() {
+            // Initialize platforms
+            platforms = [];
+            for (let i = 0; i < 7; i++) {
+                platforms.push({
+                    x: Math.random() * (canvas.width - 120),
+                    y: canvas.height - (i + 2) * 100,  // Start platforms higher
+                    width: 120,
+                    height: 15
+                });
+            }
+        }
+
+        function update() {
+            if (!gameRunning || gameOver) return;
+
+            // Player movement
+            if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+            if (keys.ArrowRight && player.x < canvas.width - player.width) player.x += player.speed;
+
+            // Jumping
+            if (keys.ArrowUp && !player.isJumping) {
+                player.isJumping = true;
+                player.velocityY = -player.jumpForce;
+                if (!hasLeftGround) {
+                    hasLeftGround = true;
+                }
+            }
+
+            // Apply gravity
+            player.velocityY += 0.6;
+            player.y += player.velocityY;
+
+            // Bottom platform collision
+            if (player.y + player.height > bottomPlatform.y) {
+                player.y = bottomPlatform.y - player.height;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            // Platform collision
+            platforms.forEach(platform => {
+                if (player.y + player.height > platform.y &&
+                    player.y + player.height < platform.y + platform.height &&
+                    player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x) {
+                    player.y = platform.y - player.height;
+                    player.velocityY = 0;
+                    player.isJumping = false;
+                }
+            });
+
+            // Move platforms and generate new ones
+            if (hasLeftGround) {
+                platforms.forEach(platform => {
+                    platform.y += 1.5;
+                    if (platform.y > canvas.height) {
+                        score++;
+                        floorCounter.textContent = `Floor: ${score.toString().padStart(5, '0')}`;
+                        platform.y = 0;
+                        platform.x = Math.random() * (canvas.width - platform.width);
+                    }
+                });
+
+                // Move bottom platform
+                bottomPlatform.y += 1.5;
+
+                // Update background
+                updateBackground();
+            }
+
+            // Keep player in view
+            if (player.y < 300) {
+                player.y = 300;
+                platforms.forEach(platform => {
+                    platform.y += 15 - player.velocityY;
+                });
+                bottomPlatform.y += 15 - player.velocityY;
+            }
+
+            // Game over condition
+            if (player.y > canvas.height) {
+                gameOver = true;
+                gameRunning = false;
+            }
+        }
+
+        function updateBackground() {
+            let newBackgroundIndex = Math.floor(score / 100);
+            if (newBackgroundIndex >= backgrounds.length) {
+                newBackgroundIndex = backgrounds.length - 1;
+            }
+            if (newBackgroundIndex !== currentBackgroundIndex) {
+                isFading = true;
+                fadeAlpha = 0;
+            }
+        }
+
+        function draw() {
+            // Draw current background
+            ctx.drawImage(backgrounds[currentBackgroundIndex].image, 0, 0, canvas.width, canvas.height);
+            
+            // If fading, draw the next background with increasing opacity
+            if (isFading) {
+                ctx.globalAlpha = fadeAlpha;
+                ctx.drawImage(backgrounds[Math.min(currentBackgroundIndex + 1, backgrounds.length - 1)].image, 0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1;
+                
+                fadeAlpha += 0.02;
+                if (fadeAlpha >= 1) {
+                    currentBackgroundIndex++;
+                    isFading = false;
+                }
+            }
+
+            if (gameOver) {
+                drawGameOver();
+            } else {
+                // Draw bottom platform
+                ctx.fillStyle = '#0f3460';
+                ctx.fillRect(bottomPlatform.x, bottomPlatform.y, bottomPlatform.width, bottomPlatform.height);
+
+                // Draw platforms
+                platforms.forEach(platform => {
+                    ctx.beginPath();
+                    ctx.roundRect(platform.x, platform.y, platform.width, platform.height, 5);
+                    ctx.fill();
+                });
+
+                // Draw player
+                ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
+            }
+        }
+
+        function drawGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#e94560';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+
+            ctx.font = '24px Arial';
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+
+            ctx.font = '20px Arial';
+            ctx.fillText('Click "Start Game" to play again', canvas.width / 2, canvas.height / 2 + 50);
+
+            startButton.style.display = 'block';
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            player.x = 375;
+            player.y = 530;
+            player.velocityY = 0;
+            player.isJumping = false;
+            bottomPlatform.y = 580;
+            score = 0;
+            gameOver = false;
+            hasLeftGround = false;
+            currentBackgroundIndex = 0;
+            isFading = false;
+            fadeAlpha = 0;
+            floorCounter.textContent = 'Floor: 00000';
+            initGame();
+        }
+
+        // Keyboard input handling
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Start button event listener
+        startButton.addEventListener('click', () => {
+            resetGame();
+            gameRunning = true;
+            gameOver = false;
+            startButton.style.display = 'none';
+        });
+
+        // Initialize and start the game loop
+        initGame();
+        gameLoop();
+    </script>
+</body>
+</html>
