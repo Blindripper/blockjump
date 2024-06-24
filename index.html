@@ -54,15 +54,24 @@
         <button id="startButton">Start Game</button>
     </div>
     <script>
+    // Define CDN URL first
+    const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
+
+    // Background images array declaration
+    const backgrounds = Array.from({ length: 16 }, (_, i) => ({
+        image: new Image(),
+        floorStart: i * 100
+    }));
+
     // Load all background images from jsDelivr CDN
-        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
-        backgrounds.forEach((bg, index) => {
-            bg.image.src = `${cdnUrl}bg${index + 1}.jpg`; // Adjust the file names as needed
-            bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
-            bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
-        });        
+    backgrounds.forEach((bg, index) => {
+        bg.image.src = `${cdnUrl}bg${index + 1}.jpg`;
+        bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
+        bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
+    });
 
-
+    // Wait for DOM to load before accessing elements
+    document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const floorCounter = document.getElementById('floorCounter');
@@ -70,17 +79,9 @@
 
         // Load Tezos sprite
         const playerSprite = new Image();
-            playerSprite.src = `${cdnUrl}TezosLogo_Icon_Blue.png`; // Replace with your image file name
-            playerSprite.onload = () => console.log('Player sprite loaded');
-            playerSprite.onerror = () => console.error('Failed to load player sprite');
-
-        // Background images
-        const backgrounds = Array.from({ length: 16 }, (_, i) => ({
-            image: new Image(),
-            floorStart: i * 100
-        }));
-
-        
+        playerSprite.src = `${cdnUrl}TezosLogo_Icon_Blue.png`;
+        playerSprite.onload = () => console.log('Player sprite loaded');
+        playerSprite.onerror = () => console.error('Failed to load player sprite');
 
         // Game variables
         let player = {
@@ -304,6 +305,7 @@
         // Initialize and start the game loop
         initGame();
         gameLoop();
+    });
     </script>
 </body>
 </html>
