@@ -54,6 +54,15 @@
         <button id="startButton">Start Game</button>
     </div>
     <script>
+    // Load all background images from jsDelivr CDN
+        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
+        backgrounds.forEach((bg, index) => {
+            bg.image.src = `${cdnUrl}bg${index + 1}.jpg`; // Adjust the file names as needed
+            bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
+            bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
+        });        
+
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const floorCounter = document.getElementById('floorCounter');
@@ -71,13 +80,7 @@
             floorStart: i * 100
         }));
 
-        // Load all background images from jsDelivr CDN
-        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
-        backgrounds.forEach((bg, index) => {
-            bg.image.src = `${cdnUrl}bg${index + 1}.jpg`; // Adjust the file names as needed
-            bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
-            bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
-        });
+        
 
         // Game variables
         let player = {
