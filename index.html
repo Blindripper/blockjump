@@ -72,7 +72,7 @@
         }));
 
         // Load all background images from jsDelivr CDN
-        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/';
+        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
         backgrounds.forEach((bg, index) => {
             bg.image.src = `${cdnUrl}bg${index + 1}.jpg`; // Adjust the file names as needed
             bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
