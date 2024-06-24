@@ -72,9 +72,9 @@
         // Load all background images from jsDelivr CDN
         const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/';
         backgrounds.forEach((bg, index) => {
-            bg.image.src = `${cdnUrl}background${index + 1}.jpg`; // Adjust the file names as needed
-            bg.image.onload = () => console.log(`Background ${index + 1} loaded`);
-            bg.image.onerror = () => console.error(`Failed to load background ${index + 1}`);
+            bg.image.src = `${cdnUrl}bg${index + 1}.jpg`; // Adjust the file names as needed
+            bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
+            bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
         });
 
         // Game variables
