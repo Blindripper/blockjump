@@ -61,7 +61,9 @@
 
         // Load Tezos sprite
         const playerSprite = new Image();
-        playerSprite.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzJjN2RmYSIgZD0iTTE3LjU4OCAyLjU4MWMtLjQ0My0uNDQzLTEuMDQtLjcwNC0xLjY4LS43MjNsLTYuOTc4LS4wMmMtMS4zMjQgMC0yLjM5OCAxLjA3NC0yLjM5OCAyLjM5OHYxNS4yMDRjMCAxLjMyNCAxLjA3NCAyLjM5OCAyLjM5OCAyLjM5OGg3Ljc3NGMxLjMyNCAwIDIuMzk4LTEuMDc0IDIuMzk4LTIuMzk4VjguNDU0YS45NS45NSAwIDAwLS4yOC0uNjczbC0xLjIzNC0xLjIzNHpNMTYuNDU0IDUuNDY2bC4yODEuMjgxSDEzLjkxdi0yLjgyNWwuMjgxLjI4MSAxLjEzMiAxLjEzMiAxLjEzMSAxLjEzMXpNMTAuMzcyIDMuODU4aDEuOTk1djMuMzNhLjk1Ljk1IDAgMDAuOTUuOTVoMy4zM3Y5LjI5MmEuNS41IDAgMDEtLjUuNUg5Ljg3MmEuNS41IDAgMDEtLjUtLjVWNC4zNThhLjUuNSAwIDAxLjUtLjV6Ii8+PC9zdmc+';
+            playerSprite.src = `${cdnUrl}TezosLogo_Icon_Blue.png`; // Replace with your image file name
+            playerSprite.onload = () => console.log('Player sprite loaded');
+            playerSprite.onerror = () => console.error('Failed to load player sprite');
 
         // Background images
         const backgrounds = Array.from({ length: 16 }, (_, i) => ({
