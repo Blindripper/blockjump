@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Tower</title>
+    <title>BlockJump</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         body {
             background-color: #1a1a2e;
             display: flex;
@@ -83,16 +84,57 @@
         playerSprite.onload = () => console.log('Player sprite loaded');
         playerSprite.onerror = () => console.error('Failed to load player sprite');
 
+           // Stage names
+    const stageNames = [
+        { name: "Athens", start: 0, end: 100 },
+        { name: "Babylon", start: 101, end: 200 },
+        { name: "Carthage", start: 201, end: 300 },
+        { name: "Delphi", start: 301, end: 400 },
+        { name: "Edo", start: 401, end: 500 },
+        { name: "Florence", start: 501, end: 600 },
+        { name: "Granada", start: 601, end: 700 },
+        { name: "Hangzhou", start: 701, end: 800 },
+        { name: "Ithaca", start: 801, end: 900 },
+        { name: "Jakarta", start: 901, end: 1000 },
+        { name: "Kathmandu", start: 1001, end: 1100 },
+        { name: "Lima", start: 1101, end: 1200 },
+        { name: "Mumbai", start: 1201, end: 1300 },
+        { name: "Nairobi", start: 1301, end: 1400 },
+        { name: "Oxford", start: 1401, end: 1500 },
+        { name: "Paris", start: 1501, end: 1600 }
+    ];
+        
+        // Stage name display variables
+    let currentStageName = "";
+    let stageNameOpacity = 0;
+    let stageNameTimer = 0;
+        
+    function updateStageName() {
+        const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end);
+        if (currentStage && currentStage.name !== currentStageName) {
+            currentStageName = currentStage.name;
+            stageNameOpacity = 1;
+            stageNameTimer = 3; // 3 seconds display time
+        }
+    }
+
+        // Game constants
+        const JUMP_VELOCITY = -600;
+        const GRAVITY = 1500;
+        const PLATFORM_SPEED = 100;
+
         // Game variables
         let player = {
             x: 375,
             y: 530,
             width: 50,
             height: 50,
-            speed: 7,
-            jumpForce: 15,
+            speed: 300,
             velocityY: 0,
-            isJumping: false
+            isJumping: false,
+            jumpCount: 0,
+            maxJumps: 2,
+            canJump: true
         };
 
         let platforms = [];
@@ -100,7 +142,8 @@
             x: 0,
             y: 580,
             width: 800,
-            height: 20
+            height: 20,
+            isSafe: true
         };
         let score = 0;
         let keys = {};
@@ -110,91 +153,151 @@
         let currentBackgroundIndex = 0;
         let fadeAlpha = 0;
         let isFading = false;
+        let nextBottomPlatformScore = 100;
+        let isPlayerOnSafePlatform = false;
+
+        function createPlatform(y) {
+            return {
+                x: Math.random() * (canvas.width - 120),
+                y: y,
+                width: 120,
+                height: 15,
+                isGolden: (score + platforms.length) % 15 === 0
+            };
+        }
 
         function initGame() {
             // Initialize platforms
             platforms = [];
             for (let i = 0; i < 7; i++) {
-                platforms.push({
-                    x: Math.random() * (canvas.width - 120),
-                    y: canvas.height - (i + 2) * 100,  // Start platforms higher
-                    width: 120,
-                    height: 15
-                });
+                platforms.push(createPlatform(canvas.height - (i + 2) * 100));
+            }
+            nextBottomPlatformScore = 100;
+            bottomPlatform.isSafe = true;
+            isPlayerOnSafePlatform = false;
+        }
+
+        function update(dt) {
+            if (!gameRunning || gameOver) return;
+
+            // Update stage name
+        updateStageName();
+        if (stageNameTimer > 0) {
+            stageNameTimer -= dt;
+            if (stageNameTimer <= 0) {
+                stageNameOpacity = Math.max(0, stageNameOpacity - dt);
             }
         }
 
-        function update() {
-            if (!gameRunning || gameOver) return;
-
             // Player movement
-            if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
-            if (keys.ArrowRight && player.x < canvas.width - player.width) player.x += player.speed;
+            if (keys.ArrowLeft && player.x > 0) player.x -= player.speed * dt;
+            if (keys.ArrowRight && player.x < canvas.width - player.width) player.x += player.speed * dt;
 
             // Jumping
-            if (keys.ArrowUp && !player.isJumping) {
+            if (keys.ArrowUp && player.canJump && player.jumpCount < player.maxJumps) {
                 player.isJumping = true;
-                player.velocityY = -player.jumpForce;
+                player.velocityY = JUMP_VELOCITY;
+                player.jumpCount++;
+                player.canJump = false;
                 if (!hasLeftGround) {
                     hasLeftGround = true;
                 }
+                if (isPlayerOnSafePlatform) {
+                    isPlayerOnSafePlatform = false;
+                }
+            }
+
+            // Reset canJump when the up arrow key is released
+            if (!keys.ArrowUp) {
+                player.canJump = true;
             }
 
             // Apply gravity
-            player.velocityY += 0.6;
-            player.y += player.velocityY;
+            player.velocityY += GRAVITY * dt;
+            player.y += player.velocityY * dt;
 
             // Bottom platform collision
-            if (player.y + player.height > bottomPlatform.y) {
+            if (player.y + player.height > bottomPlatform.y && 
+                player.y + player.height < bottomPlatform.y + bottomPlatform.height &&
+                bottomPlatform.y < canvas.height) {
                 player.y = bottomPlatform.y - player.height;
                 player.velocityY = 0;
                 player.isJumping = false;
+                player.jumpCount = 0;
+                if (bottomPlatform.isSafe) {
+                    isPlayerOnSafePlatform = true;
+                }
             }
 
             // Platform collision
             platforms.forEach(platform => {
-                if (player.y + player.height > platform.y &&
+                if (player.velocityY > 0 &&
+                    player.y + player.height > platform.y &&
                     player.y + player.height < platform.y + platform.height &&
                     player.x < platform.x + platform.width &&
                     player.x + player.width > platform.x) {
                     player.y = platform.y - player.height;
                     player.velocityY = 0;
                     player.isJumping = false;
+                    player.jumpCount = 0;
+
+                    if (platform.isGolden) {
+                        player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
+                        score += 15;
+                    }
                 }
             });
 
             // Move platforms and generate new ones
-            if (hasLeftGround) {
-                platforms.forEach(platform => {
-                    platform.y += 1.5;
+            if (hasLeftGround && !isPlayerOnSafePlatform) {
+                platforms.forEach((platform, index) => {
+                    platform.y += PLATFORM_SPEED * dt;
                     if (platform.y > canvas.height) {
                         score++;
                         floorCounter.textContent = `Floor: ${score.toString().padStart(5, '0')}`;
-                        platform.y = 0;
-                        platform.x = Math.random() * (canvas.width - platform.width);
+                        platforms[index] = createPlatform(0);
+                        
+                        // Update background every time score increases
+                        updateBackground();
                     }
                 });
 
                 // Move bottom platform
-                bottomPlatform.y += 1.5;
+                bottomPlatform.y += PLATFORM_SPEED * dt;
 
-                // Update background
-                updateBackground();
+                // Create new bottom platform every 100 floors
+                if (score >= nextBottomPlatformScore) {
+                    bottomPlatform = {
+                        x: 0,
+                        y: 0,
+                        width: 800,
+                        height: 20,
+                        isSafe: true
+                    };
+                    nextBottomPlatformScore += 100;
+                }
             }
 
             // Keep player in view
-            if (player.y < 300) {
+            if (player.y < 300 && !isPlayerOnSafePlatform) {
+                let diff = 300 - player.y;
                 player.y = 300;
                 platforms.forEach(platform => {
-                    platform.y += 15 - player.velocityY;
+                    platform.y += diff;
                 });
-                bottomPlatform.y += 15 - player.velocityY;
+                bottomPlatform.y += diff;
             }
 
             // Game over condition
-            if (player.y > canvas.height) {
+            if (player.y > canvas.height && !bottomPlatform.isSafe) {
                 gameOver = true;
                 gameRunning = false;
+            }
+
+            // Reset bottom platform safety when player leaves it
+            if (player.y + player.height < bottomPlatform.y) {
+                bottomPlatform.isSafe = false;
+                isPlayerOnSafePlatform = false;
             }
         }
 
@@ -204,6 +307,7 @@
                 newBackgroundIndex = backgrounds.length - 1;
             }
             if (newBackgroundIndex !== currentBackgroundIndex) {
+                currentBackgroundIndex = newBackgroundIndex;
                 isFading = true;
                 fadeAlpha = 0;
             }
@@ -212,7 +316,16 @@
         function draw() {
             // Draw current background
             ctx.drawImage(backgrounds[currentBackgroundIndex].image, 0, 0, canvas.width, canvas.height);
-            
+            // Draw stage name
+        if (stageNameOpacity > 0) {
+            ctx.globalAlpha = stageNameOpacity;
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 48px Orbitron, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
+            ctx.globalAlpha = 1;
+        }
+
             // If fading, draw the next background with increasing opacity
             if (isFading) {
                 ctx.globalAlpha = fadeAlpha;
@@ -221,7 +334,6 @@
                 
                 fadeAlpha += 0.02;
                 if (fadeAlpha >= 1) {
-                    currentBackgroundIndex++;
                     isFading = false;
                 }
             }
@@ -230,11 +342,12 @@
                 drawGameOver();
             } else {
                 // Draw bottom platform
-                ctx.fillStyle = '#0f3460';
+                ctx.fillStyle = bottomPlatform.isSafe ? '#4CAF50' : '#0f3460';
                 ctx.fillRect(bottomPlatform.x, bottomPlatform.y, bottomPlatform.width, bottomPlatform.height);
 
                 // Draw platforms
                 platforms.forEach(platform => {
+                    ctx.fillStyle = platform.isGolden ? '#FFD700' : '#0f3460';
                     ctx.beginPath();
                     ctx.roundRect(platform.x, platform.y, platform.width, platform.height, 5);
                     ctx.fill();
@@ -263,9 +376,23 @@
             startButton.style.display = 'block';
         }
 
-        function gameLoop() {
-            update();
+        let lastTime = 0;
+        const fixedDeltaTime = 1 / 60; // 60 FPS
+        let accumulator = 0;
+
+        function gameLoop(currentTime) {
+            if (lastTime) {
+                const deltaTime = (currentTime - lastTime) / 1000;
+                accumulator += deltaTime;
+
+                while (accumulator >= fixedDeltaTime) {
+                    update(fixedDeltaTime);
+                    accumulator -= fixedDeltaTime;
+                }
+            }
+
             draw();
+            lastTime = currentTime;
             requestAnimationFrame(gameLoop);
         }
 
@@ -274,7 +401,15 @@
             player.y = 530;
             player.velocityY = 0;
             player.isJumping = false;
-            bottomPlatform.y = 580;
+            player.jumpCount = 0;
+            player.canJump = true;
+            bottomPlatform = {
+                x: 0,
+                y: 580,
+                width: 800,
+                height: 20,
+                isSafe: true
+            };
             score = 0;
             gameOver = false;
             hasLeftGround = false;
@@ -282,6 +417,8 @@
             isFading = false;
             fadeAlpha = 0;
             floorCounter.textContent = 'Floor: 00000';
+            nextBottomPlatformScore = 100;
+            isPlayerOnSafePlatform = false;
             initGame();
         }
 
@@ -304,7 +441,7 @@
 
         // Initialize and start the game loop
         initGame();
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     });
     </script>
 </body>
