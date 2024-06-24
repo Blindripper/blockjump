@@ -70,7 +70,7 @@
         }));
 
         // Load all background images from jsDelivr CDN
-        const cdnUrl = 'https://cdn.jsdelivr.net/gh/your-username/your-repository@branch-name/';
+        const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/';
         backgrounds.forEach((bg, index) => {
             bg.image.src = `${cdnUrl}background${index + 1}.jpg`; // Adjust the file names as needed
             bg.image.onload = () => console.log(`Background ${index + 1} loaded`);
