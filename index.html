@@ -7,33 +7,31 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         body {
-            background-color: #1a1a2e;
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             color: #e94560;
         }
         #gameContainer {
             position: relative;
+            margin-top: 20px;
         }
         #gameCanvas {
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 102, 204, 0.5);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
         }
         #floorCounter {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
         }
-        #startButton {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        #startButton, #soundToggle {
             font-size: 24px;
             padding: 10px 20px;
             background-color: #e94560;
@@ -41,18 +39,29 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            margin: 10px;
         }
-        #startButton:hover {
+        #startButton:hover, #soundToggle:hover {
             background-color: #ff6b6b;
+            transform: scale(1.05);
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body>
-    <div id="floorCounter">Floor: 00000</div>
+    <div id="floorCounter">Tezos Marketcap: 0000000000</div>
     <div id="gameContainer">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+    <div id="controls">
         <button id="startButton">Start Game</button>
+        <button id="soundToggle">Sound: On</button>
     </div>
     <script>
     // Define CDN URL first
@@ -66,17 +75,50 @@
         activePowerups: 0
     };
 
+    // Sprite loading with error handling and logging
+    function loadSprite(name, url) {
+        return new Promise((resolve, reject) => {
+            const sprite = new Image();
+            sprite.onload = () => {
+                console.log(`${name} sprite loaded successfully`);
+                resolve(sprite);
+            };
+            sprite.onerror = () => {
+                console.error(`Failed to load ${name} sprite from ${url}`);
+                reject(new Error(`Failed to load ${name} sprite`));
+            };
+            sprite.src = url;
+        });
+    }
+
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+            img.src = src;
+        });
+    }
+
     // Background images array declaration
     const backgrounds = Array.from({ length: 16 }, (_, i) => ({
-        image: new Image(),
-        floorStart: i * 100
+        image: null,
+        floorStart: i * 100,
+        color: `hsl(${i * 20}, 70%, 20%)` // Fallback color
     }));
 
-    // Load all background images from jsDelivr CDN
-    backgrounds.forEach((bg, index) => {
-        bg.image.src = `${cdnUrl}bg${index + 1}.jpg`;
-        bg.image.onload = () => console.log(`bg ${index + 1} loaded`);
-        bg.image.onerror = () => console.error(`Failed to load bg ${index + 1}`);
+    // Load all background images
+    Promise.all(backgrounds.map((bg, index) => 
+        loadImage(`${cdnUrl}bg${index + 1}.jpg`)
+            .then(img => { bg.image = img; })
+            .catch(error => { 
+                console.error(error);
+                // Keep the fallback color
+            })
+    )).then(() => {
+        console.log("All background images loaded (or failed gracefully)");
+    }).catch(error => {
+        console.error("Error in background loading:", error);
     });
 
     // Wait for DOM to load before accessing elements
@@ -85,566 +127,889 @@
         const ctx = canvas.getContext('2d');
         const floorCounter = document.getElementById('floorCounter');
         const startButton = document.getElementById('startButton');
+        const soundToggle = document.getElementById('soundToggle');
 
-        // Load Tezos sprite
-        const playerSprite = new Image();
-        playerSprite.src = `${cdnUrl}TezosLogo_Icon_Blue.png`;
-        playerSprite.onload = () => console.log('Player sprite loaded');
-        playerSprite.onerror = () => console.error('Failed to load player sprite');
-
-        // Load powerup sprites
-        const powerupSprite = new Image();
-        powerupSprite.src = `${cdnUrl}bitcoin.png`;
-        powerupSprite.onload = () => console.log('Bitcoin powerup sprite loaded');
-        powerupSprite.onerror = () => console.error('Failed to load Bitcoin powerup sprite');
-
-        const solanaPowerupSprite = new Image();
-        solanaPowerupSprite.src = `${cdnUrl}solana.png`;
-        solanaPowerupSprite.onload = () => console.log('Solana powerup sprite loaded');
-        solanaPowerupSprite.onerror = () => console.error('Failed to load Solana powerup sprite');
-
-        const ethereumPowerupSprite = new Image();
-        ethereumPowerupSprite.src = `${cdnUrl}ethereum.png`;
-        ethereumPowerupSprite.onload = () => console.log('Ethereum powerup sprite loaded');
-        ethereumPowerupSprite.onerror = () => console.error('Failed to load Ethereum powerup sprite');
-
-        // Stage names
-        const stageNames = [
-            { name: "Athens", start: 0, end: 100 },
-            { name: "Babylon", start: 101, end: 200 },
-            { name: "Carthage", start: 201, end: 300 },
-            { name: "Delphi", start: 301, end: 400 },
-            { name: "Edo", start: 401, end: 500 },
-            { name: "Florence", start: 501, end: 600 },
-            { name: "Granada", start: 601, end: 700 },
-            { name: "Hangzhou", start: 701, end: 800 },
-            { name: "Ithaca", start: 801, end: 900 },
-            { name: "Jakarta", start: 901, end: 1000 },
-            { name: "Kathmandu", start: 1001, end: 1100 },
-            { name: "Lima", start: 1101, end: 1200 },
-            { name: "Mumbai", start: 1201, end: 1300 },
-            { name: "Nairobi", start: 1301, end: 1400 },
-            { name: "Oxford", start: 1401, end: 1500 },
-            { name: "Paris", start: 1501, end: 1600 }
+        // Load all sprites
+        const spritePromises = [
+            loadSprite('player', `${cdnUrl}TezosLogo_Icon_Blue.png`),
+            loadSprite('bitcoin', `${cdnUrl}bitcoin.png`),
+            loadSprite('solana', `${cdnUrl}solana.png`),
+            loadSprite('ethereum', `${cdnUrl}ethereum1.png`),  // Note the capital 'E' here
+            loadSprite('etherlink', `${cdnUrl}Etherlink.png`)
         ];
-        
-        // Stage name display variables
-        let currentStageName = "";
-        let stageNameOpacity = 0;
-        let stageNameTimer = 0;
-        
-        function updateStageName() {
-            const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end);
-            if (currentStage && currentStage.name !== currentStageName) {
-                currentStageName = currentStage.name;
-                stageNameOpacity = 1;
-                stageNameTimer = 3; // 3 seconds display time
-            }
-        }
 
-        // Game constants
-        const JUMP_VELOCITY = -600;
-        const GRAVITY = 1500;
-        const PLATFORM_SPEED = 100;
+        Promise.all(spritePromises)
+            .then(([playerSprite, bitcoinSprite, solanaSprite, ethereumSprite, etherlinkSprite]) => {
+                // Store loaded sprites
+                const sprites = {
+                    player: playerSprite,
+                    bitcoin: bitcoinSprite,
+                    solana: solanaSprite,
+                    ethereum: ethereumSprite,
+                    etherlink: etherlinkSprite
+                };
 
-        // Game variables
-        let player = {
-            x: 375,
-            y: 530,
-            width: 50,
-            height: 50,
-            speed: 300,
-            velocityY: 0,
-            isJumping: false,
-            jumpCount: 0,
-            maxJumps: 2,
-            canJump: true
-        };
-
-        let platforms = [];
-        let bottomPlatform = {
-            x: 0,
-            y: 580,
-            width: 800,
-            height: 20,
-            isSafe: true
-        };
-        let score = 0;
-        let keys = {};
-        let gameRunning = false;
-        let gameOver = false;
-        let hasLeftGround = false;
-        let currentBackgroundIndex = 0;
-        let fadeAlpha = 0;
-        let isFading = false;
-        let nextBottomPlatformScore = 100;
-        let isPlayerOnSafePlatform = false;
-
-        // Powerup variables
-        let powerups = [];
-        let solanaPowerups = [];
-        let ethereumPowerups = [];
-        let powerupActive = false;
-        let powerupTimer = 0;
-        let blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101; // 101-160 blocks
-        let blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51; // 51-80 blocks
-        let blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61; // 61-100 blocks
-        let ethereumEffectActive = false;
-        let ethereumEffectTimer = 0;
-        let originalPlatformWidth = 120; // Store the original platform width
-
-        function createPlatform(y) {
-            return {
-                x: Math.random() * (canvas.width - (ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth)),
-                y: y,
-                width: ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth,
-                height: 15,
-                isGolden: (score + platforms.length) % 15 === 0
-            };
-        }
-
-        function createPowerup(y, type) {
-            debugInfo.powerupsGenerated++;
-            console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}, Type: ${type}`);
-            return {
-                x: Math.random() * (canvas.width - 30),
-                y: y,
-                width: 30,
-                height: 30,
-                type: type
-            };
-        }
-
-        function initGame() {
-            // Initialize platforms
-            platforms = [];
-            for (let i = 0; i < 7; i++) {
-                platforms.push(createPlatform(canvas.height - (i + 2) * 100));
-            }
-            nextBottomPlatformScore = 100;
-            bottomPlatform.isSafe = true;
-            isPlayerOnSafePlatform = false;
-        }
-
-        function update(dt) {
-            if (!gameRunning || gameOver) return;
-
-            // Update stage name
-            updateStageName();
-            if (stageNameTimer > 0) {
-                stageNameTimer -= dt;
-                if (stageNameTimer <= 0) {
-                    stageNameOpacity = Math.max(0, stageNameOpacity - dt);
+                // Stage names
+                const stageNames = [
+                    { name: "Athens", start: 0, end: 999 },
+                    { name: "Babylon", start: 1000, end: 1999 },
+                    { name: "Carthage", start: 2000, end: 2999 },
+                    { name: "Delphi", start: 3000, end: 3999 },
+                    { name: "Edo", start: 4000, end: 4999 },
+                    { name: "Florence", start: 5000, end: 5999 },
+                    { name: "Granada", start: 6000, end: 6999 },
+                    { name: "Hangzhou", start: 7000, end: 7999 },
+                    { name: "Ithaca", start: 8000, end: 8999 },
+                    { name: "Jakarta", start: 9000, end: 9999 },
+                    { name: "Kathmandu", start: 10000, end: 10999 },
+                    { name: "Lima", start: 11000, end: 11999 },
+                    { name: "Mumbai", start: 12000, end: 12999 },
+                    { name: "Nairobi", start: 13000, end: 13999 },
+                    { name: "Oxford", start: 14000, end: 14999 },
+                    { name: "Paris", start: 15000, end: Infinity }
+                ];
+                
+                // Stage name display variables
+                let currentStageName = "";
+                let stageNameOpacity = 0;
+                let stageNameTimer = 0;
+                
+                function updateStageName() {
+                    const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end) || stageNames[stageNames.length - 1];
+                    if (currentStage && currentStage.name !== currentStageName) {
+                        currentStageName = currentStage.name;
+                        stageNameOpacity = 1;
+                        stageNameTimer = 3; // 3 seconds display time
+                    }
                 }
-            }
 
-            // Player movement
-            if (keys.ArrowLeft && player.x > 0) player.x -= player.speed * dt;
-            if (keys.ArrowRight && player.x < canvas.width - player.width) player.x += player.speed * dt;
+                // Game constants
+                const JUMP_VELOCITY = -800;
+                const GRAVITY = 2000;
+                let PLATFORM_SPEED = 150;
 
-            // Jumping
-            if (keys.ArrowUp && player.jumpCount < player.maxJumps && player.canJump) {
-                player.velocityY = JUMP_VELOCITY;
-                player.isJumping = true;
-                player.jumpCount++;
-                player.canJump = false;
-                if (!hasLeftGround) {
-                    hasLeftGround = true;
+                // Game variables
+                let player = {
+                    x: 375,
+                    y: 530,
+                    width: 50,
+                    height: 50,
+                    speed: 500,
+                    velocityY: 0,
+                    velocityX: 0,
+                    isJumping: false,
+                    jumpCount: 0,
+                    maxJumps: 2,
+                    canJump: true
+                };
+
+                let platforms = [];
+                let bottomPlatform = {
+                    x: 0,
+                    y: 580,
+                    width: 800,
+                    height: 20,
+                    isSafe: true
+                };
+                let score = 0;
+                let keys = {};
+                let gameRunning = false;
+                let gameOver = false;
+                let hasLeftGround = false;
+                let currentBackgroundIndex = 0;
+                let fadeAlpha = 0;
+                let isFading = false;
+                let nextBottomPlatformScore = 100;
+                let isPlayerOnSafePlatform = false;
+
+                // Powerup variables
+                let powerups = [];
+                let solanaPowerups = [];
+                let ethereumPowerups = [];
+                let etherlinkPowerups = [];
+                let powerupActive = false;
+                let powerupTimer = 0;
+                let blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101; // 101-160 blocks
+                let blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51; // 51-80 blocks
+                let blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61; // 61-100 blocks
+                let blocksUntilNextEtherlinkPowerup = Math.floor(Math.random() * 20) + 31; // 31-50 blocks
+                let ethereumEffectActive = false;
+                let ethereumEffectTimer = 0;
+                let originalPlatformWidth = 120; // Store the original platform width
+                let spikeBlockProbability = 0.05; // Initial 5% chance for spike blocks
+
+                // Particle system
+                let particles = [];
+
+                function Particle(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = Math.random() * 2 - 1;
+                    this.vy = Math.random() * -2 - 1;
+                    this.alpha = 1;
+                    this.color = color;
                 }
-                if (isPlayerOnSafePlatform) {
+
+                Particle.prototype.update = function(dt) {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha -= dt * 2;
+                };
+
+                Particle.prototype.draw = function(ctx) {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, 2, 2);
+                    ctx.globalAlpha = 1;
+                };
+
+                function createParticles(x, y, count, color) {
+                    for (let i = 0; i < count; i++) {
+                        particles.push(new Particle(x, y, color));
+                    }
+                }
+
+                function updateParticles(dt) {
+                    for (let i = particles.length - 1; i >= 0; i--) {
+                        particles[i].update(dt);
+                        if (particles[i].alpha <= 0) {
+                            particles.splice(i, 1);
+                        }
+                    }
+                }
+
+                function drawParticles(ctx) {
+                    particles.forEach(particle => particle.draw(ctx));
+                }
+
+                // Screen shake effect
+                let screenShake = {
+                    intensity: 0,
+                    duration: 0
+                };
+
+                function triggerScreenShake(intensity, duration) {
+                    screenShake.intensity = intensity;
+                    screenShake.duration = duration;
+                }
+
+                function updateScreenShake(dt) {
+                    if (screenShake.duration > 0) {
+                        screenShake.duration -= dt;
+                        if (screenShake.duration <= 0) {
+                            screenShake.intensity = 0;
+                        }
+                    }
+                }
+
+                function applyScreenShake(ctx) {
+                    if (screenShake.intensity > 0) {
+                        const dx = Math.random() * screenShake.intensity * 2 - screenShake.intensity;
+                        const dy = Math.random() * screenShake.intensity * 2 - screenShake.intensity;
+                        ctx.save();
+                        ctx.translate(dx, dy);
+                    }
+                }
+
+                function resetScreenShake(ctx) {
+                    if (screenShake.intensity > 0) {
+                        ctx.restore();
+                    }
+                }
+
+                // Dynamic difficulty system
+                let difficultyLevel = 1;
+                let scoreThreshold = 500; // Increased initial threshold
+                const maxDifficultyLevel = 10; // Increased max difficulty level
+
+                function updateDifficulty() {
+                    if (score >= scoreThreshold && difficultyLevel < maxDifficultyLevel) {
+                        difficultyLevel++;
+                        scoreThreshold += 500 * difficultyLevel; // Increase threshold more with each level
+                        adjustGameParameters();
+                    }
+                }
+
+                function adjustGameParameters() {
+                    // Adjust game parameters based on difficulty level
+                    PLATFORM_SPEED = 150 + (difficultyLevel - 1) * 10; // Slower speed increase
+                    player.speed = 500 + (difficultyLevel - 1) * 20; // Slower player speed increase
+                    
+                    // Adjust platform generation
+                    let platformWidthReduction = Math.min(40, (difficultyLevel - 1) * 5); // Cap the width reduction
+                    originalPlatformWidth = Math.max(80, 120 - platformWidthReduction);
+                    
+                    // Increase frequency of powerups and hazards more slowly
+                    blocksUntilNextPowerup = Math.max(70, 101 - (difficultyLevel - 1) * 3);
+                    blocksUntilNextSolanaPowerup = Math.max(40, 51 - (difficultyLevel - 1) * 1);
+                    blocksUntilNextEthereumPowerup = Math.max(50, 61 - (difficultyLevel - 1) * 1);
+                    blocksUntilNextEtherlinkPowerup = Math.max(25, 31 - (difficultyLevel - 1) * 0.5);
+
+                    // Adjust spike block frequency
+                    spikeBlockProbability = Math.min(0.15, 0.05 + (difficultyLevel - 1) * 0.01); // Cap at 15% chance
+                }
+
+                // Sound system
+                const sounds = {
+                    jump: new Audio('sound/jump.wav'),
+                    powerup: new Audio('sound/powerup.mp3'),
+                    gameOver: new Audio('sound/gameover.mp3'),
+                    background: new Audio('sound/main.mp3')
+                };
+
+                let isSoundOn = true;
+
+                function toggleSound() {
+                    isSoundOn = !isSoundOn;
+                    soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
+                    if (isSoundOn) {
+                        sounds.background.play();
+                    } else {
+                        sounds.background.pause();
+                    }
+                }
+
+                function playSound(soundName) {
+                    if (isSoundOn) {
+                        sounds[soundName].currentTime = 0;
+                        sounds[soundName].play();
+                    }
+                }
+
+                function startBackgroundMusic() {
+                    if (isSoundOn) {
+                        sounds.background.loop = true;
+                        sounds.background.play();
+                    }
+                }
+
+                function stopBackgroundMusic() {
+                    sounds.background.pause();
+                    sounds.background.currentTime = 0;
+                }
+
+                function createPlatform(y) {
+                    let platformType = Math.random();
+                    let platform = {
+                        x: Math.random() * (canvas.width - (ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth)),
+                        y: y,
+                        width: ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth,
+                        height: 15,
+                        isGolden: (score + platforms.length) % 15 === 0
+                    };
+
+                    if (platformType < spikeBlockProbability) {
+                        platform.isSpike = true;
+                    }
+
+                    return platform;
+                }
+
+                function createPowerup(y, type) {
+                    debugInfo.powerupsGenerated++;
+                    console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}, Type: ${type}`);
+                    return {
+                        x: Math.random() * (canvas.width - 30),
+                        y: y,
+                        width: 30,
+                        height: 30,
+                        type: type
+                    };
+                }
+
+                function initGame() {
+                    // Initialize platforms
+                    platforms = [];
+                    for (let i = 0; i < 7; i++) {
+                        platforms.push(createPlatform(canvas.height - (i + 2) * 100));
+                    }
+                    nextBottomPlatformScore = 100;
+                    bottomPlatform.isSafe = true;
                     isPlayerOnSafePlatform = false;
                 }
-            }
 
-            // Reset canJump when the up arrow key is released
-            if (!keys.ArrowUp) {
-                player.canJump = true;
-            }
-
-            // Powerup jumping (unlimited jumps)
-            if (powerupActive && keys.ArrowUp && player.canJump) {
-                player.velocityY = JUMP_VELOCITY;
-                player.canJump = false;
-                if (!hasLeftGround) {
-                    hasLeftGround = true;
+                function updateBackground() {
+                    let newBackgroundIndex = Math.min(Math.floor(score / 1000), backgrounds.length - 1);
+                    if (newBackgroundIndex !== currentBackgroundIndex) {
+                        currentBackgroundIndex = newBackgroundIndex;
+                        isFading = true;
+                        fadeAlpha = 0;
+                        
+                        // Update stage name when background changes
+                        updateStageName();
+                    }
                 }
-                if (isPlayerOnSafePlatform) {
-                    isPlayerOnSafePlatform = false;
+
+                function update(dt) {
+                    if (!gameRunning || gameOver) return;
+
+                    // Add a safety check to prevent infinite loops
+                    if (debugInfo.totalBlocksClimbed > 10000) {
+                        console.error("Game loop safety limit reached");
+                        gameOver = true;
+                        gameRunning = false;
+                        return;
+                    }
+
+                    updateDifficulty();
+                    updateScreenShake(dt);
+                    updateParticles(dt);
+
+                    // Update stage name
+                    if (stageNameTimer > 0) {
+                        stageNameTimer -= dt;
+                        if (stageNameTimer <= 0) {
+                            stageNameOpacity = Math.max(0, stageNameOpacity - dt);
+                        }
+                    }
+
+                    // Player movement
+                    let moveSpeed = player.speed;
+
+                    if (keys.ArrowLeft) {
+                        player.velocityX = -moveSpeed;
+                    } else if (keys.ArrowRight) {
+                        player.velocityX = moveSpeed;
+                    } else {
+                        player.velocityX *= 0.8; // Reduced from 0.9 for quicker deceleration
+                    }
+
+                    player.x += player.velocityX * dt;
+
+                    // Keep player within bounds
+                    player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+
+                    // Jumping
+                    if (keys.ArrowUp && player.jumpCount < player.maxJumps && player.canJump) {
+                        player.velocityY = JUMP_VELOCITY;
+                        player.isJumping = true;
+                        player.jumpCount++;
+                        player.canJump = false;
+                        if (!hasLeftGround) {
+                            hasLeftGround = true;
+                        }
+                        if (isPlayerOnSafePlatform) {
+                            isPlayerOnSafePlatform = false;
+                        }
+                        createParticles(player.x + player.width / 2, player.y + player.height, 10, '#e94560');
+                        playSound('jump');
+                    }
+
+                    // Reset canJump when the up arrow key is released
+                    if (!keys.ArrowUp) {
+                        player.canJump = true;
+                    }
+
+                    // Powerup jumping (unlimited jumps)
+                    if (powerupActive && keys.ArrowUp && player.canJump) {
+                        player.velocityY = JUMP_VELOCITY;
+                        player.canJump = false;
+                        if (!hasLeftGround) {
+                            hasLeftGround = true;
+                        }
+                        if (isPlayerOnSafePlatform) {
+                            isPlayerOnSafePlatform = false;
+                        }
+                        createParticles(player.x + player.width / 2, player.y + player.height, 10, '#FFD700');
+                        playSound('jump');
+                    }
+
+                    // Apply gravity
+                    player.velocityY += GRAVITY * dt;
+                    player.y += player.velocityY * dt;
+
+                    // Handle platform collisions
+                    let onPlatform = false;
+                    if (player.velocityY >= 0) {
+                        if (player.y + player.height > bottomPlatform.y && 
+                            player.y + player.height < bottomPlatform.y + bottomPlatform.height &&
+                            bottomPlatform.y < canvas.height) {
+                            player.y = bottomPlatform.y - player.height;
+                            player.velocityY = 0;
+                            player.isJumping = false;
+                            player.jumpCount = 0;
+                            if (bottomPlatform.isSafe) {
+                                isPlayerOnSafePlatform = true;
+                            }
+                            createParticles(player.x + player.width / 2, player.y + player.height, 5, '#4CAF50');
+                            onPlatform = true;
+                        }
+
+                        platforms.forEach(platform => {
+                            if (player.y + player.height > platform.y &&
+                                player.y + player.height < platform.y + platform.height &&
+                                player.x < platform.x + platform.width &&
+                                player.x + player.width > platform.x) {
+                                if (platform.isSpike) {
+                                    gameOver = true;
+                                    gameRunning = false;
+                                    playSound('gameOver');
+                                } else {
+                                    player.y = platform.y - player.height;
+                                    player.velocityY = 0;
+                                    player.isJumping = false;
+                                    player.jumpCount = 0;
+                                    onPlatform = true;
+
+                                    if (platform.isGolden) {
+                                        player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
+                                        score += 15;
+                                        triggerScreenShake(5, 0.3);
+                                        createParticles(player.x + player.width / 2, player.y + player.height, 15, '#FFD700');
+                                        playSound('powerup');
+                                    } else {
+                                        createParticles(player.x + player.width / 2, player.y + player.height, 5, '#0f3460');
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    if (!onPlatform) {
+                        player.isJumping = true;
+                    }
+
+                    // Move platforms and generate new ones
+                    if (hasLeftGround && !isPlayerOnSafePlatform) {
+                        platforms.forEach((platform, index) => {
+                            platform.y += PLATFORM_SPEED * dt;
+                            
+                            if (platform.y > canvas.height) {
+                                score++;
+                                debugInfo.totalBlocksClimbed++;
+                                floorCounter.textContent = `Tezos Marketcap: ${score.toString().padStart(10, '0')}`;
+                                platforms[index] = createPlatform(0);
+                                
+                                updateBackground();
+
+                                // Check if it's time to generate a new Bitcoin powerup
+                                if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
+                                    powerups.push(createPowerup(0, 'bitcoin'));
+                                    blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 60) + 101;
+                                    console.log(`Bitcoin powerup generated. Next at ${blocksUntilNextPowerup}`);
+                                }
+
+                                // Check if it's time to generate a new Solana powerup
+                                if (debugInfo.totalBlocksClimbed >= blocksUntilNextSolanaPowerup) {
+                                    solanaPowerups.push(createPowerup(0, 'solana'));
+                                    blocksUntilNextSolanaPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 30) + 51;
+                                    console.log(`Solana powerup generated. Next at ${blocksUntilNextSolanaPowerup}`);
+                                }
+
+                                // Check if it's time to generate a new Ethereum powerup
+                                if (debugInfo.totalBlocksClimbed >= blocksUntilNextEthereumPowerup) {
+                                    ethereumPowerups.push(createPowerup(0, 'ethereum'));
+                                    blocksUntilNextEthereumPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 40) + 61;
+                                    console.log(`Ethereum powerup generated. Next at ${blocksUntilNextEthereumPowerup}`);
+                                }
+
+                                // Check if it's time to generate a new Etherlink powerup
+                                if (debugInfo.totalBlocksClimbed >= blocksUntilNextEtherlinkPowerup) {
+                                    etherlinkPowerups.push(createPowerup(0, 'etherlink'));
+                                    blocksUntilNextEtherlinkPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 20) + 31;
+                                    console.log(`Etherlink powerup generated. Next at ${blocksUntilNextEtherlinkPowerup}`);
+                                }
+                            }
+                        });
+
+                        // Move bottom platform
+                        bottomPlatform.y += PLATFORM_SPEED * dt;
+
+                        // Create new bottom platform every 100 floors
+                        if (score >= nextBottomPlatformScore) {
+                            bottomPlatform = {
+                                x: 0,
+                                y: 0,
+                                width: 800,
+                                height: 20,
+                                isSafe: true
+                            };
+                            nextBottomPlatformScore += 100;
+                        }
+                    }
+
+                    // Keep player in view
+                    if (player.y < 300 && !isPlayerOnSafePlatform) {
+                        let diff = 300 - player.y;
+                        player.y = 300;
+                        platforms.forEach(platform => {
+                            platform.y += diff;
+                        });
+                        bottomPlatform.y += diff;
+                    }
+
+                    // Game over condition
+                    if (player.y > canvas.height) {
+                        if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
+                            gameOver = true;
+                            gameRunning = false;
+                            playSound('gameOver');
+                        }
+                    }
+
+                    // Reset bottom platform safety when player leaves it
+                    if (player.y + player.height < bottomPlatform.y) {
+                        bottomPlatform.isSafe = false;
+                        isPlayerOnSafePlatform = false;
+                    }
+
+                    // Move powerups and check for collision
+                    debugInfo.activePowerups = powerups.length + solanaPowerups.length + ethereumPowerups.length + etherlinkPowerups.length;
+                    
+                    // Bitcoin powerups
+                    for (let i = powerups.length - 1; i >= 0; i--) {
+                        powerups[i].y += PLATFORM_SPEED * dt;
+                        if (powerups[i].y > canvas.height) {
+                            powerups.splice(i, 1);
+                            console.log("Bitcoin powerup removed (out of bounds)");
+                        } else if (player.x < powerups[i].x + powerups[i].width &&
+                                   player.x + player.width > powerups[i].x &&
+                                   player.y < powerups[i].y + powerups[i].height &&
+                                   player.y + player.height > powerups[i].y) {
+                            powerups.splice(i, 1);
+                            powerupActive = true;
+                            powerupTimer = 10; // 10 seconds
+                            triggerScreenShake(5, 0.3);
+                            createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#FFD700');
+                            playSound('powerup');
+                            console.log("Bitcoin powerup collected!");
+                        }
+                    }
+
+                    // Solana powerups
+                    for (let i = solanaPowerups.length - 1; i >= 0; i--) {
+                        solanaPowerups[i].y += PLATFORM_SPEED * dt;
+                        if (solanaPowerups[i].y > canvas.height) {
+                            solanaPowerups.splice(i, 1);
+                            console.log("Solana powerup removed (out of bounds)");
+                        } else if (player.x < solanaPowerups[i].x + solanaPowerups[i].width &&
+                                   player.x + player.width > solanaPowerups[i].x &&
+                                   player.y < solanaPowerups[i].y + solanaPowerups[i].height &&
+                                   player.y + player.height > solanaPowerups[i].y) {
+                            solanaPowerups.splice(i, 1);
+                            gameOver = true;
+                            gameRunning = false;
+                            triggerScreenShake(10, 0.5);
+                            createParticles(player.x + player.width / 2, player.y + player.height / 2, 30, '#00FFA3');
+                            playSound('gameOver');
+                            console.log("Solana powerup collected! Game Over!");
+                        }
+                    }
+
+                    // Ethereum powerups
+                    for (let i = ethereumPowerups.length - 1; i >= 0; i--) {
+                        ethereumPowerups[i].y += PLATFORM_SPEED * dt;
+                        if (ethereumPowerups[i].y > canvas.height) {
+                            ethereumPowerups.splice(i, 1);
+                            console.log("Ethereum powerup removed (out of bounds)");
+                        } else if (player.x < ethereumPowerups[i].x + ethereumPowerups[i].width &&
+                                   player.x + player.width > ethereumPowerups[i].x &&
+                                   player.y < ethereumPowerups[i].y + ethereumPowerups[i].height &&
+                                   player.y + player.height > ethereumPowerups[i].y) {
+                            ethereumPowerups.splice(i, 1);
+                            ethereumEffectActive = true;
+                            ethereumEffectTimer = 10; // 10 seconds
+                            triggerScreenShake(5, 0.3);
+                            createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#627EEA');
+                            playSound('powerup');
+                            console.log("Ethereum powerup collected! Platforms shrinking for 10 seconds.");
+                        }
+                    }
+
+                    // Etherlink powerups
+                    for (let i = etherlinkPowerups.length - 1; i >= 0; i--) {
+                        etherlinkPowerups[i].y += PLATFORM_SPEED * dt;
+                        if (etherlinkPowerups[i].y > canvas.height) {
+                            etherlinkPowerups.splice(i, 1);
+                            console.log("Etherlink powerup removed (out of bounds)");
+                        } else if (player.x < etherlinkPowerups[i].x + etherlinkPowerups[i].width &&
+                                   player.x + player.width > etherlinkPowerups[i].x &&
+                                   player.y < etherlinkPowerups[i].y + etherlinkPowerups[i].height &&
+                                   player.y + player.height > etherlinkPowerups[i].y) {
+                            etherlinkPowerups.splice(i, 1);
+                            score += 1000;
+                            triggerScreenShake(5, 0.3);
+                            createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#00FF00');
+                            playSound('powerup');
+                            floorCounter.textContent = `Tezos Marketcap: ${score.toString().padStart(10, '0')}`;
+                            console.log("Etherlink powerup collected! +1000 points");
+                        }
+                    }
+
+                    // Handle Ethereum effect
+                    if (ethereumEffectActive) {
+                        ethereumEffectTimer -= dt;
+                        if (ethereumEffectTimer <= 0) {
+                            ethereumEffectActive = false;
+                            // Reset platform sizes
+                            platforms.forEach(platform => {
+                                platform.width = originalPlatformWidth;
+                            });
+                        } else {
+                            // Shrink platforms
+                            platforms.forEach(platform => {
+                                platform.width = originalPlatformWidth * 0.5;
+                            });
+                        }
+                    }
+
+                    // Powerup timer
+                    if (powerupActive) {
+                        powerupTimer -= dt;
+                        if (powerupTimer <= 0) {
+                            powerupActive = false;
+                        }
+                    }
+
+                    // Add debug info display
+                    console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Bitcoin: ${powerups.length}, Solana: ${solanaPowerups.length}, Ethereum: ${ethereumPowerups.length}, Etherlink: ${etherlinkPowerups.length}`);
                 }
-            }
 
-            // Apply gravity
-            player.velocityY += GRAVITY * dt;
-            player.y += player.velocityY * dt;
+                function draw() {
+                    applyScreenShake(ctx);
 
-            // Reset jump count when landing on a platform or the bottom platform
-            if (player.velocityY >= 0) {
-                if (player.y + player.height > bottomPlatform.y && 
-                    player.y + player.height < bottomPlatform.y + bottomPlatform.height &&
-                    bottomPlatform.y < canvas.height) {
-                    player.y = bottomPlatform.y - player.height;
+                    // Draw current background
+                    const currentBg = backgrounds[currentBackgroundIndex];
+                    if (currentBg.image && currentBg.image.complete && currentBg.image.naturalHeight !== 0) {
+                        ctx.drawImage(currentBg.image, 0, 0, canvas.width, canvas.height);
+                    } else {
+                        // Use fallback color if image not loaded or invalid
+                        ctx.fillStyle = currentBg.color;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    // Draw stage name
+                    if (stageNameOpacity > 0) {
+                        ctx.globalAlpha = stageNameOpacity;
+                        ctx.fillStyle = '#FFD700';
+                        ctx.font = 'bold 48px Orbitron, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
+                        ctx.globalAlpha = 1;
+                    }
+
+                    // If fading, draw the next background with increasing opacity
+                    if (isFading) {
+                        ctx.globalAlpha = fadeAlpha;
+                        const nextBg = backgrounds[Math.min(currentBackgroundIndex + 1, backgrounds.length - 1)];
+                        if (nextBg.image && nextBg.image.complete && nextBg.image.naturalHeight !== 0) {
+                            ctx.drawImage(nextBg.image, 0, 0, canvas.width, canvas.height);
+                        } else {
+                            ctx.fillStyle = nextBg.color;
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        ctx.globalAlpha = 1;
+                        
+                        fadeAlpha += 0.02;
+                        if (fadeAlpha >= 1) {
+                            isFading = false;
+                        }
+                    }
+
+                    if (gameOver) {
+                        drawGameOver();
+                    } else {
+                        // Draw bottom platform
+                        ctx.fillStyle = bottomPlatform.isSafe ? '#4CAF50' : '#0f3460';
+                        ctx.fillRect(bottomPlatform.x, bottomPlatform.y, bottomPlatform.width, bottomPlatform.height);
+
+                        // Draw platforms
+                        platforms.forEach(platform => {
+                            if (platform.isSpike) {
+                                ctx.fillStyle = '#FF0000';
+                                ctx.beginPath();
+                                ctx.moveTo(platform.x, platform.y + platform.height);
+                                ctx.lineTo(platform.x + platform.width / 2, platform.y);
+                                ctx.lineTo(platform.x + platform.width, platform.y + platform.height);
+                                ctx.closePath();
+                                ctx.fill();
+                            } else if (platform.isGolden) {
+                                ctx.fillStyle = '#FFD700';
+                                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                            } else {
+                                ctx.fillStyle = '#0f3460';
+                                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                            }
+                        });
+
+                        // Draw powerups
+                        function drawPowerup(powerup, sprite) {
+                            if (sprite && sprite.complete && sprite.naturalHeight !== 0) {
+                                ctx.drawImage(sprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                            } else {
+                                // Draw a colored rectangle as a fallback
+                                ctx.fillStyle = powerup.type === 'bitcoin' ? '#F7931A' :
+                                                powerup.type === 'solana' ? '#00FFA3' :
+                                                powerup.type === 'ethereum' ? '#627EEA' :
+                                                powerup.type === 'etherlink' ? '#00FF00' : '#FFFFFF';
+                                ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+                            }
+                        }
+
+                        powerups.forEach(powerup => drawPowerup(powerup, sprites.bitcoin));
+                        solanaPowerups.forEach(powerup => drawPowerup(powerup, sprites.solana));
+                        ethereumPowerups.forEach(powerup => drawPowerup(powerup, sprites.ethereum));
+                        etherlinkPowerups.forEach(powerup => drawPowerup(powerup, sprites.etherlink));
+
+                        // Draw player
+                        if (sprites.player && sprites.player.complete && sprites.player.naturalHeight !== 0) {
+                            if (powerupActive) {
+                                ctx.save();
+                                ctx.globalCompositeOperation = 'source-atop';
+                                ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                                ctx.fillRect(player.x, player.y, player.width, player.height);
+                                ctx.restore();
+                            }
+                            ctx.drawImage(sprites.player, player.x, player.y, player.width, player.height);
+                        } else {
+                            // Draw a colored rectangle as a fallback for the player
+                            ctx.fillStyle = powerupActive ? 'yellow' : 'blue';
+                            ctx.fillRect(player.x, player.y, player.width, player.height);
+                        }
+
+                        // Draw particles
+                        drawParticles(ctx);
+                    }
+
+                    resetScreenShake(ctx);
+                }
+
+                function drawGameOver() {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.fillStyle = '#e94560';
+                    ctx.font = 'bold 48px Orbitron, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+
+                    ctx.font = '24px Orbitron, sans-serif';
+                    ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+
+                    ctx.font = '20px Orbitron, sans-serif';
+                    ctx.fillText('Click "Start Game" to play again', canvas.width / 2, canvas.height / 2 + 50);
+
+                    startButton.style.display = 'block';
+                }
+
+                let lastTime = 0;
+                const fixedDeltaTime = 1 / 60; // 60 FPS
+                let accumulator = 0;
+
+                function gameLoop(currentTime) {
+                    try {
+                        if (lastTime) {
+                            const deltaTime = (currentTime - lastTime) / 1000;
+                            accumulator += deltaTime;
+
+                            while (accumulator >= fixedDeltaTime) {
+                                update(fixedDeltaTime);
+                                accumulator -= fixedDeltaTime;
+                            }
+                        }
+
+                        draw();
+                        lastTime = currentTime;
+                        requestAnimationFrame(gameLoop);
+                    } catch (error) {
+                        console.error("An error occurred in the game loop:", error);
+                        gameOver = true;
+                        gameRunning = false;
+                        drawGameOver();
+                    }
+                }
+
+                function resetGame() {
+                    player.x = 375;
+                    player.y = 530;
                     player.velocityY = 0;
+                    player.velocityX = 0;
                     player.isJumping = false;
                     player.jumpCount = 0;
-                    if (bottomPlatform.isSafe) {
-                        isPlayerOnSafePlatform = true;
-                    }
-                }
-
-                platforms.forEach(platform => {
-                    if (player.y + player.height > platform.y &&
-                        player.y + player.height < platform.y + platform.height &&
-                        player.x < platform.x + platform.width &&
-                        player.x + player.width > platform.x) {
-                        player.y = platform.y - player.height;
-                        player.velocityY = 0;
-                        player.isJumping = false;
-                        player.jumpCount = 0;
-
-                        if (platform.isGolden) {
-                            player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
-                            score += 15;
-                        }
-                    }
-                });
-            }
-
-            // Move platforms and generate new ones
-            if (hasLeftGround && !isPlayerOnSafePlatform) {
-                platforms.forEach((platform, index) => {
-                    platform.y += PLATFORM_SPEED * dt;
-                    if (platform.y > canvas.height) {
-                        score++;
-                        debugInfo.totalBlocksClimbed++;
-                        floorCounter.textContent = `Floor: ${score.toString().padStart(5, '0')}`;
-                        platforms[index] = createPlatform(0);
-                        
-                        updateBackground();
-
-                        // Check if it's time to generate a new Bitcoin powerup
-                        if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
-                            powerups.push(createPowerup(0, 'bitcoin'));
-                            blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 60) + 101;
-                            console.log(`Bitcoin powerup generated. Next at ${blocksUntilNextPowerup}`);
-                        }
-
-                        // Check if it's time to generate a new Solana powerup
-                        if (debugInfo.totalBlocksClimbed >= blocksUntilNextSolanaPowerup) {
-                            solanaPowerups.push(createPowerup(0, 'solana'));
-                            blocksUntilNextSolanaPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 30) + 51;
-                            console.log(`Solana powerup generated. Next at ${blocksUntilNextSolanaPowerup}`);
-                        }
-
-                       // Check if it's time to generate a new Ethereum powerup
-                       if (debugInfo.totalBlocksClimbed >= blocksUntilNextEthereumPowerup) {
-                            ethereumPowerups.push(createPowerup(0, 'ethereum'));
-                            blocksUntilNextEthereumPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 40) + 61;
-                            console.log(`Ethereum powerup generated. Next at ${blocksUntilNextEthereumPowerup}`);
-                        }
-                    }
-                });
-
-                // Move bottom platform
-                bottomPlatform.y += PLATFORM_SPEED * dt;
-
-                // Create new bottom platform every 100 floors
-                if (score >= nextBottomPlatformScore) {
+                    player.canJump = true;
                     bottomPlatform = {
                         x: 0,
-                        y: 0,
+                        y: 580,
                         width: 800,
                         height: 20,
                         isSafe: true
                     };
-                    nextBottomPlatformScore += 100;
-                }
-            }
-
-            // Keep player in view
-            if (player.y < 300 && !isPlayerOnSafePlatform) {
-                let diff = 300 - player.y;
-                player.y = 300;
-                platforms.forEach(platform => {
-                    platform.y += diff;
-                });
-                bottomPlatform.y += diff;
-            }
-
-            // Game over condition
-            if (player.y > canvas.height) {
-                if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
-                    gameOver = true;
-                    gameRunning = false;
-                }
-            }
-
-            // Reset bottom platform safety when player leaves it
-            if (player.y + player.height < bottomPlatform.y) {
-                bottomPlatform.isSafe = false;
-                isPlayerOnSafePlatform = false;
-            }
-
-            // Move powerups and check for collision
-            debugInfo.activePowerups = powerups.length + solanaPowerups.length + ethereumPowerups.length;
-            for (let i = powerups.length - 1; i >= 0; i--) {
-                powerups[i].y += PLATFORM_SPEED * dt;
-                if (powerups[i].y > canvas.height) {
-                    powerups.splice(i, 1);
-                    console.log("Bitcoin powerup removed (out of bounds)");
-                } else if (player.x < powerups[i].x + powerups[i].width &&
-                           player.x + player.width > powerups[i].x &&
-                           player.y < powerups[i].y + powerups[i].height &&
-                           player.y + player.height > powerups[i].y) {
-                    powerups.splice(i, 1);
-                    powerupActive = true;
-                    powerupTimer = 10; // 10 seconds
-                    console.log("Bitcoin powerup collected!");
-                }
-            }
-
-            // Move Solana powerups and check for collision
-            for (let i = solanaPowerups.length - 1; i >= 0; i--) {
-                solanaPowerups[i].y += PLATFORM_SPEED * dt;
-                if (solanaPowerups[i].y > canvas.height) {
-                    solanaPowerups.splice(i, 1);
-                    console.log("Solana powerup removed (out of bounds)");
-                } else if (player.x < solanaPowerups[i].x + solanaPowerups[i].width &&
-                           player.x + player.width > solanaPowerups[i].x &&
-                           player.y < solanaPowerups[i].y + solanaPowerups[i].height &&
-                           player.y + player.height > solanaPowerups[i].y) {
-                    solanaPowerups.splice(i, 1);
-                    gameOver = true;
-                    gameRunning = false;
-                    console.log("Solana powerup collected! Game Over!");
-                }
-            }
-
-            // Move Ethereum powerups and check for collision
-            for (let i = ethereumPowerups.length - 1; i >= 0; i--) {
-                ethereumPowerups[i].y += PLATFORM_SPEED * dt;
-                if (ethereumPowerups[i].y > canvas.height) {
-                    ethereumPowerups.splice(i, 1);
-                    console.log("Ethereum powerup removed (out of bounds)");
-                } else if (player.x < ethereumPowerups[i].x + ethereumPowerups[i].width &&
-                           player.x + player.width > ethereumPowerups[i].x &&
-                           player.y < ethereumPowerups[i].y + ethereumPowerups[i].height &&
-                           player.y + player.height > ethereumPowerups[i].y) {
-                    ethereumPowerups.splice(i, 1);
-                    ethereumEffectActive = true;
-                    ethereumEffectTimer = 10; // 10 seconds
-                    console.log("Ethereum powerup collected! Platforms shrinking for 10 seconds.");
-                }
-            }
-
-            // Handle Ethereum effect
-            if (ethereumEffectActive) {
-                ethereumEffectTimer -= dt;
-                if (ethereumEffectTimer <= 0) {
-                    ethereumEffectActive = false;
-                    // Reset platform sizes
-                    platforms.forEach(platform => {
-                        platform.width = originalPlatformWidth;
-                    });
-                } else {
-                    // Shrink platforms
-                    platforms.forEach(platform => {
-                        platform.width = originalPlatformWidth * 0.5;
-                    });
-                }
-            }
-
-            // Powerup timer
-            if (powerupActive) {
-                powerupTimer -= dt;
-                if (powerupTimer <= 0) {
-                    powerupActive = false;
-                }
-            }
-
-            // Add debug info display
-            console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Bitcoin: ${powerups.length}, Solana: ${solanaPowerups.length}, Ethereum: ${ethereumPowerups.length}`);
-        }
-
-        function updateBackground() {
-            let newBackgroundIndex = Math.floor(score / 100);
-            if (newBackgroundIndex >= backgrounds.length) {
-                newBackgroundIndex = backgrounds.length - 1;
-            }
-            if (newBackgroundIndex !== currentBackgroundIndex) {
-                currentBackgroundIndex = newBackgroundIndex;
-                isFading = true;
-                fadeAlpha = 0;
-            }
-        }
-
-        function draw() {
-            // Draw current background
-            ctx.drawImage(backgrounds[currentBackgroundIndex].image, 0, 0, canvas.width, canvas.height);
-            
-            // Draw stage name
-            if (stageNameOpacity > 0) {
-                ctx.globalAlpha = stageNameOpacity;
-                ctx.fillStyle = '#FFD700';
-                ctx.font = 'bold 48px Orbitron, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
-                ctx.globalAlpha = 1;
-            }
-
-            // If fading, draw the next background with increasing opacity
-            if (isFading) {
-                ctx.globalAlpha = fadeAlpha;
-                ctx.drawImage(backgrounds[Math.min(currentBackgroundIndex + 1, backgrounds.length - 1)].image, 0, 0, canvas.width, canvas.height);
-                ctx.globalAlpha = 1;
-                
-                fadeAlpha += 0.02;
-                if (fadeAlpha >= 1) {
+                    score = 0;
+                    gameOver = false;
+                    hasLeftGround = false;
+                    currentBackgroundIndex = 0;
                     isFading = false;
+                    fadeAlpha = 0;
+                    floorCounter.textContent = 'Tezos Marketcap: 0000000000';
+                    nextBottomPlatformScore = 100;
+                    isPlayerOnSafePlatform = false;
+                    powerups = [];
+                    solanaPowerups = [];
+                    ethereumPowerups = [];
+                    etherlinkPowerups = [];
+                    powerupActive = false;
+                    powerupTimer = 0;
+                    blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101;
+                    blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51;
+                    blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61;
+                    blocksUntilNextEtherlinkPowerup = Math.floor(Math.random() * 20) + 31;
+                    ethereumEffectActive = false;
+                    ethereumEffectTimer = 0;
+                    particles = [];
+                    difficultyLevel = 1;
+                    scoreThreshold = 500;
+                    PLATFORM_SPEED = 150;
+                    player.speed = 500;
+                    originalPlatformWidth = 120;
+                    spikeBlockProbability = 0.05;
+                    debugInfo = {
+                        totalBlocksClimbed: 0,
+                        blocksUntilNextPowerup: 0,
+                        powerupsGenerated: 0,
+                        activePowerups: 0
+                    };
+                    
+                    // Reset stage name
+                    currentStageName = "";
+                    stageNameOpacity = 0;
+                    stageNameTimer = 0;
+                    
+                    initGame();
+                    stopBackgroundMusic();
+                    startBackgroundMusic();
+                    
+                    // Force an immediate update of the stage name
+                    updateStageName();
                 }
-            }
 
-            if (gameOver) {
-                drawGameOver();
-            } else {
-                // Draw bottom platform
-                ctx.fillStyle = bottomPlatform.isSafe ? '#4CAF50' : '#0f3460';
-                ctx.fillRect(bottomPlatform.x, bottomPlatform.y, bottomPlatform.width, bottomPlatform.height);
-
-                // Draw platforms
-                platforms.forEach(platform => {
-                    ctx.fillStyle = platform.isGolden ? '#FFD700' : '#0f3460';
-                    ctx.beginPath();
-                    ctx.roundRect(platform.x, platform.y, platform.width, platform.height, 5);
-                    ctx.fill();
+                // Keyboard input handling
+                document.addEventListener('keydown', (e) => {
+                    keys[e.code] = true;
                 });
 
-                // Draw powerups
-                powerups.forEach(powerup => {
-                    ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                document.addEventListener('keyup', (e) => {
+                    keys[e.code] = false;
                 });
 
-                // Draw Solana powerups
-                solanaPowerups.forEach(powerup => {
-                    ctx.drawImage(solanaPowerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                // Start button event listener
+                startButton.addEventListener('click', () => {
+                    resetGame();
+                    gameRunning = true;
+                    gameOver = false;
+                    startButton.style.display = 'none';
                 });
 
-                // Draw Ethereum powerups
-                ethereumPowerups.forEach(powerup => {
-                    ctx.drawImage(ethereumPowerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
-                });
+                // Sound toggle event listener
+                soundToggle.addEventListener('click', toggleSound);
 
-                // Draw player with yellow tint during powerup
-                if (powerupActive) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'source-atop';
-                    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
-                    ctx.fillRect(player.x, player.y, player.width, player.height);
-                    ctx.restore();
-                }
-                ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
-            }
-        }
-
-        function drawGameOver() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#e94560';
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
-
-            ctx.font = '24px Arial';
-            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
-
-            ctx.font = '20px Arial';
-            ctx.fillText('Click "Start Game" to play again', canvas.width / 2, canvas.height / 2 + 50);
-
-            startButton.style.display = 'block';
-        }
-
-        let lastTime = 0;
-        const fixedDeltaTime = 1 / 60; // 60 FPS
-        let accumulator = 0;
-
-        function gameLoop(currentTime) {
-            if (lastTime) {
-                const deltaTime = (currentTime - lastTime) / 1000;
-                accumulator += deltaTime;
-
-                while (accumulator >= fixedDeltaTime) {
-                    update(fixedDeltaTime);
-                    accumulator -= fixedDeltaTime;
-                }
-            }
-
-            draw();
-            lastTime = currentTime;
-            requestAnimationFrame(gameLoop);
-        }
-
-        function resetGame() {
-            player.x = 375;
-            player.y = 530;
-            player.velocityY = 0;
-            player.isJumping = false;
-            player.jumpCount = 0;
-            player.canJump = true;
-            bottomPlatform = {
-                x: 0,
-                y: 580,
-                width: 800,
-                height: 20,
-                isSafe: true
-            };
-            score = 0;
-            gameOver = false;
-            hasLeftGround = false;
-            currentBackgroundIndex = 0;
-            isFading = false;
-            fadeAlpha = 0;
-            floorCounter.textContent = 'Floor: 00000';
-            nextBottomPlatformScore = 100;
-            isPlayerOnSafePlatform = false;
-            powerups = [];
-            solanaPowerups = [];
-            ethereumPowerups = [];
-            powerupActive = false;
-            powerupTimer = 0;
-            blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101;
-            blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51;
-            blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61;
-            ethereumEffectActive = false;
-            ethereumEffectTimer = 0;
-            debugInfo = {
-                totalBlocksClimbed: 0,
-                blocksUntilNextPowerup: 0,
-                powerupsGenerated: 0,
-                activePowerups: 0
-            };
-            initGame();
-        }
-
-        // Keyboard input handling
-        document.addEventListener('keydown', (e) => {
-            keys[e.code] = true;
-        });
-
-        document.addEventListener('keyup', (e) => {
-            keys[e.code] = false;
-        });
-
-        // Start button event listener
-        startButton.addEventListener('click', () => {
-            resetGame();
-            gameRunning = true;
-            gameOver = false;
-            startButton.style.display = 'none';
-        });
-
-        // Initialize and start the game loop
-        initGame();
-        requestAnimationFrame(gameLoop);
+                // Initialize and start the game loop
+                initGame();
+                requestAnimationFrame(gameLoop);
+            })
+            .catch(error => {
+                console.error("Error loading sprites:", error);
+                // Handle the error, maybe show a message to the user
+            });
     });
     </script>
 </body>
