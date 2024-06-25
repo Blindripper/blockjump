@@ -58,6 +58,14 @@
     // Define CDN URL first
     const cdnUrl = 'https://cdn.jsdelivr.net/gh/blindripper/blockjump@main/pics/';
 
+    // Debug information
+    let debugInfo = {
+        totalBlocksClimbed: 0,
+        blocksUntilNextPowerup: 0,
+        powerupsGenerated: 0,
+        activePowerups: 0
+    };
+
     // Background images array declaration
     const backgrounds = Array.from({ length: 16 }, (_, i) => ({
         image: new Image(),
@@ -84,39 +92,45 @@
         playerSprite.onload = () => console.log('Player sprite loaded');
         playerSprite.onerror = () => console.error('Failed to load player sprite');
 
-           // Stage names
-    const stageNames = [
-        { name: "Athens", start: 0, end: 100 },
-        { name: "Babylon", start: 101, end: 200 },
-        { name: "Carthage", start: 201, end: 300 },
-        { name: "Delphi", start: 301, end: 400 },
-        { name: "Edo", start: 401, end: 500 },
-        { name: "Florence", start: 501, end: 600 },
-        { name: "Granada", start: 601, end: 700 },
-        { name: "Hangzhou", start: 701, end: 800 },
-        { name: "Ithaca", start: 801, end: 900 },
-        { name: "Jakarta", start: 901, end: 1000 },
-        { name: "Kathmandu", start: 1001, end: 1100 },
-        { name: "Lima", start: 1101, end: 1200 },
-        { name: "Mumbai", start: 1201, end: 1300 },
-        { name: "Nairobi", start: 1301, end: 1400 },
-        { name: "Oxford", start: 1401, end: 1500 },
-        { name: "Paris", start: 1501, end: 1600 }
-    ];
+        // Load powerup sprite
+        const powerupSprite = new Image();
+        powerupSprite.src = `${cdnUrl}bitcoin.png`;
+        powerupSprite.onload = () => console.log('Powerup sprite loaded');
+        powerupSprite.onerror = () => console.error('Failed to load powerup sprite');
+
+        // Stage names
+        const stageNames = [
+            { name: "Athens", start: 0, end: 100 },
+            { name: "Babylon", start: 101, end: 200 },
+            { name: "Carthage", start: 201, end: 300 },
+            { name: "Delphi", start: 301, end: 400 },
+            { name: "Edo", start: 401, end: 500 },
+            { name: "Florence", start: 501, end: 600 },
+            { name: "Granada", start: 601, end: 700 },
+            { name: "Hangzhou", start: 701, end: 800 },
+            { name: "Ithaca", start: 801, end: 900 },
+            { name: "Jakarta", start: 901, end: 1000 },
+            { name: "Kathmandu", start: 1001, end: 1100 },
+            { name: "Lima", start: 1101, end: 1200 },
+            { name: "Mumbai", start: 1201, end: 1300 },
+            { name: "Nairobi", start: 1301, end: 1400 },
+            { name: "Oxford", start: 1401, end: 1500 },
+            { name: "Paris", start: 1501, end: 1600 }
+        ];
         
         // Stage name display variables
-    let currentStageName = "";
-    let stageNameOpacity = 0;
-    let stageNameTimer = 0;
+        let currentStageName = "";
+        let stageNameOpacity = 0;
+        let stageNameTimer = 0;
         
-    function updateStageName() {
-        const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end);
-        if (currentStage && currentStage.name !== currentStageName) {
-            currentStageName = currentStage.name;
-            stageNameOpacity = 1;
-            stageNameTimer = 3; // 3 seconds display time
+        function updateStageName() {
+            const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end);
+            if (currentStage && currentStage.name !== currentStageName) {
+                currentStageName = currentStage.name;
+                stageNameOpacity = 1;
+                stageNameTimer = 3; // 3 seconds display time
+            }
         }
-    }
 
         // Game constants
         const JUMP_VELOCITY = -600;
@@ -156,6 +170,12 @@
         let nextBottomPlatformScore = 100;
         let isPlayerOnSafePlatform = false;
 
+        // Powerup variables
+        let powerups = [];
+        let powerupActive = false;
+        let powerupTimer = 0;
+        let blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101; // 350-500 blocks
+
         function createPlatform(y) {
             return {
                 x: Math.random() * (canvas.width - 120),
@@ -163,6 +183,17 @@
                 width: 120,
                 height: 15,
                 isGolden: (score + platforms.length) % 15 === 0
+            };
+        }
+
+        function createPowerup(y) {
+            debugInfo.powerupsGenerated++;
+            console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}`);
+            return {
+                x: Math.random() * (canvas.width - 30),
+                y: y,
+                width: 30,
+                height: 30
             };
         }
 
@@ -181,22 +212,22 @@
             if (!gameRunning || gameOver) return;
 
             // Update stage name
-        updateStageName();
-        if (stageNameTimer > 0) {
-            stageNameTimer -= dt;
-            if (stageNameTimer <= 0) {
-                stageNameOpacity = Math.max(0, stageNameOpacity - dt);
+            updateStageName();
+            if (stageNameTimer > 0) {
+                stageNameTimer -= dt;
+                if (stageNameTimer <= 0) {
+                    stageNameOpacity = Math.max(0, stageNameOpacity - dt);
+                }
             }
-        }
 
             // Player movement
             if (keys.ArrowLeft && player.x > 0) player.x -= player.speed * dt;
             if (keys.ArrowRight && player.x < canvas.width - player.width) player.x += player.speed * dt;
 
             // Jumping
-            if (keys.ArrowUp && player.canJump && player.jumpCount < player.maxJumps) {
-                player.isJumping = true;
+            if (keys.ArrowUp && player.jumpCount < player.maxJumps && player.canJump) {
                 player.velocityY = JUMP_VELOCITY;
+                player.isJumping = true;
                 player.jumpCount++;
                 player.canJump = false;
                 if (!hasLeftGround) {
@@ -212,41 +243,53 @@
                 player.canJump = true;
             }
 
+            // Powerup jumping (unlimited jumps)
+            if (powerupActive && keys.ArrowUp && player.canJump) {
+                player.velocityY = JUMP_VELOCITY;
+                player.canJump = false;
+                if (!hasLeftGround) {
+                    hasLeftGround = true;
+                }
+                if (isPlayerOnSafePlatform) {
+                    isPlayerOnSafePlatform = false;
+                }
+            }
+
             // Apply gravity
             player.velocityY += GRAVITY * dt;
             player.y += player.velocityY * dt;
 
-            // Bottom platform collision
-            if (player.y + player.height > bottomPlatform.y && 
-                player.y + player.height < bottomPlatform.y + bottomPlatform.height &&
-                bottomPlatform.y < canvas.height) {
-                player.y = bottomPlatform.y - player.height;
-                player.velocityY = 0;
-                player.isJumping = false;
-                player.jumpCount = 0;
-                if (bottomPlatform.isSafe) {
-                    isPlayerOnSafePlatform = true;
-                }
-            }
-
-            // Platform collision
-            platforms.forEach(platform => {
-                if (player.velocityY > 0 &&
-                    player.y + player.height > platform.y &&
-                    player.y + player.height < platform.y + platform.height &&
-                    player.x < platform.x + platform.width &&
-                    player.x + player.width > platform.x) {
-                    player.y = platform.y - player.height;
+            // Reset jump count when landing on a platform or the bottom platform
+            if (player.velocityY >= 0) {
+                if (player.y + player.height > bottomPlatform.y && 
+                    player.y + player.height < bottomPlatform.y + bottomPlatform.height &&
+                    bottomPlatform.y < canvas.height) {
+                    player.y = bottomPlatform.y - player.height;
                     player.velocityY = 0;
                     player.isJumping = false;
                     player.jumpCount = 0;
-
-                    if (platform.isGolden) {
-                        player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
-                        score += 15;
+                    if (bottomPlatform.isSafe) {
+                        isPlayerOnSafePlatform = true;
                     }
                 }
-            });
+
+                platforms.forEach(platform => {
+                    if (player.y + player.height > platform.y &&
+                        player.y + player.height < platform.y + platform.height &&
+                        player.x < platform.x + platform.width &&
+                        player.x + player.width > platform.x) {
+                        player.y = platform.y - player.height;
+                        player.velocityY = 0;
+                        player.isJumping = false;
+                        player.jumpCount = 0;
+
+                        if (platform.isGolden) {
+                            player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
+                            score += 15;
+                        }
+                    }
+                });
+            }
 
             // Move platforms and generate new ones
             if (hasLeftGround && !isPlayerOnSafePlatform) {
@@ -254,11 +297,19 @@
                     platform.y += PLATFORM_SPEED * dt;
                     if (platform.y > canvas.height) {
                         score++;
+                        debugInfo.totalBlocksClimbed++;
                         floorCounter.textContent = `Floor: ${score.toString().padStart(5, '0')}`;
                         platforms[index] = createPlatform(0);
                         
-                        // Update background every time score increases
                         updateBackground();
+
+                        // Check if it's time to generate a new powerup
+                        if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
+                            powerups.push(createPowerup(0));
+                            blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 60) + 101;
+                            debugInfo.blocksUntilNextPowerup = blocksUntilNextPowerup - debugInfo.totalBlocksClimbed;
+                            console.log(`Next powerup in ${debugInfo.blocksUntilNextPowerup} blocks`);
+                        }
                     }
                 });
 
@@ -289,16 +340,47 @@
             }
 
             // Game over condition
-            if (player.y > canvas.height && !bottomPlatform.isSafe) {
-                gameOver = true;
-                gameRunning = false;
-            }
+            if (player.y > canvas.height) {
+        if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
+            gameOver = true;
+            gameRunning = false;
+        }
+    }
 
             // Reset bottom platform safety when player leaves it
             if (player.y + player.height < bottomPlatform.y) {
                 bottomPlatform.isSafe = false;
                 isPlayerOnSafePlatform = false;
             }
+
+            // Move powerups and check for collision
+            debugInfo.activePowerups = powerups.length;
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                powerups[i].y += PLATFORM_SPEED * dt;
+                if (powerups[i].y > canvas.height) {
+                    powerups.splice(i, 1);
+                    console.log("Powerup removed (out of bounds)");
+                } else if (player.x < powerups[i].x + powerups[i].width &&
+                           player.x + player.width > powerups[i].x &&
+                           player.y < powerups[i].y + powerups[i].height &&
+                           player.y + player.height > powerups[i].y) {
+                    powerups.splice(i, 1);
+                    powerupActive = true;
+                    powerupTimer = 10; // 10 seconds
+                    console.log("Powerup collected!");
+                }
+            }
+
+            // Powerup timer
+            if (powerupActive) {
+                powerupTimer -= dt;
+                if (powerupTimer <= 0) {
+                    powerupActive = false;
+                }
+            }
+
+            // Add debug info display
+            console.log(`Debug: Blocks climbed: ${debugInfo.totalBlocksClimbed}, Next powerup in: ${debugInfo.blocksUntilNextPowerup}, Active powerups: ${debugInfo.activePowerups}`);
         }
 
         function updateBackground() {
@@ -316,15 +398,16 @@
         function draw() {
             // Draw current background
             ctx.drawImage(backgrounds[currentBackgroundIndex].image, 0, 0, canvas.width, canvas.height);
+            
             // Draw stage name
-        if (stageNameOpacity > 0) {
-            ctx.globalAlpha = stageNameOpacity;
-            ctx.fillStyle = '#FFD700';
-            ctx.font = 'bold 48px Orbitron, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
-            ctx.globalAlpha = 1;
-        }
+            if (stageNameOpacity > 0) {
+                ctx.globalAlpha = stageNameOpacity;
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 48px Orbitron, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
+                ctx.globalAlpha = 1;
+            }
 
             // If fading, draw the next background with increasing opacity
             if (isFading) {
@@ -353,7 +436,20 @@
                     ctx.fill();
                 });
 
-                // Draw player
+                // Draw powerups
+                powerups.forEach(powerup => {
+                ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                });
+            
+
+                // Draw player with yellow tint during powerup
+                if (powerupActive) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'source-atop';
+                    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                    ctx.fillRect(player.x, player.y, player.width, player.height);
+                    ctx.restore();
+                }
                 ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
             }
         }
@@ -419,6 +515,16 @@
             floorCounter.textContent = 'Floor: 00000';
             nextBottomPlatformScore = 100;
             isPlayerOnSafePlatform = false;
+            powerups = [];
+            powerupActive = false;
+            powerupTimer = 0;
+            blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101;
+            debugInfo = {
+                totalBlocksClimbed: 0,
+                blocksUntilNextPowerup: 0,
+                powerupsGenerated: 0,
+                activePowerups: 0
+            };
             initGame();
         }
 
