@@ -92,11 +92,21 @@
         playerSprite.onload = () => console.log('Player sprite loaded');
         playerSprite.onerror = () => console.error('Failed to load player sprite');
 
-        // Load powerup sprite
+        // Load powerup sprites
         const powerupSprite = new Image();
         powerupSprite.src = `${cdnUrl}bitcoin.png`;
-        powerupSprite.onload = () => console.log('Powerup sprite loaded');
-        powerupSprite.onerror = () => console.error('Failed to load powerup sprite');
+        powerupSprite.onload = () => console.log('Bitcoin powerup sprite loaded');
+        powerupSprite.onerror = () => console.error('Failed to load Bitcoin powerup sprite');
+
+        const solanaPowerupSprite = new Image();
+        solanaPowerupSprite.src = `${cdnUrl}solana.png`;
+        solanaPowerupSprite.onload = () => console.log('Solana powerup sprite loaded');
+        solanaPowerupSprite.onerror = () => console.error('Failed to load Solana powerup sprite');
+
+        const ethereumPowerupSprite = new Image();
+        ethereumPowerupSprite.src = `${cdnUrl}ethereum.png`;
+        ethereumPowerupSprite.onload = () => console.log('Ethereum powerup sprite loaded');
+        ethereumPowerupSprite.onerror = () => console.error('Failed to load Ethereum powerup sprite');
 
         // Stage names
         const stageNames = [
@@ -172,28 +182,36 @@
 
         // Powerup variables
         let powerups = [];
+        let solanaPowerups = [];
+        let ethereumPowerups = [];
         let powerupActive = false;
         let powerupTimer = 0;
-        let blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101; // 350-500 blocks
+        let blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101; // 101-160 blocks
+        let blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51; // 51-80 blocks
+        let blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61; // 61-100 blocks
+        let ethereumEffectActive = false;
+        let ethereumEffectTimer = 0;
+        let originalPlatformWidth = 120; // Store the original platform width
 
         function createPlatform(y) {
             return {
-                x: Math.random() * (canvas.width - 120),
+                x: Math.random() * (canvas.width - (ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth)),
                 y: y,
-                width: 120,
+                width: ethereumEffectActive ? originalPlatformWidth * 0.5 : originalPlatformWidth,
                 height: 15,
                 isGolden: (score + platforms.length) % 15 === 0
             };
         }
 
-        function createPowerup(y) {
+        function createPowerup(y, type) {
             debugInfo.powerupsGenerated++;
-            console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}`);
+            console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}, Type: ${type}`);
             return {
                 x: Math.random() * (canvas.width - 30),
                 y: y,
                 width: 30,
-                height: 30
+                height: 30,
+                type: type
             };
         }
 
@@ -303,12 +321,25 @@
                         
                         updateBackground();
 
-                        // Check if it's time to generate a new powerup
+                        // Check if it's time to generate a new Bitcoin powerup
                         if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
-                            powerups.push(createPowerup(0));
+                            powerups.push(createPowerup(0, 'bitcoin'));
                             blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 60) + 101;
-                            debugInfo.blocksUntilNextPowerup = blocksUntilNextPowerup - debugInfo.totalBlocksClimbed;
-                            console.log(`Next powerup in ${debugInfo.blocksUntilNextPowerup} blocks`);
+                            console.log(`Bitcoin powerup generated. Next at ${blocksUntilNextPowerup}`);
+                        }
+
+                        // Check if it's time to generate a new Solana powerup
+                        if (debugInfo.totalBlocksClimbed >= blocksUntilNextSolanaPowerup) {
+                            solanaPowerups.push(createPowerup(0, 'solana'));
+                            blocksUntilNextSolanaPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 30) + 51;
+                            console.log(`Solana powerup generated. Next at ${blocksUntilNextSolanaPowerup}`);
+                        }
+
+                       // Check if it's time to generate a new Ethereum powerup
+                       if (debugInfo.totalBlocksClimbed >= blocksUntilNextEthereumPowerup) {
+                            ethereumPowerups.push(createPowerup(0, 'ethereum'));
+                            blocksUntilNextEthereumPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 40) + 61;
+                            console.log(`Ethereum powerup generated. Next at ${blocksUntilNextEthereumPowerup}`);
                         }
                     }
                 });
@@ -341,11 +372,11 @@
 
             // Game over condition
             if (player.y > canvas.height) {
-        if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
-            gameOver = true;
-            gameRunning = false;
-        }
-    }
+                if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
+                    gameOver = true;
+                    gameRunning = false;
+                }
+            }
 
             // Reset bottom platform safety when player leaves it
             if (player.y + player.height < bottomPlatform.y) {
@@ -354,12 +385,12 @@
             }
 
             // Move powerups and check for collision
-            debugInfo.activePowerups = powerups.length;
+            debugInfo.activePowerups = powerups.length + solanaPowerups.length + ethereumPowerups.length;
             for (let i = powerups.length - 1; i >= 0; i--) {
                 powerups[i].y += PLATFORM_SPEED * dt;
                 if (powerups[i].y > canvas.height) {
                     powerups.splice(i, 1);
-                    console.log("Powerup removed (out of bounds)");
+                    console.log("Bitcoin powerup removed (out of bounds)");
                 } else if (player.x < powerups[i].x + powerups[i].width &&
                            player.x + player.width > powerups[i].x &&
                            player.y < powerups[i].y + powerups[i].height &&
@@ -367,7 +398,58 @@
                     powerups.splice(i, 1);
                     powerupActive = true;
                     powerupTimer = 10; // 10 seconds
-                    console.log("Powerup collected!");
+                    console.log("Bitcoin powerup collected!");
+                }
+            }
+
+            // Move Solana powerups and check for collision
+            for (let i = solanaPowerups.length - 1; i >= 0; i--) {
+                solanaPowerups[i].y += PLATFORM_SPEED * dt;
+                if (solanaPowerups[i].y > canvas.height) {
+                    solanaPowerups.splice(i, 1);
+                    console.log("Solana powerup removed (out of bounds)");
+                } else if (player.x < solanaPowerups[i].x + solanaPowerups[i].width &&
+                           player.x + player.width > solanaPowerups[i].x &&
+                           player.y < solanaPowerups[i].y + solanaPowerups[i].height &&
+                           player.y + player.height > solanaPowerups[i].y) {
+                    solanaPowerups.splice(i, 1);
+                    gameOver = true;
+                    gameRunning = false;
+                    console.log("Solana powerup collected! Game Over!");
+                }
+            }
+
+            // Move Ethereum powerups and check for collision
+            for (let i = ethereumPowerups.length - 1; i >= 0; i--) {
+                ethereumPowerups[i].y += PLATFORM_SPEED * dt;
+                if (ethereumPowerups[i].y > canvas.height) {
+                    ethereumPowerups.splice(i, 1);
+                    console.log("Ethereum powerup removed (out of bounds)");
+                } else if (player.x < ethereumPowerups[i].x + ethereumPowerups[i].width &&
+                           player.x + player.width > ethereumPowerups[i].x &&
+                           player.y < ethereumPowerups[i].y + ethereumPowerups[i].height &&
+                           player.y + player.height > ethereumPowerups[i].y) {
+                    ethereumPowerups.splice(i, 1);
+                    ethereumEffectActive = true;
+                    ethereumEffectTimer = 10; // 10 seconds
+                    console.log("Ethereum powerup collected! Platforms shrinking for 10 seconds.");
+                }
+            }
+
+            // Handle Ethereum effect
+            if (ethereumEffectActive) {
+                ethereumEffectTimer -= dt;
+                if (ethereumEffectTimer <= 0) {
+                    ethereumEffectActive = false;
+                    // Reset platform sizes
+                    platforms.forEach(platform => {
+                        platform.width = originalPlatformWidth;
+                    });
+                } else {
+                    // Shrink platforms
+                    platforms.forEach(platform => {
+                        platform.width = originalPlatformWidth * 0.5;
+                    });
                 }
             }
 
@@ -380,7 +462,7 @@
             }
 
             // Add debug info display
-            console.log(`Debug: Blocks climbed: ${debugInfo.totalBlocksClimbed}, Next powerup in: ${debugInfo.blocksUntilNextPowerup}, Active powerups: ${debugInfo.activePowerups}`);
+            console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Bitcoin: ${powerups.length}, Solana: ${solanaPowerups.length}, Ethereum: ${ethereumPowerups.length}`);
         }
 
         function updateBackground() {
@@ -438,9 +520,18 @@
 
                 // Draw powerups
                 powerups.forEach(powerup => {
-                ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                    ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
                 });
-            
+
+                // Draw Solana powerups
+                solanaPowerups.forEach(powerup => {
+                    ctx.drawImage(solanaPowerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                });
+
+                // Draw Ethereum powerups
+                ethereumPowerups.forEach(powerup => {
+                    ctx.drawImage(ethereumPowerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                });
 
                 // Draw player with yellow tint during powerup
                 if (powerupActive) {
@@ -516,9 +607,15 @@
             nextBottomPlatformScore = 100;
             isPlayerOnSafePlatform = false;
             powerups = [];
+            solanaPowerups = [];
+            ethereumPowerups = [];
             powerupActive = false;
             powerupTimer = 0;
             blocksUntilNextPowerup = Math.floor(Math.random() * 60) + 101;
+            blocksUntilNextSolanaPowerup = Math.floor(Math.random() * 30) + 51;
+            blocksUntilNextEthereumPowerup = Math.floor(Math.random() * 40) + 61;
+            ethereumEffectActive = false;
+            ethereumEffectTimer = 0;
             debugInfo = {
                 totalBlocksClimbed: 0,
                 blocksUntilNextPowerup: 0,
