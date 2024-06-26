@@ -9,7 +9,6 @@
         body {
             background: linear-gradient(to bottom, #1a1a2e, #16213e);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -17,9 +16,21 @@
             font-family: 'Orbitron', sans-serif;
             color: #e94560;
         }
+        #gameWrapper {
+            display: flex;
+            justify-content: space-between;
+            width: 1200px;
+        }
+        #highscoreSection {
+            width: 200px;
+            margin-right: 20px;
+        }
         #gameContainer {
             position: relative;
-            margin-top: 20px;
+        }
+        #powerupSection {
+            width: 200px;
+            margin-left: 20px;
         }
         #gameCanvas {
             border-radius: 10px;
@@ -30,6 +41,7 @@
             font-weight: bold;
             margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            text-align: center;
         }
         #startButton, #soundToggle {
             font-size: 24px;
@@ -71,18 +83,85 @@
             font-size: 24px;
             color: white;
         }
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .powerup-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .powerup-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .powerup-description {
+            font-size: 14px;
+        }
+        #highscoreTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #highscoreTable th, #highscoreTable td {
+            border: 1px solid #e94560;
+            padding: 5px;
+            text-align: center;
+        }
+        #nameForm {
+            margin-top: 10px;
+            display: none;
+        }
+        #nameInput {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        #submitScore {
+            width: 100%;
+            padding: 5px;
+            background-color: #e94560;
+            color: #16213e;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div id="floorCounter">Tezos Marketcap: 0000000000</div>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <div id="achievementPopup"></div>
-        <div id="windIndicator"></div>
-    </div>
-    <div id="controls">
-        <button id="startButton">Start Game</button>
-        <button id="soundToggle">Sound: On</button>
+    <div id="gameWrapper">
+        <div id="highscoreSection">
+            <div class="section-title">Highscores</div>
+            <table id="highscoreTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="highscoreBody"></tbody>
+            </table>
+            <form id="nameForm">
+                <input type="text" id="nameInput" placeholder="Enter your name" maxlength="10" required>
+                <button type="submit" id="submitScore">Submit Score</button>
+            </form>
+        </div>
+        <div id="gameContainer">
+            <div id="floorCounter">Tezos Marketcap: 0000000000</div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div id="achievementPopup"></div>
+            <div id="windIndicator"></div>
+            <div id="controls">
+                <button id="startButton">Start Game</button>
+                <button id="soundToggle">Sound: On</button>
+            </div>
+        </div>
+        <div id="powerupSection">
+            <div class="section-title">Powerups</div>
+            <!-- Powerup descriptions will be dynamically added here -->
+        </div>
     </div>
     <script>
     // Define base URL for the GitHub repository
@@ -101,6 +180,20 @@
         blocksUntilNextPowerup: 0,
         powerupsGenerated: 0,
         activePowerups: 0
+    };
+
+    // Highscore system
+    let highscores = [];
+
+    // Powerup descriptions
+    const powerupDescriptions = {
+        bitcoin: { points: 250, effect: "Fly for 5 seconds" },
+        solana: { points: 0, effect: "Game Over" },
+        ethereum: { points: 250, effect: "Shrinks platforms for 5 seconds" },
+        etherlink: { points: 1000, effect: "Instant boost to score" },
+        TripleJump: { points: 250, effect: "Allows triple jump for 10 seconds" },
+        magneticCoin: { points: 250, effect: "Attracts nearby Etherlink coins" },
+        slowMotion: { points: 250, effect: "Slows down game for 10 seconds" }
     };
 
     // Sprite loading with error handling and logging
@@ -387,7 +480,7 @@
         originalPlatformWidth = Math.max(80, 120 - platformWidthReduction);
         
         // Increase frequency of powerups and hazards more slowly
-        blocksUntilNextPowerup = Math.max(20, 31 - (difficultyLevel - 1) * 1); // Increased drop rate
+        blocksUntilNextPowerup = Math.max(5, 15 - (difficultyLevel - 1)); // Increased drop rate
         spikeBlockProbability = Math.min(0.15, 0.05 + (difficultyLevel - 1) * 0.01); // Cap at 15% chance
 
         // Add moving platforms
@@ -698,6 +791,7 @@
                 gameOver = true;
                 gameRunning = false;
                 playSound('gameOver');
+                showNameForm();
             }
         }
 
@@ -990,7 +1084,7 @@
         ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
 
         ctx.font = '20px Orbitron, sans-serif';
-        ctx.fillText('Click "Start Game" to play again', canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillText('Enter your name to save your score', canvas.width / 2, canvas.height / 2 + 50);
 
         startButton.style.display = 'block';
     }
@@ -1069,9 +1163,9 @@
         movingPlatforms = [];
         wind = { speed: 0, direction: 1 };
         achievements = {
-            highJumper: { achieved: false, requirement: 1000 },
+            highJumper: { achieved: false, requirement: 10000 },
             comboMaster: { achieved: false, requirement: 10 },
-            cryptoWhale: { achieved: false, requirement: 10000 }
+            cryptoWhale: { achieved: false, requirement: 100000 }
         };
         debugInfo = {
             totalBlocksClimbed: 0,
@@ -1094,6 +1188,57 @@
         updateWindIndicator();
     }
 
+    function showNameForm() {
+        const nameForm = document.getElementById('nameForm');
+        nameForm.style.display = 'block';
+    }
+
+    function saveHighscore(name) {
+        highscores.push({ name, score });
+        highscores.sort((a, b) => b.score - a.score);
+        highscores = highscores.slice(0, 10); // Keep only top 10 scores
+        localStorage.setItem('blockjumpHighscores', JSON.stringify(highscores));
+        updateHighscoreTable();
+    }
+
+    function loadHighscores() {
+        const storedHighscores = localStorage.getItem('blockjumpHighscores');
+        if (storedHighscores) {
+            highscores = JSON.parse(storedHighscores);
+        }
+        updateHighscoreTable();
+    }
+
+    function updateHighscoreTable() {
+        const highscoreBody = document.getElementById('highscoreBody');
+        highscoreBody.innerHTML = '';
+        highscores.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.score}</td>
+            `;
+            highscoreBody.appendChild(row);
+        });
+    }
+
+    function populatePowerupDescriptions() {
+        const powerupSection = document.getElementById('powerupSection');
+        for (const [type, info] of Object.entries(powerupDescriptions)) {
+            const powerupItem = document.createElement('div');
+            powerupItem.className = 'powerup-item';
+            powerupItem.innerHTML = `
+                <img src="${picsUrl}${type}.png" alt="${type}" class="powerup-icon">
+                <div class="powerup-description">
+                    <strong>${type}:</strong> ${info.points} points<br>
+                    ${info.effect}
+                </div>
+            `;
+            powerupSection.appendChild(powerupItem);
+        }
+    }
+
     function initialize() {
         canvas = document.getElementById('gameCanvas');
         if (!canvas) {
@@ -1105,6 +1250,7 @@
         const startButton = document.getElementById('startButton');
         const soundToggle = document.getElementById('soundToggle');
         const achievementPopup = document.getElementById('achievementPopup');
+        const nameForm = document.getElementById('nameForm');
 
         // Load all sprites
         const spritePromises = [
@@ -1155,6 +1301,21 @@
 
                 // Sound toggle event listener
                 soundToggle.addEventListener('click', toggleSound);
+
+                // Name form submit event listener
+                nameForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('nameInput').value;
+                    saveHighscore(name);
+                    nameForm.style.display = 'none';
+                    startButton.style.display = 'block';
+                });
+
+                // Populate powerup descriptions
+                populatePowerupDescriptions();
+
+                // Load highscores
+                loadHighscores();
 
                 // Preload sounds
                 preloadSounds()
