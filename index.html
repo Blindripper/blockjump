@@ -219,9 +219,9 @@
     let movingPlatforms = [];
     let wind = { speed: 0, direction: 1 }; // 1 for right, -1 for left
     let achievements = {
-        highJumper: { achieved: false, requirement: 1000 },
+        highJumper: { achieved: false, requirement: 10000 },
         comboMaster: { achieved: false, requirement: 10 },
-        cryptoWhale: { achieved: false, requirement: 10000 }
+        cryptoWhale: { achieved: false, requirement: 100000 }
     };
 
     // Powerup variables
@@ -760,7 +760,8 @@
         switch(type) {
             case 'bitcoin':
                 powerupActive = true;
-                powerupTimer = 10;
+                powerupTimer = 5;
+                score += 250;
                 break;
             case 'solana':
                 gameOver = true;
@@ -768,7 +769,8 @@
                 break;
             case 'ethereum':
                 ethereumEffectActive = true;
-                ethereumEffectTimer = 10;
+                ethereumEffectTimer = 5;
+                score += 250;
                 // Shrink platforms
                 platforms.forEach(platform => {
                     platform.width = originalPlatformWidth * 0.5;
@@ -778,15 +780,18 @@
                 score += 1000;
                 break;
             case 'doubleJump':
+                score += 250;
                 player.maxJumps = 3;
                 setTimeout(() => { player.maxJumps = 2; }, 10000);
                 break;
             case 'magneticCoin':
+                score += 250;
                 // Implement coin attraction logic
                 break;
             case 'slowMotion':
+                score += 250;
                 PLATFORM_SPEED *= 0.5;
-                setTimeout(() => { PLATFORM_SPEED *= 2; }, 8000);
+                setTimeout(() => { PLATFORM_SPEED *= 2; }, 10000);
                 break;
         }
         playSound('powerup');
