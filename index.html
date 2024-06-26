@@ -228,7 +228,7 @@
     let powerups = [];
     let powerupActive = false;
     let powerupTimer = 0;
-    let blocksUntilNextPowerup = Math.floor(Math.random() * 20) + 31; // Increased drop rate: 31-50 blocks
+    let blocksUntilNextPowerup = Math.floor(Math.random() * 10) + 5; // Increased drop rate: 5-15 blocks
     let ethereumEffectActive = false;
     let ethereumEffectTimer = 0;
     let originalPlatformWidth = 120; // Store the original platform width
@@ -366,7 +366,7 @@
 
     // Dynamic difficulty system
     let difficultyLevel = 1;
-    let scoreThreshold = 500; // Increased initial threshold
+    let scoreThreshold = 2500; // Increased initial threshold
     const maxDifficultyLevel = 10; // Increased max difficulty level
 
     function updateDifficulty() {
@@ -644,7 +644,7 @@
                     // Check if it's time to generate a new powerup
                     if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
                         powerups.push(createPowerup(0));
-                        blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 20) + 31; // Increased drop rate
+                        blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 10) + 5; // Increased drop rate
                         console.log(`Powerup generated. Next at ${blocksUntilNextPowerup}`);
                     }
                 }
@@ -804,9 +804,9 @@
 
     function incrementCombo() {
         comboCounter++;
-        comboTimer = 5; // 5 seconds to continue the combo
+        comboTimer = 20; // 20 seconds to continue the combo
         if (comboCounter > 1) {
-            score += comboCounter * 10; // Bonus points for combo
+            score += comboCounter * 250; // Bonus points for combo
         }
     }
 
@@ -1049,7 +1049,7 @@
         powerups = [];
         powerupActive = false;
         powerupTimer = 0;
-        blocksUntilNextPowerup = Math.floor(Math.random() * 20) + 31; // Increased drop rate
+        blocksUntilNextPowerup = Math.floor(Math.random() * 10) + 5; // Increased drop rate
         ethereumEffectActive = false;
         ethereumEffectTimer = 0;
         particles = [];
