@@ -187,13 +187,24 @@
 
     // Powerup descriptions
     const powerupDescriptions = {
-        Bitcoin: { points: 250, effect: "Fly for 5 seconds" },
-        Solana: { points: 0, effect: "Game Over" },
-        Ethereum: { points: 250, effect: "Shrinks platforms for 5 seconds" },
-        EtherLink: { points: 1000, effect: "Instant boost to score" },
-        GreenTezos: { points: 250, effect: "Allows triple jump for 10 seconds" },
-        Blast: { points: 250, effect: "Attracts nearby Etherlink coins" },
-        MintTezos: { points: 250, effect: "Slows down game for 10 seconds" }
+        bitcoin: { points: 250, effect: "Fly for 5 seconds" },
+        solana: { points: 0, effect: "Game Over" },
+        ethereum: { points: 250, effect: "Shrinks platforms for 5 seconds" },
+        etherLink: { points: 1000, effect: "Instant boost to score" },
+        greenTezos: { points: 250, effect: "Allows triple jump for 10 seconds" },
+        blast: { points: 250, effect: "Attracts nearby Etherlink coins" },
+        mintTezos: { points: 250, effect: "Slows down game for 10 seconds" }
+    };
+
+    // Powerup image mapping
+    const powerupImages = {
+        bitcoin: 'bitcoin.png',
+        solana: 'solana.png',
+        ethereum: 'ethereum1.png',
+        etherLink: 'Etherlink.png',
+        greenTezos: 'doubleJump.png',
+        blast: 'magneticCoin.png',
+        mintTezos: 'slowMotion.png'
     };
 
     // Sprite loading with error handling and logging
@@ -327,7 +338,7 @@
     let originalPlatformWidth = 120; // Store the original platform width
     let spikeBlockProbability = 0.05; // Initial 5% chance for spike blocks
 
-    const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherlink', 'doubleJump', 'magneticCoin', 'slowMotion'];
+    const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos'];
 
     // Sound system
     const sounds = {
@@ -870,19 +881,19 @@
                     platform.width = originalPlatformWidth * 0.5;
                 });
                 break;
-            case 'etherlink':
+            case 'etherLink':
                 score += 1000;
                 break;
-            case 'doubleJump':
+            case 'greenTezos':
                 score += 250;
                 player.maxJumps = 3;
                 setTimeout(() => { player.maxJumps = 2; }, 10000);
                 break;
-            case 'magneticCoin':
+            case 'blast':
                 score += 250;
                 // Implement coin attraction logic
                 break;
-            case 'slowMotion':
+            case 'mintTezos':
                 score += 250;
                 PLATFORM_SPEED *= 0.5;
                 setTimeout(() => { PLATFORM_SPEED *= 2; }, 10000);
@@ -1183,8 +1194,8 @@
         stopBackgroundMusic();
         startBackgroundMusic();
         
-        // Force an immediate update of the stage name and wind indicator
-        updateStageName();
+      // Force an immediate update of the stage name and wind indicator
+      updateStageName();
         updateWindIndicator();
     }
 
@@ -1228,8 +1239,9 @@
         for (const [type, info] of Object.entries(powerupDescriptions)) {
             const powerupItem = document.createElement('div');
             powerupItem.className = 'powerup-item';
+            const imageName = powerupImages[type] || `${type}.png`; // Fallback to type name if not in mapping
             powerupItem.innerHTML = `
-                <img src="${picsUrl}${type}.png" alt="${type}" class="powerup-icon">
+                <img src="${picsUrl}${imageName}" alt="${type}" class="powerup-icon">
                 <div class="powerup-description">
                     <strong>${type}:</strong> ${info.points} points<br>
                     ${info.effect}
