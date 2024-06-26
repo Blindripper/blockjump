@@ -171,8 +171,49 @@
     const soundUrl = `${repoBaseUrl}sound/`;
     const picsUrl = `${repoBaseUrl}pics/`;
 
+    const BLAST_POWERUP_DURATION = 20; // Duration in seconds
+
     // Global canvas variables
     let canvas, ctx;
+
+    let sprites = new Map();
+
+    let blastEffectActive = false;
+    let blastEffectTimer = 0;
+
+    const POWERUP_MESSAGE_DURATION = 1000; // Duration in milliseconds
+
+    function showPowerupMessage(message) {
+    const canvas = document.getElementById('gameCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const popup = document.createElement('div');
+    popup.textContent = message;
+    popup.style.position = 'absolute';
+    popup.style.top = `${canvasRect.top + canvas.height / 2}px`;
+    popup.style.left = `${canvasRect.left + canvas.width / 2}px`;
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = 'rgba(255, 215, 0, 0.8)';
+    popup.style.color = '#16213e';
+    popup.style.padding = '10px 20px';
+    popup.style.borderRadius = '5px';
+    popup.style.fontFamily = 'Orbitron, sans-serif';
+    popup.style.fontSize = '18px';
+    popup.style.zIndex = '1000';
+    popup.style.textAlign = 'center';
+    popup.style.whiteSpace = 'nowrap';
+    popup.style.pointerEvents = 'none';
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        popup.style.transition = 'opacity 0.5s';
+        popup.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(popup);
+        }, 500);
+    }, POWERUP_MESSAGE_DURATION);
+}
+
 
     // Debug information
     let debugInfo = {
@@ -192,7 +233,7 @@
         ethereum: { points: 250, effect: "Shrinks platforms for 5 seconds" },
         etherLink: { points: 1000, effect: "Instant boost to score" },
         greenTezos: { points: 250, effect: "Allows triple jump for 10 seconds" },
-        blast: { points: 250, effect: "Attracts nearby Etherlink coins" },
+        blast: { points: 250, effect: "Auto-collects nearby Etherlink coins" },
         mintTezos: { points: 250, effect: "Slows down game for 10 seconds" }
     };
 
@@ -213,7 +254,7 @@
             const sprite = new Image();
             sprite.onload = () => {
                 console.log(`${name} sprite loaded successfully`);
-                resolve(sprite);
+                resolve({ key: name, image: sprite });
             };
             sprite.onerror = () => {
                 console.error(`Failed to load ${name} sprite from ${picsUrl}${fileName}`);
@@ -420,6 +461,33 @@
         }
     }
 
+    function updatePowerups(dt) {
+    powerups.forEach((powerup, index) => {
+        powerup.y += PLATFORM_SPEED * dt;
+
+        // Check for collision with player
+        if (checkCollision(player, powerup)) {
+            applyPowerupEffect(powerup.type);
+            powerups.splice(index, 1); // Remove the collected powerup
+            return;
+        }
+
+        // Check if the powerup has gone off-screen
+        if (powerup.y > canvas.height) {
+            powerups.splice(index, 1); // Remove off-screen powerup
+        }
+
+        // Auto-collect etherLink powerups when blast effect is active
+        if (blastEffectActive && powerup.type === 'etherLink') {
+            applyPowerupEffect(powerup.type);
+            powerups.splice(index, 1); // Remove the collected powerup
+        }
+    });
+}
+
+
+
+
     function updateParticles(dt) {
         for (let i = particles.length - 1; i >= 0; i--) {
             particles[i].update(dt);
@@ -429,15 +497,173 @@
         }
     }
 
+    function updateCombo(dt) {
+    if (comboTimer > 0) {
+        comboTimer -= dt;
+        if (comboTimer <= 0) {
+            comboCounter = 0;
+        }
+    }
+}
+function updateWind(dt) {
+    // Randomly change wind every few seconds
+    if (Math.random() < 0.01) { // 1% chance each frame to change wind
+        wind.speed = Math.random() * 50; // Wind speed up to 50
+        wind.direction = Math.random() < 0.5 ? -1 : 1; // Randomly choose left or right
+    }
+
+    // Apply wind effect to player
+    player.x += wind.speed * wind.direction * dt;
+    
+    // Keep player within bounds
+    player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+
+    // Update wind indicator
+    updateWindIndicator();
+}
+
+function updateAchievements() {
+    if (!achievements.highJumper.achieved && score >= achievements.highJumper.requirement) {
+        achievements.highJumper.achieved = true;
+        showAchievement("High Jumper");
+    }
+    if (!achievements.comboMaster.achieved && comboCounter >= achievements.comboMaster.requirement) {
+        achievements.comboMaster.achieved = true;
+        showAchievement("Combo Master");
+    }
+    if (!achievements.cryptoWhale.achieved && score >= achievements.cryptoWhale.requirement) {
+        achievements.cryptoWhale.achieved = true;
+        showAchievement("Crypto Whale");
+    }
+}
+
+function showAchievement(name) {
+    const achievementPopup = document.getElementById('achievementPopup');
+    if (achievementPopup) {
+        achievementPopup.textContent = `Achievement Unlocked: ${name}`;
+        achievementPopup.style.display = 'block';
+        setTimeout(() => {
+            achievementPopup.style.display = 'none';
+        }, 3000);
+    } else {
+        console.error('Achievement popup element not found');
+    }
+}
+
+function incrementCombo() {
+    comboCounter++;
+    comboTimer = 5; // Set combo timer to 5 seconds
+    if (comboCounter > 1) {
+        score += comboCounter * 10; // Bonus points for combo
+    }
+}
+
     function drawParticles(ctx) {
         particles.forEach(particle => particle.draw(ctx));
     }
+
+    // Move powerups and check for collision
+debugInfo.activePowerups = powerups.length;
+
+for (let i = powerups.length - 1; i >= 0; i--) {
+    powerups[i].y += PLATFORM_SPEED * dt;
+    if (powerups[i].y > canvas.height) {
+        powerups.splice(i, 1);
+        console.log("Powerup removed (out of bounds)");
+    } else if (player.x < powerups[i].x + powerups[i].width &&
+               player.x + player.width > powerups[i].x &&
+               player.y < powerups[i].y + powerups[i].height &&
+               player.y + player.height > powerups[i].y) {
+        applyPowerUpEffect(powerups[i].type);  // This line causes the error
+        powerups.splice(i, 1);
+        incrementCombo();
+    }
+}
+
+
+
+
+function applyPowerUpEffect(powerupType) {
+    let message = '';
+    
+    switch (powerupType) {
+        case 'bitcoin':
+            powerupActive = true;
+            powerupTimer = 5; // 5 seconds of flight
+            player.velocityY = JUMP_VELOCITY * 1.5; // Boost the player up
+            message = 'Bitcoin: Fly 5s!';
+            break;
+        
+        case 'blast':
+            blastEffectActive = true;
+            blastEffectTimer = BLAST_POWERUP_DURATION;
+            message = `Blast:EtherLink Autocollect!`;
+            break;
+        
+            case 'solana':
+            gameOver = true;
+            gameRunning = false;
+            playSound('gameOver');
+            message = 'Solana: Game Over!';
+            break;
+        case 'ethereum':
+            ethereumEffectActive = true;
+            ethereumEffectTimer = 5; // 5 seconds of shrunk platforms
+            platforms.forEach(platform => {
+                platform.width *= 0.5; // Shrink platforms
+            });
+            message = 'Ethereum: Shrunk';
+            break;
+        case 'etherLink':
+            score += 1000; // Instant boost to score
+            message = 'EtherLink: +1000!';
+            break;
+        case 'greenTezos':
+            player.maxJumps = 3; // Allow triple jump
+            setTimeout(() => { player.maxJumps = 2; }, 10000); // Reset after 10 seconds
+            message = 'Green Tezos: TripleJump 10s!';
+            break;
+        case 'mintTezos':
+            PLATFORM_SPEED *= 0.5; // Slow down game
+            setTimeout(() => { PLATFORM_SPEED *= 2; }, 10000); // Reset after 10 seconds
+            message = 'Mint Tezos: Slowdon 10s!';
+            break;
+    }
+    playSound('powerup');
+    score += powerupDescriptions[powerupType].points;
+    showPowerupMessage(message);
+}
 
     // Screen shake effect
     let screenShake = {
         intensity: 0,
         duration: 0
     };
+
+    function collectNearbyEtherlink() {
+    const blastRadius = 3800; // Adjust this value to change the collection range
+    let collectedCount = 0;
+
+    for (let i = powerups.length - 1; i >= 0; i--) {
+        if (powerups[i].type === 'etherLink') {
+            const dx = powerups[i].x - (player.x + player.width / 2);
+            const dy = powerups[i].y - (player.y + player.height / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance <= blastRadius) {
+                // Collect this Etherlink powerup
+                score += powerupDescriptions['etherLink'].points;
+                createParticles(powerups[i].x, powerups[i].y, 10, '#00FFFF');
+                powerups.splice(i, 1);
+                collectedCount++;
+            }
+        }
+    }
+
+    if (collectedCount > 0) {
+        showPowerupMessage(`Collected ${collectedCount} EtherLink powerup${collectedCount > 1 ? 's' : ''}!`);
+    }
+}
 
     function triggerScreenShake(intensity, duration) {
         screenShake.intensity = intensity;
@@ -452,6 +678,8 @@
             }
         }
     }
+
+
 
     function applyScreenShake(ctx) {
         if (screenShake.intensity > 0) {
@@ -474,17 +702,18 @@
     const maxDifficultyLevel = 10; // Increased max difficulty level
 
     function updateDifficulty() {
-        if (score >= scoreThreshold && difficultyLevel < maxDifficultyLevel) {
-            difficultyLevel++;
-            scoreThreshold += 500 * difficultyLevel; // Increase threshold more with each level
-            adjustGameParameters();
-        }
+    const newDifficultyLevel = Math.floor(score / 2000) + 1;
+    if (newDifficultyLevel > difficultyLevel) {
+        difficultyLevel = newDifficultyLevel;
+        adjustGameParameters();
+        console.log(`Difficulty increased to level ${difficultyLevel}. New platform speed: ${PLATFORM_SPEED}`);
     }
+}
 
     function adjustGameParameters() {
         // Adjust game parameters based on difficulty level
-        PLATFORM_SPEED = 150 + (difficultyLevel - 1) * 10; // Slower speed increase
-        player.speed = 500 + (difficultyLevel - 1) * 20; // Slower player speed increase
+        PLATFORM_SPEED = 150 + (difficultyLevel - 1) * 5; // Slower speed increase
+        player.speed = 500 + (difficultyLevel - 1) * 10; // Slower player speed increase
         
         // Adjust platform generation
         let platformWidthReduction = Math.min(40, (difficultyLevel - 1) * 5); // Cap the width reduction
@@ -562,6 +791,14 @@
         nextBottomPlatformScore = 100;
         bottomPlatform.isSafe = true;
         isPlayerOnSafePlatform = false;
+
+        // Reset blast effect variables
+    blastEffectActive = false;
+    blastEffectTimer = 0;
+
+        
+    // Restart background music
+    startBackgroundMusic();
     }
 
     function updateBackground() {
@@ -585,8 +822,16 @@
         }
     }
 
+
     function update(dt) {
         if (!gameRunning || gameOver) return;
+
+        if (blastEffectTimer > 0) {
+        blastEffectTimer -= dt;
+        if (blastEffectTimer <= 0) {
+            blastEffectTimer = 0;
+        }
+    }
 
         // Add a safety check to prevent infinite loops
         if (debugInfo.totalBlocksClimbed > 10000) {
@@ -619,7 +864,7 @@
         } else if (keys.ArrowRight) {
             player.velocityX = moveSpeed;
         } else {
-            player.velocityX *= 0.8; // Reduced from 0.9 for quicker deceleration
+            player.velocityX *= 0; // Reduced from 0.9 for quicker deceleration
         }
 
         player.x += player.velocityX * dt;
@@ -861,103 +1106,6 @@
         console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Powerups: ${powerups.length}, Difficulty: ${difficultyLevel}`);
     }
 
-    function applyPowerUpEffect(type) {
-        switch(type) {
-            case 'bitcoin':
-                powerupActive = true;
-                powerupTimer = 5;
-                score += 250;
-                break;
-            case 'solana':
-                gameOver = true;
-                gameRunning = false;
-                break;
-            case 'ethereum':
-                ethereumEffectActive = true;
-                ethereumEffectTimer = 5;
-                score += 250;
-                // Shrink platforms
-                platforms.forEach(platform => {
-                    platform.width = originalPlatformWidth * 0.5;
-                });
-                break;
-            case 'etherLink':
-                score += 1000;
-                break;
-            case 'greenTezos':
-                score += 250;
-                player.maxJumps = 3;
-                setTimeout(() => { player.maxJumps = 2; }, 10000);
-                break;
-            case 'blast':
-                score += 250;
-                // Implement coin attraction logic
-                break;
-            case 'mintTezos':
-                score += 250;
-                PLATFORM_SPEED *= 0.5;
-                setTimeout(() => { PLATFORM_SPEED *= 2; }, 10000);
-                break;
-        }
-        playSound('powerup');
-        createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#FFD700');
-    }
-
-    function updateCombo(dt) {
-        if (comboTimer > 0) {
-            comboTimer -= dt;
-            if (comboTimer <= 0) {
-                comboCounter = 0;
-            }
-        }
-    }
-
-    function incrementCombo() {
-        comboCounter++;
-        comboTimer = 20; // 20 seconds to continue the combo
-        if (comboCounter > 1) {
-            score += comboCounter * 250; // Bonus points for combo
-        }
-    }
-
-    function updateWind(dt) {
-        if (Math.random() < 0.01) { // 1% chance each frame to change wind
-            wind.speed = Math.random() * 50; // Wind speed up to 50
-            wind.direction = Math.random() < 0.5 ? -1 : 1;
-        }
-    }
-
-    function updateWindIndicator() {
-        const windIndicator = document.getElementById('windIndicator');
-        const arrow = wind.direction === 1 ? '→' : '←';
-        const strength = Math.floor(wind.speed / 10); // Normalize wind speed to 0-5 range
-        windIndicator.textContent = `${arrow}${'•'.repeat(strength)}`;
-        windIndicator.style.color = `rgba(255, 255, 255, ${wind.speed / 50})`; // Fade based on wind strength
-    }
-
-    function updateAchievements() {
-        if (!achievements.highJumper.achieved && score >= achievements.highJumper.requirement) {
-            achievements.highJumper.achieved = true;
-            showAchievement("High Jumper");
-        }
-        if (!achievements.comboMaster.achieved && comboCounter >= achievements.comboMaster.requirement) {
-            achievements.comboMaster.achieved = true;
-            showAchievement("Combo Master");
-        }
-        if (!achievements.cryptoWhale.achieved && score >= achievements.cryptoWhale.requirement) {
-            achievements.cryptoWhale.achieved = true;
-            showAchievement("Crypto Whale");
-        }
-    }
-
-    function showAchievement(name) {
-        achievementPopup.textContent = `Achievement Unlocked: ${name}`;
-        achievementPopup.style.display = 'block';
-        setTimeout(() => {
-            achievementPopup.style.display = 'none';
-        }, 3000);
-    }
-
     function draw() {
         if (!ctx) {
             console.error('Canvas context not initialized in draw');
@@ -1037,18 +1185,28 @@
 
             // Draw powerups
             powerups.forEach(powerup => {
-                const sprite = sprites[powerup.type];
+                const sprite = sprites.get(powerup.type);
                 if (sprite && sprite.complete && sprite.naturalHeight !== 0) {
                     ctx.drawImage(sprite, powerup.x, powerup.y, powerup.width, powerup.height);
                 } else {
                     // Draw a colored rectangle as a fallback
                     ctx.fillStyle = '#FFD700';
                     ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+                    console.warn(`Sprite for ${powerup.type} not found or not loaded`);
                 }
             });
 
+            // Draw blast radius indicator if active
+    if (blastEffectActive) {
+        ctx.beginPath();
+        ctx.arc(player.x + player.width / 2, player.y + player.height / 2, 200, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
             // Draw player
-            if (sprites.player && sprites.player.complete && sprites.player.naturalHeight !== 0) {
+            const playerSprite = sprites.get('player');
+            if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
                 if (powerupActive) {
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-atop';
@@ -1056,7 +1214,7 @@
                     ctx.fillRect(player.x, player.y, player.width, player.height);
                     ctx.restore();
                 }
-                ctx.drawImage(sprites.player, player.x, player.y, player.width, player.height);
+                ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
             } else {
                 // Draw a colored rectangle as a fallback for the player
                 ctx.fillStyle = powerupActive ? 'yellow' : 'blue';
@@ -1194,15 +1352,38 @@
         stopBackgroundMusic();
         startBackgroundMusic();
         
-      // Force an immediate update of the stage name and wind indicator
-      updateStageName();
+        // Force an immediate update of the stage name and wind indicator
+        updateStageName();
         updateWindIndicator();
     }
+    function updateWindIndicator() {
+    const windIndicator = document.getElementById('windIndicator');
+    if (!windIndicator) {
+        console.error('Wind indicator element not found');
+        return;
+    }
+    const arrow = wind.direction === 1 ? '→' : '←';
+    const strength = Math.floor(wind.speed / 10); // Normalize wind speed to 0-5 range
+    windIndicator.textContent = `${arrow}${'•'.repeat(strength)}`;
+    windIndicator.style.color = `rgba(255, 255, 255, ${wind.speed / 50})`; // Fade based on wind strength
+}
 
-    function showNameForm() {
+
+
+function showNameForm() {
+    if (isTopTenScore(score)) {
         const nameForm = document.getElementById('nameForm');
         nameForm.style.display = 'block';
+    } else {
+        // If not a top 10 score, just reset the game
+        startButton.style.display = 'block';
     }
+}
+
+function isTopTenScore(newScore) {
+    if (highscores.length < 10) return true;
+    return newScore > highscores[highscores.length - 1].score;
+}
 
     function saveHighscore(name) {
         highscores.push({ name, score });
@@ -1270,26 +1451,18 @@
             loadSprite('bitcoin', 'bitcoin.png'),
             loadSprite('solana', 'solana.png'),
             loadSprite('ethereum', 'ethereum1.png'),
-            loadSprite('etherlink', 'Etherlink.png'),
-            loadSprite('doubleJump', 'doubleJump.png'),
-            loadSprite('magneticCoin', 'magneticCoin.png'),
-            loadSprite('slowMotion', 'slowMotion.png')
+            loadSprite('etherLink', 'Etherlink.png'),
+            loadSprite('greenTezos', 'doubleJump.png'),
+            loadSprite('blast', 'magneticCoin.png'),
+            loadSprite('mintTezos', 'slowMotion.png')
         ];
 
         Promise.all(spritePromises)
-            .then(([playerSprite, bitcoinSprite, solanaSprite, ethereumSprite, etherlinkSprite, doubleJumpSprite, magneticCoinSprite, slowMotionSprite]) => {
-                // Store loaded sprites
-                sprites = {
-                    player: playerSprite,
-                    bitcoin: bitcoinSprite,
-                    solana: solanaSprite,
-                    ethereum: ethereumSprite,
-                    etherlink: etherlinkSprite,
-                    doubleJump: doubleJumpSprite,
-                    magneticCoin: magneticCoinSprite,
-                    slowMotion: slowMotionSprite
-                };
-
+            .then(loadedSprites => {
+                loadedSprites.forEach(({ key, image }) => {
+                    sprites.set(key, image);
+                });
+                
                 // Keyboard input handling
                 document.addEventListener('keydown', (e) => {
                     keys[e.code] = true;
