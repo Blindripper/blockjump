@@ -1,5 +1,5 @@
 // web3Integration.js
-import Web3 from 'https://cdn.skypack.dev/web3';
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
 let web3;
 let contract;
 let userAddress;
@@ -344,4 +344,4 @@ async function getHighscores() {
         return [];
     }
 }
-
+window.initWeb3 = initWeb3;
