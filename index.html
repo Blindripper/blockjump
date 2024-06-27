@@ -276,7 +276,7 @@
     const soundUrl = `${repoBaseUrl}sound/`;
     const picsUrl = `${repoBaseUrl}pics/`;
 
-    const BLAST_POWERUP_DURATION = 20; // Duration in seconds
+    const BLAST_POWERUP_DURATION = 30; // Duration in seconds
 
     // Global canvas variables
     let canvas, ctx;
@@ -343,9 +343,11 @@
         solana: { points: 0, effect: "Game Over" },
         ethereum: { points: 250, effect: "Shrinks platforms for 5 seconds" },
         etherLink: { points: 1000, effect: "Instant boost to score" },
-        greenTezos: { points: 250, effect: "Allows triple jump for 10 seconds" },
+        greenTezos: { points: 250, effect: "Allows triple jump for 30 seconds" },
         blast: { points: 250, effect: `Auto-collect EtherLink for ${BLAST_POWERUP_DURATION}s` },
-        mintTezos: { points: 250, effect: "Slows down game for 10 seconds" }
+        mintTezos: { points: 250, effect: "Slows down game for 30 seconds" },
+        tezosX: { points: 250, effect: "Sets off wind for 30 seconds" }
+
     };
 
     // Powerup image mapping
@@ -354,9 +356,11 @@
         solana: 'solana.png',
         ethereum: 'ethereum1.png',
         etherLink: 'Etherlink.png',
-        greenTezos: 'doubleJump.png',
-        blast: 'magneticCoin.png',
-        mintTezos: 'slowMotion.png'
+        greenTezos: 'greenTezos.png',
+        blast: 'blast.png',
+        mintTezos: 'slowMotion.png',
+        tezosX: 'TezosX1.png'
+
     };
 
     // Sprite loading with error handling and logging
@@ -489,8 +493,13 @@
     let ethereumEffectTimer = 0;
     let originalPlatformWidth = 120; // Store the original platform width
     let spikeBlockProbability = 0.05; // Initial 5% chance for spike blocks
+    let tezosXEffectActive = false;
+    let tezosXEffectTimer = 0;
+    
+    
+    const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos', 'tezosX'];
+    const TEZOSX_EFFECT_DURATION = 30; // 30 seconds
 
-    const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos'];
 
     // Sound system
     const sounds = {
@@ -652,21 +661,26 @@
     }
 
     function updateWind(dt) {
-        // Randomly change wind every few seconds
-        if (Math.random() < 0.01) { // 1% chance each frame to change wind
-            wind.speed = Math.random() * 50; // Wind speed up to 50
-            wind.direction = Math.random() < 0.5 ? -1 : 1; // Randomly choose left or right
+    if (tezosXEffectActive) {
+        wind.speed = 50; // Set a constant high wind speed during the effect
+        wind.direction = Math.random() < 0.5 ? -1 : 1; // Randomly change direction
+    } else {
+        // Existing wind logic
+        if (Math.random() < 0.01) {
+            wind.speed = Math.random() * 50;
+            wind.direction = Math.random() < 0.5 ? -1 : 1;
         }
-
-        // Apply wind effect to player
-        player.x += wind.speed * wind.direction * dt;
-        
-        // Keep player within bounds
-        player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
-
-        // Update wind indicator
-        updateWindIndicator();
     }
+
+    // Apply wind effect to player
+    player.x += wind.speed * wind.direction * dt;
+    
+    // Keep player within bounds
+    player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+
+    // Update wind indicator
+    updateWindIndicator();
+}
 
     function updateAchievements() {
         if (!achievements.highJumper.achieved && score >= achievements.highJumper.requirement) {
@@ -737,21 +751,34 @@
             break;
         case 'greenTezos':
             player.maxJumps = 3;
-            duration = 10;
+            duration = 30;
             setTimeout(() => { player.maxJumps = 2; }, 10000);
-            message = 'Green Tezos: TripleJump 10s!';
+            message = 'Green Tezos: TripleJump 30s!';
+            break;
+        case 'solana':
+            gameOver = true;
+            gameRunning = false;
+            playSound('gameOver');
+            message = 'Solana: Game Over!';
             break;
         case 'mintTezos':
             PLATFORM_SPEED *= 0.5;
-            duration = 10;
+            duration = 30;
             setTimeout(() => { PLATFORM_SPEED *= 2; }, 10000);
-            message = 'Mint Tezos: Slowdown 10s!';
+            message = 'Mint Tezos: Slowdown 30s!';
             break;
-            case 'etherLink':
-    score += 1000;
-    message = 'EtherLink: +1000!';
-    updatePowerupDisplay(powerupType, 1); // Brief 1-second highlight
-    break;
+        case 'etherLink':
+            score += 1000;
+            message = 'EtherLink: +1000!';
+            updatePowerupDisplay(powerupType, 1); // Brief 1-second highlight
+            break;
+
+        case 'tezosX':
+            tezosXEffectActive = true;
+            tezosXEffectTimer = TEZOSX_EFFECT_DURATION;
+            duration = TEZOSX_EFFECT_DURATION;
+            message = 'TezosX: No Wind 30s!';
+            break;
     }
     
     if (duration > 0) {
@@ -968,6 +995,14 @@
                 handleBlastEffect();
             }
         }
+
+        if (tezosXEffectActive) {
+        tezosXEffectTimer -= dt;
+        if (tezosXEffectTimer <= 0) {
+            tezosXEffectActive = false;
+            tezosXEffectTimer = 0;
+        }
+    }
 
         // Add a safety check to prevent infinite loops
         if (debugInfo.totalBlocksClimbed > 10000) {
@@ -1507,8 +1542,9 @@
         initGame();
         gameOver = false 
         gameRunning = true;
-        stopBackgroundMusic();
-        startBackgroundMusic();
+        
+        tezosXEffectActive = false;
+        tezosXEffectTimer = 0;
         
         // Force an immediate update of the stage name and wind indicator
         updateStageName();
@@ -1633,9 +1669,10 @@ function initialize() {
             loadSprite('solana', 'solana.png'),
             loadSprite('ethereum', 'ethereum1.png'),
             loadSprite('etherLink', 'Etherlink.png'),
-            loadSprite('greenTezos', 'doubleJump.png'),
-            loadSprite('blast', 'magneticCoin.png'),
-            loadSprite('mintTezos', 'slowMotion.png')
+            loadSprite('greenTezos', 'greenTezos.png'),
+            loadSprite('blast', 'blast.png'),
+            loadSprite('mintTezos', 'slowMotion.png'),
+            loadSprite('tezosX', 'TezosX1.png')
         ];
 
         Promise.all(spritePromises)
