@@ -269,6 +269,7 @@
                 <button id="highscoresButton" onclick="getHighscores()">Get Highscores</button>
                 <button id="updateScoreButton" onclick="updateHighscore(100)">Update Highscore</button>
                 <button id="start-game-button">Start Game</button>
+
                 <p id="output"></p>
             </div>
         </div>
@@ -1678,10 +1679,15 @@ function initialize() {
     }
 
     const floorCounter = document.getElementById('floorCounter');
-    const startButton = document.getElementById('startButton');
     const soundToggle = document.getElementById('soundToggle');
     const achievementPopup = document.getElementById('achievementPopup');
     const nameForm = document.getElementById('nameForm');
+    const startGameButton = document.getElementById('start-game-button');
+    if (startGameButton) {
+        startGameButton.addEventListener('click', startGame);
+    } else {
+        console.error('Start game button not found');
+    }
 
     const connectWalletButton = document.getElementById('connect-wallet');
     const purchaseTriesButton = document.getElementById('purchase-tries');
