@@ -271,7 +271,14 @@
             <!-- Powerup descriptions will be dynamically added here -->
         </div>
     </div>
+    <script type="module" src="web3Integration.js"></script>
     <script>
+        window.addEventListener('load', () => {
+            initWeb3();
+        });
+    </script>
+    <script>
+        
     // Define base URL for the GitHub repository
     const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
 
@@ -1789,8 +1796,6 @@ function initialize() {
 
     document.addEventListener('DOMContentLoaded', initialize);
     </script>
-<script src="web3Integration.js"></script>
-
 
 </body>
 </html>
