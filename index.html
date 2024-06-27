@@ -7,34 +7,106 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         body {
-            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            background: #16213e;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             font-family: 'Orbitron', sans-serif;
-            color: #e94560;
+            color: #FFFFFF;
         }
         #gameWrapper {
             display: flex;
-            justify-content: space-between;
-            width: 1200px;
+            justify-content: center;
+            align-items: stretch;
+            width: 100%;
+            max-width: 1450px; /* Adjust based on your preferred max width */
+            margin: 0 auto;
+            
         }
+
+        #gameCenter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         #highscoreSection {
-            width: 200px;
+            width: 300px;
             margin-right: 20px;
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
+            flex: 0.1;
+            padding-right: 20px;
         }
+        
         #gameContainer {
             position: relative;
+            flex-grow: 4;
+            flex: 2;
+            width: 800px
         }
         #powerupSection {
-            width: 200px;
-            margin-left: 20px;
+            width: 180px;
+            margin-left: 10px;
+            flex-grow: 0.2;
+            flex: 0.7;
+            padding-left: 20px;
         }
+        
+        #highscoreTable {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            font-size: 12px
+        }
+
+        #highscoreTable th {
+            padding: 3px;
+            text-align: left;
+            color: #3FE1B0;
+            font-size: 14px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #3FE1B0;
+        }
+
+        #highscoreTable td {
+            padding: 8px 5px;
+            text-align: left;
+            font-size: 12px;
+            background: rgba(63, 225, 176, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        #highscoreTable tr:hover td {
+            background: rgba(63, 225, 176, 0.2);
+        }
+
+        #highscoreTable tr td:first-child {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+
+        #highscoreTable tr td:last-child {
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
         #gameCanvas {
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            box-shadow: 0 0 20px rgba(63, 225, 176, 0.5)
         }
         #floorCounter {
             font-size: 28px;
@@ -46,7 +118,7 @@
         #startButton, #soundToggle {
             font-size: 24px;
             padding: 10px 20px;
-            background-color: #e94560;
+            background-color: #3FE1B0;
             color: #16213e;
             border: none;
             border-radius: 5px;
@@ -76,6 +148,15 @@
             font-size: 18px;
             display: none;
         }
+
+        #blockCounter {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            text-align: center;
+
+        }
         #windIndicator {
     position: absolute;
     font-size: 64px;
@@ -86,6 +167,7 @@
     z-index: 1000; /* Ensure it's above other elements */
 }
         .section-title {
+            color: #3FE1B0;
             font-size: 20px;
             margin-bottom: 10px;
             text-align: center;
@@ -118,26 +200,35 @@
             border-collapse: collapse;
         }
         #highscoreTable th, #highscoreTable td {
+            color: #3FE1B0;
             border: 1px solid #e94560;
+            border-bottom: 2px solid #3FE1B0;
             padding: 5px;
             text-align: center;
         }
         #nameForm {
-            margin-top: 10px;
+            margin-top: 20px;
             display: none;
+            width: 100%;
         }
         #nameInput {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 5px;
+            width: 90%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: rgba(63, 225, 176, 0.1);
+            border: 1px solid #3FE1B0;
+            color: #FFFFFF;
+            font-family: 'Orbitron', sans-serif;;
         }
         #submitScore {
             width: 100%;
-            padding: 5px;
-            background-color: #e94560;
+            padding: 10px;
+            background-color: #3FE1B0;
             color: #16213e;
             border: none;
             cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -150,7 +241,8 @@
                     <tr>
                         <th>Rank</th>
                         <th>Name</th>
-                        <th>Score</th>
+                        <th>Tezos Marketcap</th>
+                        <th>Blks</th>
                     </tr>
                 </thead>
                 <tbody id="highscoreBody"></tbody>
@@ -161,6 +253,7 @@
             </form>
         </div>
         <div id="gameContainer">
+            <div id="blockCounter">Blocks Climbed: 0</div>
             <div id="floorCounter">Tezos Marketcap: 0000000000</div>
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <div id="achievementPopup"></div>
@@ -192,6 +285,13 @@
 
     let blastEffectActive = false;
     let blastEffectTimer = 0;
+
+    // Add a new variable to track blocks climbed
+    let blocksClimbed = 0;
+
+    function updateBlockCounter() {
+        document.getElementById('blockCounter').textContent = `Blocks Climbed: ${blocksClimbed}`;
+    }
 
     const POWERUP_MESSAGE_DURATION = 1000; // Duration in milliseconds
 
@@ -524,6 +624,7 @@
 
         if (checkCollision(player, powerups[i])) {
             applyPowerUpEffect(powerups[i].type);
+            createParticles(powerups[i].x, powerups[i].y, 10, '#3FE1B0');
             powerups.splice(i, 1);
             incrementCombo();
         } else if (powerups[i].y > canvas.height) {
@@ -674,7 +775,7 @@
 
                 if (distance <= blastRadius) {
                     score += powerupDescriptions['etherLink'].points;
-                    createParticles(powerups[i].x, powerups[i].y, 10, '#00FFFF');
+                    createParticles(powerups[i].x, powerups[i].y, 10, '#3FE1B0');
                     powerups.splice(i, 1);
                     collectedCount++;
                 }
@@ -809,14 +910,16 @@
             return;
             updateWindIndicator();
         }
-        // Initialize platforms
-        platforms = [];
-        for (let i = 0; i < 7; i++) {
-            platforms.push(createPlatform(canvas.height - (i + 2) * 100));
-        }
-        nextBottomPlatformScore = 100;
-        bottomPlatform.isSafe = true;
-        isPlayerOnSafePlatform = false;
+         // Initialize platforms
+    platforms = [];
+    for (let i = 0; i < 7; i++) {
+        platforms.push(createPlatform(canvas.height - (i + 2) * 100));
+    }
+    nextBottomPlatformScore = 100;
+    bottomPlatform.isSafe = true;
+    isPlayerOnSafePlatform = false;
+    gameRunning = true;
+    gameOver = false 
 
         // Reset blast effect variables
         blastEffectActive = false;
@@ -837,6 +940,10 @@
             updateStageName();
         }
     }
+
+     // Make sure game is in a startable state
+     gameRunning = false;
+    gameOver = false;
 
     function updateStageName() {
         const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end) || stageNames[stageNames.length - 1];
@@ -914,7 +1021,7 @@
             if (isPlayerOnSafePlatform) {
                 isPlayerOnSafePlatform = false;
             }
-            createParticles(player.x + player.width / 2, player.y + player.height, 10, '#e94560');
+            createParticles(player.x + player.width / 2, player.y + player.height, 10, '#3FE1B0');
             playSound('jump');
         }
 
@@ -933,7 +1040,7 @@
             if (isPlayerOnSafePlatform) {
                 isPlayerOnSafePlatform = false;
             }
-            createParticles(player.x + player.width / 2, player.y + player.height, 10, '#FFD700');
+            createParticles(player.x + player.width / 2, player.y + player.height, 10, '#3FE1B0');
             playSound('jump');
         }
 
@@ -954,7 +1061,7 @@
                 if (bottomPlatform.isSafe) {
                     isPlayerOnSafePlatform = true;
                 }
-                createParticles(player.x + player.width / 2, player.y + player.height, 5, '#4CAF50');
+                createParticles(player.x + player.width / 2, player.y + player.height, 5, '#3FE1B0');
                 onPlatform = true;
             }
 
@@ -978,10 +1085,10 @@
                             player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
                             score += 15;
                             triggerScreenShake(5, 0.3);
-                            createParticles(player.x + player.width / 2, player.y + player.height, 15, '#FFD700');
+                            createParticles(player.x + player.width / 2, player.y + player.height, 15, '#3FE1B0');
                             playSound('powerup');
                         } else {
-                            createParticles(player.x + player.width / 2, player.y + player.height, 5, '#0f3460');
+                            createParticles(player.x + player.width / 2, player.y + player.height, 15, '#3FE1B0');
                         }
                     }
                 }
@@ -998,7 +1105,7 @@
                     player.isJumping = false;
                     player.jumpCount = 0;
                     onPlatform = true;
-                    createParticles(player.x + player.width / 2, player.y + player.height, 5, '#4CAF50');
+                    createParticles(player.x + player.width / 2, player.y + player.height, 5, '#3FE1B0');
                 }
             });
         }
@@ -1014,6 +1121,8 @@
                 
                 if (platform.y > canvas.height) {
                     score++;
+                    blocksClimbed++; // Increment blocks climbed
+                    updateBlockCounter(); // Update the block counter display
                     debugInfo.totalBlocksClimbed++;
                     document.getElementById('floorCounter').textContent = `Tezos Marketcap: ${score.toString().padStart(10, '0')}`;
                     platforms[index] = createPlatform(0);
@@ -1127,6 +1236,7 @@
 
         // Draw current background
         const currentBg = backgrounds[currentBackgroundIndex];
+        const playerSprite = sprites.get('player');
         if (currentBg.image && currentBg.image.complete && currentBg.image.naturalHeight !== 0) {
             ctx.drawImage(currentBg.image, 0, 0, canvas.width, canvas.height);
         } else {
@@ -1134,6 +1244,21 @@
             ctx.fillStyle = currentBg.color;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
+
+        // Draw player
+        
+        if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
+        if (powerupActive) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-atop';
+            ctx.fillStyle = 'rgba(63, 225, 176, 0.5)';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.restore();
+        }
+        ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
+    } else {
+        ctx.fillStyle = powerupActive ? '#3FE1B0' : '#FFFFFF';
+        ctx.fillRect(player.x, player.y, player.width, player.height);}
         
         // Draw stage name
         if (stageNameOpacity > 0) {
@@ -1144,6 +1269,21 @@
             ctx.fillText(currentStageName, canvas.width / 2, canvas.height / 2);
             ctx.globalAlpha = 1;
         }
+
+        // Update player color
+        if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
+        if (powerupActive) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-atop';
+            ctx.fillStyle = 'rgba(63, 225, 176, 0.5)';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.restore();
+        }
+        ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
+    } else {
+        ctx.fillStyle = powerupActive ? '#3FE1B0' : '#FFFFFF';
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
 
         // If fading, draw the next background with increasing opacity
         if (isFading) {
@@ -1173,8 +1313,8 @@
 
             // Draw platforms
             platforms.forEach(platform => {
-                if (platform.isSpike) {
-                    ctx.fillStyle = '#FF0000';
+        if (platform.isSpike) {
+            ctx.fillStyle = '#FF0000';
                     ctx.beginPath();
                     ctx.moveTo(platform.x, platform.y + platform.height);
                     ctx.lineTo(platform.x + platform.width / 2, platform.y);
@@ -1182,19 +1322,19 @@
                     ctx.closePath();
                     ctx.fill();
                 } else if (platform.isGolden) {
-                    ctx.fillStyle = '#FFD700';
-                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-                } else {
-                    ctx.fillStyle = '#0f3460';
-                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-                }
-            });
+            ctx.fillStyle = '#3FE1B0';
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        } else {
+            ctx.fillStyle = '#1E293B';
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        }
+    });
 
             // Draw moving platforms
             movingPlatforms.forEach(platform => {
-                ctx.fillStyle = '#4CAF50';
-                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-            });
+        ctx.fillStyle = '#3FE1B0';
+        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+    });
 
             // Draw powerups
             powerups.forEach(powerup => {
@@ -1218,23 +1358,6 @@
                 ctx.stroke();
             }
 
-            // Draw player
-            const playerSprite = sprites.get('player');
-            if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
-                if (powerupActive) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'source-atop';
-                    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
-                    ctx.fillRect(player.x, player.y, player.width, player.height);
-                    ctx.restore();
-                }
-                ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
-            } else {
-                // Draw a colored rectangle as a fallback for the player
-                ctx.fillStyle = powerupActive ? 'yellow' : 'blue';
-                ctx.fillRect(player.x, player.y, player.width, player.height);
-            }
-
             // Draw particles
             drawParticles(ctx);
 
@@ -1252,33 +1375,34 @@
     }
 
     function drawGameOver() {
-        if (!ctx) {
-            console.error('Canvas context not initialized in drawGameOver');
-            return;
-        }
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#e94560';
-        ctx.font = 'bold 48px Orbitron, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
-
-        ctx.font = '24px Orbitron, sans-serif';
-        ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
-
-        ctx.font = '20px Orbitron, sans-serif';
-        ctx.fillText('Enter your name to save your score', canvas.width / 2, canvas.height / 2 + 50);
-
-        document.getElementById('startButton').style.display = 'block';
+    if (!ctx) {
+        console.error('Canvas context not initialized in drawGameOver');
+        return;
     }
+    ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#3FE1B0';
+    ctx.font = 'bold 48px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+
+    ctx.font = '24px Orbitron, sans-serif';
+    ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+
+    ctx.font = '20px Orbitron, sans-serif';
+    ctx.fillText('Enter your name to save your score', canvas.width / 2, canvas.height / 2 + 50);
+
+    document.getElementById('startButton').style.display = 'block';
+}
 
     let lastTime = 0;
     const fixedDeltaTime = 1 / 60; // 60 FPS
     let accumulator = 0;
 
     function gameLoop(currentTime) {
-        try {
+    try {
+        if (gameRunning) {
             if (lastTime) {
                 const deltaTime = (currentTime - lastTime) / 1000;
                 accumulator += deltaTime;
@@ -1290,21 +1414,26 @@
             }
 
             draw();
-            lastTime = currentTime;
-            requestAnimationFrame(gameLoop);
-        } catch (error) {
-            console.error("An error occurred in the game loop:", error);
-            gameOver = true;
-            gameRunning = false;
-            drawGameOver();
         }
+        
+        lastTime = currentTime;
+        requestAnimationFrame(gameLoop);
+    } catch (error) {
+        console.error("An error occurred in the game loop:", error);
+        gameOver = true;
+        gameRunning = false;
+        drawGameOver();
     }
+}
 
     function resetGame() {
         document.dispatchEvent(new Event('gameReset'));
-        if (!canvas || !ctx) {
-            console.error('Canvas not initialized in resetGame');
-            return;
+        
+        gameOver = false;
+        gameRunning = true;
+        blocksClimbed = 0; // Reset blocks climbed
+        updateBlockCounter(); // Update the block counter display
+
             // Reset powerup displays
     for (const type of powerUpTypes) {
         const powerupItem = document.getElementById(`powerup-${type}`);
@@ -1314,7 +1443,7 @@
             if (timerElement) {
                 timerElement.textContent = '';
             }
-        }
+        
     }
         }
         player.x = 375;
@@ -1376,6 +1505,8 @@
         stageNameTimer = 0;
         
         initGame();
+        gameOver = false 
+        gameRunning = true;
         stopBackgroundMusic();
         startBackgroundMusic();
         
@@ -1403,50 +1534,60 @@
     windIndicator.style.transform = 'translate(-50%, -50%)'; // Center the indicator
 }
 
-    function showNameForm() {
-        if (isTopTenScore(score)) {
-            const nameForm = document.getElementById('nameForm');
-            nameForm.style.display = 'block';
-        } else {
-            // If not a top 10 score, just reset the game
-            document.getElementById('startButton').style.display = 'block';
-        }
+function showNameForm() {
+    if (isTopTenScore(score, blocksClimbed)) {
+        const nameForm = document.getElementById('nameForm');
+        nameForm.style.display = 'block';
+    } else {
+        // If not a top 10 score, just reset the game
+        document.getElementById('startButton').style.display = 'block';
     }
+}
 
-    function isTopTenScore(newScore) {
-        if (highscores.length < 10) return true;
-        return newScore > highscores[highscores.length - 1].score;
-    }
+    function isTopTenScore(newScore, newBlocksClimbed) {
+    if (highscores.length < 10) return true;
+    return newScore > highscores[highscores.length - 1].score ||
+           (newScore === highscores[highscores.length - 1].score &&
+            newBlocksClimbed > highscores[highscores.length - 1].blocksClimbed);
+}
 
     function saveHighscore(name) {
-        highscores.push({ name, score });
-        highscores.sort((a, b) => b.score - a.score);
-        highscores = highscores.slice(0, 10); // Keep only top 10 scores
-        localStorage.setItem('blockjumpHighscores', JSON.stringify(highscores));
-        updateHighscoreTable();
-    }
+    highscores.push({ name, score, blocksClimbed });
+    highscores.sort((a, b) => b.score - a.score);
+    highscores = highscores.slice(0, 10); // Keep only top 10 scores
+    localStorage.setItem('blockjumpHighscores', JSON.stringify(highscores));
+    updateHighscoreTable();
+}
 
-    function loadHighscores() {
-        const storedHighscores = localStorage.getItem('blockjumpHighscores');
-        if (storedHighscores) {
-            highscores = JSON.parse(storedHighscores);
-        }
-        updateHighscoreTable();
+function loadHighscores() {
+    const storedHighscores = localStorage.getItem('blockjumpHighscores');
+    if (storedHighscores) {
+        highscores = JSON.parse(storedHighscores);
+        // Ensure compatibility with old format
+        highscores = highscores.map(entry => ({
+            name: entry.name,
+            score: entry.score,
+            blocksClimbed: entry.blocksClimbed || 0
+        }));
     }
+    updateHighscoreTable();
+}
 
-    function updateHighscoreTable() {
-        const highscoreBody = document.getElementById('highscoreBody');
-        highscoreBody.innerHTML = '';
-        highscores.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.score}</td>
-            `;
-            highscoreBody.appendChild(row);
-        });
-    }
+    // Update the updateHighscoreTable function
+function updateHighscoreTable() {
+    const highscoreBody = document.getElementById('highscoreBody');
+    highscoreBody.innerHTML = '';
+    highscores.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name}</td>
+            <td>${entry.score}</td>
+            <td>${entry.blocksClimbed}</td>
+        `;
+        highscoreBody.appendChild(row);
+    });
+}
 
     function populatePowerupDescriptions() {
     const powerupSection = document.getElementById('powerupSection');
@@ -1468,11 +1609,13 @@
     }
 }
 
-    function initialize() {
-        canvas = document.getElementById('gameCanvas');
-        if (!canvas) {
-            console.error('Canvas element not found');
-            return;
+function initialize() {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    
+    if (!canvas || !ctx) {
+        console.error('Canvas element not found or context not available');
+        return;
             updateWindIndicator();
  
         }
@@ -1512,15 +1655,13 @@
 
                 // Start button event listener
                 startButton.addEventListener('click', () => {
-                    if (canvas && ctx) {
-                        resetGame();
-                        gameRunning = true;
-                        gameOver = false;
-                        startButton.style.display = 'none';
-                    } else {
-                        console.error('Canvas not initialized');
-                    }
-                });
+    resetGame();
+    startButton.style.display = 'none';
+    populatePowerupDescriptions();
+    if (isSoundOn) {
+        startBackgroundMusic();
+    }
+});
 
                 // Sound toggle event listener
                 soundToggle.addEventListener('click', toggleSound);
@@ -1564,4 +1705,3 @@
     </script>
 </body>
 </html>
-
