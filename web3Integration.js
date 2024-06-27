@@ -4,7 +4,7 @@ let web3;
 let contract;
 let account;
 
-const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your actual contract address
+const contractAddress = '0xa300CF327B3084073a4B13290abB0DC7a382c3AD'; // Replace with your actual contract address
 const contractABI = [
     // Replace with your actual contract ABI
     // Example ABI (you need to replace this with your actual ABI):
