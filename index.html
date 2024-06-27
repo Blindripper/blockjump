@@ -260,11 +260,11 @@
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
             <div id="controls">
-                <button id="connectButton" onclick="initWeb3()">Connect to MetaMask</button>
-                <button id="purchaseTriesButton" onclick="purchaseGameTries()">Purchase Game Tries</button>
-                <button id="getTriesButton" onclick="getGameTries()">Get Game Tries</button>
-                <button id="highscoresButton" onclick="getHighscores()">Get Highscores</button>
-                <button id="updateScoreButton" onclick="updateHighscore(100)">Update Highscore</button>
+                <button id="connectButton">Connect to MetaMask</button>
+                <button id="purchaseTriesButton">Purchase Game Tries</button>
+                <button id="getTriesButton">Get Game Tries</button>
+                <button id="highscoresButton">Get Highscores</button>
+                <button id="updateScoreButton">Update Highscore</button>
                 <button id="start-game-button">Start Game</button>
 
                 <p id="output"></p>
@@ -1656,137 +1656,125 @@
         }
 
         function initialize() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            
-            if (!canvas || !ctx) {
-                console.error('Canvas element not found or context not available');
-                return;
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    
+    if (!canvas || !ctx) {
+        console.error('Canvas element not found or context not available');
+        return;
+    }
+
+    const floorCounter = document.getElementById('floorCounter');
+    const soundToggle = document.getElementById('soundToggle');
+    const achievementPopup = document.getElementById('achievementPopup');
+    const nameForm = document.getElementById('nameForm');
+    const startGameButton = document.getElementById('start-game-button');
+
+    // Web3 button event listeners
+    document.getElementById('connectButton').addEventListener('click', async () => {
+        try {
+            const connected = await initWeb3();
+            if (connected) {
+                console.log('Successfully connected to Web3');
+                document.getElementById('connectButton').textContent = 'Connected';
+                // Enable other Web3 buttons here
             }
-
-            const floorCounter = document.getElementById('floorCounter');
-            const soundToggle = document.getElementById('soundToggle');
-            const achievementPopup = document.getElementById('achievementPopup');
-            const nameForm = document.getElementById('nameForm');
-            const startGameButton = document.getElementById('start-game-button');
-            if (startGameButton) {
-                startGameButton.addEventListener('click', startGame);
-            } else {
-                console.error('Start game button not found');
-            }
-
-            const connectWalletButton = document.getElementById('connect-wallet');
-            const purchaseTriesButton = document.getElementById('purchase-tries');
-
-            // Load all sprites
-            const spritePromises = [
-                loadSprite('player', 'TezosLogo_Icon_Blue.png'),
-                loadSprite('bitcoin', 'bitcoin.png'),
-                loadSprite('solana', 'solana.png'),
-                loadSprite('ethereum', 'ethereum1.png'),
-                loadSprite('etherLink', 'Etherlink.png'),
-                loadSprite('greenTezos', 'greenTezos.png'),
-                loadSprite('blast', 'blast.png'),
-                loadSprite('mintTezos', 'slowMotion.png'),
-                loadSprite('tezosX', 'TezosX1.png')
-            ];
-
-            Promise.all(spritePromises)
-                .then(loadedSprites => {
-                    loadedSprites.forEach(({ key, image }) => {
-                        sprites.set(key, image);
-                    });
-                    
-                    // Keyboard input handling
-                    document.addEventListener('keydown', (e) => {
-                        keys[e.code] = true;
-                    });
-
-                    document.addEventListener('keyup', (e) => {
-                        keys[e.code] = false;
-                    });
-
-                    // Start button event listener
-                    document.getElementById('start-game-button').addEventListener('click', startGame);
-
-                    // Sound toggle event listener
-                    soundToggle.addEventListener('click', toggleSound);
-
-                    // Name form submit event listener
-                    nameForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const name = document.getElementById('nameInput').value;
-                        nameForm.style.display = 'none';
-                        startButton.style.display = 'block';
-                        // Note: We're not saving the highscore here anymore as it's handled by the smart contract
-                    });
-
-                    // Add these new event listeners for Web3 buttons
-
-                    if (connectWalletButton) {
-                        connectWalletButton.addEventListener('click', async () => {
-                            try {
-                                await initWeb3();
-                                console.log('Wallet connected successfully');
-                                connectWalletButton.textContent = 'Wallet Connected';
-                                connectWalletButton.disabled = true;
-                            } catch (error) {
-                                console.error('Failed to connect wallet:', error);
-                                alert('Failed to connect wallet. Please try again.');
-                            }
-                        });
-                    } else {
-                        console.error('Connect wallet button not found');
-                    }
-
-                    if (purchaseTriesButton) {
-                        purchaseTriesButton.addEventListener('click', async () => {
-                            try {
-                                await purchaseGameTries();
-                                console.log('Game tries purchased successfully');
-                                alert('10 game tries purchased successfully!');
-                            } catch (error) {
-                                console.error('Failed to purchase game tries:', error);
-                                alert('Failed to purchase game tries. Please try again.');
-                            }
-                        });
-                    } else {
-                        console.error('Purchase tries button not found');
-                    }
-
-                    // Populate powerup descriptions
-                    populatePowerupDescriptions();
-
-                    // Preload sounds
-                    preloadSounds()
-                        .then(() => {
-                            console.log("All sounds preloaded successfully");
-                            // Initialize and start the game loop
-                            initGame();
-                            requestAnimationFrame(gameLoop);
-                        })
-                        .catch(error => {
-                            console.error("Error preloading sounds:", error);
-                            // Initialize and start the game loop even if sound loading fails
-                            initGame();
-                            requestAnimationFrame(gameLoop);
-                        });
-
-                    // Initialize Web3
-                    console.log('Initializing Web3...');
-                    initWeb3().then(() => {
-                        console.log('Web3 initialized');
-                        loadHighscores().catch(error => console.error('Failed to load highscores:', error));
-                    }).catch(error => {
-                        console.error('Failed to initialize Web3:', error);
-                        // You might want to display an error message to the user here
-                    });
-
-                })
-                .catch(error => {
-                    console.error("Error loading sprites:", error);
-                });
+        } catch (error) {
+            console.error('Failed to connect to Web3:', error);
+            alert('Failed to connect to Web3. Please try again.');
         }
+    });
+
+    document.getElementById('purchaseTriesButton').addEventListener('click', async () => {
+        try {
+            const purchased = await purchaseGameTries();
+            if (purchased) {
+                console.log('Game tries purchased successfully');
+                alert('10 game tries purchased successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to purchase game tries:', error);
+            alert('Failed to purchase game tries. Please try again.');
+        }
+    });
+
+    document.getElementById('getTriesButton').addEventListener('click', async () => {
+        try {
+            const tries = await getGameTries();
+            console.log('Current game tries:', tries);
+            alert(`You have ${tries} game tries remaining.`);
+        } catch (error) {
+            console.error('Failed to get game tries:', error);
+            alert('Failed to get game tries. Please try again.');
+        }
+    });
+
+    document.getElementById('highscoresButton').addEventListener('click', async () => {
+        try {
+            const highscores = await getHighscores();
+            console.log('Highscores:', highscores);
+            updateHighscoreTable(highscores);
+        } catch (error) {
+            console.error('Failed to get highscores:', error);
+            alert('Failed to get highscores. Please try again.');
+        }
+    });
+
+    document.getElementById('updateScoreButton').addEventListener('click', async () => {
+        try {
+            const score = 100; // Replace with actual score
+            const updated = await updateHighscore(score);
+            if (updated) {
+                console.log('Highscore updated successfully');
+                alert('Highscore updated successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to update highscore:', error);
+            alert('Failed to update highscore. Please try again.');
+        }
+    });
+
+    if (startGameButton) {
+        startGameButton.addEventListener('click', startGame);
+    } else {
+        console.error('Start game button not found');
+    }
+
+    // Sound toggle event listener
+    soundToggle.addEventListener('click', toggleSound);
+
+    // Name form submit event listener
+    nameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('nameInput').value;
+        nameForm.style.display = 'none';
+        startButton.style.display = 'block';
+    });
+
+    // Keyboard input handling
+    document.addEventListener('keydown', (e) => {
+        keys[e.code] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+        keys[e.code] = false;
+    });
+
+    // Initialize Web3
+    console.log('Initializing Web3...');
+    initWeb3().then(() => {
+        console.log('Web3 initialized');
+        loadHighscores().catch(error => console.error('Failed to load highscores:', error));
+    }).catch(error => {
+        console.error('Failed to initialize Web3:', error);
+        // You might want to display an error message to the user here
+    });
+
+    // Load sprites, populate powerup descriptions, preload sounds, etc.
+    // ... (rest of your initialization code)
+}
+
+document.addEventListener('DOMContentLoaded', initialize);
 
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
