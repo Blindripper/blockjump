@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockJump</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+    <script src="web3Integration.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         body {
@@ -261,9 +263,12 @@
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
             <div id="controls">
-                <button id="connect-wallet">Connect Wallet</button>
-                <button id="purchase-tries">Purchase 10 Tries</button>
-                <button id="soundToggle">Sound: On</button>
+                <button id="connectButton" onclick="initWeb3()">Connect to MetaMask</button>
+                <button id="purchaseTriesButton" onclick="purchaseGameTries()">Purchase Game Tries</button>
+                <button id="getTriesButton" onclick="getGameTries()">Get Game Tries</button>
+                <button id="highscoresButton" onclick="getHighscores()">Get Highscores</button>
+                <button id="updateScoreButton" onclick="updateHighscore(100)">Update Highscore</button>
+                <p id="output"></p>
             </div>
         </div>
         <div id="powerupSection">
