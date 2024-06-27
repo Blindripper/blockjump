@@ -231,7 +231,9 @@
             text-transform: uppercase;
         }
     </style>
-</head>
+        
+       
+    </head>
 <body>
     <div id="gameWrapper">
         <div id="highscoreSection">
@@ -259,7 +261,8 @@
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
             <div id="controls">
-                <button id="startButton">Start Game</button>
+                <button id="connect-wallet">Connect Wallet</button>
+                <button id="purchase-tries">Purchase 10 Tries</button>
                 <button id="soundToggle">Sound: On</button>
             </div>
         </div>
@@ -277,6 +280,32 @@
     const picsUrl = `${repoBaseUrl}pics/`;
 
     const BLAST_POWERUP_DURATION = 30; // Duration in seconds
+
+    async function startGame() {
+    try {
+        const tries = await getGameTries();
+        if (tries > 0) {
+            if (await useGameTry()) {
+                resetGame();
+                gameRunning = true;
+                document.getElementById('start-game-button').style.display = 'none';
+                populatePowerupDescriptions();
+                if (isSoundOn) {
+                    startBackgroundMusic();
+                }
+            } else {
+                console.log('Failed to use a game try');
+                alert('Failed to use a game try. Please try again.');
+            }
+        } else {
+            console.log('No more tries left. Please purchase more.');
+            alert('No more tries left. Please purchase more.');
+        }
+    } catch (error) {
+        console.error('Error starting game:', error);
+        alert('Error starting game. Please try again.');
+    }
+}
 
     // Global canvas variables
     let canvas, ctx;
@@ -333,10 +362,7 @@
         powerupsGenerated: 0,
         activePowerups: 0
     };
-
-    // Highscore system
-    let highscores = [];
-
+    
     // Powerup descriptions
     const powerupDescriptions = {
         bitcoin: { points: 250, effect: "Fly for 5 seconds" },
@@ -579,15 +605,7 @@
         document.addEventListener('gameReset', clearTimer, { once: true });
     }
 }
-
-
-    
-
-
-
-
-
-    // Particle system
+// Particle system
     let particles = [];
 
     function Particle(x, y, color) {
@@ -848,6 +866,21 @@
             ctx.restore();
         }
     }
+
+    async function endGame(finalScore) {
+    try {
+        await updateHighscore(finalScore);
+        const highscores = await getHighscores();
+        updateHighscoreTable(highscores);
+        showNameForm();
+    } catch (error) {
+        console.error('Error ending game:', error);
+        alert('Error updating highscore. Your score may not have been saved.');
+        showNameForm();  // Show the name form even if there was an error, so the game can be restarted
+
+        // Handle the error appropriately, maybe show an error message to the user
+    }
+}
 
     // Dynamic difficulty system
     let difficultyLevel = 1;
@@ -1217,14 +1250,13 @@
 
         // Game over condition
         if (player.y > canvas.height) {
-            if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
-                gameOver = true;
-                gameRunning = false;
-                playSound('gameOver');
-                showNameForm();
-            }
-        }
-
+    if (!bottomPlatform.isSafe || player.y > bottomPlatform.y + bottomPlatform.height) {
+        gameOver = true;
+        gameRunning = false;
+        playSound('gameOver');
+        endGame(score);  // Call the new endGame function instead of showNameForm
+    }
+}
         // Reset bottom platform safety when player leaves it
         if (player.y + player.height < bottomPlatform.y) {
             bottomPlatform.isSafe = false;
@@ -1540,8 +1572,7 @@
         stageNameTimer = 0;
         
         initGame();
-        gameOver = false 
-        gameRunning = true;
+        
         
         tezosXEffectActive = false;
         tezosXEffectTimer = 0;
@@ -1571,55 +1602,34 @@
 }
 
 function showNameForm() {
-    if (isTopTenScore(score, blocksClimbed)) {
-        const nameForm = document.getElementById('nameForm');
-        nameForm.style.display = 'block';
-    } else {
-        // If not a top 10 score, just reset the game
-        document.getElementById('startButton').style.display = 'block';
+    const nameForm = document.getElementById('nameForm');
+    nameForm.style.display = 'block';
+}
+
+    
+
+    
+
+async function loadHighscores() {
+    try {
+        const highscores = await getHighscores();
+        updateHighscoreTable(highscores);
+    } catch (error) {
+        console.error('Error loading highscores:', error);
+        // Handle the error appropriately, maybe show an error message to the user
     }
 }
 
-    function isTopTenScore(newScore, newBlocksClimbed) {
-    if (highscores.length < 10) return true;
-    return newScore > highscores[highscores.length - 1].score ||
-           (newScore === highscores[highscores.length - 1].score &&
-            newBlocksClimbed > highscores[highscores.length - 1].blocksClimbed);
-}
-
-    function saveHighscore(name) {
-    highscores.push({ name, score, blocksClimbed });
-    highscores.sort((a, b) => b.score - a.score);
-    highscores = highscores.slice(0, 10); // Keep only top 10 scores
-    localStorage.setItem('blockjumpHighscores', JSON.stringify(highscores));
-    updateHighscoreTable();
-}
-
-function loadHighscores() {
-    const storedHighscores = localStorage.getItem('blockjumpHighscores');
-    if (storedHighscores) {
-        highscores = JSON.parse(storedHighscores);
-        // Ensure compatibility with old format
-        highscores = highscores.map(entry => ({
-            name: entry.name,
-            score: entry.score,
-            blocksClimbed: entry.blocksClimbed || 0
-        }));
-    }
-    updateHighscoreTable();
-}
-
-    // Update the updateHighscoreTable function
-function updateHighscoreTable() {
+function updateHighscoreTable(highscores) {
     const highscoreBody = document.getElementById('highscoreBody');
     highscoreBody.innerHTML = '';
     highscores.forEach((entry, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${entry.name}</td>
+            <td>${entry.player}</td>
             <td>${entry.score}</td>
-            <td>${entry.blocksClimbed}</td>
+            <td>${entry.blocksClimbed || 0}</td>
         `;
         highscoreBody.appendChild(row);
     });
@@ -1652,93 +1662,134 @@ function initialize() {
     if (!canvas || !ctx) {
         console.error('Canvas element not found or context not available');
         return;
-            updateWindIndicator();
- 
-        }
-        ctx = canvas.getContext('2d');
-        const floorCounter = document.getElementById('floorCounter');
-        const startButton = document.getElementById('startButton');
-        const soundToggle = document.getElementById('soundToggle');
-        const achievementPopup = document.getElementById('achievementPopup');
-        const nameForm = document.getElementById('nameForm');
-
-        // Load all sprites
-        const spritePromises = [
-            loadSprite('player', 'TezosLogo_Icon_Blue.png'),
-            loadSprite('bitcoin', 'bitcoin.png'),
-            loadSprite('solana', 'solana.png'),
-            loadSprite('ethereum', 'ethereum1.png'),
-            loadSprite('etherLink', 'Etherlink.png'),
-            loadSprite('greenTezos', 'greenTezos.png'),
-            loadSprite('blast', 'blast.png'),
-            loadSprite('mintTezos', 'slowMotion.png'),
-            loadSprite('tezosX', 'TezosX1.png')
-        ];
-
-        Promise.all(spritePromises)
-            .then(loadedSprites => {
-                loadedSprites.forEach(({ key, image }) => {
-                    sprites.set(key, image);
-                });
-                
-                // Keyboard input handling
-                document.addEventListener('keydown', (e) => {
-                    keys[e.code] = true;
-                });
-
-                document.addEventListener('keyup', (e) => {
-                    keys[e.code] = false;
-                });
-
-                // Start button event listener
-                startButton.addEventListener('click', () => {
-    resetGame();
-    startButton.style.display = 'none';
-    populatePowerupDescriptions();
-    if (isSoundOn) {
-        startBackgroundMusic();
     }
-});
 
-                // Sound toggle event listener
-                soundToggle.addEventListener('click', toggleSound);
+    const floorCounter = document.getElementById('floorCounter');
+    const startButton = document.getElementById('startButton');
+    const soundToggle = document.getElementById('soundToggle');
+    const achievementPopup = document.getElementById('achievementPopup');
+    const nameForm = document.getElementById('nameForm');
 
-                // Name form submit event listener
-                nameForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const name = document.getElementById('nameInput').value;
-                    saveHighscore(name);
-                    nameForm.style.display = 'none';
-                    startButton.style.display = 'block';
-                });
+    const connectWalletButton = document.getElementById('connect-wallet');
+    const purchaseTriesButton = document.getElementById('purchase-tries');
 
-                // Populate powerup descriptions
-                populatePowerupDescriptions();
+    // Load all sprites
+    const spritePromises = [
+        loadSprite('player', 'TezosLogo_Icon_Blue.png'),
+        loadSprite('bitcoin', 'bitcoin.png'),
+        loadSprite('solana', 'solana.png'),
+        loadSprite('ethereum', 'ethereum1.png'),
+        loadSprite('etherLink', 'Etherlink.png'),
+        loadSprite('greenTezos', 'greenTezos.png'),
+        loadSprite('blast', 'blast.png'),
+        loadSprite('mintTezos', 'slowMotion.png'),
+        loadSprite('tezosX', 'TezosX1.png')
+    ];
 
-                // Load highscores
-                loadHighscores();
-
-                // Preload sounds
-                preloadSounds()
-                    .then(() => {
-                        console.log("All sounds preloaded successfully");
-                        // Initialize and start the game loop
-                        initGame();
-                        requestAnimationFrame(gameLoop);
-                    })
-                    .catch(error => {
-                        console.error("Error preloading sounds:", error);
-                        // Initialize and start the game loop even if sound loading fails
-                        initGame();
-                        requestAnimationFrame(gameLoop);
-                    });
-            })
-            .catch(error => {
-                console.error("Error loading sprites:", error);
+    Promise.all(spritePromises)
+        .then(loadedSprites => {
+            loadedSprites.forEach(({ key, image }) => {
+                sprites.set(key, image);
             });
+            
+            // Keyboard input handling
+            document.addEventListener('keydown', (e) => {
+                keys[e.code] = true;
+            });
+
+            document.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
+
+            // Start button event listener
+            document.getElementById('start-game-button').addEventListener('click', startGame);
+
+            // Sound toggle event listener
+            soundToggle.addEventListener('click', toggleSound);
+
+            // Name form submit event listener
+            nameForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('nameInput').value;
+                nameForm.style.display = 'none';
+                startButton.style.display = 'block';
+                // Note: We're not saving the highscore here anymore as it's handled by the smart contract
+            });
+
+
+
+
+            // Add these new event listeners for Web3 buttons
+
+            if (connectWalletButton) {
+        connectWalletButton.addEventListener('click', async () => {
+            try {
+                await initWeb3();
+                console.log('Wallet connected successfully');
+                connectWalletButton.textContent = 'Wallet Connected';
+                connectWalletButton.disabled = true;
+            } catch (error) {
+                console.error('Failed to connect wallet:', error);
+                alert('Failed to connect wallet. Please try again.');
+            }
+        });
+    } else {
+        console.error('Connect wallet button not found');
     }
+
+    if (purchaseTriesButton) {
+        purchaseTriesButton.addEventListener('click', async () => {
+            try {
+                await purchaseGameTries();
+                console.log('Game tries purchased successfully');
+                alert('10 game tries purchased successfully!');
+            } catch (error) {
+                console.error('Failed to purchase game tries:', error);
+                alert('Failed to purchase game tries. Please try again.');
+            }
+        });
+    } else {
+        console.error('Purchase tries button not found');
+    }
+
+
+            // Populate powerup descriptions
+            populatePowerupDescriptions();
+
+            // Preload sounds
+            preloadSounds()
+                .then(() => {
+                    console.log("All sounds preloaded successfully");
+                    // Initialize and start the game loop
+                    initGame();
+                    requestAnimationFrame(gameLoop);
+                })
+                .catch(error => {
+                    console.error("Error preloading sounds:", error);
+                    // Initialize and start the game loop even if sound loading fails
+                    initGame();
+                    requestAnimationFrame(gameLoop);
+                });
+
+            // Initialize Web3
+            console.log('Initializing Web3...');
+            initWeb3().then(() => {
+                console.log('Web3 initialized');
+                loadHighscores().catch(error => console.error('Failed to load highscores:', error));
+            }).catch(error => {
+                console.error('Failed to initialize Web3:', error);
+                // You might want to display an error message to the user here
+            });
+
+        })
+        .catch(error => {
+            console.error("Error loading sprites:", error);
+        });
+}
 
     document.addEventListener('DOMContentLoaded', initialize);
     </script>
+    
+    <script src="web3Integration.js"></script>
 </body>
 </html>
