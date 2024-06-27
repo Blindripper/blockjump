@@ -1,5 +1,3 @@
-// web3Integration.js
-<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
 let web3;
 let contract;
 let userAddress;
@@ -192,7 +190,7 @@ const contractABI = [
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [],
@@ -205,21 +203,21 @@ const contractABI = [
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [],
       "name": "purchaseGameTries",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [],
       "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [
@@ -232,7 +230,7 @@ const contractABI = [
       "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [
@@ -245,16 +243,17 @@ const contractABI = [
       "name": "updateHighscore",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
+          "type": "function"
     },
     {
       "inputs": [],
       "name": "useGameTry",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
+          "type": "function"
     }
-  ]; // You need to fill this with your contract's ABI
+]; // You need to fill this with your contract's ABI
+
 const contractAddress = "0xa300CF327B3084073a4B13290abB0DC7a382c3AD";
 
 async function initWeb3() {
@@ -274,7 +273,7 @@ async function initWeb3() {
     } else {
       console.log('No Ethereum browser extension detected, install MetaMask');
     }
-  }
+}
 
 async function purchaseGameTries() {
     if (!contract || !userAddress) {
@@ -344,4 +343,9 @@ async function getHighscores() {
         return [];
     }
 }
+
 window.initWeb3 = initWeb3;
+window.purchaseGameTries = purchaseGameTries;
+window.getGameTries = getGameTries;
+window.updateHighscore = updateHighscore;
+window.getHighscores = getHighscores;
