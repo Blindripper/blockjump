@@ -4,80 +4,30 @@ let web3;
 let contract;
 let account;
 
-const contractAddress = '0xBf43C48596720Caf9125D1022cA2f670Bb9A7abE'; // Replace with your actual contract address
+const contractAddress = '0xb764aE4b757749e3C53b561bf8Da1d8aC8ab9CDb'; // Replace with your actual contract address
 const contractABI = [
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tries",
-        "type": "uint256"
-      }
-    ],
-    "name": "GameTryPurchased",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "blocksClimbed",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "prize",
-        "type": "uint256"
-      }
-    ],
-    "name": "NewHighscore",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
     "inputs": [],
-    "name": "GAME_PRICE",
+    "name": "addFunds",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimPrize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractBalance",
     "outputs": [
       {
         "internalType": "uint256",
@@ -90,63 +40,34 @@ const contractABI = [
   },
   {
     "inputs": [],
-    "name": "MAX_HIGHSCORES",
+    "name": "getHighscores",
     "outputs": [
       {
-        "internalType": "uint256",
+        "components": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "score",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blocksClimbed",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct BlockJumpGame.Highscore[10]",
         "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "TRIES_PER_PURCHASE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "gameTries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      }
-    ],
-    "name": "getGameTries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "type": "tuple[10]"
       }
     ],
     "stateMutability": "view",
@@ -166,6 +87,11 @@ const contractABI = [
         "internalType": "address",
         "name": "player",
         "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
       },
       {
         "internalType": "uint256",
@@ -195,34 +121,12 @@ const contractABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "purchaseGameTries",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
       {
         "internalType": "uint256",
         "name": "score",
@@ -234,14 +138,7 @@ const contractABI = [
         "type": "uint256"
       }
     ],
-    "name": "updateHighscore",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "useGameTry",
+    "name": "submitScore",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -283,33 +180,14 @@ async function purchaseGameTries() {
         return false;
     }
     try {
-        const gamePrice = await contract.methods.GAME_PRICE().call();
-        console.log('Game price:', web3.utils.fromWei(gamePrice, 'ether'), 'ETH');
-
-        const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
-            from: account,
-            value: gamePrice
+        const result = await contract.methods.purchaseGameTries().send({ 
+            from: account, 
+            value: web3.utils.toWei('0.1', 'ether') // Adjust the amount as needed
         });
-        console.log('Estimated gas:', gasEstimate);
-
-        const gasPrice = await web3.eth.getGasPrice();
-        console.log('Current gas price:', web3.utils.fromWei(gasPrice, 'gwei'), 'Gwei');
-
-        const txParams = {
-            from: account,
-            value: gamePrice,
-            gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-            gasPrice: gasPrice
-        };
-        console.log('Transaction parameters:', txParams);
-
-        const result = await contract.methods.purchaseGameTries().send(txParams);
         console.log('Game tries purchased successfully:', result);
         return true;
     } catch (error) {
         console.error('Error purchasing game tries:', error);
-        if (error.message) console.error('Error message:', error.message);
-        if (error.stack) console.error('Error stack:', error.stack);
         return false;
     }
 }
@@ -321,12 +199,9 @@ async function getGameTries() {
     }
     try {
         const tries = await contract.methods.getGameTries(account).call({ from: account });
-        console.log('Game tries:', tries);
         return parseInt(tries);
     } catch (error) {
         console.error('Error getting game tries:', error);
-        if (error.message) console.error('Error message:', error.message);
-        if (error.stack) console.error('Error stack:', error.stack);
         return 0;
     }
 }
@@ -355,12 +230,43 @@ async function getHighscores() {
       const highscores = await contract.methods.getHighscores().call();
       return highscores.map(score => ({
           player: score.player,
+          name: score.name,  // Include the player's name
           score: parseInt(score.score),
           blocksClimbed: parseInt(score.blocksClimbed)
       }));
   } catch (error) {
       console.error('Error getting highscores:', error);
       return [];
+  }
+}
+
+async function submitScore(name, score, blocksClimbed) {
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ from: account });
+      console.log('Score submitted successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error submitting score:', error);
+      return false;
+  }
+}
+
+async function claimPrize() {
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const result = await contract.methods.claimPrize().send({ from: account });
+      console.log('Prize claimed successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error claiming prize:', error);
+      return false;
   }
 }
 
@@ -394,4 +300,4 @@ if (window.ethereum) {
     });
 }
 
-export { initWeb3, purchaseGameTries, getGameTries, getHighscores, updateHighscore, useGameTry };
+export { initWeb3, purchaseGameTries, getGameTries, getHighscores, submitScore, claimPrize, useGameTry };
