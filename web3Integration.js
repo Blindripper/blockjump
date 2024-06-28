@@ -325,35 +325,36 @@ async function useGameTry() {
 }
 
 async function getHighscores() {
-    if (!contract) {
-        console.error('Contract not initialized');
-        return [];
-    }
-    try {
-        const highscores = await contract.methods.getHighscores().call();
-        return highscores.map(score => ({
-            player: score.player,
-            score: parseInt(score.score)
-        }));
-    } catch (error) {
-        console.error('Error getting highscores:', error);
-        return [];
-    }
+  if (!contract) {
+      console.error('Contract not initialized');
+      return [];
+  }
+  try {
+      const highscores = await contract.methods.getHighscores().call();
+      return highscores.map(score => ({
+          player: score.player,
+          score: parseInt(score.score),
+          blocksClimbed: parseInt(score.blocksClimbed)
+      }));
+  } catch (error) {
+      console.error('Error getting highscores:', error);
+      return [];
+  }
 }
 
-async function updateHighscore(score) {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.updateHighscore(score).send({ from: account });
-        console.log('Highscore updated successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error updating highscore:', error);
-        return false;
-    }
+async function updateHighscore(score, blocksClimbed) {
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const result = await contract.methods.updateHighscore(score, blocksClimbed).send({ from: account });
+      console.log('Highscore updated successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error updating highscore:', error);
+      return false;
+  }
 }
 
 // Event listeners for MetaMask account changes and network changes
