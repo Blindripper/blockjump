@@ -255,7 +255,7 @@
                 </thead>
                 <tbody id="highscoreBody"></tbody>
             </table>
-            <form id="nameForm">
+            <form id="nameForm" style="display: none;">
                 <input type="text" id="nameInput" placeholder="Enter your name" maxlength="10" required>
                 <button type="submit" id="submitScore">Submit Score</button>
             </form>
@@ -925,16 +925,28 @@ function gameLoop(currentTime) {
         }
 
         async function endGame(finalScore) {
+    gameOver = true;
+    gameRunning = false;
+    
+    // Display game over text
+    ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#3FE1B0';
+    ctx.font = 'bold 48px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+    ctx.font = '24px Orbitron, sans-serif';
+    ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 10);
+
+    // Show the name input form
+    document.getElementById('nameForm').style.display = 'block';
+
     try {
-        const highscores = await getHighscores();
-        if (finalScore > highscores[9].score) {
-            showNameForm();
-        } else {
-            resetGame();
-        }
+        // Any async operations you need to perform at game end
+        await updateHighscoreTable();
+        // You could also update the contract state here if needed
     } catch (error) {
-        console.error('Error ending game:', error);
-        resetGame();
+        console.error('Error updating end game state:', error);
     }
 }
 
@@ -1670,10 +1682,7 @@ console.log('Drawing frame');
             windIndicator.style.transform = 'translate(-50%, -50%)'; // Center the indicator
         }
 
-        function showNameForm() {
-            const nameForm = document.getElementById('nameForm');
-            nameForm.style.display = 'block';
-        }
+        
 
         async function loadHighscores() {
             try {
@@ -1808,19 +1817,7 @@ console.log('Drawing frame');
         }
     });
 
-    document.getElementById('updateScoreButton').addEventListener('click', async () => {
-        try {
-            const score = 100; // Replace with actual score
-            const updated = await updateHighscore(score, blocksClimbed);
-            if (updated) {
-                console.log('Highscore updated successfully');
-                alert('Highscore updated successfully!');
-            }
-        } catch (error) {
-            console.error('Failed to update highscore:', error);
-            alert('Failed to update highscore. Please try again.');
-        }
-    });
+    
 
     if (startGameButton) {
         startGameButton.addEventListener('click', startGame);
@@ -1831,13 +1828,23 @@ console.log('Drawing frame');
     // Sound toggle event listener
     
 
-    // Name form submit event listener
-    nameForm.addEventListener('submit', async (e) => {
+    document.getElementById('nameForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value;
-    await submitHighscore(name);
-    nameForm.style.display = 'none';
-    resetGame();
+    const score = (finalScore)// get the final score
+    const blocksClimbed = totalBlocksClimbed // get the number of blocks climbed
+    
+    try {
+        await submitScore(name, score, blocksClimbed);
+        console.log('Score submitted successfully');
+        // Optionally, update the highscore table here
+        await updateHighscoreTable();
+    } catch (error) {
+        console.error('Error submitting score:', error);
+    }
+    
+    // Hide the form after submission
+    document.getElementById('nameForm').style.display = 'none';
 });
 
     // Keyboard input handling
