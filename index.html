@@ -1007,7 +1007,11 @@ function gameLoop(currentTime) {
         console.error('Canvas or context not available at start of initGame');
         return;
     }
-    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+    if (!ctx) {
+        console.error('Context not available at start of initGame');
+        return;
+    }
+    console.log('Canvas dimensions in initGame:', canvas.width, 'x', canvas.height);
 
             updateWindIndicator();
             // Initialize platforms
@@ -1680,35 +1684,25 @@ console.log('Drawing frame');
         }
 
         function initialize() {
-            console.log('Initializing...');
+    console.log('Initializing...');
     canvas = document.getElementById('gameCanvas');
     console.log('Canvas element:', canvas);
-    if (!canvas || !ctx) {
-        console.error('Canvas element not found or context not available');
+    if (!canvas) {
+        console.error('Canvas element not found');
         return;
     }
     ctx = canvas.getContext('2d');
-    console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
-    // Add these lines to make the canvas visible
-    canvas.style.border = '2px solid red';
-    canvas.style.zIndex = '1000';
-    document.addEventListener('keydown', (e) => {
-        console.log('Key pressed:', e.code);
-        keys[e.code] = true;
-    });
-
-    document.addEventListener('keyup', (e) => {
-        keys[e.code] = false;
-    });
-    
-    if (!canvas || !ctx) {
-        console.error('Canvas element not found or context not available');
+    if (!ctx) {
+        console.error('Unable to get 2D context');
         return;
     }
     console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
-    console.log('Starting game loop');
-    requestAnimationFrame(gameLoop);
-}
+    // ... rest of the function
+
+
+
+    initGame();
+}  
 
 
     const floorCounter = document.getElementById('floorCounter');
