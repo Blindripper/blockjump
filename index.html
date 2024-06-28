@@ -1643,12 +1643,13 @@
         function updateHighscoreTable(highscores) {
     const highscoreBody = document.getElementById('highscoreBody');
     highscoreBody.innerHTML = '';
-    highscores.slice(0, 10).forEach((entry, index) => {
+    highscores.forEach((entry, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${entry.player.substring(0, 10)}</td>
-            <td>${entry.score.toString().substring(0, 10)}</td>
+            <td>${entry.player.substring(0, 6)}...${entry.player.substring(38)}</td>
+            <td>${entry.score.toString().padStart(10, '0')}</td>
+            <td>N/A</td>
         `;
         highscoreBody.appendChild(row);
     });
