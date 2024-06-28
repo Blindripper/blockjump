@@ -1809,11 +1809,11 @@ console.log('Drawing frame');
 
     // Load sprites, populate powerup descriptions, preload sounds, etc.
     // ... (rest of your initialization code)
-}
 
-document.addEventListener('DOMContentLoaded', initialize);
-
-        document.addEventListener('DOMContentLoaded', initialize);
+    (function() {
+    document.addEventListener('DOMContentLoaded', initialize);
+})();
+        
     </script>
 </body>
 </html>
