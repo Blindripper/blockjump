@@ -1689,6 +1689,9 @@ console.log('Drawing frame');
     }
     ctx = canvas.getContext('2d');
     console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
+    // Add these lines to make the canvas visible
+    canvas.style.border = '2px solid red';
+    canvas.style.zIndex = '1000';
     document.addEventListener('keydown', (e) => {
         console.log('Key pressed:', e.code);
         keys[e.code] = true;
@@ -1706,9 +1709,7 @@ console.log('Drawing frame');
     console.log('Starting game loop');
     requestAnimationFrame(gameLoop);
 }
-// Add these lines to make the canvas visible
-    canvas.style.border = '2px solid red';
-    canvas.style.zIndex = '1000';
+
 
     const floorCounter = document.getElementById('floorCounter');
     const soundToggle = document.getElementById('soundToggle');
