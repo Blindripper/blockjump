@@ -254,7 +254,7 @@
                     <tr>
                         <th>Rank</th>
                         <th>Name</th>
-                        <th>Tezos Marketcap</th>
+                        <th>Tezos Price</th>
                         <th>Score</th>
                         <th>Blks</th>
                         
@@ -1300,7 +1300,7 @@ console.log('Updating game state, dt:', dt);
                         blocksClimbed++; // Increment blocks climbed
                         updateBlockCounter(); // Update the block counter display
                         debugInfo.totalBlocksClimbed++;
-                        document.getElementById('floorCounter').textContent = `Tezos Marketcap: ${score.toString().padStart(10, '0')}`;
+                        document.getElementById('floorCounter').textContent = `Tezos Price: ${score.toString().padStart(7, '0')}`;
                         platforms[index] = createPlatform(0);
                         
                         updateBackground();
@@ -1620,7 +1620,7 @@ console.log('Drawing frame');
             currentBackgroundIndex = 0;
             isFading = false;
             fadeAlpha = 0;
-            document.getElementById('floorCounter').textContent = 'Tezos Marketcap: 0000000';
+            document.getElementById('floorCounter').textContent = 'Tezos Price: 0000000';
             nextBottomPlatformScore = 100;
             isPlayerOnSafePlatform = false;
             powerups = [];
