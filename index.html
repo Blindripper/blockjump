@@ -787,7 +787,7 @@ function gameLoop(currentTime) {
 
         function incrementCombo() {
             comboCounter++;
-            comboTimer = 5; // Set combo timer to 5 seconds
+            comboTimer = 10; // Set combo timer to 5 seconds
             if (comboCounter > 1) {
                 score += comboCounter * 10; // Bonus points for combo
             }
@@ -1562,7 +1562,7 @@ console.log('Drawing frame');
             ctx.font = '20px Orbitron, sans-serif';
             ctx.fillText('Enter your name to save your score', canvas.width / 2, canvas.height / 2 + 50);
 
-            document.getElementById('startButton').style.display = 'block';
+            
         }
 
 
