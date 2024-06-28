@@ -925,10 +925,11 @@ function gameLoop(currentTime) {
         }
 
         async function endGame(finalScore, finalBlocksClimbed) {
-    window.finalScore = finalScore;
-    window.blocksClimbed = finalBlocksClimbed;
+    window.finalScore = score;
+    window.blocksClimbed = blocksClimbed;
     gameOver = true;
     gameRunning = false;
+    console.log('Game ended with score:', window.finalScore, 'and blocks climbed:', window.blocksClimbed);
     
     // Display game over text
     ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
@@ -1846,19 +1847,37 @@ console.log('Drawing frame');
     
 
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const name = document.getElementById('nameInput').value;
-    const score = window.finalScore; // Assuming you've stored the final score in a global variable
-    const blocksClimbed = window.blocksClimbed; // Assuming you've kept track of blocks climbed
+  e.preventDefault();
+  const name = document.getElementById('nameInput').value.trim();
+  const score = window.finalScore;
+  const blocksClimbed = window.blocksClimbed;
 
-    try {
-        await submitScore(name, score, blocksClimbed);
-        console.log('Score submitted successfully');
-        // Optionally, update the highscore table here
-        await updateHighscoreTable();
-    } catch (error) {
-        console.error('Error submitting score:', error);
+  if (!name) {
+    alert('Please enter a valid name');
+    return;
+  }
+
+  if (typeof score !== 'number' || isNaN(score) || typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
+    console.error('Invalid score or blocksClimbed:', { score, blocksClimbed });
+    alert('An error occurred. Please try again.');
+    return;
+  }
+
+  try {
+    const submitted = await submitScore(name, score, blocksClimbed);
+    if (submitted) {
+      console.log('Score submitted successfully');
+      await updateHighscoreTable();
+    } else {
+      console.error('Failed to submit score');
+      alert('Failed to submit score. Please try again.');
     }
+  } catch (error) {
+    console.error('Error during score submission:', error);
+    alert('An error occurred while submitting your score. Please try again.');
+  }
+
+  this.style.display = 'none';
     
     // Hide the form after submission
     document.getElementById('nameForm').style.display = 'none';
