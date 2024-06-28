@@ -295,57 +295,6 @@
 
         const BLAST_POWERUP_DURATION = 30; // Duration in seconds
 
-        async function startGame() {
-    console.log('Starting game...');
-    try {
-        const tries = await getGameTries();
-        console.log('Current game tries:', tries);
-        if (tries > 0) {
-            console.log('Using a game try...');
-            if (await useGameTry()) {
-                console.log('Game try used successfully. Resetting game...');
-                resetGame();
-                console.log('Game reset. Setting gameRunning to true...');
-                gameRunning = true;
-                // ... rest of the function
-            } else {
-                console.log('Failed to use a game try');
-            }
-        } else {
-            console.log('No more tries left. Please purchase more.');
-        }
-    } catch (error) {
-        console.error('Error starting game:', error);
-    }
-    console.log('End of startGame function. gameRunning:', gameRunning);
-}
-
-if (gameRunning) {
-    console.log('Starting game loop');
-    requestAnimationFrame(gameLoop);
-}
-
-function gameLoop(currentTime) {
-    console.log('Game loop running, time:', currentTime);
-    
-    if (gameRunning) {
-        let dt = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
-
-        console.log('Updating game state');
-        update(dt);
-        
-        console.log('Drawing game');
-        draw();
-    } else {
-        console.log('Game is not running');
-    }
-    
-    requestAnimationFrame(gameLoop);
-}
-
-        
-
         // Global canvas variables
         let canvas, ctx;
 
@@ -562,6 +511,57 @@ function gameLoop(currentTime) {
         
         const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos', 'tezosX'];
         const TEZOSX_EFFECT_DURATION = 30; // 30 seconds
+
+
+        async function startGame() {
+    console.log('Starting game...');
+    try {
+        const tries = await getGameTries();
+        console.log('Current game tries:', tries);
+        if (tries > 0) {
+            console.log('Using a game try...');
+            if (await useGameTry()) {
+                console.log('Game try used successfully. Resetting game...');
+                resetGame();
+                console.log('Game reset. Setting gameRunning to true...');
+                gameRunning = true;
+                // ... rest of the function
+            } else {
+                console.log('Failed to use a game try');
+            }
+        } else {
+            console.log('No more tries left. Please purchase more.');
+        }
+    } catch (error) {
+        console.error('Error starting game:', error);
+    }
+    console.log('End of startGame function. gameRunning:', gameRunning);
+}
+
+if (gameRunning) {
+    console.log('Starting game loop');
+    requestAnimationFrame(gameLoop);
+}
+
+function gameLoop(currentTime) {
+    console.log('Game loop running, time:', currentTime);
+    
+    if (gameRunning) {
+        let dt = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
+        console.log('Updating game state');
+        update(dt);
+        
+        console.log('Drawing game');
+        draw();
+    } else {
+        console.log('Game is not running');
+    }
+    
+    requestAnimationFrame(gameLoop);
+}
+
 
 
         // Sound system
