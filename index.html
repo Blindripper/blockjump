@@ -925,17 +925,38 @@ function gameLoop(currentTime) {
         }
 
         async function endGame(finalScore) {
-            try {
-                await updateHighscore(finalScore);
-                const highscores = await getHighscores();
-                updateHighscoreTable(highscores);
-                showNameForm();
-            } catch (error) {
-                console.error('Error ending game:', error);
-                alert('Error updating highscore. Your score may not have been saved.');
-                showNameForm();  // Show the name form even if there was an error, so the game can be restarted
-            }
+    try {
+        const highscores = await getHighscores();
+        if (finalScore > highscores[9].score) {
+            showNameForm();
+        } else {
+            resetGame();
         }
+    } catch (error) {
+        console.error('Error ending game:', error);
+        resetGame();
+    }
+}
+
+async function submitHighscore(name) {
+    try {
+        await submitScore(name, score, blocksClimbed);
+        const highscores = await getHighscores();
+        updateHighscoreTable(highscores);
+        if (highscores[0].player === account) {
+            showClaimPrizeButton();
+        }
+    } catch (error) {
+        console.error('Error submitting highscore:', error);
+    }
+}
+
+function showClaimPrizeButton() {
+    const claimButton = document.createElement('button');
+    claimButton.textContent = 'Claim Prize';
+    claimButton.onclick = claimPrize;
+    document.body.appendChild(claimButton);
+}
 
         // Dynamic difficulty system
         let difficultyLevel = 1;
@@ -1811,12 +1832,13 @@ console.log('Drawing frame');
     
 
     // Name form submit event listener
-    nameForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('nameInput').value;
-        nameForm.style.display = 'none';
-        startButton.style.display = 'block';
-    });
+    nameForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('nameInput').value;
+    await submitHighscore(name);
+    nameForm.style.display = 'none';
+    resetGame();
+});
 
     // Keyboard input handling
     document.addEventListener('keydown', (e) => {
