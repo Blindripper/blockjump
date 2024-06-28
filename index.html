@@ -1831,8 +1831,8 @@ console.log('Drawing frame');
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value;
-    const score = score // get the final score
-    const blocksClimbed = blocksClimbed // get the number of blocks climbed
+    const score = endGame(finalScore) // get the final score
+    const blocksClimbed =  // get the number of blocks climbed
     
     try {
         await submitScore(name, score, blocksClimbed);
