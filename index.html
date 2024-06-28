@@ -46,11 +46,14 @@
         }
         
         #gameContainer {
-            position: relative;
-            flex-grow: 4;
-            flex: 2;
-            width: 800px
-        }
+    position: relative;
+    flex-grow: 4;
+    flex: 2;
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
         #powerupSection {
             width: 180px;
             margin-left: 10px;
@@ -107,9 +110,10 @@
         }
 
         #gameCanvas {
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(63, 225, 176, 0.5)
-        }
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
+    margin-top: 20px; /* Add some space above the canvas */
+}
         #floorCounter {
             font-size: 28px;
             font-weight: bold;
@@ -134,10 +138,12 @@
             transform: scale(1.05);
         }
         #controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
         #achievementPopup {
             position: absolute;
             top: 50px;
@@ -1705,10 +1711,6 @@ console.log('Drawing frame');
 
 // Add these lines to make the canvas visible
     canvas.style.border = '2px solid red';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '50%';
-    canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
     canvas.style.zIndex = '1000';
 
     const floorCounter = document.getElementById('floorCounter');
