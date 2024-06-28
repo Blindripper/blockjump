@@ -1680,8 +1680,15 @@ console.log('Drawing frame');
         }
 
         function initialize() {
+            console.log('Initializing...');
     canvas = document.getElementById('gameCanvas');
+    console.log('Canvas element:', canvas);
+    if (!canvas || !ctx) {
+        console.error('Canvas element not found or context not available');
+        return;
+    }
     ctx = canvas.getContext('2d');
+    console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
     document.addEventListener('keydown', (e) => {
         console.log('Key pressed:', e.code);
         keys[e.code] = true;
@@ -1696,6 +1703,8 @@ console.log('Drawing frame');
         return;
     }
     console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
+    console.log('Starting game loop');
+    requestAnimationFrame(gameLoop);
 }
 // Add these lines to make the canvas visible
     canvas.style.border = '2px solid red';
