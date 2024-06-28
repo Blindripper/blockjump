@@ -4,7 +4,7 @@ let web3;
 let contract;
 let account;
 
-const contractAddress = '0x4558BBDd6924317d17bf62fEcCdE8B7355a0F22e'; // Replace with your actual contract address
+const contractAddress = '0xAA9e942E9221b6954E61167b75f38987096cd8E5'; // Replace with your actual contract address
 const contractABI = [
   {
     "inputs": [],
@@ -290,12 +290,12 @@ async function purchaseGameTries() {
       const gasPrice = await web3.eth.getGasPrice();
       const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
           from: account,
-          value: web3.utils.toWei('0.001', 'ether')
+          value: web3.utils.toWei('0.01', 'xtz')
       });
 
       const result = await contract.methods.purchaseGameTries().send({ 
           from: account, 
-          value: web3.utils.toWei('0.001', 'ether'),
+          value: web3.utils.toWei('0.01', 'xtz'),
           gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
           gasPrice: gasPrice
       });
