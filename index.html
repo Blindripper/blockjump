@@ -1724,7 +1724,7 @@ console.log('Drawing frame');
           <td>${index + 1}</td>
           <td>${entry.name || 'Anonymous'}</td>
           <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-          <td>${entry.score ? entry.score.toString().padStart(10, '0') : '0000000'}</td>
+          <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
           <td>${entry.blocksClimbed || 0}</td>
         `;
         highscoreBody.appendChild(row);
