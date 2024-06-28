@@ -320,6 +320,11 @@
     console.log('End of startGame function. gameRunning:', gameRunning);
 }
 
+if (gameRunning) {
+    console.log('Starting game loop');
+    requestAnimationFrame(gameLoop);
+}
+
 function gameLoop(currentTime) {
     console.log('Game loop running, time:', currentTime);
     
@@ -1052,6 +1057,7 @@ function gameLoop(currentTime) {
         function update(dt) {
 console.log('Updating game state, dt:', dt);
     console.log('Player position:', player.x, player.y);
+    console.log('Update function called, dt:', dt);
             if (!gameRunning || gameOver) return;
             
             updateWindIndicator();
@@ -1689,7 +1695,8 @@ console.log('Drawing frame');
         console.error('Canvas element not found or context not available');
         return;
     }
-
+    console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
+}
 // Add these lines to make the canvas visible
     canvas.style.border = '2px solid red';
     canvas.style.zIndex = '1000';
