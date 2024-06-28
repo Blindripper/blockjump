@@ -324,6 +324,9 @@
         console.log('Forcing redraw');
         draw();
     }, 100);   }
+
+console.log('Starting game loop');
+    requestAnimationFrame(gameLoop);
 }
 
         // Global canvas variables
@@ -1493,26 +1496,19 @@ console.log('Drawing frame');
         const fixedDeltaTime = 1 / 60; // 60 FPS
         let accumulator = 0;
 
-        function gameLoop(currentTime) {
-console.log('Game loop running, time:', currentTime);
-    try {
-        if (gameRunning) {
-            console.log('Game loop running...');
-            if (lastTime) {
-                const deltaTime = (currentTime - lastTime) / 1000;
-                accumulator += deltaTime;
-
-                while (accumulator >= fixedDeltaTime) {
-                    update(fixedDeltaTime);
-                    accumulator -= fixedDeltaTime;
-                }
-            }
-
-            draw();
-        }
+      function gameLoop(currentTime) {
+    console.log('Game loop running, time:', currentTime);
+    
+    if (gameRunning) {
+        console.log('Updating game state');
+        update(dt);
         
-        lastTime = currentTime;
-        requestAnimationFrame(gameLoop);
+        console.log('Drawing game');
+        draw();
+    }
+    
+    requestAnimationFrame(gameLoop);
+}
     } catch (error) {
         console.error("An error occurred in the game loop:", error);
         gameOver = true;
