@@ -245,28 +245,24 @@ async function initWeb3() {
     }
 }
 
-async function purchaseGameTries() {
+async function useGameTry() {
   if (!contract || !account) {
       console.error('Contract not initialized or account not available');
       return false;
   }
   try {
       const gasPrice = await web3.eth.getGasPrice();
-      const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
-          from: account,
-          value: web3.utils.toWei('0.1', 'ether')
-      });
+      const gasEstimate = await contract.methods.useGameTry().estimateGas({from: account});
 
-      const result = await contract.methods.purchaseGameTries().send({ 
-          from: account, 
-          value: web3.utils.toWei('0.1', 'ether'),
+      const result = await contract.methods.useGameTry().send({ 
+          from: account,
           gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
           gasPrice: gasPrice
       });
-      console.log('Game tries purchased successfully:', result);
+      console.log('Game try used successfully:', result);
       return true;
   } catch (error) {
-      console.error('Error purchasing game tries:', error);
+      console.error('Error using game try:', error);
       return false;
   }
 }
