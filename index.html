@@ -320,6 +320,24 @@
     console.log('End of startGame function. gameRunning:', gameRunning);
 }
 
+function gameLoop(currentTime) {
+    console.log('Game loop running, time:', currentTime);
+    
+    if (gameRunning) {
+        let dt = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
+        console.log('Updating game state');
+        update(dt);
+        
+        console.log('Drawing game');
+        draw();
+    } else {
+        console.log('Game is not running');
+    }
+    
+    requestAnimationFrame(gameLoop);
+}
 
         
 
@@ -1490,24 +1508,7 @@ console.log('Drawing frame');
         const fixedDeltaTime = 1 / 60; // 60 FPS
         let accumulator = 0;
 
-      function gameLoop(currentTime) {
-    console.log('Game loop running, time:', currentTime);
-    
-    if (gameRunning) {
-        let dt = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
-
-        console.log('Updating game state');
-        update(dt);
-        
-        console.log('Drawing game');
-        draw();
-    } else {
-        console.log('Game is not running');
-    }
-    
-    requestAnimationFrame(gameLoop);
-}
+      
 
         function resetGame() {
             console.log('Resetting game...');
