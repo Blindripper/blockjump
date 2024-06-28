@@ -19,15 +19,14 @@
             color: #FFFFFF;
         }
         #gameWrapper {
-            display: flex;
-            justify-content: flex-start;
-            align-items: stretch;
-            width: 100%;
-            max-width: 1850px; /* Adjust based on your preferred max width */
-            margin: 0 auto;
-            
-            
-        }
+    display: grid;
+    grid-template-columns: auto 800px auto;
+    gap: 20px;
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    align-items: start;
+}
 
         #gameCenter {
             display: flex;
@@ -36,25 +35,20 @@
         }
 
         #highscoreSection {
+    grid-column: 1;
     width: 300px;
-    margin-right: 60px;
     background: rgba(22, 33, 62, 0.8);
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
-    flex: 0 0 auto; /* This prevents the section from growing or shrinking */
-    align-self: flex-start; /* This aligns the section to the top */
 }
         
-        #gameContainer {
-    position: relative;
-    flex-grow: 1;
-    flex: 2;
+#gameContainer {
+    grid-column: 2;
     width: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 20px; 
 }
 #powerupSection {
     grid-column: 3;
@@ -171,21 +165,36 @@
             margin-bottom: 10px;
             text-align: center;
         }
-        #powerupSection {
-    grid-column: 3;
-    width: 200px;
-    justify-self: center;
-    align-self: center;
-}
+        
         .powerup-item.active {
             background-color: rgba(255, 215, 0, 0.3);
             border-radius: 5px;
         }
+        .powerup-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.powerup-icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+}
+
+.powerup-description {
+    font-size: 12px;
+}
+
 
         .powerup-timer {
             font-weight: bold;
             color: #FFD700;
         }
+
+
 
         #highscoreTable {
             width: 100%;
