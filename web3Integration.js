@@ -321,9 +321,12 @@ async function getGameTries() {
     }
     try {
         const tries = await contract.methods.getGameTries(account).call({ from: account });
+        console.log('Game tries:', tries);
         return parseInt(tries);
     } catch (error) {
         console.error('Error getting game tries:', error);
+        if (error.message) console.error('Error message:', error.message);
+        if (error.stack) console.error('Error stack:', error.stack);
         return 0;
     }
 }
