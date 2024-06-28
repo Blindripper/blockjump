@@ -320,7 +320,10 @@
     } catch (error) {
         console.error('Error starting game:', error);
         alert('Error starting game. Please try again.');
-    }
+ setTimeout(() => {
+        console.log('Forcing redraw');
+        draw();
+    }, 100);   }
 }
 
         // Global canvas variables
@@ -1032,6 +1035,8 @@
         }
 
         function update(dt) {
+console.log('Updating game state, dt:', dt);
+    console.log('Player position:', player.x, player.y);
             if (!gameRunning || gameOver) return;
             
             updateWindIndicator();
@@ -1312,6 +1317,9 @@
         }
 
         function draw() {
+console.log('Drawing frame');
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, 50, 50);
             if (!ctx) {
                 console.error('Canvas context not initialized in draw');
                 return;
@@ -1486,6 +1494,7 @@
         let accumulator = 0;
 
         function gameLoop(currentTime) {
+console.log('Game loop running, time:', currentTime);
     try {
         if (gameRunning) {
             console.log('Game loop running...');
