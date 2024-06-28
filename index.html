@@ -291,6 +291,14 @@
 
         async function startGame() {
     try {
+        console.log('Starting game loop');
+    requestAnimationFrame(gameLoop);
+
+    // Force an initial draw
+    setTimeout(() => {
+        console.log('Forcing initial draw');
+        draw();
+    }, 100);
         console.log('Starting game...');
         const tries = await getGameTries();
         console.log('Current game tries:', tries);
@@ -1500,21 +1508,19 @@ console.log('Drawing frame');
     console.log('Game loop running, time:', currentTime);
     
     if (gameRunning) {
+        let dt = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
         console.log('Updating game state');
         update(dt);
         
         console.log('Drawing game');
         draw();
+    } else {
+        console.log('Game is not running');
     }
     
     requestAnimationFrame(gameLoop);
-}
-    } catch (error) {
-        console.error("An error occurred in the game loop:", error);
-        gameOver = true;
-        gameRunning = false;
-        drawGameOver();
-    }
 }
 
         function resetGame() {
@@ -1683,11 +1689,27 @@ console.log('Drawing frame');
         function initialize() {
     canvas = document.getElementById('gameCanvas');
     ctx = canvas.getContext('2d');
+    document.addEventListener('keydown', (e) => {
+        console.log('Key pressed:', e.code);
+        keys[e.code] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+        keys[e.code] = false;
+    });
     
     if (!canvas || !ctx) {
         console.error('Canvas element not found or context not available');
         return;
     }
+
+// Add these lines to make the canvas visible
+    canvas.style.border = '2px solid red';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '50%';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
+    canvas.style.zIndex = '1000';
 
     const floorCounter = document.getElementById('floorCounter');
     const soundToggle = document.getElementById('soundToggle');
