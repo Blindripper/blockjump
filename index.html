@@ -26,6 +26,7 @@
             max-width: 1850px; /* Adjust based on your preferred max width */
             margin: 0 auto;
             
+            
         }
 
         #gameCenter {
@@ -55,13 +56,12 @@
     align-items: center;
     margin-left: 20px; 
 }
-        #powerupSection {
-            width: 180px;
-            margin-left: 10px;
-            flex-grow: 0.2;
-            flex: 0.7;
-            padding-left: 20px;
-        }
+#powerupSection {
+    grid-column: 3;
+    width: 200px;
+    justify-self: center;
+    align-self: center;
+}
         
         #highscoreTable {
         font-size: 12px;
@@ -171,19 +171,12 @@
             margin-bottom: 10px;
             text-align: center;
         }
-        .powerup-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .powerup-icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-        }
-        .powerup-description {
-            font-size: 14px;
-        }
+        #powerupSection {
+    grid-column: 3;
+    width: 200px;
+    justify-self: center;
+    align-self: center;
+}
         .powerup-item.active {
             background-color: rgba(255, 215, 0, 0.3);
             border-radius: 5px;
