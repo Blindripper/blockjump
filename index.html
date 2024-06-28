@@ -379,8 +379,15 @@
             mintTezos: 'slowMotion.png',
             tezosX: 'TezosX1.png'
         };
-
-
+      
+        function loadSprite(name, fileName) {
+    return new Promise((resolve, reject) => {
+        const sprite = new Image();
+        sprite.onload = () => resolve({ key: name, image: sprite });
+        sprite.onerror = () => reject(new Error(`Failed to load sprite: ${name}`));
+        sprite.src = `${picsUrl}${fileName}`;
+    });
+}
 
         function loadSprites() {
     return Promise.all([
