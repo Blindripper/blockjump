@@ -1002,12 +1002,12 @@ function gameLoop(currentTime) {
         }
 
         function initGame() {
-            if (!canvas || !ctx) {
-                console.error('Canvas not initialized in initGame');
-                return;
-            }
-
-            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+            console.log('Initializing game...');
+    if (!canvas || !ctx) {
+        console.error('Canvas or context not available at start of initGame');
+        return;
+    }
+    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
 
             updateWindIndicator();
             // Initialize platforms
