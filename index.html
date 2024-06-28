@@ -295,6 +295,11 @@
 
         const BLAST_POWERUP_DURATION = 30; // Duration in seconds
 
+        let lastTime = 0;
+        const fixedDeltaTime = 1 / 60; // 60 FPS
+        let accumulator = 0;
+
+
         // Global canvas variables
         let canvas, ctx;
 
@@ -525,7 +530,8 @@
                 resetGame();
                 console.log('Game reset. Setting gameRunning to true...');
                 gameRunning = true;
-                // ... rest of the function
+                lastTime = performance.now(); // Initialize lastTime
+                requestAnimationFrame(gameLoop); // Start the game loop
             } else {
                 console.log('Failed to use a game try');
             }
@@ -536,7 +542,7 @@
         console.error('Error starting game:', error);
     }
     console.log('End of startGame function. gameRunning:', gameRunning);
-}
+}   
 
 if (gameRunning) {
     console.log('Starting game loop');
@@ -555,11 +561,11 @@ function gameLoop(currentTime) {
         
         console.log('Drawing game');
         draw();
+
+        requestAnimationFrame(gameLoop);
     } else {
         console.log('Game is not running');
     }
-    
-    requestAnimationFrame(gameLoop);
 }
 
 
@@ -1514,19 +1520,17 @@ console.log('Drawing frame');
             document.getElementById('startButton').style.display = 'block';
         }
 
-        let lastTime = 0;
-        const fixedDeltaTime = 1 / 60; // 60 FPS
-        let accumulator = 0;
-
-      
 
         function resetGame() {
             console.log('Resetting game...');
             document.dispatchEvent(new Event('gameReset'));
             
-            gameOver = false;
+            
             gameRunning = true;
+            gameOver = false;
+            lastTime = performance.now();
             blocksClimbed = 0; // Reset blocks climbed
+            requestAnimationFrame(gameLoop);
             updateBlockCounter(); // Update the block counter display
 
             // Reset powerup displays
@@ -1697,11 +1701,16 @@ console.log('Drawing frame');
         return;
     }
     console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
-    // ... rest of the function
+    canvas.style.border = '2px solid red';
+    canvas.style.zIndex = '1000';
 
+    populatePowerupDescriptions();
+    loadSprites();
+    preloadSounds();
 
 
     initGame();
+    console.log('Initialization complete');
 }  
 
 
@@ -1710,6 +1719,11 @@ console.log('Drawing frame');
     const achievementPopup = document.getElementById('achievementPopup');
     const nameForm = document.getElementById('nameForm');
     const startGameButton = document.getElementById('start-game-button');
+    if (startGameButton) {
+    startGameButton.addEventListener('click', startGame);
+} else {
+    console.error('Start game button not found');
+}
 
     // Web3 button event listeners
     document.getElementById('connectButton').addEventListener('click', async () => {
