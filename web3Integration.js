@@ -329,23 +329,38 @@ async function getHighscores() {
 
 async function submitScore(name, score, blocksClimbed) {
   if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+    console.error('Contract not initialized or account not available');
+    return false;
   }
-  try {
-      const gasPrice = await web3.eth.getGasPrice();
-      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed).estimateGas({from: account});
+  
+  // Add these checks
+  if (typeof name !== 'string' || name.length === 0) {
+    console.error('Invalid name provided');
+    return false;
+  }
+  if (typeof score !== 'number' || isNaN(score)) {
+    console.error('Invalid score provided');
+    return false;
+  }
+  if (typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
+    console.error('Invalid blocksClimbed provided');
+    return false;
+  }
 
-      const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
-          from: account,
-          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-          gasPrice: gasPrice
-      });
-      console.log('Score submitted successfully:', result);
-      return true;
+  try {
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed).estimateGas({from: account});
+
+    const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
+      from: account,
+      gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+      gasPrice: gasPrice
+    });
+    console.log('Score submitted successfully:', result);
+    return true;
   } catch (error) {
-      console.error('Error submitting score:', error);
-      return false;
+    console.error('Error submitting score:', error);
+    return false;
   }
 }
 
