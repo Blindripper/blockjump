@@ -269,7 +269,7 @@
         </div>
         <div id="gameContainer">
             <div id="blockCounter">Blocks Climbed: 0</div>
-            <div id="floorCounter">Tezos Marketcap: 0000000000</div>
+            <div id="floorCounter">Tezos Price: 0000000</div>
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
@@ -1620,7 +1620,7 @@ console.log('Drawing frame');
             currentBackgroundIndex = 0;
             isFading = false;
             fadeAlpha = 0;
-            document.getElementById('floorCounter').textContent = 'Tezos Marketcap: 0000000000';
+            document.getElementById('floorCounter').textContent = 'Tezos Marketcap: 0000000';
             nextBottomPlatformScore = 100;
             isPlayerOnSafePlatform = false;
             powerups = [];
@@ -1724,7 +1724,7 @@ console.log('Drawing frame');
           <td>${index + 1}</td>
           <td>${entry.name || 'Anonymous'}</td>
           <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-          <td>${entry.score ? entry.score.toString().padStart(10, '0') : '0000000000'}</td>
+          <td>${entry.score ? entry.score.toString().padStart(10, '0') : '0000000'}</td>
           <td>${entry.blocksClimbed || 0}</td>
         `;
         highscoreBody.appendChild(row);
