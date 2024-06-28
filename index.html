@@ -296,16 +296,8 @@
         const BLAST_POWERUP_DURATION = 30; // Duration in seconds
 
         async function startGame() {
+    console.log('Starting game...');
     try {
-        console.log('Starting game loop');
-    requestAnimationFrame(gameLoop);
-
-    // Force an initial draw
-    setTimeout(() => {
-        console.log('Forcing initial draw');
-        draw();
-    }, 100);
-        console.log('Starting game...');
         const tries = await getGameTries();
         console.log('Current game tries:', tries);
         if (tries > 0) {
@@ -315,31 +307,30 @@
                 resetGame();
                 console.log('Game reset. Setting gameRunning to true...');
                 gameRunning = true;
-                document.getElementById('start-game-button').style.display = 'none';
-                console.log('Populating powerup descriptions...');
-                populatePowerupDescriptions();
-                if (isSoundOn) {
-                    console.log('Starting background music...');
-                    startBackgroundMusic();
-                }
-                console.log('Game should now be running...');
+                // ... rest of the function
             } else {
                 console.log('Failed to use a game try');
-                alert('Failed to use a game try. Please try again.');
             }
         } else {
             console.log('No more tries left. Please purchase more.');
-            alert('No more tries left. Please purchase more.');
         }
     } catch (error) {
         console.error('Error starting game:', error);
-        alert('Error starting game. Please try again.');
- setTimeout(() => {
-        console.log('Forcing redraw');
-        draw();
-    }, 100);   }
+    }
+    console.log('End of startGame function. gameRunning:', gameRunning);
+}
 
-console.log('Starting game loop');
+function gameLoop(currentTime) {
+    console.log('Game loop running, time:', currentTime, 'gameRunning:', gameRunning);
+    
+    if (gameRunning) {
+        let dt = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
+        update(dt);
+        draw();
+    }
+    
     requestAnimationFrame(gameLoop);
 }
 
