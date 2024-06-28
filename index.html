@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockJump</title>
-     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
@@ -1641,19 +1641,18 @@
         }
 
         function updateHighscoreTable(highscores) {
-            const highscoreBody = document.getElementById('highscoreBody');
-            highscoreBody.innerHTML = '';
-            highscores.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.player}</td>
-                    <td>${entry.score}</td>
-                    <td>${entry.blocksClimbed || 0}</td>
-                `;
-                highscoreBody.appendChild(row);
-            });
-        }
+    const highscoreBody = document.getElementById('highscoreBody');
+    highscoreBody.innerHTML = '';
+    highscores.slice(0, 10).forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.player.substring(0, 10)}</td>
+            <td>${entry.score.toString().substring(0, 10)}</td>
+        `;
+        highscoreBody.appendChild(row);
+    });
+}
 
         function populatePowerupDescriptions() {
             const powerupSection = document.getElementById('powerupSection');
