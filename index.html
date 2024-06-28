@@ -320,19 +320,8 @@
     console.log('End of startGame function. gameRunning:', gameRunning);
 }
 
-function gameLoop(currentTime) {
-    console.log('Game loop running, time:', currentTime, 'gameRunning:', gameRunning);
-    
-    if (gameRunning) {
-        let dt = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
 
-        update(dt);
-        draw();
-    }
-    
-    requestAnimationFrame(gameLoop);
-}
+        
 
         // Global canvas variables
         let canvas, ctx;
