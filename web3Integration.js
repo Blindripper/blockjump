@@ -283,14 +283,33 @@ async function purchaseGameTries() {
         return false;
     }
     try {
-        const result = await contract.methods.purchaseGameTries().send({ 
-            from: account, 
-            value: web3.utils.toWei('0.1', 'ether') // Adjust the amount as needed
+        const gamePrice = await contract.methods.GAME_PRICE().call();
+        console.log('Game price:', web3.utils.fromWei(gamePrice, 'ether'), 'ETH');
+
+        const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
+            from: account,
+            value: gamePrice
         });
+        console.log('Estimated gas:', gasEstimate);
+
+        const gasPrice = await web3.eth.getGasPrice();
+        console.log('Current gas price:', web3.utils.fromWei(gasPrice, 'gwei'), 'Gwei');
+
+        const txParams = {
+            from: account,
+            value: gamePrice,
+            gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+            gasPrice: gasPrice
+        };
+        console.log('Transaction parameters:', txParams);
+
+        const result = await contract.methods.purchaseGameTries().send(txParams);
         console.log('Game tries purchased successfully:', result);
         return true;
     } catch (error) {
         console.error('Error purchasing game tries:', error);
+        if (error.message) console.error('Error message:', error.message);
+        if (error.stack) console.error('Error stack:', error.stack);
         return false;
     }
 }
