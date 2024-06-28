@@ -290,12 +290,12 @@ async function purchaseGameTries() {
       const gasPrice = await web3.eth.getGasPrice();
       const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
           from: account,
-          value: web3.utils.toWei('0.1', 'ether')
+          value: web3.utils.toWei('0.001', 'ether')
       });
 
       const result = await contract.methods.purchaseGameTries().send({ 
           from: account, 
-          value: web3.utils.toWei('0.1', 'ether'),
+          value: web3.utils.toWei('0.001', 'ether'),
           gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
           gasPrice: gasPrice
       });
