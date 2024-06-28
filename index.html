@@ -1832,7 +1832,7 @@ console.log('Drawing frame');
     e.preventDefault();
     const name = document.getElementById('nameInput').value;
     const score = endGame(finalScore) // get the final score
-    const blocksClimbed =  // get the number of blocks climbed
+    const blocksClimbed = blocksClimbed // get the number of blocks climbed
     
     try {
         await submitScore(name, score, blocksClimbed);
