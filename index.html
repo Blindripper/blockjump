@@ -35,14 +35,8 @@
         }
 
         #highscoreSection {
-            width: 300px;
-            margin-right: 20px;
-            background: rgba(22, 33, 62, 0.8);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
-            flex: 0.1;
-            padding-right: 20px;
+        max-height: 300px;
+        overflow-y: auto;
         }
         
         #gameContainer {
@@ -63,28 +57,18 @@
         }
         
         #highscoreTable {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 8px;
-            font-size: 12px
+        font-size: 12px;
+        width: 100%;
+        table-layout: fixed;
         }
 
-        #highscoreTable th {
-            padding: 3px;
-            text-align: left;
-            color: #3FE1B0;
-            font-size: 14px;
-            text-transform: uppercase;
-            border-bottom: 2px solid #3FE1B0;
+        #highscoreTable th, #highscoreTable td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         }
 
-        #highscoreTable td {
-            padding: 8px 5px;
-            text-align: left;
-            font-size: 12px;
-            background: rgba(63, 225, 176, 0.1);
-            transition: background 0.3s ease;
-        }
+        
 
         #highscoreTable tr:hover td {
             background: rgba(63, 225, 176, 0.2);
@@ -1715,6 +1699,7 @@ console.log('Drawing frame');
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${index + 1}</td>
+          <td>${entry.name || 'Anonymous'}</td>
           <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
           <td>${entry.score ? entry.score.toString().padStart(10, '0') : '0000000000'}</td>
           <td>${entry.blocksClimbed || 0}</td>
