@@ -4,12 +4,31 @@ let web3;
 let contract;
 let account;
 
-const contractAddress = '0xb764aE4b757749e3C53b561bf8Da1d8aC8ab9CDb'; // Replace with your actual contract address
+const contractAddress = '0xC625aa8a610B50FBb6E047F6f454Cd6e27AFe9D0'; // Replace with your actual contract address
 const contractABI = [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tries",
+        "type": "uint256"
+      }
+    ],
+    "name": "GameTryPurchased",
+    "type": "event"
   },
   {
     "inputs": [],
@@ -28,6 +47,44 @@ const contractABI = [
   {
     "inputs": [],
     "name": "contractBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "gameTries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      }
+    ],
+    "name": "getGameTries",
     "outputs": [
       {
         "internalType": "uint256",
@@ -121,6 +178,13 @@ const contractABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "purchaseGameTries",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "string",
@@ -139,6 +203,13 @@ const contractABI = [
       }
     ],
     "name": "submitScore",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "useGameTry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -182,7 +253,7 @@ async function purchaseGameTries() {
     try {
         const result = await contract.methods.purchaseGameTries().send({ 
             from: account, 
-            value: web3.utils.toWei('0.1', 'ether') // Adjust the amount as needed
+            value: web3.utils.toWei('0.1', 'ether')
         });
         console.log('Game tries purchased successfully:', result);
         return true;
@@ -222,67 +293,52 @@ async function useGameTry() {
 }
 
 async function getHighscores() {
-  if (!contract) {
-      console.error('Contract not initialized');
-      return [];
-  }
-  try {
-      const highscores = await contract.methods.getHighscores().call();
-      return highscores.map(score => ({
-          player: score.player,
-          name: score.name,  // Include the player's name
-          score: parseInt(score.score),
-          blocksClimbed: parseInt(score.blocksClimbed)
-      }));
-  } catch (error) {
-      console.error('Error getting highscores:', error);
-      return [];
-  }
+    if (!contract) {
+        console.error('Contract not initialized');
+        return [];
+    }
+    try {
+        const highscores = await contract.methods.getHighscores().call();
+        return highscores.map(score => ({
+            player: score.player,
+            name: score.name,
+            score: parseInt(score.score),
+            blocksClimbed: parseInt(score.blocksClimbed)
+        }));
+    } catch (error) {
+        console.error('Error getting highscores:', error);
+        return [];
+    }
 }
 
 async function submitScore(name, score, blocksClimbed) {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ from: account });
-      console.log('Score submitted successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error submitting score:', error);
-      return false;
-  }
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
+    try {
+        const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ from: account });
+        console.log('Score submitted successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error submitting score:', error);
+        return false;
+    }
 }
 
 async function claimPrize() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const result = await contract.methods.claimPrize().send({ from: account });
-      console.log('Prize claimed successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error claiming prize:', error);
-      return false;
-  }
-}
-
-async function updateHighscore(score, blocksClimbed) {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const result = await contract.methods.updateHighscore(score, blocksClimbed).send({ from: account });
-      console.log('Highscore updated successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error updating highscore:', error);
-      return false;
-  }
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
+    try {
+        const result = await contract.methods.claimPrize().send({ from: account });
+        console.log('Prize claimed successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error claiming prize:', error);
+        return false;
+    }
 }
 
 // Event listeners for MetaMask account changes and network changes
