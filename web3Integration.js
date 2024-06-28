@@ -246,21 +246,29 @@ async function initWeb3() {
 }
 
 async function purchaseGameTries() {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.purchaseGameTries().send({ 
-            from: account, 
-            value: web3.utils.toWei('0.1', 'ether')
-        });
-        console.log('Game tries purchased successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error purchasing game tries:', error);
-        return false;
-    }
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
+          from: account,
+          value: web3.utils.toWei('0.1', 'ether')
+      });
+
+      const result = await contract.methods.purchaseGameTries().send({ 
+          from: account, 
+          value: web3.utils.toWei('0.1', 'ether'),
+          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+          gasPrice: gasPrice
+      });
+      console.log('Game tries purchased successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error purchasing game tries:', error);
+      return false;
+  }
 }
 
 async function getGameTries() {
@@ -277,19 +285,30 @@ async function getGameTries() {
     }
 }
 
-async function useGameTry() {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.useGameTry().send({ from: account });
-        console.log('Game try used successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error using game try:', error);
-        return false;
-    }
+async function purchaseGameTries() {
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
+          from: account,
+          value: web3.utils.toWei('0.1', 'ether')
+      });
+
+      const result = await contract.methods.purchaseGameTries().send({ 
+          from: account, 
+          value: web3.utils.toWei('0.1', 'ether'),
+          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+          gasPrice: gasPrice
+      });
+      console.log('Game tries purchased successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error purchasing game tries:', error);
+      return false;
+  }
 }
 
 async function getHighscores() {
@@ -312,33 +331,47 @@ async function getHighscores() {
 }
 
 async function submitScore(name, score, blocksClimbed) {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ from: account });
-        console.log('Score submitted successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error submitting score:', error);
-        return false;
-    }
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed).estimateGas({from: account});
+
+      const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
+          from: account,
+          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+          gasPrice: gasPrice
+      });
+      console.log('Score submitted successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error submitting score:', error);
+      return false;
+  }
 }
 
 async function claimPrize() {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.claimPrize().send({ from: account });
-        console.log('Prize claimed successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error claiming prize:', error);
-        return false;
-    }
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasEstimate = await contract.methods.claimPrize().estimateGas({from: account});
+
+      const result = await contract.methods.claimPrize().send({ 
+          from: account,
+          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
+          gasPrice: gasPrice
+      });
+      console.log('Prize claimed successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error claiming prize:', error);
+      return false;
+  }
 }
 
 // Event listeners for MetaMask account changes and network changes
