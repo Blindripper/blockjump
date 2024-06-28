@@ -9,26 +9,25 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         body {
-            background: #16213e;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            color: #FFFFFF;
-            padding-left: 20px;
-        }
-        #gameWrapper {
+    background: #16213e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    color: #FFFFFF;
+}
+#gameWrapper {
     display: grid;
-    grid-template-columns: auto 800px auto;
+    grid-template-columns: 300px 800px 300px;
     gap: 20px;
     width: 100%;
-    max-width: 1350px;
-    margin: 0 auto 0 0;
+    max-width: 1400px;
+    margin: 0 auto;
     align-items: start;
-    padding-left: 20px;
-}
+    position: relative;
+}   
 
         #gameCenter {
             display: flex;
@@ -43,7 +42,9 @@
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
-    margin-right: -10px;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
         
 #gameContainer {
@@ -52,17 +53,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: -10px;
+    justify-self: center;
 }
+
 #powerupSection {
     grid-column: 3;
-    width: 200px;
-    justify-self: center;
-    align-self: center;
-    padding: 10px;
+    width: 220px;
     background: rgba(22, 33, 62, 0.8);
     border-radius: 10px;
-    margin-left: -10px;
+    padding: 10px;
+    justify-self: center;
+    align-self: start;
 }
         
         #highscoreTable {
@@ -130,10 +131,12 @@
             background-color: #ff6b6b;
             transform: scale(1.05);
         }
+        
         #controls {
+    grid-column: 2;
+    width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
     flex-wrap: wrap;
     margin-top: 20px;
 }
