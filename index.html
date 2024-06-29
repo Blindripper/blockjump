@@ -498,6 +498,38 @@
         // Add a new variable to track blocks climbed
         let blocksClimbed = 0;
 
+        function initGame() {
+            console.log('Initializing game...');
+    if (!canvas || !ctx) {
+        console.error('Canvas or context not available at start of initGame');
+        return;
+    }
+    if (!ctx) {
+        console.error('Context not available at start of initGame');
+        return;
+    }
+    console.log('Canvas dimensions in initGame:', canvas.width, 'x', canvas.height);
+
+            updateWindIndicator();
+            // Initialize platforms
+            platforms = [];
+            for (let i = 0; i < 7; i++) {
+                platforms.push(createPlatform(canvas.height - (i + 2) * 100));
+            }
+            nextBottomPlatformScore = 100;
+            bottomPlatform.isSafe = true;
+            isPlayerOnSafePlatform = false;
+            gameRunning = true;
+            gameOver = false 
+
+            // Reset blast effect variables
+            blastEffectActive = false;
+            blastEffectTimer = 0;
+            
+            // Restart background music
+            startBackgroundMusic();
+        }
+
         function updateBlockCounter() {
             document.getElementById('blockCounter').textContent = `Blocks Climbed: ${blocksClimbed}`;
         }
@@ -1311,37 +1343,7 @@ function showClaimPrizeButton() {
     };
 }  
 
-        function initGame() {
-            console.log('Initializing game...');
-    if (!canvas || !ctx) {
-        console.error('Canvas or context not available at start of initGame');
-        return;
-    }
-    if (!ctx) {
-        console.error('Context not available at start of initGame');
-        return;
-    }
-    console.log('Canvas dimensions in initGame:', canvas.width, 'x', canvas.height);
-
-            updateWindIndicator();
-            // Initialize platforms
-            platforms = [];
-            for (let i = 0; i < 7; i++) {
-                platforms.push(createPlatform(canvas.height - (i + 2) * 100));
-            }
-            nextBottomPlatformScore = 100;
-            bottomPlatform.isSafe = true;
-            isPlayerOnSafePlatform = false;
-            gameRunning = true;
-            gameOver = false 
-
-            // Reset blast effect variables
-            blastEffectActive = false;
-            blastEffectTimer = 0;
-            
-            // Restart background music
-            startBackgroundMusic();
-        }
+        
 
         function updateBackground() {
             let newBackgroundIndex = Math.min(Math.floor(score / 1000), backgrounds.length - 1);
