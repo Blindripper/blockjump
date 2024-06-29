@@ -1609,17 +1609,22 @@ console.log('Drawing frame');
                 });
 
                 // Draw powerups
-                powerups.forEach(powerup => {
-                    const sprite = sprites.get(powerup.type);
-                    if (sprite && sprite.complete && sprite.naturalHeight !== 0) {
-                        ctx.drawImage(sprite, powerup.x, powerup.y, powerup.width, powerup.height);
-                    } else {
-                        // Draw a colored rectangle as a fallback
-                        ctx.fillStyle = '#FFD700';
-                        ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
-                        console.warn(`Sprite for ${powerup.type} not found or not loaded`);
-                    }
-                });
+                if (powerups.length > 0) {
+        console.log(`Drawing ${powerups.length} powerups`);
+        powerups.forEach(powerup => {
+            const sprite = sprites.get(powerup.type);
+            if (sprite && sprite.complete && sprite.naturalHeight !== 0) {
+                ctx.drawImage(sprite, powerup.x, powerup.y, powerup.width, powerup.height);
+            } else {
+                console.warn(`Sprite for ${powerup.type} not found or not loaded`);
+                // Draw a colored rectangle as a fallback
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+            }
+        });
+    } else {
+        console.log('No powerups to draw');
+    }
 
                 // Draw blast radius indicator if active
                 if (blastEffectActive) {
@@ -1828,25 +1833,33 @@ console.log('Drawing frame');
   }
 }
 
-        function populatePowerupDescriptions() {
-            const powerupSection = document.getElementById('powerupSection');
-            powerupSection.innerHTML = ''; // Clear existing content
-            for (const [type, info] of Object.entries(powerupDescriptions)) {
-                const powerupItem = document.createElement('div');
-                powerupItem.className = 'powerup-item';
-                powerupItem.id = `powerup-${type}`;
-                const imageName = powerupImages[type] || `${type}.png`;
-                powerupItem.innerHTML = `
-                    <img src="${picsUrl}${imageName}" alt="${type}" class="powerup-icon">
-                    <div class="powerup-description">
-                        <strong>${type}:</strong> ${info.points} points<br>
-                        ${info.effect}
-                        <div class="powerup-timer"></div>
-                    </div>
-                `;
-                powerupSection.appendChild(powerupItem);
-            }
-        }
+function populatePowerupDescriptions() {
+    console.log('Populating powerup descriptions...');
+    const powerupSection = document.getElementById('powerupSection');
+    if (!powerupSection) {
+        console.error('Powerup section not found in the DOM');
+        return;
+    }
+    powerupSection.innerHTML = ''; // Clear existing content
+    for (const [type, info] of Object.entries(powerupDescriptions)) {
+        console.log(`Creating description for ${type}`);
+        const powerupItem = document.createElement('div');
+        powerupItem.className = 'powerup-item';
+        powerupItem.id = `powerup-${type}`;
+        const imageName = powerupImages[type] || `${type}.png`;
+        powerupItem.innerHTML = `
+            <img src="${picsUrl}${imageName}" alt="${type}" class="powerup-icon">
+            <div class="powerup-description">
+                <strong>${type}:</strong> ${info.points} points<br>
+                ${info.effect}
+                <div class="powerup-timer"></div>
+            </div>
+        `;
+        powerupSection.appendChild(powerupItem);
+        console.log(`Added powerup description for ${type}`);
+    }
+    console.log('Finished populating powerup descriptions');
+}
 
         function initialize() {
     console.log('Initializing...');
