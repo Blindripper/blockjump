@@ -399,7 +399,7 @@
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
         <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
         <div id="tryCounter" style="display: none;">Tries: <span id="triesLeft">0</span></div>
-
+        <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
@@ -743,6 +743,10 @@ function gameLoop(currentTime) {
         return;
     }
 
+    if (isSoundOn) {
+        sounds.background.play().catch(error => console.warn("Error playing background music:", error));
+    }
+
     gameLoopId = requestAnimationFrame(gameLoop);
 
     let dt = (currentTime - lastTime) / 1000;
@@ -768,36 +772,54 @@ function gameLoop(currentTime) {
             background: new Audio(`${soundUrl}main.mp3`)
         };
 
-        let isSoundOn = true;
+        let isSoundOn = false;
 
-        function toggleSound() {
-            isSoundOn = !isSoundOn;
-            document.getElementById('soundToggle').textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
-            if (isSoundOn) {
-                sounds.background.play();
-            } else {
-                sounds.background.pause();
-            }
-        }
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
+    }
+    if (isSoundOn) {
+        enableSound();
+    } else {
+        disableSound();
+    }
+}
 
-       function playSound(soundName) {
-            if (isSoundOn && sounds[soundName]) {
-                sounds[soundName].currentTime = 0;
-                sounds[soundName].play().catch(error => console.error("Error playing sound:", error));
-            }
-        }
+function enableSound() {
+    Object.values(sounds).forEach(sound => {
+        sound.muted = false;
+    });
+    if (gameRunning) {
+        sounds.background.play().catch(error => console.warn("Error playing background music:", error));
+    }
+}
 
-        function startBackgroundMusic() {
-            if (isSoundOn) {
-                sounds.background.loop = true;
-                sounds.background.play().catch(error => console.error("Error playing background music:", error));
-            }
+function disableSound() {
+    Object.values(sounds).forEach(sound => {
+        sound.muted = true;
+        if (sound.pause) {
+            sound.pause();
+            sound.currentTime = 0;
         }
+    });
+}
 
-        function stopBackgroundMusic() {
-            sounds.background.pause();
-            sounds.background.currentTime = 0;
-        }
+function playSound(soundName) {
+    if (isSoundOn && sounds[soundName]) {
+        sounds[soundName].currentTime = 0;
+        sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
+    }
+}
+
+document.getElementById('soundToggle').addEventListener('click', toggleSound);
+
+    
+
+       
+
+       
 
         function preloadSounds() {
             return Promise.all(Object.values(sounds).map(audio => {
@@ -1009,7 +1031,7 @@ function gameLoop(currentTime) {
     setTimeout(() => { 
         player.maxJumps = 2; 
         console.log('Green Tezos effect ended');
-    }, 30000);
+    }, duration * 1000);
     message = 'Green Tezos: TripleJump 30s!';
     break;
 
@@ -1117,6 +1139,10 @@ function gameLoop(currentTime) {
             }
         }
 
+        
+
+   
+
         async function endGame(finalScore, finalBlocksClimbed) {
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
@@ -1134,6 +1160,12 @@ function gameLoop(currentTime) {
     ctx.font = '24px Orbitron, sans-serif';
     ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 10);
     drawGameOver();
+
+    sounds.background.pause();
+    sounds.background.currentTime = 0;
+    if (isSoundOn) {
+        playSound('gameOver');
+    }
     // Show the name input form
     document.getElementById('nameForm').style.display = 'block';
 
@@ -1838,6 +1870,11 @@ function clearCanvasOverlays() {
             requestAnimationFrame(gameLoop);
             updateBlockCounter(); // Update the block counter display
 
+            if (isSoundOn) {
+        sounds.background.currentTime = 0;
+        sounds.background.play().catch(error => console.warn("Error playing background music:", error));
+    }
+
             // Reset powerup displays
             for (const type of powerUpTypes) {
                 const powerupItem = document.getElementById(`powerup-${type}`);
@@ -2066,7 +2103,6 @@ function populatePowerupBar() {
 
 
     const floorCounter = document.getElementById('floorCounter');
-    const soundToggle = document.getElementById('soundToggle');
     const achievementPopup = document.getElementById('achievementPopup');
     const nameForm = document.getElementById('nameForm');
 
@@ -2163,7 +2199,7 @@ function updateButtonState() {
     });
 
     
-    // Sound toggle event listener
+    
     
 
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
