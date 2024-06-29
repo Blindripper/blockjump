@@ -1019,7 +1019,6 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
                 case 'etherLink':
                     score += 1000;
                     message = 'EtherLink: +1000!';
-                    updatePowerupDisplay(powerupType, 1); // Brief 1-second highlight
                     break;
 
                 case 'tezosX':
@@ -1030,9 +1029,7 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
                     break;
             }
             
-            if (duration > 0) {
-                updatePowerupDisplay(powerupType, duration);
-            }
+            
 
             // Update the powerup count in the UI
     const powerupElement = document.getElementById(`powerup-${powerupType}`);
