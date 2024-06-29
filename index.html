@@ -156,6 +156,13 @@
     right: 0;
     width: 100%;
 }
+
+#powerupBar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
         
         #highscoreTable {
         font-size: 12px;
@@ -272,22 +279,30 @@
             background-color: rgba(255, 215, 0, 0.3);
             border-radius: 5px;
         }
+      
         .powerup-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 5px;
+    width: 50px;
 }
 
 .powerup-icon {
     width: 30px;
     height: 30px;
-    margin-bottom: 5px;
+    
 }
 
 .powerup-description {
     font-size: 12px;
+}
+
+.powerup-count {
+    font-size: 12px;
+    color: #FFD700;
 }
 
 
@@ -363,6 +378,7 @@
         </div>
         <div id="gameContainer">
             <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
+            <div id="powerupBar"></div>
             <div id="blockCounter">Blocks Climbed: 0</div>
             <div id="floorCounter">Tezos Price: 0000000</div>
             <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -959,6 +975,16 @@ function gameLoop(currentTime) {
             if (duration > 0) {
                 updatePowerupDisplay(powerupType, duration);
             }
+
+            // Update the powerup count in the UI
+    const powerupElement = document.getElementById(`powerup-${powerupType}`);
+    if (powerupElement) {
+        const countElement = powerupElement.querySelector('.powerup-count');
+        if (countElement) {
+            const currentCount = parseInt(countElement.textContent);
+            countElement.textContent = currentCount + 1;
+        }
+    }
             
             playSound('powerup');
             score += powerupDescriptions[powerupType].points;
@@ -1139,21 +1165,21 @@ function showClaimPrizeButton() {
         }
 
         function createPowerup(y) {
-            if (!canvas) {
-                console.error('Canvas not initialized in createPowerup');
-                return null;
-            }
-            const type = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
-            debugInfo.powerupsGenerated++;
-            console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}, Type: ${type}`);
-            return {
-                x: Math.random() * (canvas.width - 30),
-                y: y,
-                width: 30,
-                height: 30,
-                type: type
-            };
-        }
+    if (!canvas) {
+        console.error('Canvas not initialized in createPowerup');
+        return null;
+    }
+    const type = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+    debugInfo.powerupsGenerated++;
+    console.log(`Powerup generated. Total: ${debugInfo.powerupsGenerated}, Type: ${type}`);
+    return {
+        x: Math.random() * (canvas.width - 30),
+        y: y,
+        width: 30,
+        height: 30,
+        type: type
+    };
+}  
 
         function initGame() {
             console.log('Initializing game...');
@@ -1833,32 +1859,28 @@ console.log('Drawing frame');
   }
 }
 
-function populatePowerupDescriptions() {
-    console.log('Populating powerup descriptions...');
-    const powerupSection = document.getElementById('powerupSection');
-    if (!powerupSection) {
-        console.error('Powerup section not found in the DOM');
+function populatePowerupBar() {
+    console.log('Populating powerup bar...');
+    const powerupBar = document.getElementById('powerupBar');
+    if (!powerupBar) {
+        console.error('Powerup bar not found in the DOM');
         return;
     }
-    powerupSection.innerHTML = ''; // Clear existing content
+    powerupBar.innerHTML = ''; // Clear existing content
     for (const [type, info] of Object.entries(powerupDescriptions)) {
-        console.log(`Creating description for ${type}`);
+        console.log(`Creating powerup icon for ${type}`);
         const powerupItem = document.createElement('div');
         powerupItem.className = 'powerup-item';
         powerupItem.id = `powerup-${type}`;
         const imageName = powerupImages[type] || `${type}.png`;
         powerupItem.innerHTML = `
             <img src="${picsUrl}${imageName}" alt="${type}" class="powerup-icon">
-            <div class="powerup-description">
-                <strong>${type}:</strong> ${info.points} points<br>
-                ${info.effect}
-                <div class="powerup-timer"></div>
-            </div>
+            <span class="powerup-count">0</span>
         `;
-        powerupSection.appendChild(powerupItem);
-        console.log(`Added powerup description for ${type}`);
+        powerupBar.appendChild(powerupItem);
+        console.log(`Added powerup icon for ${type}`);
     }
-    console.log('Finished populating powerup descriptions');
+    console.log('Finished populating powerup bar');
 }
 
         function initialize() {
@@ -1878,7 +1900,7 @@ function populatePowerupDescriptions() {
     canvas.style.border = '2px solid red';
     canvas.style.zIndex = '1000';
 
-    populatePowerupDescriptions();
+    populatePowerupBar();
     loadSprites();
     preloadSounds();
 
@@ -1958,18 +1980,7 @@ function updateButtonState() {
     }
 }
 
-    document.getElementById('purchaseTriesButton').addEventListener('click', async () => {
-        try {
-            const purchased = await purchaseGameTries();
-            if (purchased) {
-                console.log('Game tries purchased successfully');
-                alert('10 game tries purchased successfully!');
-            }
-        } catch (error) {
-            console.error('Failed to purchase game tries:', error);
-            alert('Failed to purchase game tries. Please try again.');
-        }
-    });
+    
 
     document.getElementById('getTriesButton').addEventListener('click', async () => {
         try {
