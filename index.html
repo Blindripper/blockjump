@@ -1601,20 +1601,17 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (!isConnected) {
-            drawCanvasMessage('Please connect your wallet to play');
-        } else if (gameOver) {
-            drawCanvasButton('Try Again', startGame);
-        } else {
+        if (isConnected) {
             const tries = parseInt(document.getElementById('triesLeft').textContent);
             if (tries > 0) {
                 drawCanvasButton('Start Game', startGame);
             } else {
                 drawCanvasMessage('Please buy more tries');
             }
+        } else {
+            drawCanvasMessage('Please connect your wallet to play');
         }
     }
-
 
             // Draw player
             
@@ -1783,7 +1780,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
     button.style.position = 'absolute';
     button.style.left = `${canvasRect.left + canvas.width / 2}px`;
     button.style.top = `${canvasRect.top + canvas.height / 2}px`;
-
+    button.style.transform = 'translate(-50%, -50%)';
 
     document.body.appendChild(button);
 }
@@ -2029,12 +2026,7 @@ function populatePowerupBar() {
     const soundToggle = document.getElementById('soundToggle');
     const achievementPopup = document.getElementById('achievementPopup');
     const nameForm = document.getElementById('nameForm');
-    const startGameButton = document.getElementById('start-game-button');
-    if (startGameButton) {
-    startGameButton.addEventListener('click', startGame);
-} else {
-    console.error('Start game button not found');
-}
+
 
     // Web3 button event listeners
     let isConnected = false;
@@ -2064,11 +2056,12 @@ function populatePowerupBar() {
             updateButtonState();
             console.log('Disconnected from Web3');
             document.getElementById('buyTriesBtn').style.display = 'none';
+            draw();
         } catch (error) {
             console.error('Failed to disconnect from Web3:', error);
             alert('Failed to disconnect from Web3. Please try again.');
         }
-        draw();
+        
     }
 });
 
@@ -2123,13 +2116,6 @@ function updateButtonState() {
     });
 
     
-
-    if (startGameButton) {
-        startGameButton.addEventListener('click', startGame);
-    } else {
-        console.error('Start game button not found');
-    }
-
     // Sound toggle event listener
     
 
