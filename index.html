@@ -201,6 +201,14 @@
             letter-spacing: 2px;
         }
 
+        #tryCounter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: #3FE1B0;
+    text-align: right;
+    margin-top: 10px;
+}
+
         #gameCanvas {
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
@@ -354,6 +362,8 @@
     <div id="header">
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
         <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
+        <div id="tryCounter" style="display: none;">Tries: <span id="triesLeft">0</span></div>
+
     </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
@@ -385,7 +395,6 @@
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
             <div id="controls">
-                <button id="getTriesButton">Get Game Tries</button>
                 <button id="highscoresButton">Get Highscores</button>
                 <button id="updateScoreButton">Update Highscore</button>
                 <button id="start-game-button">Start Game</button>
@@ -657,6 +666,7 @@
                 gameRunning = true;
                 lastTime = performance.now(); // Initialize lastTime
                 requestAnimationFrame(gameLoop); // Start the game loop
+                updateTryCount();
             } else {
                 console.log('Failed to use a game try');
             }
@@ -1825,6 +1835,18 @@ console.log('Drawing frame');
             }
         }
 
+        async function updateTryCount() {
+    try {
+        const tries = await getGameTries();
+        const triesLeftSpan = document.getElementById('triesLeft');
+        if (triesLeftSpan) {
+            triesLeftSpan.textContent = tries;
+        }
+    } catch (error) {
+        console.error('Failed to get game tries:', error);
+    }
+}
+
         async function updateHighscoreTable() {
   try {
     const highscores = await getHighscores();
@@ -1929,6 +1951,7 @@ function populatePowerupBar() {
                 console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
+                updateTryCount();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 updateHighscoreTable();
             }
@@ -1957,6 +1980,7 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
         if (purchased) {
             console.log('Game tries purchased successfully');
             alert('10 game tries purchased successfully!');
+            updateTryCount();
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
@@ -1966,29 +1990,25 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
 
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
+    const buyButton = document.getElementById('buyTriesBtn');
+    const tryCounter = document.getElementById('tryCounter');
+    
     if (isConnected) {
         connectButton.textContent = 'Disconnect wallet';
         connectButton.classList.add('disconnect-button');
         connectButton.classList.remove('connect-button');
+        buyButton.style.display = 'block';
+        tryCounter.style.display = 'block';
+        updateTryCount(); // We'll create this function next
     } else {
         connectButton.textContent = 'Connect wallet';
         connectButton.classList.remove('disconnect-button');
         connectButton.classList.add('connect-button');
+        buyButton.style.display = 'none';
+        tryCounter.style.display = 'none';
     }
 }
 
-    
-
-    document.getElementById('getTriesButton').addEventListener('click', async () => {
-        try {
-            const tries = await getGameTries();
-            console.log('Current game tries:', tries);
-            alert(`You have ${tries} game tries remaining.`);
-        } catch (error) {
-            console.error('Failed to get game tries:', error);
-            alert('Failed to get game tries. Please try again.');
-        }
-    });
 
     document.getElementById('highscoresButton').addEventListener('click', async () => {
         try {
