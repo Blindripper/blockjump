@@ -40,6 +40,60 @@
     top: 20px;
     right: 20px;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px; /* Space between buttons */
+}   
+
+.game-button {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    color: white;
+    width: 200px; /* Set a fixed width for both buttons */
+}
+
+.game-button:hover {
+    transform: scale(1.05);
+}
+
+.game-button:active {
+    transform: scale(0.98);
+}
+
+.connect-button {
+    background-color: #FF8C00;
+}
+
+.connect-button:hover {
+    background-color: #FFA500;
+}
+
+.disconnect-button {
+    background-color: #E74C3C;
+}
+
+.disconnect-button:hover {
+    background-color: #C0392B;
+}
+
+.buy-button {
+    background-color: #3498DB;
+}
+
+.buy-button:hover {
+    background-color: #2980B9;
+}
+
+/* Hide the buy button initially */
+#buyTriesBtn {
+    display: none;
 }
 
 .connect-button {
@@ -292,7 +346,8 @@
 </head>
 <body>
     <div id="header">
-        <button id="walletConnectBtn" class="connect-button">Connect wallet</button>
+        <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
+        <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
     </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
@@ -1853,7 +1908,8 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
                 console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
-                // Enable other Web3 buttons here
+                // Show the buy button when connected
+                document.getElementById('buyTriesBtn').style.display = 'block';
             }
         } catch (error) {
             console.error('Failed to connect to Web3:', error);
@@ -1866,12 +1922,40 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
             isConnected = false;
             updateButtonState();
             console.log('Disconnected from Web3');
+            // Hide the buy button when disconnected
+            document.getElementById('buyTriesBtn').style.display = 'none';
         } catch (error) {
             console.error('Failed to disconnect from Web3:', error);
             alert('Failed to disconnect from Web3. Please try again.');
         }
     }
 });
+
+document.getElementById('buyTriesBtn').addEventListener('click', async () => {
+    try {
+        const purchased = await purchaseGameTries();
+        if (purchased) {
+            console.log('Game tries purchased successfully');
+            alert('10 game tries purchased successfully!');
+        }
+    } catch (error) {
+        console.error('Failed to purchase game tries:', error);
+        alert('Failed to purchase game tries. Please try again.');
+    }
+});
+
+function updateButtonState() {
+    const connectButton = document.getElementById('walletConnectBtn');
+    if (isConnected) {
+        connectButton.textContent = 'Disconnect wallet';
+        connectButton.classList.add('disconnect-button');
+        connectButton.classList.remove('connect-button');
+    } else {
+        connectButton.textContent = 'Connect wallet';
+        connectButton.classList.remove('disconnect-button');
+        connectButton.classList.add('connect-button');
+    }
+}
 
 function updateButtonState() {
     const button = document.getElementById('walletConnectBtn');
