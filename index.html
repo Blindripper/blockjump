@@ -1971,6 +1971,21 @@ function clearCanvasOverlays() {
   }
 }
 
+async function checkAndDisplayStartButton() {
+    try {
+        const tries = await getGameTries();
+        if (tries > 0) {
+            drawCanvasButton('Start Game', startGame);
+        } else {
+            clearCanvasOverlays();
+            drawCanvasMessage('No more tries left. Please purchase more.');
+        }
+    } catch (error) {
+        console.error('Error checking game tries:', error);
+    }
+}
+
+
 function populatePowerupBar() {
     console.log('Populating powerup bar...');
     const powerupBar = document.getElementById('powerupBar');
@@ -2042,6 +2057,7 @@ function populatePowerupBar() {
                 updateTryCount();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 updateHighscoreTable();
+                updateButtonState();
                 draw();
             }
         } catch (error) {
@@ -2072,6 +2088,7 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
             console.log('Game tries purchased successfully');
             alert('10 game tries purchased successfully!');
             updateTryCount();
+            updateButtonState();
             draw();
         }
     } catch (error) {
@@ -2092,12 +2109,14 @@ function updateButtonState() {
         buyButton.style.display = 'block';
         tryCounter.style.display = 'block';
         updateTryCount(); // We'll create this function next
+        checkAndDisplayStartButton();
     } else {
         connectButton.textContent = 'Connect wallet';
         connectButton.classList.remove('disconnect-button');
         connectButton.classList.add('connect-button');
         buyButton.style.display = 'none';
         tryCounter.style.display = 'none';
+        clearCanvasOverlays();
     }
 
     draw();
