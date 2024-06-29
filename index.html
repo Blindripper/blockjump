@@ -662,6 +662,12 @@ function createPowerupTimerBar(type, duration) {
     
     timerBar.appendChild(progress);
     powerupTimers.appendChild(timerBar);
+
+    // Check for active powerup and add the 'active' class if necessary
+  if (type === activePowerupType) { // Assuming 'activePowerupType' is defined elsewhere
+    timerBar.classList.add('active');
+  }
+
     
     return { timerBar, progress };
 }
