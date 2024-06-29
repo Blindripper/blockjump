@@ -64,6 +64,13 @@
     transform: scale(0.98);
 }  
 
+.disconnect-button {
+    background-color: #E74C3C;
+}
+
+.disconnect-button:hover {
+    background-color: #C0392B;
+}
 
 
         #highscoreSection {
@@ -285,7 +292,7 @@
 </head>
 <body>
     <div id="header">
-        <button id="connectWalletBtn" class="connect-button">Connect wallet</button>
+        <button id="walletConnectBtn" class="connect-button">Connect wallet</button>
     </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
@@ -1836,19 +1843,46 @@ console.log('Drawing frame');
 }
 
     // Web3 button event listeners
-    document.getElementById('connectWalletBtn').addEventListener('click', async () => {
-    try {
-        const connected = await initWeb3();
-        if (connected) {
-            console.log('Successfully connected to Web3');
-            document.getElementById('connectWalletBtn').textContent = 'Connected';
-            // Enable other Web3 buttons here
+    let isConnected = false;
+
+document.getElementById('walletConnectBtn').addEventListener('click', async () => {
+    if (!isConnected) {
+        try {
+            const connected = await initWeb3();
+            if (connected) {
+                console.log('Successfully connected to Web3');
+                isConnected = true;
+                updateButtonState();
+                // Enable other Web3 buttons here
+            }
+        } catch (error) {
+            console.error('Failed to connect to Web3:', error);
+            alert('Failed to connect to Web3. Please try again.');
         }
-    } catch (error) {
-        console.error('Failed to connect to Web3:', error);
-        alert('Failed to connect to Web3. Please try again.');
+    } else {
+        try {
+            // Implement your disconnect logic here
+            // For example: await disconnectWeb3();
+            isConnected = false;
+            updateButtonState();
+            console.log('Disconnected from Web3');
+        } catch (error) {
+            console.error('Failed to disconnect from Web3:', error);
+            alert('Failed to disconnect from Web3. Please try again.');
+        }
     }
 });
+
+function updateButtonState() {
+    const button = document.getElementById('walletConnectBtn');
+    if (isConnected) {
+        button.textContent = 'Disconnect wallet';
+        button.classList.add('disconnect-button');
+    } else {
+        button.textContent = 'Connect wallet';
+        button.classList.remove('disconnect-button');
+    }
+}
 
     document.getElementById('purchaseTriesButton').addEventListener('click', async () => {
         try {
