@@ -502,6 +502,8 @@
             console.log('Initializing game...');
     if (!canvas || !ctx) {
         console.error('Canvas or context not available at start of initGame');
+        console.log('canvas:', canvas);
+        console.log('ctx:', ctx);
         return;
     }
     if (!ctx) {
@@ -2063,7 +2065,9 @@ function resetGame() {
 async function checkAndDisplayStartButton() {
     try {
         const tries = await getGameTries();
+        console.log('Current game tries:', tries);
         if (tries > 0) {
+            console.log('Drawing Start Game button');
             drawCanvasButton('Start Game', startGame);
         } else {
             clearCanvasOverlays();
@@ -2109,6 +2113,7 @@ function populatePowerupBar() {
         return;
     }
     ctx = canvas.getContext('2d');
+    console.log('Canvas context:', ctx);
     if (!ctx) {
         console.error('Unable to get 2D context');
         return;
@@ -2136,9 +2141,11 @@ function populatePowerupBar() {
     let isConnected = false;
 
     document.getElementById('walletConnectBtn').addEventListener('click', async () => {
+        console.log('Wallet connect button clicked');
     if (!isConnected) {
         try {
             const connected = await initWeb3();
+            console.log('Web3 initialization result:', connected);
             if (connected) {
                 console.log('Successfully connected to Web3');
                 isConnected = true;
