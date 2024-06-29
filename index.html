@@ -47,6 +47,13 @@
     flex: 0.1;
     
 }
+
+#gameLogo {
+    display: block;
+    margin: 0 auto 20px;
+    max-width: 300px;
+    height: auto;
+}
         
 #gameContainer {
     grid-column: 2;
@@ -268,6 +275,7 @@
             </form>
         </div>
         <div id="gameContainer">
+            <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/logo.png" alt="Game Logo">
             <div id="blockCounter">Blocks Climbed: 0</div>
             <div id="floorCounter">Tezos Price: 0000000</div>
             <canvas id="gameCanvas" width="800" height="600"></canvas>
