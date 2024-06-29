@@ -747,6 +747,7 @@ function gameLoop(currentTime) {
         sounds.background.play().catch(error => console.warn("Error playing background music:", error));
     }
 
+    gameLoopId = requestAnimationFrame(gameLoop);
 
     let dt = (currentTime - lastTime) / 1000;
     lastTime = currentTime;
