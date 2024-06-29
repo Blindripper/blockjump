@@ -378,8 +378,6 @@
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
             <div id="controls">
-                <button id="connectButton">Connect to MetaMask</button>
-                <button id="purchaseTriesButton">Purchase Game Tries</button>
                 <button id="getTriesButton">Get Game Tries</button>
                 <button id="highscoresButton">Get Highscores</button>
                 <button id="updateScoreButton">Update Highscore</button>
@@ -1900,7 +1898,7 @@ console.log('Drawing frame');
     // Web3 button event listeners
     let isConnected = false;
 
-document.getElementById('walletConnectBtn').addEventListener('click', async () => {
+    document.getElementById('walletConnectBtn').addEventListener('click', async () => {
     if (!isConnected) {
         try {
             const connected = await initWeb3();
@@ -1908,7 +1906,6 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
                 console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
-                // Show the buy button when connected
                 document.getElementById('buyTriesBtn').style.display = 'block';
             }
         } catch (error) {
@@ -1922,7 +1919,6 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
             isConnected = false;
             updateButtonState();
             console.log('Disconnected from Web3');
-            // Hide the buy button when disconnected
             document.getElementById('buyTriesBtn').style.display = 'none';
         } catch (error) {
             console.error('Failed to disconnect from Web3:', error);
@@ -1954,17 +1950,6 @@ function updateButtonState() {
         connectButton.textContent = 'Connect wallet';
         connectButton.classList.remove('disconnect-button');
         connectButton.classList.add('connect-button');
-    }
-}
-
-function updateButtonState() {
-    const button = document.getElementById('walletConnectBtn');
-    if (isConnected) {
-        button.textContent = 'Disconnect wallet';
-        button.classList.add('disconnect-button');
-    } else {
-        button.textContent = 'Connect wallet';
-        button.classList.remove('disconnect-button');
     }
 }
 
