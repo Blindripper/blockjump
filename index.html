@@ -35,6 +35,37 @@
             align-items: center;
         }
 
+        #header {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.connect-button {
+    background-color: #FF8C00;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.connect-button:hover {
+    background-color: #FFA500;
+    transform: scale(1.05);
+}
+
+.connect-button:active {
+    transform: scale(0.98);
+}  
+
+
+
         #highscoreSection {
     position: fixed;
     top:    210px;
@@ -253,6 +284,9 @@
     </style>
 </head>
 <body>
+    <div id="header">
+        <button id="connectWalletBtn" class="connect-button">Connect wallet</button>
+    </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
             <div class="section-title">Highscores</div>
@@ -1802,19 +1836,19 @@ console.log('Drawing frame');
 }
 
     // Web3 button event listeners
-    document.getElementById('connectButton').addEventListener('click', async () => {
-        try {
-            const connected = await initWeb3();
-            if (connected) {
-                console.log('Successfully connected to Web3');
-                document.getElementById('connectButton').textContent = 'Connected';
-                // Enable other Web3 buttons here
-            }
-        } catch (error) {
-            console.error('Failed to connect to Web3:', error);
-            alert('Failed to connect to Web3. Please try again.');
+    document.getElementById('connectWalletBtn').addEventListener('click', async () => {
+    try {
+        const connected = await initWeb3();
+        if (connected) {
+            console.log('Successfully connected to Web3');
+            document.getElementById('connectWalletBtn').textContent = 'Connected';
+            // Enable other Web3 buttons here
         }
-    });
+    } catch (error) {
+        console.error('Failed to connect to Web3:', error);
+        alert('Failed to connect to Web3. Please try again.');
+    }
+});
 
     document.getElementById('purchaseTriesButton').addEventListener('click', async () => {
         try {
