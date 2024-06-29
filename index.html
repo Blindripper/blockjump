@@ -831,32 +831,6 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
             }));
         }
 
-        function updatePowerupDisplay(type, duration) {
-            const powerupItem = document.getElementById(`powerup-${type}`);
-            if (powerupItem) {
-                powerupItem.classList.add('active');
-                const timerElement = powerupItem.querySelector('.powerup-timer');
-                
-                let timeLeft = duration;
-                const timerInterval = setInterval(() => {
-                    timeLeft -= 0.1;
-                    timerElement.textContent = `Time left: ${timeLeft.toFixed(1)}s`;
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        powerupItem.classList.remove('active');
-                        timerElement.textContent = '';
-                    }
-                }, 100); // Update every 0.1 seconds for smoother countdown
-
-                
-
-                // Add event listeners to clear the timer when needed
-                document.addEventListener('gameOver', clearTimer, { once: true });
-                document.addEventListener('gameReset', clearTimer, { once: true });
-            }
-        }
-
         // Particle system
         let particles = [];
 
