@@ -991,13 +991,18 @@ function gameLoop(currentTime) {
                     });
                     message = 'Ethereum: Shrunk 5s';
                     break;
-                case 'greenTezos':
-                    player.maxJumps = 3;
-                    duration = 30;
-                    setTimeout(() => { player.maxJumps = 2; }, 10000);
-                    message = 'Green Tezos: TripleJump 30s!';
-                    break;
-                    case 'solana':
+                
+                    case 'greenTezos':
+    player.maxJumps = 3;
+    duration = 30;
+    setTimeout(() => { 
+        player.maxJumps = 2; 
+        console.log('Green Tezos effect ended');
+    }, 30000);
+    message = 'Green Tezos: TripleJump 30s!';
+    break;
+
+                case 'solana':
                     gameOver = true;
                     gameRunning = false;
                     playSound('gameOver');
@@ -1292,6 +1297,7 @@ function showClaimPrizeButton() {
         }
 
         function update(dt) {
+            if (!gameRunning || gameOver) return;
 console.log('Updating game state, dt:', dt);
     console.log('Player position:', player.x, player.y);
     console.log('Update function called, dt:', dt);
@@ -1572,6 +1578,11 @@ console.log('Updating game state, dt:', dt);
 
             // Add debug info display
             console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Powerups: ${powerups.length}, Difficulty: ${difficultyLevel}`);
+
+            if (gameOver && !intentionalGameOver) {
+        console.error('Unexpected game over condition');
+        gameOver = false;
+            }
         }
 
         function draw() {
