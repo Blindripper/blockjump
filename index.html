@@ -20,14 +20,14 @@
 }
 #gameWrapper {
     display: grid;
-    grid-template-columns: 300px 800px 300px;
+    grid-template-columns: 300px 1fr 300px;
     gap: 20px;
     width: 100%;
     max-width: 1550px;
     margin: 0 auto;
     align-items: start;
     position: relative;
-}   
+}  
 
         #gameCenter {
             display: flex;
@@ -127,17 +127,11 @@
 }
 
 
-        #highscoreSection {
-    position: fixed;
-    top:    210px;
-    left:   18px;      
-    width: 500px;
-    background: rgba(22, 33, 62, 0.8);
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
-    flex: 0.1;
-    
+#highscoreSection {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 #gameLogo {
@@ -157,13 +151,10 @@
 }
 
 #powerupSection {
-    grid-column: 3;
-    width: 220px;
-    background: rgba(22, 33, 62, 0.8);
-    border-radius: 10px;
-    padding: 10px;
-    justify-self: center;
-    align-self: center;
+    position: relative;
+    top: 0;
+    right: 0;
+    width: 100%;
 }
         
         #highscoreTable {
@@ -1907,6 +1898,7 @@ console.log('Drawing frame');
                 isConnected = true;
                 updateButtonState();
                 document.getElementById('buyTriesBtn').style.display = 'block';
+                updateHighscoreTable();
             }
         } catch (error) {
             console.error('Failed to connect to Web3:', error);
