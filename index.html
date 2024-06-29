@@ -506,7 +506,7 @@
         let accumulator = 0;
         let intentionalGameOver = false;
         let gameLoopId;
-
+        let activePowerupType = null; 
 
 
 
@@ -1082,6 +1082,11 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
         function applyPowerUpEffect(powerupType) {
     let message = '';
     let duration = 0;
+
+    function activatePowerup(powerupType) {
+  // ... (other powerup activation logic)
+  activePowerupType = powerupType;
+}
     
     switch (powerupType) {
         case 'bitcoin':
