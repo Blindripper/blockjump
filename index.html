@@ -346,6 +346,43 @@
             color: #FFFFFF;
             font-family: 'Orbitron', sans-serif;;
         }
+
+        .canvas-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    font-size: 24px;
+    font-family: 'Orbitron', sans-serif;
+    color: #FFFFFF;
+    background-color: #3FE1B0;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
+    text-transform: uppercase;
+}
+
+.canvas-button:hover {
+    background-color: #2DC898;
+    box-shadow: 0 0 30px rgba(63, 225, 176, 0.8);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.canvas-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-family: 'Orbitron', sans-serif;
+    color: #FFFFFF;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
         #submitScore {
             width: 100%;
             padding: 10px;
@@ -397,7 +434,6 @@
             <div id="controls">
                 <button id="highscoresButton">Get Highscores</button>
                 <button id="updateScoreButton">Update Highscore</button>
-                <button id="start-game-button">Start Game</button>
 
                 <p id="output"></p>
             </div>
@@ -654,6 +690,13 @@
 
         async function startGame() {
     console.log('Starting game...');
+    clearCanvasOverlays();
+    
+    if (!isConnected) {
+        console.log('Wallet not connected');
+        return;
+    }
+
     try {
         const tries = await getGameTries();
         console.log('Current game tries:', tries);
@@ -664,20 +707,22 @@
                 resetGame();
                 console.log('Game reset. Setting gameRunning to true...');
                 gameRunning = true;
-                lastTime = performance.now(); // Initialize lastTime
-                requestAnimationFrame(gameLoop); // Start the game loop
+                gameOver = false;
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
                 updateTryCount();
             } else {
                 console.log('Failed to use a game try');
             }
         } else {
             console.log('No more tries left. Please purchase more.');
+            drawCanvasMessage('No more tries left. Please purchase more.');
         }
     } catch (error) {
         console.error('Error starting game:', error);
     }
     console.log('End of startGame function. gameRunning:', gameRunning);
-}   
+}     
 
 if (gameRunning) {
     console.log('Starting game loop');
@@ -1084,6 +1129,7 @@ function gameLoop(currentTime) {
     } catch (error) {
         console.error('Error updating end game state:', error);
     }
+    draw();
 }
 
 async function submitHighscore(name) {
@@ -1230,6 +1276,7 @@ function showClaimPrizeButton() {
                 // Update stage name when background changes
                 updateStageName();
             }
+            draw();
         }
 
          // Make sure game is in a startable state
@@ -1549,6 +1596,25 @@ console.log('Drawing frame');
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
+            if (!gameRunning) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (!isConnected) {
+            drawCanvasMessage('Please connect your wallet to play');
+        } else if (gameOver) {
+            drawCanvasButton('Try Again', startGame);
+        } else {
+            const tries = parseInt(document.getElementById('triesLeft').textContent);
+            if (tries > 0) {
+                drawCanvasButton('Start Game', startGame);
+            } else {
+                drawCanvasMessage('Please buy more tries');
+            }
+        }
+    }
+
+
             // Draw player
             
             if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
@@ -1706,12 +1772,32 @@ console.log('Drawing frame');
             
         }
 
+        function drawCanvasButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'canvas-button';
+    button.onclick = onClick;
+    document.body.appendChild(button);
+}
+
+function drawCanvasMessage(text) {
+    const message = document.createElement('div');
+    message.textContent = text;
+    message.className = 'canvas-message';
+    document.body.appendChild(message);
+}
+
+function clearCanvasOverlays() {
+    const overlays = document.querySelectorAll('.canvas-button, .canvas-message');
+    overlays.forEach(overlay => overlay.remove());
+} 
+
 
         function resetGame() {
             console.log('Resetting game...');
             document.dispatchEvent(new Event('gameReset'));
-            
-            
+            clearCanvasOverlays();
+            document.dispatchEvent(new Event('gameReset')); 
             gameRunning = true;
             gameOver = false;
             lastTime = performance.now();
@@ -1801,6 +1887,8 @@ console.log('Drawing frame');
             initGame();
     
             console.log('Game reset complete.');
+            
+            draw();
 
         }
 
@@ -2007,6 +2095,8 @@ function updateButtonState() {
         buyButton.style.display = 'none';
         tryCounter.style.display = 'none';
     }
+
+    draw();
 }
 
 
