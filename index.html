@@ -758,6 +758,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
             if (await useGameTry()) {
                 console.log('Game try used successfully. Resetting game...');
                 resetGame();
+                initGame();
                 console.log('Game reset. Setting gameRunning to true...');
                 gameRunning = true;
                 gameOver = false;
@@ -2068,6 +2069,7 @@ async function checkAndDisplayStartButton() {
         }
     } catch (error) {
         console.error('Error checking game tries:', error);
+        drawCanvasMessage('Error checking game tries. Please try again.');
     }
 }
 
@@ -2118,7 +2120,7 @@ function populatePowerupBar() {
     preloadSounds();
 
 
-    initGame();
+    
     console.log('Initialization complete');
 }  
 
@@ -2142,6 +2144,7 @@ function populatePowerupBar() {
                 updateTryCount();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 updateHighscoreTable();
+                checkAndDisplayStartButton();
                 updateButtonState();
                 draw();
             }
