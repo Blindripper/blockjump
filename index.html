@@ -129,8 +129,8 @@
 
 #highscoreSection {
     position: relative;
-    top: 0;
-    left: 0;
+    top: 50;
+    left: 1;
     width: 100%;
 }
 
@@ -849,12 +849,7 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
                     }
                 }, 100); // Update every 0.1 seconds for smoother countdown
 
-                // Clear the interval when the game ends or resets
-                const clearTimer = () => {
-                    clearInterval(timerInterval);
-                    powerupItem.classList.remove('active');
-                    timerElement.textContent = '';
-                };
+                
 
                 // Add event listeners to clear the timer when needed
                 document.addEventListener('gameOver', clearTimer, { once: true });
