@@ -349,8 +349,6 @@
 
         .canvas-button {
     position: absolute;
-    top: 50%;
-    left: 50%;
     transform: translate(-50%, -50%);
     padding: 15px 30px;
     font-size: 24px;
@@ -363,6 +361,7 @@
     transition: all 0.3s ease;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
     text-transform: uppercase;
+    z-index: 1000; /* Ensure it's above other elements */
 }
 
 .canvas-button:hover {
@@ -1576,7 +1575,9 @@ console.log('Updating game state, dt:', dt);
         }
 
         function draw() {
+            console.log('Drawing. gameRunning:', gameRunning, 'isConnected:', isConnected, 'gameOver:', gameOver);
 console.log('Drawing frame');
+ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'red';
     ctx.fillRect(0, 0, 50, 50);
             if (!ctx) {
@@ -1584,7 +1585,7 @@ console.log('Drawing frame');
                 return;
             }
             applyScreenShake(ctx);
-
+            
             // Draw current background
             const currentBg = backgrounds[currentBackgroundIndex];
             const playerSprite = sprites.get('player');
@@ -1777,6 +1778,13 @@ console.log('Drawing frame');
     button.textContent = text;
     button.className = 'canvas-button';
     button.onclick = onClick;
+    
+    const canvasRect = canvas.getBoundingClientRect();
+    button.style.position = 'absolute';
+    button.style.left = `${canvasRect.left + canvas.width / 2}px`;
+    button.style.top = `${canvasRect.top + canvas.height / 2}px`;
+
+
     document.body.appendChild(button);
 }
 
@@ -2042,6 +2050,7 @@ function populatePowerupBar() {
                 updateTryCount();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 updateHighscoreTable();
+                draw();
             }
         } catch (error) {
             console.error('Failed to connect to Web3:', error);
@@ -2059,6 +2068,7 @@ function populatePowerupBar() {
             console.error('Failed to disconnect from Web3:', error);
             alert('Failed to disconnect from Web3. Please try again.');
         }
+        draw();
     }
 });
 
@@ -2069,6 +2079,7 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
             console.log('Game tries purchased successfully');
             alert('10 game tries purchased successfully!');
             updateTryCount();
+            draw();
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
