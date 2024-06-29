@@ -455,6 +455,10 @@
         let lastTime = 0;
         const fixedDeltaTime = 1 / 60; // 60 FPS
         let accumulator = 0;
+        let intentionalGameOver = false;
+        let gameLoopId;
+
+
 
 
         // Global canvas variables
@@ -708,7 +712,7 @@
                 gameRunning = true;
                 gameOver = false;
                 lastTime = performance.now();
-                requestAnimationFrame(gameLoop);
+                gameLoopId = requestAnimationFrame(gameLoop);
                 updateTryCount();
             } else {
                 console.log('Failed to use a game try');
@@ -728,23 +732,30 @@ if (gameRunning) {
     requestAnimationFrame(gameLoop);
 }
 
+
+
 function gameLoop(currentTime) {
     console.log('Game loop running, time:', currentTime);
     
-    if (gameRunning) {
-        let dt = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
-
-        console.log('Updating game state');
-        update(dt);
-        
-        console.log('Drawing game');
-        draw();
-
-        requestAnimationFrame(gameLoop);
-    } else {
-        console.log('Game is not running');
+    if (!gameRunning || gameOver) {
+        console.log('Game is not running or is over');
+        cancelAnimationFrame(gameLoopId);
+        return;
     }
+
+    gameLoopId = requestAnimationFrame(gameLoop);
+
+    let dt = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
+
+    console.log('Updating game state, dt:', dt);
+    update(dt);
+    
+    console.log('Drawing game');
+    draw();
+
+    // Debug information
+    console.log(`Debug: Blocks: ${debugInfo.totalBlocksClimbed}, Powerups: ${powerups.length}, Difficulty: ${difficultyLevel}`);
 }
 
 
@@ -1112,7 +1123,7 @@ function gameLoop(currentTime) {
     gameOver = true;
     gameRunning = false;
     console.log('Game ended with score:', window.finalScore, 'and blocks climbed:', window.blocksClimbed);
-    
+    cancelAnimationFrame(gameLoopId);
     // Display game over text
     ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1122,7 +1133,7 @@ function gameLoop(currentTime) {
     ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
     ctx.font = '24px Orbitron, sans-serif';
     ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 10);
-
+    drawGameOver();
     // Show the name input form
     document.getElementById('nameForm').style.display = 'block';
 
@@ -1133,6 +1144,7 @@ function gameLoop(currentTime) {
     } catch (error) {
         console.error('Error updating end game state:', error);
     }
+    intentionalGameOver = false; 
     draw();
 }
 
@@ -1169,6 +1181,8 @@ function showClaimPrizeButton() {
                 console.log(`Difficulty increased to level ${difficultyLevel}. New platform speed: ${PLATFORM_SPEED}`);
             }
         }
+
+
 
         function adjustGameParameters() {
             // Adjust game parameters based on difficulty level
@@ -1425,9 +1439,12 @@ console.log('Updating game state, dt:', dt);
                         player.x < platform.x + platform.width &&
                         player.x + player.width > platform.x) {
                         if (platform.isSpike) {
+                            intentionalGameOver = true;
                             gameOver = true;
                             gameRunning = false;
+                            endGame(score, blocksClimbed);
                             playSound('gameOver');
+                            return;
                         } else {
                             player.y = platform.y - player.height;
                             player.velocityY = 0;
@@ -1581,7 +1598,7 @@ console.log('Updating game state, dt:', dt);
 
             if (gameOver && !intentionalGameOver) {
         console.error('Unexpected game over condition');
-        gameOver = false;
+        endGame(score, blocksClimbed);
             }
         }
 
