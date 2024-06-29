@@ -291,6 +291,14 @@
             text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
             text-align: center;
 
+            .powerup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Adjust gap for spacing between icon and description */
+  justify-content: flex-end; /* Align items at the bottom */
+  width: 100%; /* Occupy full width of the powerup item */
+}
+
         }
         #windIndicator {
             position: absolute;
@@ -308,10 +316,14 @@
             text-align: center;
         }
         
-        .powerup-item.active {
-            background-color: rgba(255, 215, 0, 0.3);
-            border-radius: 5px;
-        }
+        .powerup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Adjust gap for spacing between icon and description */
+  justify-content: flex-end; /* Align items at the bottom */
+  width: 100%; /* Occupy full width of the powerup item */
+}
+
       
         .powerup-item {
     display: flex;
@@ -322,6 +334,14 @@
     padding: 5px;
     width: 50px;
 }
+
+.powerup-item.active {
+    background-color: rgba(255, 215, 0, 0.3);
+    border-radius: 5px;
+}
+
+
+
 
 .powerup-icon {
     width: 30px;
