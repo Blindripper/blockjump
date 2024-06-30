@@ -494,7 +494,7 @@
         
     </div>
     <script type="module" src="web3Integration.js"></script>
-    <script type="module">import { initWeb3, startGame, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
+    <script type="module"> import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 
         // Define base URL for the GitHub repository
         const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
@@ -812,7 +812,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        const gameStarted = await startGame(); // Call the new startGame function from web3Integration.js
+        const gameStarted = await startGameWeb3(); // Call the imported function
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
             resetGame();
@@ -832,7 +832,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         drawCanvasMessage('Error starting game. Please try again.');
     }
     console.log('End of startGame function. gameRunning:', gameRunning);
-}     
+}       
 
 if (gameRunning) {
     console.log('Starting game loop');
