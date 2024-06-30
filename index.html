@@ -815,7 +815,8 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         const gameStarted = await startGameWeb3(); // Call the imported function
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
-            window.gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
+            gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
+            window.gameStartTime = gameStartTime;
             console.log('Game start time set:', gameStartTime);
             resetGame();
             initGame();
@@ -1239,7 +1240,8 @@ function removeAllPowerupTimerBars() {
         async function endGame(finalScore, finalBlocksClimbed) {
             if (typeof gameStartTime === 'undefined') {
         console.error('gameStartTime is not defined');
-        gameStartTime = Date.now(); // Fallback value
+        alert('There was an issue with the game session. Please try starting a new game.');
+        return;
     }
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
@@ -1261,6 +1263,7 @@ function removeAllPowerupTimerBars() {
     ctx.font = '24px Orbitron, sans-serif';
     ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 10);
     drawGameOver();
+    console.log('Game ended:', { score: finalScore, blocksClimbed: finalBlocksClimbed, gameStartTime: window.gameStartTime });
 
     sounds.background.pause();
     sounds.background.currentTime = 0;
@@ -2275,6 +2278,8 @@ function populatePowerupBar() {
         
     }
 });
+
+
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
