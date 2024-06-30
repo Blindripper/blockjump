@@ -3,223 +3,16 @@
 let web3;
 let contract;
 let account;
+let gameStartTime;
 
 const contractAddress = '0xAA9e942E9221b6954E61167b75f38987096cd8E5'; // Replace with your actual contract address
 const contractABI = [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tries",
-        "type": "uint256"
-      }
-    ],
-    "name": "GameTryPurchased",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "addFunds",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "claimPrize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "contractBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "gameTries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      }
-    ],
-    "name": "getGameTries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getHighscores",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "player",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "score",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blocksClimbed",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct BlockJumpGame.Highscore[10]",
-        "name": "",
-        "type": "tuple[10]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "highscores",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "player",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blocksClimbed",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "purchaseGameTries",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blocksClimbed",
-        "type": "uint256"
-      }
-    ],
-    "name": "submitScore",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "useGameTry",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+  // The entire ABI you provided goes here
 ];
 
 async function initWeb3() {
     if (typeof window.ethereum !== 'undefined') {
         try {
-            // Request account access
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             web3 = new Web3(window.ethereum);
             const accounts = await web3.eth.getAccounts();
@@ -232,7 +25,6 @@ async function initWeb3() {
             return false;
         }
     } else if (typeof window.web3 !== 'undefined') {
-        // Legacy dapp browsers...
         web3 = new Web3(window.web3.currentProvider);
         const accounts = await web3.eth.getAccounts();
         account = accounts[0];
@@ -245,26 +37,27 @@ async function initWeb3() {
     }
 }
 
-async function useGameTry() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const gasPrice = await web3.eth.getGasPrice();
-      const gasEstimate = await contract.methods.useGameTry().estimateGas({from: account});
+async function startGame() {
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
+    try {
+        const gasPrice = await web3.eth.getGasPrice();
+        const gasEstimate = await contract.methods.startGame().estimateGas({from: account});
 
-      const result = await contract.methods.useGameTry().send({ 
-          from: account,
-          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-          gasPrice: gasPrice
-      });
-      console.log('Game try used successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error using game try:', error);
-      return false;
-  }
+        const result = await contract.methods.startGame().send({ 
+            from: account,
+            gas: Math.round(gasEstimate * 1.2),
+            gasPrice: gasPrice
+        });
+        gameStartTime = Math.floor(Date.now() / 1000); // Current time in seconds
+        console.log('Game started successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error starting game:', error);
+        return false;
+    }
 }
 
 async function getGameTries() {
@@ -282,30 +75,29 @@ async function getGameTries() {
 }
 
 async function purchaseGameTries() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const gasPrice = await web3.eth.getGasPrice();
-      const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
-          from: account,
-          value: web3.utils.toWei('10000000000000000', 'wei')
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
+    try {
+        const gasPrice = await web3.eth.getGasPrice();
+        const gasEstimate = await contract.methods.purchaseGameTries().estimateGas({
+            from: account,
+            value: web3.utils.toWei('0.01', 'ether')
+        });
 
-      });
-
-      const result = await contract.methods.purchaseGameTries().send({ 
-          from: account, 
-          value: web3.utils.toWei('10000000000000000', 'wei'),
-          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-          gasPrice: gasPrice
-      });
-      console.log('Game tries purchased successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error purchasing game tries:', error);
-      return false;
-  }
+        const result = await contract.methods.purchaseGameTries().send({ 
+            from: account, 
+            value: web3.utils.toWei('0.01', 'ether'),
+            gas: Math.round(gasEstimate * 1.2),
+            gasPrice: gasPrice
+        });
+        console.log('Game tries purchased successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error purchasing game tries:', error);
+        return false;
+    }
 }
 
 async function getHighscores() {
@@ -328,77 +120,80 @@ async function getHighscores() {
 }
 
 async function submitScore(name, score, blocksClimbed) {
-  if (!contract || !account) {
-    console.error('Contract not initialized or account not available');
-    return false;
-  }
-  
-  // Add these checks
-  if (typeof name !== 'string' || name.length === 0) {
-    console.error('Invalid name provided');
-    return false;
-  }
-  if (typeof score !== 'number' || isNaN(score)) {
-    console.error('Invalid score provided');
-    return false;
-  }
-  if (typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
-    console.error('Invalid blocksClimbed provided');
-    return false;
-  }
+    if (!contract || !account || !gameStartTime) {
+        console.error('Contract not initialized, account not available, or game not started');
+        return false;
+    }
+    
+    if (typeof name !== 'string' || name.length === 0) {
+        console.error('Invalid name provided');
+        return false;
+    }
+    if (typeof score !== 'number' || isNaN(score)) {
+        console.error('Invalid score provided');
+        return false;
+    }
+    if (typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
+        console.error('Invalid blocksClimbed provided');
+        return false;
+    }
 
-  try {
-    const gasPrice = await web3.eth.getGasPrice();
-    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed).estimateGas({from: account});
+    try {
+        const gasPrice = await web3.eth.getGasPrice();
+        const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).estimateGas({from: account});
 
-    const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
-      from: account,
-      gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-      gasPrice: gasPrice
-    });
-    console.log('Score submitted successfully:', result);
-    return true;
-  } catch (error) {
-    console.error('Error submitting score:', error);
-    return false;
-  }
+        const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ 
+            from: account,
+            gas: Math.round(gasEstimate * 1.2),
+            gasPrice: gasPrice
+        });
+        console.log('Score submitted successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error submitting score:', error);
+        return false;
+    }
 }
 
 async function claimPrize() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
-  try {
-      const gasPrice = await web3.eth.getGasPrice();
-      const gasEstimate = await contract.methods.claimPrize().estimateGas({from: account});
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
+    try {
+        const gasPrice = await web3.eth.getGasPrice();
+        const gasEstimate = await contract.methods.claimPrize().estimateGas({from: account});
 
-      const result = await contract.methods.claimPrize().send({ 
-          from: account,
-          gas: Math.round(gasEstimate * 1.2), // Add 20% buffer
-          gasPrice: gasPrice
-      });
-      console.log('Prize claimed successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error claiming prize:', error);
-      return false;
-  }
+        const result = await contract.methods.claimPrize().send({ 
+            from: account,
+            gas: Math.round(gasEstimate * 1.2),
+            gasPrice: gasPrice
+        });
+        console.log('Prize claimed successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('Error claiming prize:', error);
+        return false;
+    }
 }
 
-// Event listeners for MetaMask account changes and network changes
 if (window.ethereum) {
     window.ethereum.on('accountsChanged', function (accounts) {
         account = accounts[0];
         console.log('Account changed to:', account);
-        // You might want to refresh the UI or re-initialize some game state here
     });
 
     window.ethereum.on('chainChanged', function (chainId) {
         console.log('Network changed to:', chainId);
-        // You might want to check if the user is on the correct network here
-        // and prompt them to switch if they're not
     });
 }
 
-export { initWeb3, purchaseGameTries, getGameTries, getHighscores, submitScore, claimPrize, useGameTry };
+export { 
+    initWeb3, 
+    startGame, 
+    getGameTries, 
+    purchaseGameTries, 
+    getHighscores, 
+    submitScore, 
+    claimPrize 
+};
