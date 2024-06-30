@@ -355,6 +355,21 @@ async function getGameTries() {
     }
 }
 
+async function getContractBalance() {
+  if (!contract) {
+    console.error('Contract not initialized');
+    return 0; // Or another default value
+  }
+
+  try {
+    const balance = await contract.methods.contractBalance().call();
+    return parseInt(balance); // Assuming the contract uses an integer for balance
+  } catch (error) {
+    console.error('Error fetching contract balance:', error);
+    return 0; // Or another default value
+  }
+}
+
 async function purchaseGameTries() {
   if (!contract || !account) {
       console.error('Contract not initialized or account not available');
@@ -485,5 +500,6 @@ export {
     purchaseGameTries, 
     getHighscores, 
     submitScore, 
-    claimPrize, 
+    claimPrize,
+    getContractBalance, 
 };
