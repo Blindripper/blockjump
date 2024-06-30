@@ -447,6 +447,7 @@
     </style>
 </head>
 <body>
+    
     <div id="header">
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
         <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
@@ -456,7 +457,9 @@
     <div id="left-sidebar">
         <h2>Contract Information</h2>
         <p id="contract-balance"></p>
-        <script>
+        <script type="module" src="web3Integration.js"></script>
+
+        <script type="module">
           (async () => {
             const balance = await getContractBalance(); // Call the function from web3Integration.js
             document.getElementById("contract-balance").textContent = `Jackpot: ${balance}`;
