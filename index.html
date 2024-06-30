@@ -453,6 +453,16 @@
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
+    <div id="left-sidebar">
+        <h2>Contract Information</h2>
+        <p id="contract-balance"></p>
+        <script>
+          (async () => {
+            const balance = await getContractBalance(); // Call the function from web3Integration.js
+            document.getElementById("contract-balance").textContent = `Jackpot: ${balance}`;
+          })();
+        </script>
+      </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
             <div class="section-title">Highscores</div>
