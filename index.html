@@ -2357,21 +2357,8 @@ function updateButtonState() {
         return;
     }
 
-    if (typeof window.finalScore !== 'number' || isNaN(window.finalScore) || 
-        typeof window.blocksClimbed !== 'number' || isNaN(window.blocksClimbed) ||
-        typeof window.gameStartTime !== 'number' || isNaN(window.gameStartTime)) {
-        console.error('Invalid score data:', { 
-            score: window.finalScore, 
-            blocksClimbed: window.blocksClimbed, 
-            gameStartTime: window.gameStartTime 
-        });
-        alert('An error occurred. Please try again.');
-        return;
-    }
-
-    console.log('Submitting score:', { 
-        name, 
-        score: window.finalScore, 
+    console.log('Form submitted. Current game data:', { 
+        finalScore: window.finalScore, 
         blocksClimbed: window.blocksClimbed, 
         gameStartTime: window.gameStartTime 
     });
@@ -2384,11 +2371,11 @@ function updateButtonState() {
             alert('Score submitted successfully!');
         } else {
             console.error('Failed to submit score');
-            alert('Failed to submit score. Please try again.');
+            alert('Failed to submit score. Please check the console for more details.');
         }
     } catch (error) {
         console.error('Error during score submission:', error);
-        alert('An error occurred while submitting your score. Please try again.');
+        alert('An error occurred while submitting your score. Please check the console for more details.');
     }
 
     this.style.display = 'none';
