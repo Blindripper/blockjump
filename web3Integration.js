@@ -347,19 +347,39 @@ async function getHighscores() {
     }
 }
 
-async function submitScore(name, score, blocksClimbed, gameStartTime) {
+async function submitScore(name, score, blocksClimbed) {
   if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+    console.error('Contract not initialized or account not available');
+    return false;
   }
+  
+  if (typeof name !== 'string' || name.length === 0) {
+    console.error('Invalid name provided');
+    return false;
+  }
+  if (typeof score !== 'number' || isNaN(score)) {
+    console.error('Invalid score provided');
+    return false;
+  }
+  if (typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
+    console.error('Invalid blocksClimbed provided');
+    return false;
+  }
+
   try {
-      console.log('Submitting score:', { name, score, blocksClimbed, gameStartTime });
-      const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ from: account });
-      console.log('Score submitted successfully:', result);
-      return true;
+    const gasPrice = await web3.eth.getGasPrice();
+    const manualGasEstimate = 200000; // Manual gas estimate
+
+    const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
+      from: account,
+      gas: manualGasEstimate,
+      gasPrice: gasPrice
+    });
+    console.log('Score submitted successfully:', result);
+    return true;
   } catch (error) {
-      console.error('Error submitting score:', error);
-      return false;
+    console.error('Error submitting score:', error);
+    return false;
   }
 }
 
