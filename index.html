@@ -2351,6 +2351,7 @@ function updateButtonState() {
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
+    console.log('Submitting score:', { name, score, blocksClimbed, gameStartTime });
     const score = window.finalScore;
     const blocksClimbed = window.blocksClimbed;
 
