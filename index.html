@@ -325,15 +325,7 @@
 }
 
       
-        .powerup-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-    padding: 5px;
-    width: 50px;
-}
+
 
 .powerup-item.active {
     background-color: rgba(255, 215, 0, 0.3);
@@ -506,8 +498,7 @@
         let accumulator = 0;
         let intentionalGameOver = false;
         let gameLoopId;
-        let activePowerupType = null; 
-
+        
 
 
         // Global canvas variables
@@ -652,7 +643,9 @@
 }
 
 function createPowerupTimerBar(type, duration) {
-    const powerupTimers = document.getElementById('powerupTimers');
+    const powerupElement = document.getElementById(`powerup-${type}`);
+    if (!powerupElement) return null;
+
     const timerBar = document.createElement('div');
     timerBar.className = 'powerup-timer-bar';
     timerBar.id = `powerup-timer-${type}`;
@@ -661,14 +654,8 @@ function createPowerupTimerBar(type, duration) {
     progress.className = 'powerup-timer-progress';
     
     timerBar.appendChild(progress);
-    powerupTimers.appendChild(timerBar);
+    powerupElement.appendChild(timerBar);
 
-    // Check for active powerup and add the 'active' class if necessary
-  if (type === activePowerupType) { // Assuming 'activePowerupType' is defined elsewhere
-    timerBar.classList.add('active');
-  }
-
-    
     return { timerBar, progress };
 }
 
@@ -1083,11 +1070,6 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
     let message = '';
     let duration = 0;
 
-    function activatePowerup(powerupType) {
-  // ... (other powerup activation logic)
-  activePowerupType = powerupType;
-}
-    
     switch (powerupType) {
         case 'bitcoin':
             powerupActive = true;
@@ -1146,20 +1128,23 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
     }
     
     if (duration > 0) {
-        const { timerBar, progress } = createPowerupTimerBar(powerupType, duration);
-        let timeLeft = duration;
-        const timerInterval = setInterval(() => {
-            timeLeft -= 0.1;
-            updatePowerupTimerBar(powerupType, timeLeft, duration);
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerBar.remove();
-            }
-        }, 100);
+        const timerBarObj = createPowerupTimerBar(powerupType, duration);
+        if (timerBarObj) {
+            const { timerBar, progress } = timerBarObj;
+            let timeLeft = duration;
+            const timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                const percentage = (timeLeft / duration) * 100;
+                progress.style.width = `${percentage}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerBar.remove();
+                }
+            }, 100);
+        }
     }
 
-    // Update the powerup count in the UI
     const powerupElement = document.getElementById(`powerup-${powerupType}`);
     if (powerupElement) {
         const countElement = powerupElement.querySelector('.powerup-count');
@@ -1172,7 +1157,7 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
     playSound('powerup');
     score += powerupDescriptions[powerupType].points;
     showPowerupMessage(message);
-}
+} 
 
         function handleBlastEffect() {
             const blastRadius = 200; // Adjust this value to change the collection range
