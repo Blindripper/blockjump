@@ -261,6 +261,13 @@ async function initWeb3() {
             const accounts = await web3.eth.getAccounts();
             account = accounts[0];
             contract = new web3.eth.Contract(contractABI, contractAddress);
+            console.log('Contract initialized:', contract);
+    console.log('Contract methods:', contract.methods);
+
+            if (!contract.methods) {
+              throw new Error('Contract methods not available');
+          }
+
             console.log('Web3 initialized, user connected:', account);
             return true;
         } catch (error) {
