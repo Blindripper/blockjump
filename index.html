@@ -562,15 +562,6 @@
             document.getElementById('blockCounter').textContent = `Blocks Climbed: ${blocksClimbed}`;
         }
 
-        function updateClaimPrizeButton(highscores) {
-    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
-    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === account) {
-        claimPrizeBtn.style.display = 'block';
-    } else {
-        claimPrizeBtn.style.display = 'none';
-    }
-} 
-
         const POWERUP_MESSAGE_DURATION = 1000; // Duration in milliseconds
 
         function showPowerupMessage(message) {
