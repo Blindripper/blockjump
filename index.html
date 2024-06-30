@@ -2353,7 +2353,6 @@ function updateButtonState() {
     const name = document.getElementById('nameInput').value.trim();
     const score = window.finalScore;
     const blocksClimbed = window.blocksClimbed;
-    const gameStartTime = window.gameStartTime;
 
     if (!name) {
         alert('Please enter a valid name');
@@ -2383,7 +2382,7 @@ function updateButtonState() {
     }
 
     this.style.display = 'none';
-});
+}); 
 
     // Keyboard input handling
     document.addEventListener('keydown', (e) => {
