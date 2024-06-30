@@ -2074,6 +2074,8 @@ async function updateHighscoreTable() {
     const highscores = await getHighscores();
     let currentAccount;
 
+    console.log('Fetched highscores:', highscores);
+
     if (!highscores || !Array.isArray(highscores)) {
       console.error('Invalid highscores data:', highscores);
       return;
@@ -2083,8 +2085,8 @@ async function updateHighscoreTable() {
     if (window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       currentAccount = accounts[0];
+      console.log('Current account:', currentAccount);
     } else {
-      // Add alternative method to get the account if not using Ethereum
       console.log('Ethereum provider not found. Using alternative method.');
       // currentAccount = ... (get account from your blockchain provider)
     }
@@ -2112,10 +2114,10 @@ async function updateHighscoreTable() {
 
     // Call updateClaimPrizeButton only once, with the correct account
     if (currentAccount) {
+      console.log('Calling updateClaimPrizeButton with:', { highscores, currentAccount });
       updateClaimPrizeButton(highscores, currentAccount);
     } else {
-      console.log('No account connected');
-      // Handle the case where no account is connected
+      console.log('No account connected, not updating claim prize button');
     }
 
   } catch (error) {
@@ -2124,13 +2126,20 @@ async function updateHighscoreTable() {
 }
 
 function updateClaimPrizeButton(highscores, currentAccount) {
+    console.log('Updating claim prize button:', { isConnected, highscores, currentAccount });
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
-    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === currentAccount) {
-        claimPrizeBtn.style.display = 'block';
+    if (claimPrizeBtn) {
+        if (isConnected && highscores && highscores.length > 0 && highscores[0].player === currentAccount) {
+            console.log('Showing claim prize button');
+            claimPrizeBtn.style.display = 'block';
+        } else {
+            console.log('Hiding claim prize button');
+            claimPrizeBtn.style.display = 'none';
+        }
     } else {
-        claimPrizeBtn.style.display = 'none';
+        console.error('Claim prize button not found in the DOM');
     }
-} 
+}
 
 async function checkAndDisplayStartButton() {
     try {
