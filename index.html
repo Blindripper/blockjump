@@ -262,6 +262,18 @@
             background-color: #ff6b6b;
             transform: scale(1.05);
         }
+
+        #claimPrizeBtn {
+    margin-top: 20px;
+    background-color: #FFD700;
+    color: #16213e;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+#claimPrizeBtn:hover {
+    background-color: #FFA500;
+}   
         
         #controls {
     grid-column: 2;
@@ -445,7 +457,8 @@
         <div id="highscoreSection">
             <div class="section-title">Highscores</div>
             <table id="highscoreTable">
-                <thead>
+                <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
+                 <thead>
                     <tr>
                         <th>Rank</th>
                         <th>Name</th>
@@ -548,6 +561,15 @@
         function updateBlockCounter() {
             document.getElementById('blockCounter').textContent = `Blocks Climbed: ${blocksClimbed}`;
         }
+
+        function updateClaimPrizeButton(highscores) {
+    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
+    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === account) {
+        claimPrizeBtn.style.display = 'block';
+    } else {
+        claimPrizeBtn.style.display = 'none';
+    }
+} 
 
         const POWERUP_MESSAGE_DURATION = 1000; // Duration in milliseconds
 
@@ -2056,7 +2078,7 @@ function resetGame() {
     }
 }
 
-        async function updateHighscoreTable() {
+async function updateHighscoreTable() {
   try {
     const highscores = await getHighscores();
     if (!highscores || !Array.isArray(highscores)) {
@@ -2082,10 +2104,23 @@ function resetGame() {
         highscoreBody.appendChild(row);
       }
     });
+
+    // Update the Claim Prize button visibility
+    updateClaimPrizeButton(highscores);
+
   } catch (error) {
     console.error('Error updating highscore table:', error);
   }
 }
+
+function updateClaimPrizeButton(highscores) {
+    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
+    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === account) {
+        claimPrizeBtn.style.display = 'block';
+    } else {
+        claimPrizeBtn.style.display = 'none';
+    }
+}    
 
 async function checkAndDisplayStartButton() {
     try {
@@ -2216,6 +2251,21 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
         alert('Failed to purchase game tries. Please try again.');
+    }
+});
+
+document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
+    try {
+        const result = await claimPrize();
+        if (result) {
+            alert('Prize claimed successfully! Congratz!');
+            updateHighscoreTable(); // Refresh the table and button state
+        } else {
+            alert('Failed to claim prize. Not eligble.');
+        }
+    } catch (error) {
+        console.error('Error claiming prize:', error);
+        alert('An error occurred while claiming the prize. Please try again.');
     }
 });
 
