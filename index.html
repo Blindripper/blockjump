@@ -815,7 +815,8 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         const gameStarted = await startGameWeb3(); // Call the imported function
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
-            gameStartTime = Date.now();
+            gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
+            console.log('Game start time set:', gameStartTime);
             resetGame();
             initGame();
             console.log('Game reset. Setting gameRunning to true...');
@@ -823,7 +824,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
             gameOver = false;
             lastTime = performance.now();
             gameLoopId = requestAnimationFrame(gameLoop);
-            updateTryCount();
+            await updateTryCount();
         } else {
             console.log('Failed to start game');
             drawCanvasMessage('Failed to start game. Please try again.');
@@ -832,8 +833,8 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         console.error('Error starting game:', error);
         drawCanvasMessage('Error starting game. Please try again.');
     }
-    console.log('End of startGame function. gameRunning:', gameRunning);
-}       
+    console.log('End of startGame function. gameRunning:', gameRunning, 'gameStartTime:', gameStartTime);
+}     
 
 if (gameRunning) {
     console.log('Starting game loop');
@@ -1243,6 +1244,8 @@ function removeAllPowerupTimerBars() {
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
+    console.log('Game ended:', { score: window.finalScore, blocksClimbed: window.blocksClimbed, gameStartTime: window.gameStartTime });
+
     gameOver = true;
     gameRunning = false;
     removeAllPowerupTimerBars();
@@ -2339,38 +2342,40 @@ function updateButtonState() {
     
 
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const name = document.getElementById('nameInput').value.trim();
-  const score = window.finalScore;
-  const blocksClimbed = window.blocksClimbed;
-  const gameStartTime = window.gameStartTime;
+    e.preventDefault();
+    const name = document.getElementById('nameInput').value.trim();
+    const score = window.finalScore;
+    const blocksClimbed = window.blocksClimbed;
+    const gameStartTime = window.gameStartTime;
 
-  if (!name) {
-    alert('Please enter a valid name');
-    return;
-  }
-
-  if (typeof score !== 'number' || isNaN(score) || typeof blocksClimbed !== 'number' || isNaN(blocksClimbed) || typeof gameStartTime !== 'number' || isNaN(gameStartTime)) {
-    console.error('Invalid score or blocksClimbed:', { score, blocksClimbed });
-    alert('An error occurred. Please try again.');
-    return;
-  }
-
-  try {
-    const submitted = await submitScore(name, score, blocksClimbed);
-    if (submitted) {
-      console.log('Score submitted successfully');
-      await updateHighscoreTable();
-    } else {
-      console.error('Failed to submit score');
-      alert('Failed to submit score. Please try again.');
+    if (!name) {
+        alert('Please enter a valid name');
+        return;
     }
-  } catch (error) {
-    console.error('Error during score submission:', error);
-    alert('An error occurred while submitting your score. Please try again.');
-  }
 
-  this.style.display = 'none';
+    if (typeof score !== 'number' || isNaN(score) || 
+        typeof blocksClimbed !== 'number' || isNaN(blocksClimbed) ||
+        typeof gameStartTime !== 'number' || isNaN(gameStartTime)) {
+        console.error('Invalid score data:', { score, blocksClimbed, gameStartTime });
+        alert('An error occurred. Please try again.');
+        return;
+    }
+
+    try {
+        const submitted = await submitScore(name, score, blocksClimbed, gameStartTime);
+        if (submitted) {
+            console.log('Score submitted successfully');
+            await updateHighscoreTable();
+        } else {
+            console.error('Failed to submit score');
+            alert('Failed to submit score. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error during score submission:', error);
+        alert('An error occurred while submitting your score. Please try again.');
+    }
+
+    this.style.display = 'none';
 });
 
     // Keyboard input handling
