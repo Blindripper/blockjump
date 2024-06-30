@@ -388,6 +388,7 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
     return true;
   } catch (error) {
     console.error('Error submitting score:', error);
+    if (error.message) console.error('Error message:', error.message);
     return false;
   }
 }
