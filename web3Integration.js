@@ -356,29 +356,30 @@ async function getGameTries() {
 }
 
 async function purchaseGameTries() {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    
-    if (purchased) {
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+
+  try {
+      const result = await contract.methods.purchaseGameTries().send({ 
+          from: account, 
+          value: web3.utils.toWei('0.01', 'ether')
+      });
+      console.log('Game tries purchased successfully:', result);
+
+      // Set gameStartTime after successful purchase
       gameStartTime = Math.floor(Date.now() / 1000);
       window.gameStartTime = gameStartTime;
-      console.log('Game tries purchased and game start time set:', gameStartTime);
-    }
+      console.log('Game start time set:', gameStartTime);
 
-    try {
-        const result = await contract.methods.purchaseGameTries().send({ 
-            from: account, 
-            value: web3.utils.toWei('0.01', 'ether')
-        });
-        console.log('Game tries purchased successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error purchasing game tries:', error);
-        return false;
-    }
+      return true;
+  } catch (error) {
+      console.error('Error purchasing game tries:', error);
+      return false;
+  }
 }
+
 
 async function getHighscores() {
     if (!contract) {
