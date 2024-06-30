@@ -2096,22 +2096,21 @@ async function updateHighscoreTable() {
       }
     });
 
-    // Update the Claim Prize button visibility
-    updateClaimPrizeButton(highscores);
+    updateClaimPrizeButton(highscores, account);
 
   } catch (error) {
     console.error('Error updating highscore table:', error);
   }
 }
 
-function updateClaimPrizeButton(highscores) {
+function updateClaimPrizeButton(highscores, currentAccount) {
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
-    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === account) {
+    if (isConnected && highscores && highscores.length > 0 && highscores[0].player === currentAccount) {
         claimPrizeBtn.style.display = 'block';
     } else {
         claimPrizeBtn.style.display = 'none';
     }
-}    
+} 
 
 async function checkAndDisplayStartButton() {
     try {
