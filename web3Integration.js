@@ -360,6 +360,13 @@ async function purchaseGameTries() {
         console.error('Contract not initialized or account not available');
         return false;
     }
+    
+    if (purchased) {
+      gameStartTime = Math.floor(Date.now() / 1000);
+      window.gameStartTime = gameStartTime;
+      console.log('Game tries purchased and game start time set:', gameStartTime);
+    }
+
     try {
         const result = await contract.methods.purchaseGameTries().send({ 
             from: account, 
