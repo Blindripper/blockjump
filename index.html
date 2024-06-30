@@ -512,7 +512,7 @@
         let gameLoopId;
         
 
-
+        let gameStartTime;
         // Global canvas variables
         let canvas, ctx;
 
@@ -815,6 +815,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         const gameStarted = await startGameWeb3(); // Call the imported function
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
+            gameStartTime = Date.now();
             resetGame();
             initGame();
             console.log('Game reset. Setting gameRunning to true...');
@@ -1235,6 +1236,10 @@ function removeAllPowerupTimerBars() {
    
 
         async function endGame(finalScore, finalBlocksClimbed) {
+            if (typeof gameStartTime === 'undefined') {
+        console.error('gameStartTime is not defined');
+        gameStartTime = Date.now(); // Fallback value
+    }
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
