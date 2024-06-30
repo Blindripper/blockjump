@@ -5,7 +5,7 @@ let contract;
 let account;
 let gameStartTime;
 
-const contractAddress = '0xd82536EbAa9418218fd771615327f58297422b75'; // Replace if this has changed
+const contractAddress = '0xf4f20F939b5B4bBf2581BB9Ab2ECd8701641821c'; // Replace if this has changed
 const contractABI = [
   {
     "inputs": [],
@@ -29,6 +29,49 @@ const contractABI = [
       }
     ],
     "name": "GameTryPurchased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "blocksClimbed",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "submittedGameStartTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "storedGameStartTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "ScoreSubmitted",
     "type": "event"
   },
   {
@@ -289,6 +332,7 @@ async function startGame() {
     try {
         const result = await contract.methods.startGame().send({ from: account });
         gameStartTime = Math.floor(Date.now() / 1000);
+        window.gameStartTime = gameStartTime;
         console.log('Game started successfully:', result);
         return true;
     } catch (error) {
@@ -357,6 +401,24 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   console.log('Attempting to submit score with:', { name, score, blocksClimbed, gameStartTime });
 
   try {
+    // Get the last game start time from the contract
+    const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+    console.log('Last game start time from contract:', lastGameStartTime);
+
+    // Check if the game start time matches
+    if (gameStartTime != lastGameStartTime) {
+      console.error('Game start time mismatch. Local:', gameStartTime, 'Contract:', lastGameStartTime);
+      return false;
+    }
+
+    // Check if the game session is still valid
+    const currentTime = Math.floor(Date.now() / 1000);
+    const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
+    if (currentTime - gameStartTime > tokenValidityPeriod) {
+      console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
+      return false;
+    }
+
     // Convert numbers to strings to avoid potential BigNumber issues
     const scoreStr = score.toString();
     const blocksClimbedStr = blocksClimbed.toString();
