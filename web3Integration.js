@@ -368,11 +368,12 @@ async function submitScore(name, score, blocksClimbed) {
 
   try {
     const gasPrice = await web3.eth.getGasPrice();
-    const manualGasEstimate = 200000; // Manual gas estimate
+    // Dynamic gas estimation based on current network conditions
+    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed).estimateGas({ from: account });
 
     const result = await contract.methods.submitScore(name, score, blocksClimbed).send({ 
       from: account,
-      gas: manualGasEstimate,
+      gas: gasEstimate, // Use estimated gas
       gasPrice: gasPrice
     });
     console.log('Score submitted successfully:', result);
@@ -382,6 +383,7 @@ async function submitScore(name, score, blocksClimbed) {
     return false;
   }
 }
+
 
 
 async function claimPrize() {
