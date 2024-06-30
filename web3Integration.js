@@ -424,12 +424,6 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
     const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
     console.log('Last game start time from contract:', lastGameStartTime);
 
-    // Check if the game start time matches
-    if (gameStartTime != lastGameStartTime) {
-      console.error('Game start time mismatch. Local:', gameStartTime, 'Contract:', lastGameStartTime);
-      return false;
-    }
-
     // Check if the game session is still valid
     const currentTime = Math.floor(Date.now() / 1000);
     const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
