@@ -2131,11 +2131,14 @@ function updateClaimPrizeButton(highscores, currentAccount) {
     if (claimPrizeBtn) {
         if (isConnected && highscores && highscores.length > 0) {
             const leadingAccount = highscores[0].player;
-            if (leadingAccount === currentAccount) {
-                console.log('Showing claim prize button');
+            console.log('Leading account:', leadingAccount);
+            console.log('Current account:', currentAccount);
+            
+            if (leadingAccount && currentAccount && leadingAccount.toLowerCase() === currentAccount.toLowerCase()) {
+                console.log('Showing claim prize button - account matches leading highscore');
                 claimPrizeBtn.style.display = 'block';
             } else {
-                console.log('Hiding claim prize button - not the leading account');
+                console.log('Hiding claim prize button - account does not match leading highscore');
                 claimPrizeBtn.style.display = 'none';
             }
         } else {
