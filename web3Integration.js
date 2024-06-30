@@ -373,11 +373,17 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   try {
     // Get the current gas price
     let gasPrice = await web3.eth.getGasPrice();
-    // Convert it to a number and reduce it (e.g., by 20%)
-    gasPrice = Math.floor(Number(gasPrice) * 0.8);
+    // Convert it to a number and increase it (e.g., by 20%)
+    gasPrice = Math.floor(Number(gasPrice) * 1.2);
 
-    // Set a fixed gas limit
-    const gasLimit = 200000; // Adjust this value based on your contract's needs
+    // Estimate gas
+    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).estimateGas({ from: account });
+
+    // Increase gas limit by 20%
+    const gasLimit = Math.floor(gasEstimate * 1.2);
+
+    console.log('Submitting score with parameters:', { name, score, blocksClimbed, gameStartTime });
+    console.log('Gas settings:', { gasPrice, gasLimit });
 
     const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ 
       from: account,
