@@ -2072,10 +2072,24 @@ function resetGame() {
 async function updateHighscoreTable() {
   try {
     const highscores = await getHighscores();
+    let currentAccount;
     if (!highscores || !Array.isArray(highscores)) {
       console.error('Invalid highscores data:', highscores);
       return;
     }
+
+    if (window.ethereum) {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            currentAccount = accounts[0];
+        }
+
+        if (currentAccount) {
+            updateClaimPrizeButton(highscores, currentAccount);
+        } else {
+            console.log('No account connected');
+            // Handle the case where no account is connected
+        }
+
     const highscoreBody = document.getElementById('highscoreBody');
     if (!highscoreBody) {
       console.error('Highscore table body not found');
