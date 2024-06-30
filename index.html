@@ -815,7 +815,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         const gameStarted = await startGameWeb3(); // Call the imported function
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
-            gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
+            window.gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
             console.log('Game start time set:', gameStartTime);
             resetGame();
             initGame();
@@ -2354,6 +2354,7 @@ function updateButtonState() {
     console.log('Submitting score:', { name, score, blocksClimbed, gameStartTime });
     const score = window.finalScore;
     const blocksClimbed = window.blocksClimbed;
+    const gameStartTime = window.gameStartTime;
 
     if (!name) {
         alert('Please enter a valid name');
