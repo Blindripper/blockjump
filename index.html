@@ -1242,7 +1242,7 @@ function removeAllPowerupTimerBars() {
         gameStartTime = Date.now(); // Fallback value
     }
     window.finalScore = score;
-    window.blocksClimbed = blocksClimbed;
+    window.blocksClimbed = finalblocksClimbed;
     window.gameStartTime = gameStartTime;
     console.log('Game ended:', { score: window.finalScore, blocksClimbed: window.blocksClimbed, gameStartTime: window.gameStartTime });
 
@@ -2351,26 +2351,33 @@ function updateButtonState() {
     document.getElementById('nameForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
-    console.log('Submitting score:', { name, score, blocksClimbed, gameStartTime });
-    const score = window.finalScore;
-    const blocksClimbed = window.blocksClimbed;
-    const gameStartTime = window.gameStartTime;
-
+    
     if (!name) {
         alert('Please enter a valid name');
         return;
     }
 
-    if (typeof score !== 'number' || isNaN(score) || 
-        typeof blocksClimbed !== 'number' || isNaN(blocksClimbed) ||
-        typeof gameStartTime !== 'number' || isNaN(gameStartTime)) {
-        console.error('Invalid score data:', { score, blocksClimbed, gameStartTime });
+    if (typeof window.finalScore !== 'number' || isNaN(window.finalScore) || 
+        typeof window.blocksClimbed !== 'number' || isNaN(window.blocksClimbed) ||
+        typeof window.gameStartTime !== 'number' || isNaN(window.gameStartTime)) {
+        console.error('Invalid score data:', { 
+            score: window.finalScore, 
+            blocksClimbed: window.blocksClimbed, 
+            gameStartTime: window.gameStartTime 
+        });
         alert('An error occurred. Please try again.');
         return;
     }
 
+    console.log('Submitting score:', { 
+        name, 
+        score: window.finalScore, 
+        blocksClimbed: window.blocksClimbed, 
+        gameStartTime: window.gameStartTime 
+    });
+
     try {
-        const submitted = await submitScore(name, score, blocksClimbed, gameStartTime);
+        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         if (submitted) {
             console.log('Score submitted successfully');
             await updateHighscoreTable();
