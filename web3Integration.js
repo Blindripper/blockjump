@@ -348,19 +348,21 @@ async function getHighscores() {
 }
 
 async function submitScore(name, score, blocksClimbed, gameStartTime) {
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-    try {
-        const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ from: account });
-        console.log('Score submitted successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('Error submitting score:', error);
-        return false;
-    }
+  if (!contract || !account) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
+  try {
+      console.log('Submitting score:', { name, score, blocksClimbed, gameStartTime });
+      const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ from: account });
+      console.log('Score submitted successfully:', result);
+      return true;
+  } catch (error) {
+      console.error('Error submitting score:', error);
+      return false;
+  }
 }
+
 
 async function claimPrize() {
     if (!contract || !account) {
