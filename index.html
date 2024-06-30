@@ -1286,6 +1286,13 @@ async function submitHighscore(name) {
         await submitScore(name, score, blocksClimbed);
         const highscores = await getHighscores();
         updateHighscoreTable(highscores);
+
+        if (!window.gameStartTime) {
+        console.error('Game not started yet. Please start the game before submitting score');
+        alert('Please start the game before submitting your score');
+        return;
+    }
+
         if (highscores[0].player === account) {
             showClaimPrizeButton();
         }
