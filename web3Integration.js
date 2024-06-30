@@ -5,252 +5,253 @@ let contract;
 let account;
 let gameStartTime;
 
-const contractAddress = '0x1C3b222a48ab06AA000fc988286c542a935Cdb7D'; // Replace if this has changed
-const contractABI = [{
-  "inputs": [],
-  "stateMutability": "nonpayable",
-  "type": "constructor"
-},
-{
-  "anonymous": false,
-  "inputs": [
-    {
-      "indexed": false,
-      "internalType": "address",
-      "name": "player",
-      "type": "address"
-    },
-    {
-      "indexed": false,
-      "internalType": "uint256",
-      "name": "tries",
-      "type": "uint256"
-    }
-  ],
-  "name": "GameTryPurchased",
-  "type": "event"
-},
-{
-  "inputs": [],
-  "name": "TOKEN_VALIDITY_PERIOD",
-  "outputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "addFunds",
-  "outputs": [],
-  "stateMutability": "payable",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "claimPrize",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "contractBalance",
-  "outputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "address",
-      "name": "",
-      "type": "address"
-    }
-  ],
-  "name": "gameTries",
-  "outputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "address",
-      "name": "player",
-      "type": "address"
-    }
-  ],
-  "name": "getGameTries",
-  "outputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "getHighscores",
-  "outputs": [
-    {
-      "components": [
-        {
-          "internalType": "address",
-          "name": "player",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "score",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "blocksClimbed",
-          "type": "uint256"
-        }
-      ],
-      "internalType": "struct BlockJumpGame.Highscore[10]",
-      "name": "",
-      "type": "tuple[10]"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "name": "highscores",
-  "outputs": [
-    {
-      "internalType": "address",
-      "name": "player",
-      "type": "address"
-    },
-    {
-      "internalType": "string",
-      "name": "name",
-      "type": "string"
-    },
-    {
-      "internalType": "uint256",
-      "name": "score",
-      "type": "uint256"
-    },
-    {
-      "internalType": "uint256",
-      "name": "blocksClimbed",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "address",
-      "name": "",
-      "type": "address"
-    }
-  ],
-  "name": "lastGameStartTime",
-  "outputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "owner",
-  "outputs": [
-    {
-      "internalType": "address",
-      "name": "",
-      "type": "address"
-    }
-  ],
-  "stateMutability": "view",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "purchaseGameTries",
-  "outputs": [],
-  "stateMutability": "payable",
-  "type": "function"
-},
-{
-  "inputs": [],
-  "name": "startGame",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "string",
-      "name": "name",
-      "type": "string"
-    },
-    {
-      "internalType": "uint256",
-      "name": "score",
-      "type": "uint256"
-    },
-    {
-      "internalType": "uint256",
-      "name": "blocksClimbed",
-      "type": "uint256"
-    },
-    {
-      "internalType": "uint256",
-      "name": "gameStartTime",
-      "type": "uint256"
-    }
-  ],
-  "name": "submitScore",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
-}
+const contractAddress = '0xd82536EbAa9418218fd771615327f58297422b75'; // Replace if this has changed
+const contractABI = [
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tries",
+        "type": "uint256"
+      }
+    ],
+    "name": "GameTryPurchased",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "TOKEN_VALIDITY_PERIOD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "addFunds",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimPrize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "gameTries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      }
+    ],
+    "name": "getGameTries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getHighscores",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "score",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blocksClimbed",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct BlockJumpGame.Highscore[10]",
+        "name": "",
+        "type": "tuple[10]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "highscores",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blocksClimbed",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "lastGameStartTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "purchaseGameTries",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "startGame",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blocksClimbed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gameStartTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "submitScore",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ];
 
 async function initWeb3() {
@@ -353,48 +354,34 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
     return false;
   }
   
-  if (typeof name !== 'string' || name.length === 0) {
-    console.error('Invalid name provided');
-    return false;
-  }
-  if (typeof score !== 'number' || isNaN(score)) {
-    console.error('Invalid score provided');
-    return false;
-  }
-  if (typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
-    console.error('Invalid blocksClimbed provided');
-    return false;
-  }
-  if (typeof gameStartTime !== 'number' || isNaN(gameStartTime)) {
-    console.error('Invalid gameStartTime provided');
-    return false;
-  }
+  console.log('Attempting to submit score with:', { name, score, blocksClimbed, gameStartTime });
 
   try {
-    // Get the current gas price
-    let gasPrice = await web3.eth.getGasPrice();
-    // Convert it to a number and increase it (e.g., by 20%)
-    gasPrice = Math.floor(Number(gasPrice) * 1.2);
+    // Convert numbers to strings to avoid potential BigNumber issues
+    const scoreStr = score.toString();
+    const blocksClimbedStr = blocksClimbed.toString();
+    const gameStartTimeStr = gameStartTime.toString();
 
     // Estimate gas
-    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).estimateGas({ from: account });
+    const gasEstimate = await contract.methods.submitScore(name, scoreStr, blocksClimbedStr, gameStartTimeStr).estimateGas({ from: account });
+    console.log('Gas estimate:', gasEstimate);
 
-    // Increase gas limit by 20%
-    const gasLimit = Math.floor(gasEstimate * 1.2);
+    // Set gas limit to 1.5 times the estimate
+    const gasLimit = Math.floor(gasEstimate * 1.5);
 
-    console.log('Submitting score with parameters:', { name, score, blocksClimbed, gameStartTime });
-    console.log('Gas settings:', { gasPrice, gasLimit });
+    console.log('Submitting transaction with gas limit:', gasLimit);
 
-    const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({ 
+    const result = await contract.methods.submitScore(name, scoreStr, blocksClimbedStr, gameStartTimeStr).send({ 
       from: account,
-      gas: gasLimit,
-      gasPrice: gasPrice
+      gas: gasLimit
     });
+
     console.log('Score submitted successfully:', result);
     return true;
   } catch (error) {
-    console.error('Error submitting score:', error);
+    console.error('Error in submitScore:', error);
     if (error.message) console.error('Error message:', error.message);
+    if (error.stack) console.error('Error stack:', error.stack);
     return false;
   }
 }
