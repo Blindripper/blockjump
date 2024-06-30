@@ -494,8 +494,7 @@
         
     </div>
     <script type="module" src="web3Integration.js"></script>
-    <script type="module">
-        import { initWeb3, purchaseGameTries, getGameTries, getHighscores, submitScore, claimPrize, useGameTry } from './web3Integration.js';
+    <script type="module">import { initWeb3, startGame, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 
         // Define base URL for the GitHub repository
         const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
@@ -813,29 +812,24 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        const tries = await getGameTries();
-        console.log('Current game tries:', tries);
-        if (tries > 0) {
-            console.log('Using a game try...');
-            if (await useGameTry()) {
-                console.log('Game try used successfully. Resetting game...');
-                resetGame();
-                initGame();
-                console.log('Game reset. Setting gameRunning to true...');
-                gameRunning = true;
-                gameOver = false;
-                lastTime = performance.now();
-                gameLoopId = requestAnimationFrame(gameLoop);
-                updateTryCount();
-            } else {
-                console.log('Failed to use a game try');
-            }
+        const gameStarted = await startGame(); // Call the new startGame function from web3Integration.js
+        if (gameStarted) {
+            console.log('Game started successfully. Resetting game...');
+            resetGame();
+            initGame();
+            console.log('Game reset. Setting gameRunning to true...');
+            gameRunning = true;
+            gameOver = false;
+            lastTime = performance.now();
+            gameLoopId = requestAnimationFrame(gameLoop);
+            updateTryCount();
         } else {
-            console.log('No more tries left. Please purchase more.');
-            drawCanvasMessage('No more tries left. Please purchase more.');
+            console.log('Failed to start game');
+            drawCanvasMessage('Failed to start game. Please try again.');
         }
     } catch (error) {
         console.error('Error starting game:', error);
+        drawCanvasMessage('Error starting game. Please try again.');
     }
     console.log('End of startGame function. gameRunning:', gameRunning);
 }     
@@ -1243,6 +1237,7 @@ function removeAllPowerupTimerBars() {
         async function endGame(finalScore, finalBlocksClimbed) {
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
+    window.gameStartTime = gameStartTime;
     gameOver = true;
     gameRunning = false;
     removeAllPowerupTimerBars();
@@ -2343,13 +2338,14 @@ function updateButtonState() {
   const name = document.getElementById('nameInput').value.trim();
   const score = window.finalScore;
   const blocksClimbed = window.blocksClimbed;
+  const gameStartTime = window.gameStartTime;
 
   if (!name) {
     alert('Please enter a valid name');
     return;
   }
 
-  if (typeof score !== 'number' || isNaN(score) || typeof blocksClimbed !== 'number' || isNaN(blocksClimbed)) {
+  if (typeof score !== 'number' || isNaN(score) || typeof blocksClimbed !== 'number' || isNaN(blocksClimbed) || typeof gameStartTime !== 'number' || isNaN(gameStartTime)) {
     console.error('Invalid score or blocksClimbed:', { score, blocksClimbed });
     alert('An error occurred. Please try again.');
     return;
@@ -2370,9 +2366,6 @@ function updateButtonState() {
   }
 
   this.style.display = 'none';
-    
-    // Hide the form after submission
-    document.getElementById('nameForm').style.display = 'none';
 });
 
     // Keyboard input handling
