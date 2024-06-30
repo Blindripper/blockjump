@@ -2381,6 +2381,7 @@ function updateButtonState() {
         if (submitted) {
             console.log('Score submitted successfully');
             await updateHighscoreTable();
+            alert('Score submitted successfully!');
         } else {
             console.error('Failed to submit score');
             alert('Failed to submit score. Please try again.');
@@ -2391,7 +2392,7 @@ function updateButtonState() {
     }
 
     this.style.display = 'none';
-}); 
+});
 
     // Keyboard input handling
     document.addEventListener('keydown', (e) => {
