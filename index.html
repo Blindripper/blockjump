@@ -11,23 +11,23 @@
         body {
     background: #0f1624;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    justify-content: flex-start; /* Changed from center */
+    align-items: flex-start; /* Changed from center */
+    min-height: 100vh;
     margin: 0;
     font-family: 'Orbitron', sans-serif;
     color: #FFFFFF;
-    padding: 0;
+    padding: 20px 0 0 0; /* Add some top padding */
 }
 
 #gameWrapper {
   display: flex;
-  justify-content: space-between; /* Space between elements */
-  align-items: center;
+  justify-content: flex-start; /* Changed from space-between */
+  align-items: flex-start; /* Changed from center */
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* Increased from 1200px */
   margin: 0 auto;
-  margin-right: 800 px;
+  padding-left: 20px; /* Add some padding on the left */
 }
 
 
@@ -42,11 +42,11 @@
     top: 20px;
     right: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Align items to the right */
     padding: 10px 20px;
     background-color: #1f2a40;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row; /* Changed from column */
+    align-items: center;
     gap: 10px;
 }
 
@@ -184,30 +184,22 @@
 }
         
 #gameContainer {
-    grid-column: 2;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-right: 100;
+    flex-grow: 0; /* Changed from 1 */
+    width: 800px; /* Set a fixed width */
+    margin: 0; /* Remove auto margins */
     padding: 20px;
     background: #1f2a40;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)
-    
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #leftSidebar {
-    width: 400px; /* Adjust the width as needed */
+    width: 300px; /* Reduced from 400px */
     padding: 20px;
     background-color: #2b3a67;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-right: 200px;
+    margin-right: 20px; /* Reduced from 200px */
 }
 
 #powerupTimers {
