@@ -444,6 +444,15 @@
             font-family: 'Orbitron', sans-serif;
             text-transform: uppercase;
         }
+
+        .special-sidebar {
+    /* Your custom styles here */
+    background-color: #3498DB; /* Example background color */
+    color: rgb(63, 225, 176, 0.8); /* Example text color */
+    padding: 20px; /* Example padding */
+    border-radius: 5px; /* Example border radius */
+    margin-left: 20px;
+}
     </style>
 </head>
 <body>
@@ -454,10 +463,10 @@
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
-    <div id="left-sidebar">
+    <div id="left-sidebar" class="special-sidebar">
         <h3>1st can claim the Jackpot</h3>
         <p id="contract-balance">Contract Balance: Loading...</p>
-      </div>
+    </div>
     <div id="gameWrapper">
         <div id="highscoreSection">
             <div class="section-title">Highscores</div>
