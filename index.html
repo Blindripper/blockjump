@@ -2467,7 +2467,7 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
         hideBlockchainWaitMessage();
         if (purchased) {
             console.log('Game tries purchased successfully');
-            alert('10 Game tries purchased successfully!');
+            displayCanvasMessage('10 Game tries purchased successfully!');
             updateTryCount();
             updateButtonState();
             draw();
@@ -2475,9 +2475,73 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     } catch (error) {
         hideBlockchainWaitMessage();
         console.error('Failed to purchase game tries:', error);
-        alert('Failed to purchase game tries. Please try again.');
+        displayCanvasMessage('Failed to purchase game tries. Please try again.');
     }
 });
+
+function displayCanvasMessage(message, type = 'info') {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Save the current canvas state
+    ctx.save();
+
+    // Set up the background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Set up the text style
+    ctx.font = 'bold 24px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Set color based on message type
+    switch(type) {
+        case 'success':
+            ctx.fillStyle = '#4CAF50'; // Green
+            break;
+        case 'error':
+            ctx.fillStyle = '#F44336'; // Red
+            break;
+        default:
+            ctx.fillStyle = '#3FE1B0'; // Default color
+    }
+
+    // Draw the message
+    const maxWidth = canvas.width * 0.8; // 80% of canvas width
+    const lineHeight = 30;
+    wrapText(ctx, message, canvas.width / 2, canvas.height / 2, maxWidth, lineHeight);
+
+    // Restore the canvas state
+    ctx.restore();
+
+    // Remove the message after a delay
+    setTimeout(() => {
+        draw(); // Redraw the game canvas to remove the message
+    }, 3000); // Display for 3 seconds
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+
+    for(let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        }
+        else {
+            line = testLine;
+        }
+    }
+    context.fillText(line, x, y);
+}
+
+
 
 document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
     try {
@@ -2485,16 +2549,17 @@ document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
         const result = await claimPrize();
         hideBlockchainWaitMessage();
         if (result) {
-            alert('Prize claimed successfully! Congratz!');
-            updateHighscoreTable(); // Refresh the table and button state
+            displayCanvasMessage('Prize claimed successfully! Congratz!', 'success');
+            await updateHighscoreTable(); // Refresh the table and button state
         } else {
-            alert('Failed to claim prize. Not eligble.');
+            displayCanvasMessage('Failed to claim prize. Not eligible.', 'error');
         }
     } catch (error) {
         console.error('Error claiming prize:', error);
-        alert('An error occurred while claiming the prize. Please try again.');
+        displayCanvasMessage('An error occurred while claiming the prize. Please try again.', 'error');
     }
 });
+
 
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
