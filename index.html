@@ -1938,7 +1938,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
                 drawCanvasMessage('Please buy more tries');
             }
         } else {
-            drawCanvasMessage('Please connect your wallet to play');
+            drawCanvasMessage('Please connect your Wallet to play');
         }
     }
 
@@ -2471,12 +2471,12 @@ function populatePowerupBar() {
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
-        showBlockchainWaitMessage("Purchasing game tries on Etherlink...");
+        showBlockchainWaitMessage("Getting Game tries from Etherlink...");
         const purchased = await purchaseGameTries();
         hideBlockchainWaitMessage();
         if (purchased) {
             console.log('Game tries purchased successfully');
-            alert('10 game tries purchased successfully!');
+            alert('10 Game tries purchased successfully!');
             updateTryCount();
             updateButtonState();
             draw();
