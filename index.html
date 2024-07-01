@@ -312,6 +312,7 @@
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
     margin-top: 10px; /* Add some space above the canvas */
+    z-index: 10;
 }
         #floorCounter {
             width: 100%;
@@ -2481,44 +2482,34 @@ document.getElementById('buyTriesBtn').addEventListener('click', async () => {
 
 function displayCanvasMessage(message, type = 'info') {
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const overlay = document.createElement('div');
+    
+    overlay.style.position = 'absolute';
+    overlay.style.left = canvas.offsetLeft + 'px';
+    overlay.style.top = canvas.offsetTop + 'px';
+    overlay.style.width = canvas.width + 'px';
+    overlay.style.height = canvas.height + 'px';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';  // Ensure it's above other elements
 
-    // Save the current canvas state
-    ctx.save();
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.style.color = type === 'error' ? '#F44336' : (type === 'success' ? '#4CAF50' : '#3FE1B0');
+    messageElement.style.fontSize = '24px';
+    messageElement.style.fontFamily = 'Orbitron, sans-serif';
+    messageElement.style.fontWeight = 'bold';
+    messageElement.style.textAlign = 'center';
+    messageElement.style.maxWidth = '80%';
 
-    // Set up the background
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    overlay.appendChild(messageElement);
+    document.body.appendChild(overlay);
 
-    // Set up the text style
-    ctx.font = 'bold 24px Orbitron, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Set color based on message type
-    switch(type) {
-        case 'success':
-            ctx.fillStyle = '#4CAF50'; // Green
-            break;
-        case 'error':
-            ctx.fillStyle = '#F44336'; // Red
-            break;
-        default:
-            ctx.fillStyle = '#3FE1B0'; // Default color
-    }
-
-    // Draw the message
-    const maxWidth = canvas.width * 0.8; // 80% of canvas width
-    const lineHeight = 30;
-    wrapText(ctx, message, canvas.width / 2, canvas.height / 2, maxWidth, lineHeight);
-
-    // Restore the canvas state
-    ctx.restore();
-
-    // Remove the message after a delay
     setTimeout(() => {
-        draw(); // Redraw the game canvas to remove the message
-    }, 3000); // Display for 3 seconds
+        document.body.removeChild(overlay);
+    }, 3000);
 }
 
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
@@ -2587,12 +2578,12 @@ function updateButtonState() {
 }
 
 
-    document.getElementById('nameForm').addEventListener('submit', async function(e) {
+document.getElementById('nameForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
     
     if (!name) {
-        alert('Please enter a valid name');
+        displayCanvasMessage('Please enter a valid name', 'error');
         return;
     }
 
@@ -2609,18 +2600,80 @@ function updateButtonState() {
         if (submitted) {
             console.log('Score submitted successfully');
             await updateHighscoreTable();
-            alert('Score submitted successfully!');
+            displayCanvasMessage('Score submitted successfully!', 'success');
         } else {
             console.error('Failed to submit score');
-            alert('Failed to submit score. Please check the console for more details.');
+            displayCanvasMessage('Failed to submit score. Please try again.', 'error');
         }
     } catch (error) {
         console.error('Error during score submission:', error);
-        alert('An error occurred while submitting your score. Please check the console for more details.');
+        displayCanvasMessage('An error occurred while submitting your score. Please try again.', 'error');
     }
 
     this.style.display = 'none';
 });
+
+function displayCanvasMessage(message, type = 'info') {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Save the current canvas state
+    ctx.save();
+
+    // Set up the background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Set up the text style
+    ctx.font = 'bold 24px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Set color based on message type
+    switch(type) {
+        case 'success':
+            ctx.fillStyle = '#4CAF50'; // Green
+            break;
+        case 'error':
+            ctx.fillStyle = '#F44336'; // Red
+            break;
+        default:
+            ctx.fillStyle = '#3FE1B0'; // Default color
+    }
+
+    // Draw the message
+    const maxWidth = canvas.width * 0.8; // 80% of canvas width
+    const lineHeight = 30;
+    wrapText(ctx, message, canvas.width / 2, canvas.height / 2, maxWidth, lineHeight);
+
+    // Restore the canvas state
+    ctx.restore();
+
+    // Remove the message after a delay
+    setTimeout(() => {
+        draw(); // Redraw the game canvas to remove the message
+    }, 3000); // Display for 3 seconds
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+
+    for(let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        }
+        else {
+            line = testLine;
+        }
+    }
+    context.fillText(line, x, y);
+} 
 
     // Keyboard input handling
     document.addEventListener('keydown', (e) => {
