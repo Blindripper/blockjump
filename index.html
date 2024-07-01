@@ -40,8 +40,8 @@
 
         #header {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     display: flex;
     justify-content: flex-end; /* Align items to the right */
     padding: 5px 10px;
@@ -339,8 +339,8 @@
 
         #soundToggle {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 10px;
+            right: 10px;
             z-index: 1000;
             font-size: 16px;
             padding: 10px 20px;
@@ -708,7 +708,7 @@ function formatBalance(coinBalance) {
 
 function updateBalanceDisplay(formattedBalance) {
   const balanceElement = document.getElementById("contract-balance");
-  balanceElement.textContent = `Contract Balance: ${formattedBalance} ETH`;
+  balanceElement.textContent = `Contract Balance: ${formattedBalance} XTZ`;
 }
 
 // Call the function to fetch and display the balance on page load
