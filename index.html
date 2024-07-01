@@ -27,6 +27,7 @@
     max-width: 1200px;
     margin: 0 auto;
     align-items: start;
+    justify-content: center;
 }
 
 
@@ -47,15 +48,12 @@
 }
 
 .jackpot-info {
-    grid-column: 1;
-    width: calc(100% - 20px); /* Adjust width accounting for left position */
-    margin-top: 10px;
+    width: 100%;
     padding: 10px;
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
-    position: relative;
-    left: 20px; /* Align with highscoreSection */
+    margin-top: 20px;
 }
 
 .jackpot-info h3 {
@@ -149,16 +147,12 @@
 
 
 #highscoreSection {
-    grid-column: 1;
-    width: calc(100% - 20px);
+    width: 100%;
     padding: 10px;
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
-    position: relative; /* Change to relative positioning */
-    top: 20px; /* Adjust top position */
-    left: 20px; /* Adjust left position */
-    margin: 0;
+    margin-bottom: 20px;
 }
 
 #gameLogo {
@@ -169,13 +163,21 @@
 }
         
 #gameContainer {
+    grid-column: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     width: 100%;
     max-width: 800px;
-    padding: 0;
-    margin: auto;
+    margin: 0 auto;
+}
+
+#leftSidebar {
+    grid-column: 1;
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
 }
 
 #powerupTimers {
@@ -212,11 +214,10 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 10px;
-    max-width: 800px;
-    width: 100%;
     margin: 10px 0;
     padding: 0;
+    width: 100%;
+    max-width: 800px;
 }
         
         #highscoreTable {
