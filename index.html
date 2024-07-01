@@ -1639,37 +1639,39 @@ console.log('Updating game state, dt:', dt);
                     onPlatform = true;
                 }
 
-                platforms.forEach(platform => {
-                    if (player.y + player.height > platform.y &&
-                        player.y + player.height < platform.y + platform.height &&
-                        player.x < platform.x + platform.width &&
-                        player.x + player.width > platform.x) {
-                        if (platform.isSpike) {
-                            intentionalGameOver = true;
-                            gameOver = true;
-                            gameRunning = false;
-                            endGame(score, blocksClimbed);
-                            playSound('gameOver');
-                            return;
-                        } else {
-                            player.y = platform.y - player.height;
-                            player.velocityY = 0;
-                            player.isJumping = false;
-                            player.jumpCount = 0;
-                            onPlatform = true;
+                // In your update function, where you handle platform collisions
+platforms.forEach(platform => {
+    if (player.velocityY >= 0 && // Player is moving downwards
+        player.y + player.height > platform.y &&
+        player.y + player.height < platform.y + platform.height &&
+        player.x < platform.x + platform.width &&
+        player.x + player.width > platform.x) {
+        
+        if (platform.isSpike) {
+            gameOver = true;
+            gameRunning = false;
+            endGame(score, blocksClimbed);
+            playSound('gameOver');
+        } else {
+            // Normal platform collision
+            player.y = platform.y - player.height;
+            player.velocityY = 0;
+            player.isJumping = false;
+            player.jumpCount = 0;
+            onPlatform = true;
 
-                            if (platform.isGolden) {
-                                player.velocityY = JUMP_VELOCITY * 1.5; // 1.5x jump height for golden platforms
-                                score += 15;
-                                triggerScreenShake(5, 0.3);
-                                createParticles(player.x + player.width / 2, player.y + player.height, 15, '#3FE1B0');
-                                playSound('powerup');
-                            } else {
-                                createParticles(player.x + player.width / 2, player.y + player.height, 15, '#3FE1B0');
-                            }
-                        }
-                    }
-                });
+            if (platform.isGolden) {
+                player.velocityY = JUMP_VELOCITY * 1.5;
+                score += 15;
+                triggerScreenShake(5, 0.3);
+                createParticles(player.x + player.width / 2, player.y + player.height, 15, '#3FE1B0');
+                playSound('powerup');
+            } else {
+                createParticles(player.x + player.width / 2, player.y + player.height, 5, '#3FE1B0');
+            }
+        }
+    }
+});
 
                 // Check collision with moving platforms
                 movingPlatforms.forEach(platform => {
