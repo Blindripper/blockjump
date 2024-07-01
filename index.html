@@ -969,7 +969,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        showBlockchainWaitMessage("Starting game on Etherlink...");
+        showBlockchainWaitMessage("Starting game on Etherlink...", 0.7, 0.5);
         const gameStarted = await startGameWeb3();
         hideBlockchainWaitMessage();
         if (gameStarted) {
@@ -1445,7 +1445,7 @@ function removeAllPowerupTimerBars() {
 
 async function submitHighscore(name) {
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...");
+        showBlockchainWaitMessage("Waiting for Etherlink...", 0.7, 0.5);
         await submitScore(name, score, blocksClimbed);
         const highscores = await getHighscores();
         hideBlockchainWaitMessage();
@@ -1487,22 +1487,39 @@ function showClaimPrizeButton() {
         }
 
 
-        function showBlockchainWaitMessage(message = "Waiting for Etherlink...") {
-    const waitMessage = document.createElement('div');
-    waitMessage.id = 'blockchain-wait-message';
-    waitMessage.textContent = message;
-    waitMessage.style.position = 'fixed';
-    waitMessage.style.top = '50%';
-    waitMessage.style.left = '50%';
-    waitMessage.style.transform = 'translate(-50%, -50%)';
-    waitMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    waitMessage.style.color = '#3FE1B0';
-    waitMessage.style.padding = '20px';
-    waitMessage.style.borderRadius = '10px';
-    waitMessage.style.zIndex = '1000';
-    waitMessage.style.fontFamily = 'Orbitron, sans-serif';
-    document.body.appendChild(waitMessage);
-}
+        function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset = 0.5, yOffset = 0.5) {
+    const canvas = document.getElementById('gameCanvas');
+    const overlay = document.createElement('div');
+    
+    overlay.style.position = 'absolute';
+    overlay.style.left = canvas.offsetLeft + 'px';
+    overlay.style.top = canvas.offsetTop + 'px';
+    overlay.style.width = canvas.width + 'px';
+    overlay.style.height = canvas.height + 'px';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.style.color = '#3FE1B0';
+    messageElement.style.fontSize = '24px';
+    messageElement.style.fontFamily = 'Orbitron, sans-serif';
+    messageElement.style.fontWeight = 'bold';
+    messageElement.style.textAlign = 'center';
+    messageElement.style.maxWidth = '80%';
+    messageElement.style.position = 'absolute';
+    messageElement.style.left = `${canvas.width * xOffset}px`;
+    messageElement.style.top = `${canvas.height * yOffset}px`;
+    messageElement.style.transform = 'translate(-50%, -50%)';
+
+    overlay.appendChild(messageElement);
+    document.body.appendChild(overlay);
+
+    return overlay; // Return the overlay element so it can be removed later
+}   
 
 function hideBlockchainWaitMessage() {
     const waitMessage = document.getElementById('blockchain-wait-message');
@@ -2143,7 +2160,7 @@ function resetGame() {
     clearCanvasOverlays();
     removeAllPowerupTimerBars();
     hideScoreSubmissionForm();
-    
+
     const powerupTimers = document.getElementById('powerupTimers');
     if (powerupTimers) {
         powerupTimers.innerHTML = '';
@@ -2479,7 +2496,7 @@ function populatePowerupBar() {
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
-        showBlockchainWaitMessage("Getting Game tries from Etherlink...");
+        showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.7, 0.5);
         const purchased = await purchaseGameTries();
         hideBlockchainWaitMessage();
         if (purchased) {
@@ -2614,7 +2631,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     });
 
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...");
+        showBlockchainWaitMessage("Waiting for Etherlink...", 0.7, 0.5);
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         hideBlockchainWaitMessage();
         if (submitted) {
