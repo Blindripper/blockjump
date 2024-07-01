@@ -1429,14 +1429,16 @@ function hideBlockchainWaitMessage() {
             spikeBlockProbability = Math.min(0.15, 0.05 + (difficultyLevel - 1) * 0.005); // Cap at 15% chance
 
             // Add moving platforms
-            if (difficultyLevel >= 5 && movingPlatforms.length < 2) {
-                movingPlatforms.push({
-                    x: Math.random() * (canvas.width - 100),
-                    y: Math.random() * (canvas.height / 2),
-                    width: 100,
-                    height: 15,
-                    speed: 30 + Math.random() * 30
-                });
+            if (difficultyLevel >= 2) { // Start at difficulty level 2
+        const desiredMovingPlatforms = Math.min(5, Math.floor((difficultyLevel - 1) / 2)); // Increase up to 5 moving platforms
+        while (movingPlatforms.length < desiredMovingPlatforms) {
+            movingPlatforms.push({
+                x: Math.random() * (canvas.width - 100),
+                y: Math.random() * (canvas.height / 2),
+                width: 100,
+                height: 15,
+                speed: 30 + Math.random() * (20 + difficultyLevel * 2) // Slightly increase speed with difficulty
+            });
             }
 
             // Increase wind probability and max speed
