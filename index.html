@@ -957,6 +957,8 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         const powerUpTypes = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos', 'tezosX'];
         const TEZOSX_EFFECT_DURATION = 30; // 30 seconds
 
+        let messageOverlay;
+
 
         async function startGame() {
     console.log('Starting game...');
@@ -969,9 +971,14 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        showBlockchainWaitMessage("Starting game on Etherlink...", 0.5, 0.5);
+        messageOverlay = showBlockchainWaitMessage("Starting game on Etherlink...", 0.7, 0.5);
         const gameStarted = await startGameWeb3();
-        hideBlockchainWaitMessage();
+
+        if (messageOverlay) {
+            document.body.removeChild(messageOverlay);
+            messageOverlay = null; // Reset the variable
+        }
+
         if (gameStarted) {
             console.log('Game started successfully. Resetting game...');
             gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
@@ -989,12 +996,20 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
             console.log('Failed to start game');
             drawCanvasMessage('Failed to start game. Please try again.');
         }
+
     } catch (error) {
+        // Ensure the message overlay is removed in case of an error
+        if (messageOverlay) {
+            document.body.removeChild(messageOverlay);
+            messageOverlay = null; // Reset the variable
+        }
         console.error('Error starting game:', error);
         drawCanvasMessage('Error starting game. Please try again.');
     }
     console.log('End of startGame function. gameRunning:', gameRunning, 'gameStartTime:', gameStartTime);
-}     
+}
+            
+        
 
 if (gameRunning) {
     console.log('Starting game loop');
