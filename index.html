@@ -454,7 +454,7 @@
     padding: 20px; /* Example padding */
     border-radius: 5px; /* Example border radius */
     margin-left: 75px;
-    margin-top: 75px;
+    margin-top: 150px;
 }
     </style>
 </head>
@@ -2448,7 +2448,9 @@ function updateButtonState() {
     });
 
     try {
+        showBlockchainWaitMessage("Waiting for Etherlink...");
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
+        hideBlockchainWaitMessage();
         if (submitted) {
             console.log('Score submitted successfully');
             await updateHighscoreTable();
