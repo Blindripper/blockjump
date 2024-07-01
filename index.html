@@ -46,8 +46,8 @@
     justify-content: flex-end; /* Align items to the right */
     padding: 5px 10px;
     background-color: #1f2a40;
-    flex-direction: row; /* Changed from column */
-    align-items: center;
+    flex-direction: column; /* Changed from column */
+    align-items: flex-end;
     gap: 5px;
     
 }
@@ -93,7 +93,12 @@
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease;
     color: white;
-    width: 120px; /* Set a fixed width for both buttons */
+    width: auto; /* Set a fixed width for both buttons */
+    min-width: 120px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .game-button:hover {
@@ -128,9 +133,23 @@
     background-color: #2980B9;
 }
 
-/* Hide the buy button initially */
 #buyTriesBtn {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto; /* Allow height to adjust to content */
+    padding: 8px 16px;
+}
+
+#buyTriesBtn br {
+    display: none; /* Remove line break */
+}
+
+#buyTriesBtn::after {
+    content: "0.01 XTZ";
+    font-size: 0.8em;
+    margin-top: 2px;
 }
 
 .connect-button {
