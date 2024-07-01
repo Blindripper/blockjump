@@ -325,7 +325,7 @@
     text-align: center;
     margin-bottom: 10px;
         }
-        #startButton, #soundToggle {
+        #startButton {
             font-size: 24px;
             padding: 10px 20px;
             background-color: #3FE1B0;
@@ -337,7 +337,28 @@
             font-family: 'Orbitron', sans-serif;
             margin: 10px;
         }
-        #startButton:hover, #soundToggle:hover {
+        #startButton:hover {
+            background-color: #ff6b6b;
+            transform: scale(1.05);
+        }
+
+        #soundToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #3FE1B0;
+            color: #16213e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        #soundToggle:hover {
             background-color: #ff6b6b;
             transform: scale(1.05);
         }
@@ -542,8 +563,8 @@
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
         <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
-        <button id="soundToggle" class="game-button">Sound: Off</button>
-    </div>
+        </div>
+        
     <div id="gameWrapper">
         <div id="leftSidebar">
             <div id="highscoreSection">
@@ -584,6 +605,7 @@
                 <p id="output"></p>
             </div>
         </div>
+        <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
     <script type="module" src="web3Integration.js"></script>
     <script type="module"> import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, } from './web3Integration.js';
