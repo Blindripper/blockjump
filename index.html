@@ -27,7 +27,7 @@
   max-width: 1400px; /* Increased from 1200px */
   margin: 0 auto;
   padding-left: 0; /* Add some padding on the left */
-  margin-left: 50px;
+  margin-left: 70px;
 }
 
 
@@ -671,7 +671,7 @@
         }
 
        async function getContractBalance() {
-  const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x0e8Bb7500D80701CCa627480681ABE6982E4dd8a'; // Replace if needed
+  const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x703793fa32AC5d35D77B245e4a5F9AAC11937af2'; // Replace if needed
 
   try {
     const response = await fetch(apiUrl);
@@ -2352,10 +2352,7 @@ async function checkAndDisplayStartButton() {
         if (tries > 0) {
             console.log('Drawing Start Game button');
             drawCanvasButton('Start Game', startGame);
-        } else {
-            clearCanvasOverlays();
-            drawCanvasMessage('No more tries left.');
-        }
+        } 
     } catch (error) {
         console.error('Error checking game tries:', error);
         drawCanvasMessage('Error checking game tries. Please try again.');
