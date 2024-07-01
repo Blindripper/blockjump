@@ -576,21 +576,33 @@
     const data = await response.json();
     const coinBalance = data["coin_balance"]; // Assuming "coin_balance" is the key
 
-    // Update the HTML element with the balance (explained in step 2)
-    updateBalanceDisplay(coinBalance);
+    // Convert wei to ether and format the balance
+    const formattedBalance = formatBalance(coinBalance);
+
+    // Update the HTML element with the formatted balance
+    updateBalanceDisplay(formattedBalance);
   } catch (error) {
     console.error('Error fetching contract balance:', error);
     // Handle error gracefully, e.g., display an error message in HTML
   }
 }
 
-// Call the function to fetch and display the balance
+// Function to format the balance (assuming you have it defined elsewhere)
+function formatBalance(coinBalance) {
+  // ... your existing logic to format the balance with commas and convert to Ether
+
+  return formattedBalance; // Return the formatted string
+}
+
+// Function to update the HTML element
+function updateBalanceDisplay(formattedBalance) {
+  const balanceElement = document.getElementById("contract-balance");
+  balanceElement.textContent = `Contract Balance: ${formattedBalance}`;
+}
+
+// Call the function to fetch and display the balance (assuming it's called on page load)
 getContractBalance();
 
-function updateBalanceDisplay(coinBalance) {
-  const balanceElement = document.getElementById("contract-balance");
-  balanceElement.textContent = `Contract Balance: ${(coinBalance)}`;
-}
 
  
 
