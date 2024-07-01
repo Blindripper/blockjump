@@ -142,12 +142,13 @@
 }
         
 #gameContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 800px; /* Adjust width as needed */
+    grid-column: 2;
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
 }
-
 
 #powerupTimers {
     display: flex;
@@ -233,16 +234,11 @@
     margin-top: 10px;
 }
 
-#gameCanvas {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 10px; /* Maintain your existing style */
-  box-shadow: 0 0 20px rgba(63, 225, 176, 0.5); /* Maintain your existing style */
-  margin-top: 20px; /* Maintain your existing style */
+        #gameCanvas {
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
+    margin-top: 20px; /* Add some space above the canvas */
 }
-   
         #floorCounter {
             font-size: 28px;
             font-weight: bold;
@@ -459,7 +455,7 @@
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
     <div id="left-sidebar">
-        <h2>1st can claim the Jackpot</h2>
+        <h3>1st can claim the Jackpot</h3>
         <p id="contract-balance">Contract Balance: Loading...</p>
       </div>
     <div id="gameWrapper">
@@ -568,7 +564,7 @@
             document.getElementById('blockCounter').textContent = `Blocks Climbed: ${blocksClimbed}`;
         }
 
-        async function getContractBalance() {
+       async function getContractBalance() {
   const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x0e8Bb7500D80701CCa627480681ABE6982E4dd8a'; // Replace if needed
 
   try {
