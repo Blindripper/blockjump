@@ -961,6 +961,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         async function startGame() {
     console.log('Starting game...');
     clearCanvasOverlays();
+    hideScoreSubmissionForm();
     
     if (!isConnected) {
         console.log('Wallet not connected');
@@ -1429,7 +1430,7 @@ function removeAllPowerupTimerBars() {
         playSound('gameOver');
     }
     // Show the name input form
-    document.getElementById('nameForm').style.display = 'block';
+    showScoreSubmissionForm();
 
     try {
         // Any async operations you need to perform at game end
@@ -1598,6 +1599,20 @@ function hideBlockchainWaitMessage() {
             }
             draw();
         }
+
+        function hideScoreSubmissionForm() {
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.style.display = 'none';
+    }
+}
+
+function showScoreSubmissionForm() {
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.style.display = 'block';
+    }
+}
 
          // Make sure game is in a startable state
          gameRunning = false;
@@ -2127,7 +2142,8 @@ function resetGame() {
     document.dispatchEvent(new Event('gameReset'));
     clearCanvasOverlays();
     removeAllPowerupTimerBars();
-
+    hideScoreSubmissionForm();
+    
     const powerupTimers = document.getElementById('powerupTimers');
     if (powerupTimers) {
         powerupTimers.innerHTML = '';
