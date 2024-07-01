@@ -2490,6 +2490,8 @@ function displayCanvasMessage(message, type = 'info') {
     overlay.style.width = canvas.width + 'px';
     overlay.style.height = canvas.height + 'px';
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.flexDirection = 'column';  // Changed to column
+    overlay.style.justifyContent = 'flex-start';  // Align to the top
     overlay.style.display = 'flex';
     overlay.style.justifyContent = 'center';
     overlay.style.alignItems = 'center';
@@ -2503,6 +2505,8 @@ function displayCanvasMessage(message, type = 'info') {
     messageElement.style.fontWeight = 'bold';
     messageElement.style.textAlign = 'center';
     messageElement.style.maxWidth = '80%';
+    messageElement.style.marginTop = `${canvas.height * yOffset}px`;  // Move message up
+
 
     overlay.appendChild(messageElement);
     document.body.appendChild(overlay);
