@@ -142,13 +142,12 @@
 }
         
 #gameContainer {
-    grid-column: 2;
-    width: 800px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 800px; /* Adjust width as needed */
 }
+
 
 #powerupTimers {
     display: flex;
@@ -234,11 +233,16 @@
     margin-top: 10px;
 }
 
-        #gameCanvas {
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-    margin-top: 20px; /* Add some space above the canvas */
+#gameCanvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px; /* Maintain your existing style */
+  box-shadow: 0 0 20px rgba(63, 225, 176, 0.5); /* Maintain your existing style */
+  margin-top: 20px; /* Maintain your existing style */
 }
+   
         #floorCounter {
             font-size: 28px;
             font-weight: bold;
