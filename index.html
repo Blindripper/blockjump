@@ -63,6 +63,14 @@
     color: #FFFFFF;
 }
 
+#content {
+  display: flex;
+  flex-grow: 1; /* Allow content to fill remaining space */
+  justify-content: space-between; /* Space between sidebars */
+  align-items: center; /* Vertically center sidebars */
+  width: 100%; /* Inherit full width from parent */
+}
+
 .game-button {
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
@@ -164,6 +172,7 @@
     grid-column: 2;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -173,7 +182,7 @@
 
 #leftSidebar {
     grid-column: 1;
-    width: 100%;
+    width: 300px;
     max-width: 300px;
     padding: 10px;
 }
@@ -501,7 +510,22 @@
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
     <div id="gameWrapper">
+        <div id="content">
         <div id="leftSidebar">
+            </div>
+            <div id="gameContainer">
+                <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
+                <div id="blockCounter">Blocks Climbed: 0</div>
+                <div id="floorCounter">Tezos Price: 0000000</div>
+                <div id="powerupBar"></div>
+                <div id="powerupTimers"></div>
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="achievementPopup"></div>
+                <div id="windIndicator"></div>
+                <div id="controls">
+                    <p id="output"></p>
+                </div>
+            </div>
             <div id="highscoreSection">
                 <div class="section-title">Highscores</div>
             <table id="highscoreTable">
@@ -527,19 +551,7 @@
                 <button type="submit" id="submitScore">Submit Score</button>
             </form>
         </div>
-        <div id="gameContainer">
-            <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
-            <div id="blockCounter">Blocks Climbed: 0</div>
-            <div id="floorCounter">Tezos Price: 0000000</div>
-            <div id="powerupBar"></div>
-            <div id="powerupTimers"></div>
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-            <div id="achievementPopup"></div>
-            <div id="windIndicator"></div>
-            <div id="controls">
-                <p id="output"></p>
-            </div>
-        </div>
+        
         
     </div>
     <script type="module" src="web3Integration.js"></script>
