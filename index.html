@@ -50,7 +50,72 @@
     z-index: 1000;
     }
 
-.jackpot-info {
+    #achievementsSection {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 250px;
+            background-color: rgba(22, 33, 62, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            color: #3FE1B0;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .achievement {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(31, 42, 64, 0.8);
+            border-radius: 5px;
+        }
+
+        .achievement img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .achievement-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .achievement-info {
+            flex-grow: 1;
+        }
+
+        .achievement h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+
+        .achievement p {
+            margin: 0;
+            font-size: 12px;
+        }
+
+        .mint-button {
+            display: none;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background-color: #3FE1B0;
+            color: #16213e;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+        }
+
+        .achievement.unlocked {
+            border: 2px solid #FFD700;
+        }
+
+
+
+    .jackpot-info {
     position: relative;
     width: 85%;
     padding: 20px;
@@ -559,6 +624,11 @@
         <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
         </div>
+
+        <div id="achievementsSection">
+            <h2>Achievements</h2>
+            <div id="achievementsList"></div>
+        </div> 
         
     <div id="gameWrapper">
         <div id="leftSidebar">
@@ -602,8 +672,12 @@
         </div>
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
+    <script type="module" src="achievements.js"></script>
     <script type="module" src="web3Integration.js"></script>
-    <script type="module"> import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, } from './web3Integration.js';
+    <script type="module"> 
+    import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, } from './web3Integration.js';
+    import { checkAchievements, loadUserAchievements } from './achievements.js';
+
 
         // Define base URL for the GitHub repository
         const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
@@ -620,7 +694,8 @@
         let accumulator = 0;
         let intentionalGameOver = false;
         let gameLoopId;
-        
+        let powerupsCollected = 0;
+
 
         let gameStartTime;
         // Global canvas variables
@@ -672,7 +747,7 @@
         }
 
        async function getContractBalance() {
-  const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x703793fa32AC5d35D77B245e4a5F9AAC11937af2'; // Replace if needed
+  const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x22E1eE21df281461608EA17fd2c50377d588c074'; // Replace if needed
 
   try {
     const response = await fetch(apiUrl);
@@ -971,7 +1046,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        messageOverlay = showBlockchainWaitMessage("Starting game on Etherlink...", 0.5, 0.5);
+        messageOverlay = showBlockchainWaitMessage("Starting Game on Etherlink...", 0.5, 0.5);
         const gameStarted = await startGameWeb3();
 
         if (messageOverlay) {
@@ -1310,6 +1385,7 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
             message = 'TezosX: No Wind 30s!';
             break;
     }
+    powerupsCollected++;
     
     if (duration > 0) {
         const timerBarObj = createPowerupTimerBar(powerupType, duration);
@@ -1421,7 +1497,11 @@ function removeAllPowerupTimerBars() {
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
     console.log('Game ended:', { score: window.finalScore, blocksClimbed: window.blocksClimbed, gameStartTime: window.gameStartTime });
-
+    checkAchievements({
+        blocksClimbed: finalBlocksClimbed,
+        powerupsCollected: powerupsCollected,
+        score: finalScore
+    });
     gameOver = true;
     gameRunning = false;
     removeAllPowerupTimerBars();
@@ -1821,6 +1901,7 @@ platforms.forEach(platform => {
             }
         }
     }
+    
 });
 
                 // Check collision with moving platforms
@@ -1956,7 +2037,14 @@ platforms.forEach(platform => {
         console.error('Unexpected game over condition');
         endGame(score, blocksClimbed);
             }
+            checkAchievements({
+        blocksClimbed: blocksClimbed,
+        powerupsCollected: powerupsCollected,
+        score: score
+        })
         }
+      
+        
 
         function draw() {
             console.log('Drawing. gameRunning:', gameRunning, 'isConnected:', isConnected, 'gameOver:', gameOver);
@@ -2182,7 +2270,7 @@ function resetGame() {
     clearCanvasOverlays();
     removeAllPowerupTimerBars();
     hideScoreSubmissionForm();
-
+    powerupsCollected = 0;
     const powerupTimers = document.getElementById('powerupTimers');
     if (powerupTimers) {
         powerupTimers.innerHTML = '';
@@ -2489,6 +2577,7 @@ function populatePowerupBar() {
                 updateTryCount();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 await updateHighscoreTable();
+                await loadUserAchievements(); // Add this line
                 checkAndDisplayStartButton();
                 updateButtonState();
                 draw();
