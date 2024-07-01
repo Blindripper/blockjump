@@ -570,9 +570,9 @@
                         <tr>
                             <th>Rank</th>
                             <th>Name</th>
-                            <th>Tezos Price</th>
                             <th>Score</th>
-                            <th>Blks</th>
+                            <th>Tezos Price</th>
+                            <th>Blocks</th>
                         </tr>
                     </thead>
                     <tbody id="highscoreBody"></tbody>
@@ -655,7 +655,7 @@
             for (let i = 0; i < 7; i++) {
                 platforms.push(createPlatform(canvas.height - (i + 2) * 100));
             }
-            nextBottomPlatformScore = 100;
+            nextBottomPlatformScore = 1000;
             bottomPlatform.isSafe = true;
             isPlayerOnSafePlatform = false;
             gameRunning = true;
@@ -928,7 +928,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         let currentBackgroundIndex = 0;
         let fadeAlpha = 0;
         let isFading = false;
-        let nextBottomPlatformScore = 100;
+        let nextBottomPlatformScore = 1000;
         let isPlayerOnSafePlatform = false;
 
         // New game elements
@@ -1820,7 +1820,7 @@ platforms.forEach(platform => {
                 // Move bottom platform
                 bottomPlatform.y += PLATFORM_SPEED * dt;
 
-                // Create new bottom platform every 100 floors
+                // Create new bottom platform every 1000 floors
                 if (score >= nextBottomPlatformScore) {
                     bottomPlatform = {
                         x: 0,
@@ -1829,7 +1829,7 @@ platforms.forEach(platform => {
                         height: 20,
                         isSafe: true
                     };
-                    nextBottomPlatformScore += 100;
+                    nextBottomPlatformScore += 1000;
                 }
 
                 // Move and update moving platforms
@@ -1868,12 +1868,7 @@ platforms.forEach(platform => {
                     endGame(score);  // Call the new endGame function instead of showNameForm
                 }
             }
-            // Reset bottom platform safety when player leaves it
-            if (player.y + player.height < bottomPlatform.y) {
-                bottomPlatform.isSafe = false;
-                isPlayerOnSafePlatform = false;
-            }
-
+            
             // Apply wind effect to player
             player.x += wind.speed * wind.direction * dt;
             player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
