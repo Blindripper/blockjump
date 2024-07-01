@@ -5,7 +5,7 @@ let contract;
 let account;
 let gameStartTime;
 
-const contractAddress = '0x22E1eE21df281461608EA17fd2c50377d588c074'; // Replace if this has changed
+const contractAddress = '0x177e592bda7fF5Af20273A730CD19b9aCE9aB50e'; // Replace if this has changed
 const contractABI = [
   {
     "inputs": [],
@@ -67,6 +67,25 @@ const contractABI = [
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "_fromTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_toTokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "BatchMetadataUpdate",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "player",
         "type": "address"
@@ -79,6 +98,19 @@ const contractABI = [
       }
     ],
     "name": "GameTryPurchased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MetadataUpdate",
     "type": "event"
   },
   {
@@ -568,6 +600,19 @@ const contractABI = [
       }
     ],
     "name": "setApprovalForAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "baseURI",
+        "type": "string"
+      }
+    ],
+    "name": "setBaseURI",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
