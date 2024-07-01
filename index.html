@@ -453,7 +453,7 @@
     padding: 20px; /* Example padding */
     border-radius: 5px; /* Example border radius */
     margin-left: 75px;
-    margin-top: 220px;
+    margin-top: 225px;
 }
     </style>
 </head>
@@ -1920,7 +1920,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.closePath();
                         ctx.fill();
                     } else if (platform.isGolden) {
-                        ctx.fillStyle = '#3FE1B0';
+                        ctx.fillStyle = '#FFD700';
                         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
                     } else {
                         ctx.fillStyle = '#1E293B';
@@ -1930,7 +1930,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Draw moving platforms
                 movingPlatforms.forEach(platform => {
-                    ctx.fillStyle = '#3FE1B0';
+                    ctx.fillStyle = '#00FF00';
                     ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
                 });
 
