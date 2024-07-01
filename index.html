@@ -20,7 +20,7 @@
 }
 #gameWrapper {
     display: grid;
-    grid-template-columns: 150px 1fr 300px;
+    grid-template-columns: 250px 1fr 300px;
     gap: 10px;
     width: 100%;
     max-width: 1550px;
@@ -128,10 +128,12 @@
 
 
 #highscoreSection {
-    position: fixed;
-    top: 20 px;
-    left: 0 px;
-    width: 25%;
+    grid-column: 1; /* Place in the first column */
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(30, 41, 59, 0.8); /* Semi-transparent background */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
 }
 
 #gameLogo {
@@ -143,13 +145,12 @@
         
 #gameContainer {
     grid-column: 2;
-    width: 800px;
+    width: 100%;
+    max-width: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-self: start;
-    margin-left: 30px;
-    margin-top: -50px;
+    justify-self: center;
 }
 
 #powerupTimers {
@@ -193,17 +194,22 @@
         
         font-size: 12px;
         width: 100%;
-        table-layout: fixed;
-        position: relative;
+        border-collapse: collapse;
         }
 
         #highscoreTable th, #highscoreTable td {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        }
+    padding: 5px;
+    text-align: center;
+    border-bottom: 1px solid rgba(63, 225, 176, 0.3);
+}
 
-        
+#highscoreTable th {
+    color: #3FE1B0;
+}
+
+#highscoreTable td {
+    color: #FFFFFF;
+}
 
         #highscoreTable tr:hover td {
             background: rgba(63, 225, 176, 0.2);
@@ -454,7 +460,7 @@
     padding: 20px; /* Example padding */
     border-radius: 5px; /* Example border radius */
     margin-left: 75px;
-    margin-top: 290px;
+    margin-top: 275px;
 }
     </style>
 </head>
