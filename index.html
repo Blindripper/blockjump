@@ -19,16 +19,14 @@
     color: #FFFFFF;
 }
 
-
 #gameWrapper {
     display: grid;
-    grid-template-columns: 300px 1fr 300px; /* Return to three-column layout */
+    grid-template-columns: 300px 1fr;
     gap: 20px;
     width: 100%;
-    max-width: 1550px;
+    max-width: 1200px;
     margin: 0 auto;
     align-items: start;
-    position: relative;
 }
 
 
@@ -39,10 +37,9 @@
         }
 
         #header {
-    position: fixed;
+    position: absolute;
     top: 20px;
     right: 20px;
-    z-index: 1000;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -51,8 +48,8 @@
 
 .jackpot-info {
     grid-column: 1;
-    width: calc(100% - 40px); /* Adjust width accounting for left position */
-    margin-top: 20px;
+    width: calc(100% - 20px); /* Adjust width accounting for left position */
+    margin-top: 10px;
     padding: 10px;
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
@@ -153,7 +150,7 @@
 
 #highscoreSection {
     grid-column: 1;
-    width: 100%;
+    width: calc(100% - 20px);
     padding: 10px;
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
@@ -161,6 +158,7 @@
     position: relative; /* Change to relative positioning */
     top: 20px; /* Adjust top position */
     left: 20px; /* Adjust left position */
+    margin: 0;
 }
 
 #gameLogo {
@@ -171,13 +169,13 @@
 }
         
 #gameContainer {
-    grid-column: 2;
-    width: 100%;
-    max-width: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-self: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 0;
+    margin: auto;
 }
 
 #powerupTimers {
@@ -215,6 +213,10 @@
     justify-content: center;
     gap: 10px;
     margin-bottom: 10px;
+    max-width: 800px;
+    width: 100%;
+    margin: 10px 0;
+    padding: 0;
 }
         
         #highscoreTable {
@@ -270,16 +272,16 @@
 }
 
         #gameCanvas {
+            margin: 10px 0;
+            padding: 0;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
     margin-top: 10px; /* Add some space above the canvas */
 }
         #floorCounter {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
-            text-align: center;
+            width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
         }
         #startButton, #soundToggle {
             font-size: 24px;
@@ -305,6 +307,8 @@
     font-weight: bold;
     transition: background-color 0.3s ease;
     margin-left: 130px;
+    margin: 10px auto;
+    display: block;
 }
 
 #claimPrizeBtn:hover {
@@ -333,11 +337,9 @@
         }
 
         #blockCounter {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
-            text-align: center;
+            width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
 
             .powerup-content {
   display: flex;
@@ -499,10 +501,6 @@
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
-    <div id="left-sidebar" class="special-sidebar">
-        <h3>1st can claim the Jackpot</h3>
-        <p id="contract-balance">Contract Balance: Loading...</p>
-    </div>
     <div id="gameWrapper">
         <div id="leftSidebar">
             <div id="highscoreSection">
@@ -522,7 +520,7 @@
             </table>
             <div class="jackpot-info">
                 <h3>1st can claim the Jackpot</h3>
-                <p id="contract-balance">Contract Balance: 0.03 ETH</p>
+                <p id="contract-balance">Contract Balance: Loading...</p>
             </div>
             <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
             <form id="nameForm" style="display: none;">
