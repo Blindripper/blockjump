@@ -22,7 +22,7 @@
 
 #gameWrapper {
     display: grid;
-    grid-template-columns: 300px 1fr; /* Two-column layout */
+    grid-template-columns: 300px 1fr 300px; /* Return to three-column layout */
     gap: 20px;
     width: 100%;
     max-width: 1550px;
@@ -30,6 +30,7 @@
     align-items: start;
     position: relative;
 }
+
 
         #gameCenter {
             display: flex;
@@ -50,12 +51,14 @@
 
 .jackpot-info {
     grid-column: 1;
-    width: 100%;
+    width: calc(100% - 40px); /* Adjust width accounting for left position */
     margin-top: 20px;
     padding: 10px;
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
+    position: relative;
+    left: 20px; /* Align with highscoreSection */
 }
 
 .jackpot-info h3 {
@@ -155,7 +158,9 @@
     background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
-    align-self: start; /* Align to the top */
+    position: relative; /* Change to relative positioning */
+    top: 20px; /* Adjust top position */
+    left: 20px; /* Adjust left position */
 }
 
 #gameLogo {
@@ -172,6 +177,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-self: center;
 }
 
 #powerupTimers {
