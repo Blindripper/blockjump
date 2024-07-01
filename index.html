@@ -969,7 +969,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        showBlockchainWaitMessage("Starting game on Etherlink...", 0.7, 0.5);
+        showBlockchainWaitMessage("Starting game on Etherlink...", 0.5, 0.5);
         const gameStarted = await startGameWeb3();
         hideBlockchainWaitMessage();
         if (gameStarted) {
@@ -1445,7 +1445,7 @@ function removeAllPowerupTimerBars() {
 
 async function submitHighscore(name) {
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...", 0.7, 0.5);
+        showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
         await submitScore(name, score, blocksClimbed);
         const highscores = await getHighscores();
         hideBlockchainWaitMessage();
@@ -2496,7 +2496,7 @@ function populatePowerupBar() {
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
-        showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.7, 0.5);
+        showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
         const purchased = await purchaseGameTries();
         hideBlockchainWaitMessage();
         if (purchased) {
@@ -2631,7 +2631,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     });
 
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...", 0.7, 0.5);
+        showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         hideBlockchainWaitMessage();
         if (submitted) {
