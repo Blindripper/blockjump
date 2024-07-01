@@ -5,7 +5,7 @@ let contract;
 let account;
 let gameStartTime;
 
-const contractAddress = '0x0e8Bb7500D80701CCa627480681ABE6982E4dd8a'; // Replace if this has changed
+const contractAddress = '0x703793fa32AC5d35D77B245e4a5F9AAC11937af2'; // Replace if this has changed
 const contractABI = [
   {
     "inputs": [],
@@ -469,13 +469,19 @@ async function claimPrize() {
         return false;
     }
     try {
-        const result = await contract.methods.claimPrize().send({ from: account });
-        console.log('Prize claimed successfully:', result);
+      const result = await contract.methods.claimPrize().call({ from: account });
+      if (result) {
+        const tx = await contract.methods.claimPrize().send({ from: account });
+        console.log('Prize claimed successfully:', tx);
         return true;
-    } catch (error) {
-        console.error('Error claiming prize:', error);
+      } else {
+        console.error('Prize claim failed in call');
         return false;
     }
+} catch (error) {
+    console.error('Error claiming prize:', error);
+    return false;
+}
 }
 
 export { 
