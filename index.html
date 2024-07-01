@@ -22,7 +22,7 @@
 
 #gameWrapper {
   display: flex;
-  justify-content: flex-start; /* Changed from space-between */
+  justify-content: center; /* Changed from space-between */
   align-items: flex-start; /* Changed from center */
   width: 100%;
   max-width: 1400px; /* Increased from 1200px */
@@ -39,16 +39,17 @@
         }
 
         #header {
-    position: absolute;
-    top: 10px;
-    right: 100px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
     display: flex;
     justify-content: flex-end; /* Align items to the right */
     padding: 5px 10px;
     background-color: #1f2a40;
     flex-direction: column; /* Changed from column */
     align-items: flex-end;
-    gap: 5px;
+    gap: 10px;
+    z-index: 1000;
     }
 
 .jackpot-info {
@@ -202,7 +203,7 @@
 #gameContainer {
     flex-grow: 0; /* Changed from 1 */
     width: 800px; /* Set a fixed width */
-    margin: 0; /* Remove auto margins */
+    margin: 0 auto; /* Remove auto margins */
     padding: 20px;
     background: #1f2a40;
     border-radius: 8px;
@@ -215,9 +216,8 @@
     background-color: #2b3a67;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-right: 10px; /* Reduced from 200px */
-    margin-left: 10px;
-}
+    margin-right: 20px; /* Reduced from 200px */
+    }
 
 #powerupTimers {
     display: flex;
