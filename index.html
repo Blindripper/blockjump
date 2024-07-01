@@ -1439,13 +1439,16 @@ function hideBlockchainWaitMessage() {
                 height: 15,
                 speed: 30 + Math.random() * (20 + difficultyLevel * 2) // Slightly increase speed with difficulty
             });
-            }
+        }
+    }
 
             // Increase wind probability and max speed
             if (difficultyLevel >= 7) {
                 wind.speed = Math.random() * (30 + difficultyLevel * 3);
             }
         }
+
+
 
         function createPlatform(y) {
             if (!canvas) {
