@@ -2613,47 +2613,6 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     this.style.display = 'none';
 });
 
-function displayCanvasMessage(message, type = 'info') {
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Save the current canvas state
-    ctx.save();
-
-    // Set up the background
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Set up the text style
-    ctx.font = 'bold 24px Orbitron, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Set color based on message type
-    switch(type) {
-        case 'success':
-            ctx.fillStyle = '#4CAF50'; // Green
-            break;
-        case 'error':
-            ctx.fillStyle = '#F44336'; // Red
-            break;
-        default:
-            ctx.fillStyle = '#3FE1B0'; // Default color
-    }
-
-    // Draw the message
-    const maxWidth = canvas.width * 0.8; // 80% of canvas width
-    const lineHeight = 30;
-    wrapText(ctx, message, canvas.width / 2, canvas.height / 2, maxWidth, lineHeight);
-
-    // Restore the canvas state
-    ctx.restore();
-
-    // Remove the message after a delay
-    setTimeout(() => {
-        draw(); // Redraw the game canvas to remove the message
-    }, 3000); // Display for 3 seconds
-}
 
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
