@@ -971,7 +971,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
     }
 
     try {
-        messageOverlay = showBlockchainWaitMessage("Starting game on Etherlink...", 0.7, 0.5);
+        messageOverlay = showBlockchainWaitMessage("Starting game on Etherlink...", 0.5, 0.5);
         const gameStarted = await startGameWeb3();
 
         if (messageOverlay) {
@@ -2508,23 +2508,36 @@ function populatePowerupBar() {
 });
 
 
+let purchaseMessageOverlay;
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
-        showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+        purchaseMessageOverlay = showBlockchainWaitMessage("Purchasing game tries on Etherlink...", 0.7, 0.5);
         const purchased = await purchaseGameTries();
-        hideBlockchainWaitMessage();
+        
+        // Always remove the message overlay
+        if (purchaseMessageOverlay) {
+            document.body.removeChild(purchaseMessageOverlay);
+            purchaseMessageOverlay = null;
+        }
+        
         if (purchased) {
             console.log('Game tries purchased successfully');
-            displayCanvasMessage('10 Game tries purchased successfully!');
-            updateTryCount();
+            displayCanvasMessage('10 game tries purchased successfully!', 'success', 0.3);
+            await updateTryCount();
             updateButtonState();
             draw();
+        } else {
+            displayCanvasMessage('Failed to purchase game tries. Please try again.', 'error', 0.3);
         }
     } catch (error) {
-        hideBlockchainWaitMessage();
+        // Ensure the message overlay is removed in case of an error
+        if (purchaseMessageOverlay) {
+            document.body.removeChild(purchaseMessageOverlay);
+            purchaseMessageOverlay = null;
+        }
         console.error('Failed to purchase game tries:', error);
-        displayCanvasMessage('Failed to purchase game tries. Please try again.');
+        displayCanvasMessage('Error purchasing game tries. Please try again.', 'error', 0.3);
     }
 });
 
@@ -2586,20 +2599,33 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
 
 
 
+let claimMessageOverlay;
+
 document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...");
+        claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.7, 0.5);
         const result = await claimPrize();
-        hideBlockchainWaitMessage();
+        
+        // Always remove the message overlay
+        if (claimMessageOverlay) {
+            document.body.removeChild(claimMessageOverlay);
+            claimMessageOverlay = null;
+        }
+        
         if (result) {
-            displayCanvasMessage('Prize claimed successfully! Congratz!', 'success');
+            displayCanvasMessage('Prize claimed successfully! Congratulations!', 'success', 0.3);
             await updateHighscoreTable(); // Refresh the table and button state
         } else {
-            displayCanvasMessage('Failed to claim prize. Not eligible.', 'error');
+            displayCanvasMessage('Failed to claim prize. Not eligible.', 'error', 0.3);
         }
     } catch (error) {
+        // Ensure the message overlay is removed in case of an error
+        if (claimMessageOverlay) {
+            document.body.removeChild(claimMessageOverlay);
+            claimMessageOverlay = null;
+        }
         console.error('Error claiming prize:', error);
-        displayCanvasMessage('An error occurred while claiming the prize. Please try again.', 'error');
+        displayCanvasMessage('An error occurred while claiming the prize. Please try again.', 'error', 0.3);
     }
 });
 
