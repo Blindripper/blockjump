@@ -1792,27 +1792,30 @@ platforms.forEach(platform => {
 
             // Move platforms and generate new ones
             if (hasLeftGround && !isPlayerOnSafePlatform) {
-                platforms.forEach((platform, index) => {
-                    platform.y += PLATFORM_SPEED * dt;
-                    
-                    if (platform.y > canvas.height) {
-                        score++;
-                        blocksClimbed++; // Increment blocks climbed
-                        updateBlockCounter(); // Update the block counter display
-                        debugInfo.totalBlocksClimbed++;
-                        document.getElementById('floorCounter').textContent = `Tezos Price: ${score.toString().padStart(7, '0')}`;
-                        platforms[index] = createPlatform(0);
+    platforms.forEach((platform, index) => {
+        platform.y += PLATFORM_SPEED * dt;
+        
+        if (platform.y > canvas.height) {
+            // Instead of incrementing score here, we'll do it separately
+            platforms[index] = createPlatform(0);
+            blocksClimbed++;
+            updateBlockCounter();
+            debugInfo.totalBlocksClimbed++;
+        }
+    });
+
+    score++;
+    document.getElementById('floorCounter').textContent = `Tezos Price: ${score.toString().padStart(7, '0')}`;
                         
                         updateBackground();
 
                         // Check if it's time to generate a new powerup
-                        if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
-                            powerups.push(createPowerup(0));
-                            blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 10) + 5; // Increased drop rate
-                            console.log(`Powerup generated. Next at ${blocksUntilNextPowerup}`);
-                        }
-                    }
-                });
+    if (debugInfo.totalBlocksClimbed >= blocksUntilNextPowerup) {
+        powerups.push(createPowerup(0));
+        blocksUntilNextPowerup = debugInfo.totalBlocksClimbed + Math.floor(Math.random() * 10) + 5;
+        console.log(`Powerup generated. Next at ${blocksUntilNextPowerup}`);
+    }
+
 
                 // Move bottom platform
                 bottomPlatform.y += PLATFORM_SPEED * dt;
