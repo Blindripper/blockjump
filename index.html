@@ -2512,7 +2512,7 @@ let purchaseMessageOverlay;
 
 document.getElementById('buyTriesBtn').addEventListener('click', async () => {
     try {
-        purchaseMessageOverlay = showBlockchainWaitMessage("Purchasing game tries on Etherlink...", 0.7, 0.5);
+        purchaseMessageOverlay = showBlockchainWaitMessage("Purchasing game tries on Etherlink...", 0.5, 0.5);
         const purchased = await purchaseGameTries();
         
         // Always remove the message overlay
@@ -2603,7 +2603,7 @@ let claimMessageOverlay;
 
 document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
     try {
-        claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.7, 0.5);
+        claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.5, 0.5);
         const result = await claimPrize();
         
         // Always remove the message overlay
