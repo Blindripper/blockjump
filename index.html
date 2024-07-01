@@ -18,16 +18,18 @@
     font-family: 'Orbitron', sans-serif;
     color: #FFFFFF;
 }
+
+
 #gameWrapper {
     display: grid;
-    grid-template-columns: 250px 1fr 300px;
-    gap: 10px;
+    grid-template-columns: 300px 1fr; /* Two-column layout */
+    gap: 20px;
     width: 100%;
     max-width: 1550px;
     margin: 0 auto;
     align-items: start;
     position: relative;
-}  
+}
 
         #gameCenter {
             display: flex;
@@ -43,8 +45,27 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px; /* Space between buttons */
-}   
+    gap: 10px;
+}
+
+.jackpot-info {
+    grid-column: 1;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: rgba(30, 41, 59, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
+}
+
+.jackpot-info h3 {
+    color: #3FE1B0;
+    margin-bottom: 5px;
+}
+
+#contract-balance {
+    color: #FFFFFF;
+}
 
 .game-button {
     font-family: 'Orbitron', sans-serif;
@@ -128,12 +149,13 @@
 
 
 #highscoreSection {
-    grid-column: 1; /* Place in the first column */
+    grid-column: 1;
     width: 100%;
     padding: 10px;
-    background-color: rgba(30, 41, 59, 0.8); /* Semi-transparent background */
+    background-color: rgba(30, 41, 59, 0.8);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(63, 225, 176, 0.3);
+    align-self: start; /* Align to the top */
 }
 
 #gameLogo {
@@ -150,7 +172,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-self: center;
 }
 
 #powerupTimers {
@@ -477,8 +498,9 @@
         <p id="contract-balance">Contract Balance: Loading...</p>
     </div>
     <div id="gameWrapper">
-        <div id="highscoreSection">
-            <div class="section-title">Highscores</div>
+        <div id="leftSidebar">
+            <div id="highscoreSection">
+                <div class="section-title">Highscores</div>
             <table id="highscoreTable">
                  <thead>
                     <tr>
@@ -492,6 +514,10 @@
                 </thead>
                 <tbody id="highscoreBody"></tbody>
             </table>
+            <div class="jackpot-info">
+                <h3>1st can claim the Jackpot</h3>
+                <p id="contract-balance">Contract Balance: 0.03 ETH</p>
+            </div>
             <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
             <form id="nameForm" style="display: none;">
                 <input type="text" id="nameInput" placeholder="Enter your name" maxlength="10" required>
