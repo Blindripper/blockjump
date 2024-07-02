@@ -1335,6 +1335,13 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
             }
         }
 
+        function removeBlockchainWaitMessage() {
+    const overlay = document.querySelector('.blockchain-wait-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
         function incrementCombo() {
             comboCounter++;
             comboTimer = 10; // Set combo timer to 5 seconds
@@ -1445,6 +1452,8 @@ function removeAllPowerupTimerBars() {
     const timerBars = document.querySelectorAll('.powerup-timer-bar');
     timerBars.forEach(bar => bar.remove());
 }
+
+
 
         function handleBlastEffect() {
             const blastRadius = 200; // Adjust this value to change the collection range
@@ -1607,7 +1616,7 @@ function showClaimPrizeButton() {
         function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset = 0.5, yOffset = 0.5) {
     const canvas = document.getElementById('gameCanvas');
     const overlay = document.createElement('div');
-    
+    overlay.className = 'blockchain-wait-overlay';
     overlay.style.position = 'absolute';
     overlay.style.left = canvas.offsetLeft + 'px';
     overlay.style.top = canvas.offsetTop + 'px';
@@ -2742,6 +2751,8 @@ document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
     try {
         claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.5, 0.5);
         const result = await claimPrize();
+
+        removeBlockchainWaitMessage();
         
         // Always remove the message overlay
         if (claimMessageOverlay) {
@@ -2756,6 +2767,7 @@ document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
             displayCanvasMessage('Failed to claim prize. Not eligible.', 'error', 0.3);
         }
     } catch (error) {
+        removeBlockchainWaitMessage();
         // Ensure the message overlay is removed in case of an error
         if (claimMessageOverlay) {
             document.body.removeChild(claimMessageOverlay);
@@ -2811,6 +2823,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     try {
         showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
+        removeBlockchainWaitMessage();
         hideBlockchainWaitMessage();
         if (submitted) {
             console.log('Score submitted successfully');
@@ -2822,6 +2835,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
         }
     } catch (error) {
         console.error('Error during score submission:', error);
+        removeBlockchainWaitMessage();
         displayCanvasMessage('An error occurred while submitting your score. Please try again.', 'error');
     }
 
