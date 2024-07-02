@@ -1307,35 +1307,7 @@ document.getElementById('soundToggle').addEventListener('click', toggleSound);
             updateWindIndicator();
         }
 
-        function updateAchievements() {
-            if (!achievements.highJumper.achieved && score >= achievements.highJumper.requirement) {
-                achievements.highJumper.achieved = true;
-                showAchievement("High Jumper");
-            }
-            if (!achievements.comboMaster.achieved && comboCounter >= achievements.comboMaster.requirement) {
-                achievements.comboMaster.achieved = true;
-                showAchievement("Combo Master");
-            }
-            if (!achievements.cryptoWhale.achieved && score >= achievements.cryptoWhale.requirement) {
-                achievements.cryptoWhale.achieved = true;
-                showAchievement("Crypto Whale");
-            }
-        }
-
-        function showAchievement(name) {
-            const achievementPopup = document.getElementById('achievementPopup');
-            if (achievementPopup) {
-                achievementPopup.textContent = `Achievement Unlocked: ${name}`;
-                achievementPopup.style.display = 'block';
-                setTimeout(() => {
-                    achievementPopup.style.display = 'none';
-                }, 3000);
-            } else {
-                console.error('Achievement popup element not found');
-            }
-        }
-
-        function removeBlockchainWaitMessage() {
+         function removeBlockchainWaitMessage() {
     const overlay = document.querySelector('.blockchain-wait-overlay');
     if (overlay) {
         overlay.remove();
