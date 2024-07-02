@@ -43,6 +43,7 @@ let gameStats = {};
 
 function renderAchievements() {
     const achievementsList = document.getElementById('achievementsList');
+    if (!achievementsList) return;
     achievementsList.innerHTML = '';
 
     achievements.forEach(achievement => {
@@ -59,6 +60,11 @@ function renderAchievements() {
             <button class="mint-button" data-id="${achievement.id}">Mint NFT</button>
         `;
         achievementsList.appendChild(achievementElement);
+        const achievementsSection = document.getElementById('achievementsSection');
+    if (achievementsSection) {
+        achievementsSection.style.display = 'block';
+    }
+
 
         const mintButton = achievementElement.querySelector('.mint-button');
         mintButton.style.display = achievement.requirement(gameStats) ? 'block' : 'none';
