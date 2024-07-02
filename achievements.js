@@ -39,6 +39,7 @@ const achievements = [
 ];
 
 let userAchievements = [];
+let gameStats = {};
 
 function renderAchievements() {
     const achievementsList = document.getElementById('achievementsList');
@@ -46,7 +47,7 @@ function renderAchievements() {
 
     achievements.forEach(achievement => {
         const achievementElement = document.createElement('div');
-        achievementElement.className = `achievement ${userAchievements.includes(achievement.id) ? 'unlocked' : ''}`;
+        achievementElement.className = `achievement ${achievement.requirement(gameStats) ? 'unlocked' : ''}`;
         achievementElement.innerHTML = `
             <div class="achievement-content">
                 <img src="https://raw.githubusercontent.com/Blindripper/blockjump/main/NFT/${achievement.image}" alt="${achievement.name}">
@@ -60,19 +61,29 @@ function renderAchievements() {
         achievementsList.appendChild(achievementElement);
 
         const mintButton = achievementElement.querySelector('.mint-button');
+        mintButton.style.display = achievement.requirement(gameStats) ? 'block' : 'none';
         mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
     });
-
-    updateMintButtons();
 }
 
-function updateMintButtons() {
-    achievements.forEach(achievement => {
-        const mintButton = document.querySelector(`.mint-button[data-id="${achievement.id}"]`);
-        if (mintButton) {
-            mintButton.style.display = userAchievements.includes(achievement.id) ? 'none' : 'block';
+async function mintAchievementNFT(achievementId) {
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        const achievement = achievements.find(a => a.id === achievementId);
+        if (achievement && achievement.requirement(gameStats)) {
+            const success = await mintAchievement(window.ethereum.selectedAddress, achievementId);
+            if (success) {
+                userAchievements.push(achievementId);
+                renderAchievements();
+            }
+        } else {
+            console.log('Achievement conditions not met');
         }
-    });
+    }
+}
+
+function updateGameStats(stats) {
+    gameStats = stats;
+    renderAchievements();
 }
 
 async function loadUserAchievements() {
@@ -82,27 +93,8 @@ async function loadUserAchievements() {
     }
 }
 
-async function mintAchievementNFT(achievementId) {
-    if (window.ethereum && window.ethereum.selectedAddress) {
-        const success = await mintAchievement(window.ethereum.selectedAddress, achievementId);
-        if (success) {
-            userAchievements.push(achievementId);
-            renderAchievements();
-        }
-    }
-}
-
-function checkAchievements(stats) {
-    achievements.forEach(achievement => {
-        if (!userAchievements.includes(achievement.id) && achievement.requirement(stats)) {
-            userAchievements.push(achievement.id);
-            renderAchievements();
-        }
-    });
-}
-
 // Initialize achievements
 loadUserAchievements();
 
 // Export functions to be used in the main game logic
-export { checkAchievements, loadUserAchievements };
+export { updateGameStats, loadUserAchievements };
