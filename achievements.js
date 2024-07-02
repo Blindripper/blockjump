@@ -43,7 +43,10 @@ let gameStats = {};
 
 function renderAchievements() {
     const achievementsList = document.getElementById('achievementsList');
-    if (!achievementsList) return;
+    if (!achievementsList) {
+        console.error('Achievements list element not found');
+        return;  // Exit the function if element is not available
+    }
     achievementsList.innerHTML = '';
 
     achievements.forEach(achievement => {
