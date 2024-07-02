@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockJump</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon1.ico">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+</head>
+<body>
+    <header>
+        <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
+        <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
+        <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
+    </header>
+
+    <div id="gameWrapper">
+        <div id="leftSidebar">
+            <div id="highscoreSection">
+                <div class="section-title">Highscores</div>
+                <table id="highscoreTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Score</th>
+                            <th>Tezos Price</th>
+                            <th>Blocks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="highscoreBody"></tbody>
+                </table>
+                <div class="jackpot-info">
+                    <h3>1st can claim the Jackpot</h3>
+                    <p id="contract-balance">Contract Balance: Loading...</p>
+                </div>
+                <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
+                <form id="nameForm" style="display: none;">
+                    <input type="text" id="nameInput" placeholder="Enter your name" maxlength="10" required>
+                    <button type="submit" id="submitScore">Submit Score</button>
+                </form>
+            </div>
+        </div>
+        <div id="gameContainer">
+            <button id="infoButton" class="info-button">?</button>
+            <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
+            <div id="blockCounter">Blocks Climbed: 0</div>
+            <div id="floorCounter">Tezos Price: 0000000</div>
+            <div id="powerupBar"></div>
+            <div id="powerupTimers"></div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div id="achievementPopup"></div>
+            <div id="windIndicator"></div>
+            <div id="controls">
+                <p id="output"></p>
+            </div>
+        </div>
+        <div id="achievementsSection" style="display: none;">
+            <h2>Achievements</h2>
+            <div id="achievementsList"></div>
+        </div>
+    </div>
+
+    <div id="infoModal" class="info-modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Game Mechanics</h2>
+            <p>BlockJump is a vertical platformer where you climb as high as you can while collecting powerups and avoiding hazards.</p>
+            <ul>
+                <li>Use arrow keys to move left and right, and jump.</li>
+                <li>Collect powerups to gain special abilities or score boosts.</li>
+                <li>Avoid red spike platforms - they'll end your game!</li>
+                <li>The higher you climb, the higher your score.</li>
+                <li>Wind effects will push you left or right - adapt your jumps!</li>
+                <li>Try to achieve special milestones to unlock achievements.</li>
+            </ul>
+        </div>
+    </div>
+
+    <button id="soundToggle" class="game-button">Sound: Off</button>
+
+    <script type="module" src="game.js"></script>
+    <script type="module" src="web3Integration.js"></script>
+    <script type="module" src="achievements.js"></script>
+</body>
+</html>
