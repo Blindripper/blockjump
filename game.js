@@ -1909,9 +1909,8 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
                 updateButtonState();
                 updateTryCount();
                 await loadUserAchievements();
-                document.getElementById('buyTriesBtn').style.display = 'block';
                 await updateHighscoreTable();
-                await loadUserAchievements(); // Add this line
+                document.getElementById('buyTriesBtn')?.style.display = 'block'; // Optional chaining
                 showAchievements();
                 checkAndDisplayStartButton();
                 updateButtonState();
@@ -1940,8 +1939,8 @@ document.getElementById('walletConnectBtn').addEventListener('click', async () =
 
 let purchaseMessageOverlay;
 
-document.getElementById('buyTriesBtn').addEventListener('click', async () => {
-    try {
+document.getElementById('buyTriesBtn')?.addEventListener('click', async () => {
+try {
         purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
         const purchased = await purchaseGameTries();
         
@@ -2028,7 +2027,8 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
 
 let claimMessageOverlay;
 
-document.getElementById('claimPrizeBtn').addEventListener('click', async () => {
+document.getElementById('claimPrizeBtn')?.addEventListener('click', async () => {
+
     try {
         claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.5, 0.5);
         const result = await claimPrize();
@@ -2181,7 +2181,7 @@ async function handleScoreSubmission(e) {
 
 
 
-document.getElementById('nameForm').addEventListener('submit', async function(e) {
+document.getElementById('nameForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
     
@@ -2200,7 +2200,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
         showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         removeBlockchainWaitMessage();
-        hideBlockchainWaitMessage();
+        
         if (submitted) {
             console.log('Score submitted successfully');
             await updateHighscoreTable();
@@ -2220,6 +2220,9 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
 
 
     // Keyboard input handling
+    
+    
+    
     document.addEventListener('keydown', (e) => {
         keys[e.code] = true;
     });
@@ -2236,61 +2239,68 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM fully loaded and parsed');
-
-
+  
     // Initialize other game components
     initialize();
     setupEventListeners();
     loadSprites();
     preloadSounds();
     populatePowerupBar();
-    updateHighscoreTable().catch(error => console.error('Failed to update highscores:', error));
-    getContractBalance();
-
-     // **Event Listener for Buy Tries Button**
-     if (document.getElementById('buyTriesBtn')) {  // Check for element first
-        const buyButton = document.getElementById('buyTriesBtn');
-        buyButton.addEventListener('click', async () => {
-      try {
-        purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
-        const purchased = await purchaseGameTries();
-        
-        // Always remove the message overlay
-        if (purchaseMessageOverlay) {
-            document.body.removeChild(purchaseMessageOverlay);
-            purchaseMessageOverlay = null;
-        }
-        
-        if (purchased) {
-            console.log('Game tries purchased successfully');
-            displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
-            await updateTryCount();
-            updateButtonState();
-            draw();
-        } else {
-            displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
-        }
-      } catch (error) {
-        // Ensure the message overlay is removed in case of an error
-        if (purchaseMessageOverlay) {
-            document.body.removeChild(purchaseMessageOverlay);
-            purchaseMessageOverlay = null;
-        }
-        console.error('Failed to purchase game tries:', error);
-        displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
-      }
+  
+    updateHighscoreTable().catch(error => {
+      console.error('Failed to update highscores:', error);
+      // Display user-friendly message, e.g., "An error occurred while updating highscores"
     });
-  } else {
-    console.error('Buy Tries button not found');
-  }
-
+  
+    getContractBalance();
+  
+    // Event Listener for Buy Tries Button
+    if (document.getElementById('buyTriesBtn')) { // Check for element first
+      const buyButton = document.getElementById('buyTriesBtn');
+      buyButton.addEventListener('click', async () => {
+        try {
+          purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+          const purchased = await purchaseGameTries();
+          
+          // Always remove the message overlay
+          if (purchaseMessageOverlay) {
+              document.body.removeChild(purchaseMessageOverlay);
+              purchaseMessageOverlay = null;
+          }
+          
+          if (purchased) {
+              console.log('Game tries purchased successfully');
+              displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
+              await updateTryCount();
+              updateButtonState();
+              draw();
+          } else {
+              displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
+          }
+        } catch (error) {
+          // Ensure the message overlay is removed in case of an error
+          if (purchaseMessageOverlay) {
+              document.body.removeChild(purchaseMessageOverlay);
+              purchaseMessageOverlay = null;
+          }
+          console.error('Failed to purchase game tries:', error);
+          displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+        }
+      });
+    } else {
+      console.error('Buy Tries button not found');
+    }
+  
     // Initialize Web3
     console.log('Initializing Web3...');
     initWeb3().then(() => {
-        console.log('Web3 initialized');
-        loadHighscores().catch(error => console.error('Failed to load highscores:', error));
+      console.log('Web3 initialized');
+      loadHighscores().catch(error => {
+        console.error('Failed to load highscores:', error);
+        // Display user-friendly message, e.g., "An error occurred while loading highscores"
+      });
     }).catch(error => {
-        console.error('Failed to initialize Web3:', error);
-        // You might want to display an error message to the user here
+      console.error('Failed to initialize Web3:', error);
+      // You might want to display an error message to the user here
     });
-});
+  });
