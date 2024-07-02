@@ -1858,6 +1858,7 @@ function populatePowerupBar() {
 }
 
 
+
 function handleWalletConnection() {
     console.log('Wallet connect button clicked');
     if (!isConnected) {
@@ -2241,6 +2242,24 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
         keys[e.code] = false;
     });
 
+    
+
+    // Load sprites, populate powerup descriptions, preload sounds, etc.
+    // ... (rest of your initialization code)
+// ... (all your previous code remains unchanged)
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed');
+
+    // Initialize other game components
+    initialize();
+    setupEventListeners();
+    loadSprites();
+    preloadSounds();
+    populatePowerupBar();
+    updateHighscoreTable().catch(error => console.error('Failed to update highscores:', error));
+    getContractBalance();
+
     // Initialize Web3
     console.log('Initializing Web3...');
     initWeb3().then(() => {
@@ -2250,13 +2269,6 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
         console.error('Failed to initialize Web3:', error);
         // You might want to display an error message to the user here
     });
-
-    // Load sprites, populate powerup descriptions, preload sounds, etc.
-    // ... (rest of your initialization code)
-// ... (all your previous code remains unchanged)
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM fully loaded and parsed');
 
     const walletConnectBtn = document.getElementById('walletConnectBtn');
     if (walletConnectBtn) {
@@ -2293,13 +2305,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Sound toggle button not found');
     }
 
-    // Initialize other game components
-    initialize();
-    setupEventListeners();
-    loadSprites();
-    preloadSounds();
-    populatePowerupBar();
-    updateHighscoreTable().catch(error => console.error('Failed to update highscores:', error));
-    getContractBalance();
+    
 });
     
