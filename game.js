@@ -1785,67 +1785,29 @@ function populatePowerupBar() {
     }
     console.log('Finished populating powerup bar');
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Call the existing initialize function
-    initialize();
-    setupEventListeners();
-
-
-
-    // New code for the info button and modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', function() {
-            infoModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', function() {
-            infoModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = 'none';
-            }
-        });
-    } else {
-        console.error('One or more elements for the info modal are missing.');
-    }
-});
-
-
-
-
-function initialize() {
+  
+  function initialize() {
     console.log('Initializing...');
     canvas = document.getElementById('gameCanvas');
-    console.log('Canvas element:', canvas);
     if (!canvas) {
-        console.error('Canvas element not found');
-        return;
+      console.error('Canvas element not found');
+      return;
     }
     ctx = canvas.getContext('2d');
-    console.log('Canvas context:', ctx);
     if (!ctx) {
-        console.error('Unable to get 2D context');
-        return;
+      console.error('Unable to get 2D context');
+      return;
     }
     console.log('Canvas initialized, dimensions:', canvas.width, 'x', canvas.height);
-    canvas.style.border = '2px solid red';
-    canvas.style.zIndex = '1000';
-
+  
     populatePowerupBar();
     loadSprites();
     preloadSounds();
-
+  
     console.log('Initialization complete');
-}
-
-function setupEventListeners() {
+  }
+  
+  function setupEventListeners() {
     const connectButton = document.getElementById('walletConnectBtn');
     if (connectButton) {
         connectButton.addEventListener('click', handleWalletConnection);
@@ -1871,8 +1833,30 @@ function setupEventListeners() {
         soundToggle.addEventListener('click', toggleSound);
     }
 
-    // ... (add any other event listeners you need)
+    // New code for the info button and modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
+
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', function() {
+            infoModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function() {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+    } else {
+        console.error('One or more elements for the info modal are missing.');
+    }
 }
+
 
 async function handleWalletConnection() {
     console.log('Wallet connect button clicked');
@@ -2276,5 +2260,34 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
 
     // Load sprites, populate powerup descriptions, preload sounds, etc.
     // ... (rest of your initialization code)
+// ... (all your previous code remains unchanged)
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Call the existing initialize function
+    initialize();
+    setupEventListeners();
+
+    // New code for the info button and modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
+
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', function() {
+            infoModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function() {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+    } else {
+        console.error('One or more elements for the info modal are missing.');
+    }
+});
     
