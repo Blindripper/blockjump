@@ -2297,6 +2297,9 @@ function resetGame() {
     lastTime = performance.now();
     blocksClimbed = 0;
     score = 0;
+    score = 0;
+    currentBackgroundIndex = 0;
+    updateBackground();
     
     // Reset powerup-related variables
     powerups = [];
