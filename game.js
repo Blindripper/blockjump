@@ -2248,9 +2248,9 @@ document.addEventListener('DOMContentLoaded', function() {
     getContractBalance();
 
      // **Event Listener for Buy Tries Button**
-  const buyButton = document.getElementById('buyTriesBtn');
-  if (buyButton) {
-    buyButton.addEventListener('click', async () => {
+     if (document.getElementById('buyTriesBtn')) {  // Check for element first
+        const buyButton = document.getElementById('buyTriesBtn');
+        buyButton.addEventListener('click', async () => {
       try {
         purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
         const purchased = await purchaseGameTries();
