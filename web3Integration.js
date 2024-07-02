@@ -5,7 +5,7 @@ let contract;
 let account;
 let gameStartTime;
 
-const contractAddress = '0x177e592bda7fF5Af20273A730CD19b9aCE9aB50e'; // Replace if this has changed
+const contractAddress = '0x9Cc0bD4399F2796ed1980acd710cEC241Ab9e099'; // Replace if this has changed
 const contractABI = [
   {
     "inputs": [],
