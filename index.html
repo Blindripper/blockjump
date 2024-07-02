@@ -1062,6 +1062,8 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
         return;
     }
 
+    resetGame();
+
     try {
         messageOverlay = showBlockchainWaitMessage("Starting Game on Etherlink...", 0.5, 0.5);
         const gameStarted = await startGameWeb3();
@@ -1076,7 +1078,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
             gameStartTime = Math.floor(Date.now() / 1000); // Set as Unix timestamp
             window.gameStartTime = gameStartTime;
             console.log('Game start time set:', gameStartTime);
-            resetGame();
+            
             initGame();
 
             console.log('Game reset. Setting gameRunning to true...');
@@ -2271,6 +2273,9 @@ function clearCanvasOverlays() {
 
 function resetGame() {
     console.log('Resetting game...');
+    if (gameLoopId) {
+        cancelAnimationFrame(gameLoopId);
+    }
     document.dispatchEvent(new Event('gameReset'));
     clearCanvasOverlays();
     removeAllPowerupTimerBars();
