@@ -1078,6 +1078,7 @@ function updatePowerupTimerBar(type, timeLeft, duration) {
             console.log('Game start time set:', gameStartTime);
             resetGame();
             initGame();
+
             console.log('Game reset. Setting gameRunning to true...');
             gameRunning = true;
             gameOver = false;
@@ -1131,6 +1132,8 @@ function gameLoop(currentTime) {
 
     console.log('Updating game state, dt:', dt);
     update(dt);
+
+
     
     console.log('Drawing game');
     draw();
@@ -1741,13 +1744,13 @@ function showScoreSubmissionForm() {
         gameOver = false;
 
         function updateStageName() {
-            const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end) || stageNames[stageNames.length - 1];
-            if (currentStage && currentStage.name !== currentStageName) {
-                currentStageName = currentStage.name;
-                stageNameOpacity = 1;
-                stageNameTimer = 3; // 3 seconds display time
-            }
-        }
+    const currentStage = stageNames.find(stage => score >= stage.start && score <= stage.end) || stageNames[0];
+    if (currentStage.name !== currentStageName) {
+        currentStageName = currentStage.name;
+        stageNameOpacity = 1;
+        stageNameTimer = 3; // 3 seconds display time
+    }
+}
 
         function update(dt) {
             if (!gameRunning || gameOver) return;
@@ -2271,6 +2274,9 @@ function resetGame() {
     document.dispatchEvent(new Event('gameReset'));
     clearCanvasOverlays();
     removeAllPowerupTimerBars();
+    currentStageName = "Athens";
+    stageNameOpacity = 1;
+    stageNameTimer = 3;
     hideScoreSubmissionForm();
     powerupsCollected = 0;
     const powerupTimers = document.getElementById('powerupTimers');
