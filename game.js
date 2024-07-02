@@ -1808,52 +1808,44 @@ function populatePowerupBar() {
   }
   
   function setupEventListeners() {
-    const connectButton = document.getElementById('walletConnectBtn');
-    if (connectButton) {
-        connectButton.addEventListener('click', handleWalletConnection);
-    }
+    const elements = [
+        { id: 'walletConnectBtn', event: 'click', handler: handleWalletConnection },
+        { id: 'buyTriesBtn', event: 'click', handler: handleBuyTries },
+        { id: 'claimPrizeBtn', event: 'click', handler: handleClaimPrize },
+        { id: 'nameForm', event: 'submit', handler: handleScoreSubmission },
+        { id: 'soundToggle', event: 'click', handler: toggleSound }
+    ];
 
-    const buyTriesButton = document.getElementById('buyTriesBtn');
-    if (buyTriesButton) {
-        buyTriesButton.addEventListener('click', handleBuyTries);
-    }
-
-    const claimPrizeButton = document.getElementById('claimPrizeBtn');
-    if (claimPrizeButton) {
-        claimPrizeButton.addEventListener('click', handleClaimPrize);
-    }
-
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.addEventListener('submit', handleScoreSubmission);
-    }
-
-    const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.addEventListener('click', toggleSound);
-    }
-
-    // New code for the info button and modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', function() {
-            infoModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', function() {
-            infoModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = 'none';
+    elements.forEach(({ id, event, handler }) => {
+        try {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(event, handler);
+            } else {
+                console.warn(`Element with id '${id}' not found`);
             }
-        });
-    } else {
-        console.error('One or more elements for the info modal are missing.');
+        } catch (error) {
+            console.error(`Error setting up event listener for '${id}':`, error);
+        }
+    });
+
+    // Info button and modal setup
+    try {
+        const infoButton = document.getElementById('infoButton');
+        const infoModal = document.getElementById('infoModal');
+        const closeButton = document.querySelector('.close-button');
+
+        if (infoButton && infoModal && closeButton) {
+            infoButton.addEventListener('click', () => infoModal.style.display = 'block');
+            closeButton.addEventListener('click', () => infoModal.style.display = 'none');
+            window.addEventListener('click', (event) => {
+                if (event.target == infoModal) infoModal.style.display = 'none';
+            });
+        } else {
+            console.warn('One or more elements for the info modal are missing.');
+        }
+    } catch (error) {
+        console.error('Error setting up info modal:', error);
     }
 }
 
@@ -2270,40 +2262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // You might want to display an error message to the user here
     });
 
-    const walletConnectBtn = document.getElementById('walletConnectBtn');
-    if (walletConnectBtn) {
-        walletConnectBtn.addEventListener('click', handleWalletConnection);
-    } else {
-        console.error('Wallet connect button not found');
-    }
-
-    const buyTriesBtn = document.getElementById('buyTriesBtn');
-    if (buyTriesBtn) {
-        buyTriesBtn.addEventListener('click', handleBuyTries);
-    } else {
-        console.error('Buy tries button not found');
-    }
-
-    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
-    if (claimPrizeBtn) {
-        claimPrizeBtn.addEventListener('click', handleClaimPrize);
-    } else {
-        console.error('Claim prize button not found');
-    }
-
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.addEventListener('submit', handleScoreSubmission);
-    } else {
-        console.error('Name form not found');
-    }
-
-    const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.addEventListener('click', toggleSound);
-    } else {
-        console.error('Sound toggle button not found');
-    }
+    
 
     
 });
