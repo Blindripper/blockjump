@@ -691,7 +691,7 @@
     <script type="module" src="web3Integration.js"></script>
     <script type="module"> 
     import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, } from './web3Integration.js';
-    import { checkAchievements, loadUserAchievements, updateGameStats } from './achievements.js';
+    import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 
         // Define base URL for the GitHub repository
@@ -1135,28 +1135,7 @@ function gameLoop(currentTime) {
     console.log('Drawing game');
     draw();
 
-    function checkAchievements() {
-    if (blocksClimbed === 666 && !achievements[1]) {
-        mintAchievement(1);
-        achievements[1] = true;
-    }
-    if (powerupsCollected >= 100 && !achievements[2]) {
-        mintAchievement(2);
-        achievements[2] = true;
-    }
-    if (blocksClimbed >= 1000 && !achievements[3]) {
-        mintAchievement(3);
-        achievements[3] = true;
-    }
-    if (score >= 15000 && !achievements[4]) {
-        mintAchievement(4);
-        achievements[4] = true;
-    }
-    if (score >= 100000 && !achievements[5]) {
-        mintAchievement(5);
-        achievements[5] = true;
-    }
-}
+ 
 
 // Call this function in your game loop or after updating game stats
 
