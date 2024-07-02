@@ -11,8 +11,6 @@
 <body>
     <header>
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
-        <button id="buyTriesBtn" class="game-button buy-button">Buy 10 Tries</button>
-        <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
     </header>
 
     <div id="gameWrapper">
@@ -32,12 +30,9 @@
                     <tbody id="highscoreBody"></tbody>
                 </table>
                 <div class="jackpot-info">
-                    <h3>Jackpot</h3>
-                    <div class="contract-balance">
-                      <span id="contract-balance-amount">0.02</span> XTZ
-                    </div>
-                    <p>1st place can claim the Jackpot!</p>
-                  </div>
+                    <h3>1st can claim the Jackpot</h3>
+                    <p id="contract-balance">Contract Balance: Loading...</p>
+                </div>
                 <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
                 <form id="nameForm" style="display: none;">
                     <input type="text" id="nameInput" placeholder="Enter your name" maxlength="10" required>
@@ -55,9 +50,6 @@
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <div id="achievementPopup"></div>
             <div id="windIndicator"></div>
-            <div id="controls">
-                <p id="output"></p>
-            </div>
         </div>
         <div id="achievementsSection" style="display: none;">
             <h2>Achievements</h2>
