@@ -16,7 +16,8 @@ let accumulator = 0;
 let intentionalGameOver = false;
 let gameLoopId;
 let powerupsCollected = 0;
-
+// Web3 button event listeners
+let isConnected = false;
 let gameStartTime;
 // Global canvas variables
 let canvas, ctx;
@@ -1785,6 +1786,40 @@ function populatePowerupBar() {
     console.log('Finished populating powerup bar');
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Call the existing initialize function
+    initialize();
+    setupEventListeners();
+
+
+
+    // New code for the info button and modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
+
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', function() {
+            infoModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function() {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+    } else {
+        console.error('One or more elements for the info modal are missing.');
+    }
+});
+
+
+
+
 function initialize() {
     console.log('Initializing...');
     canvas = document.getElementById('gameCanvas');
@@ -1808,7 +1843,69 @@ function initialize() {
     preloadSounds();
 
     console.log('Initialization complete');
-}  
+}
+
+function setupEventListeners() {
+    const connectButton = document.getElementById('walletConnectBtn');
+    if (connectButton) {
+        connectButton.addEventListener('click', handleWalletConnection);
+    }
+
+    const buyTriesButton = document.getElementById('buyTriesBtn');
+    if (buyTriesButton) {
+        buyTriesButton.addEventListener('click', handleBuyTries);
+    }
+
+    const claimPrizeButton = document.getElementById('claimPrizeBtn');
+    if (claimPrizeButton) {
+        claimPrizeButton.addEventListener('click', handleClaimPrize);
+    }
+
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.addEventListener('submit', handleScoreSubmission);
+    }
+
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', toggleSound);
+    }
+
+    // ... (add any other event listeners you need)
+}
+
+async function handleWalletConnection() {
+    console.log('Wallet connect button clicked');
+    try {
+        if (!isConnected) {
+            const connected = await initWeb3();
+            console.log('Web3 initialization result:', connected);
+            if (connected) {
+                console.log('Successfully connected to Web3');
+                isConnected = true;
+                updateButtonState();
+                await updateTryCount();
+                await loadUserAchievements();
+                showBuyTriesButton();
+                await updateHighscoreTable();
+                showAchievements();
+                checkAndDisplayStartButton();
+                draw();
+            }
+        } else {
+            // Implement your disconnect logic here
+            isConnected = false;
+            updateButtonState();
+            console.log('Disconnected from Web3');
+            hideBuyTriesButton();
+            hideAchievements();
+            draw();
+        }
+    } catch (error) {
+        console.error('Error handling wallet connection:', error);
+        alert('Failed to connect/disconnect. Please try again.');
+    }
+}
 
 const floorCounter = document.getElementById('floorCounter');
 const achievementPopup = document.getElementById('achievementPopup');
@@ -1828,8 +1925,7 @@ function hideAchievements() {
     }
 }
 
-// Web3 button event listeners
-let isConnected = false;
+
 
 document.getElementById('walletConnectBtn').addEventListener('click', async () => {
     console.log('Wallet connect button clicked');
@@ -1999,25 +2095,126 @@ function updateButtonState() {
     const buyButton = document.getElementById('buyTriesBtn');
     const tryCounter = document.getElementById('tryCounter');
     
-    if (isConnected) {
-        connectButton.textContent = 'Disconnect wallet';
-        connectButton.classList.add('disconnect-button');
-        connectButton.classList.remove('connect-button');
-        buyButton.style.display = 'block';
-        tryCounter.style.display = 'block';
-        updateTryCount(); // We'll create this function next
-        checkAndDisplayStartButton();
-    } else {
-        connectButton.textContent = 'Connect wallet';
-        connectButton.classList.remove('disconnect-button');
-        connectButton.classList.add('connect-button');
-        buyButton.style.display = 'none';
-        tryCounter.style.display = 'none';
-        clearCanvasOverlays();
+    if (connectButton) {
+        if (isConnected) {
+            connectButton.textContent = 'Disconnect wallet';
+            connectButton.classList.add('disconnect-button');
+            connectButton.classList.remove('connect-button');
+        } else {
+            connectButton.textContent = 'Connect wallet';
+            connectButton.classList.remove('disconnect-button');
+            connectButton.classList.add('connect-button');
+        }
     }
 
-    draw();
+    if (buyButton) {
+        buyButton.style.display = isConnected ? 'block' : 'none';
+    }
+
+    if (tryCounter) {
+        tryCounter.style.display = isConnected ? 'block' : 'none';
+    }
+
+    if (isConnected) {
+        updateTryCount();
+    }
 }
+
+function showBuyTriesButton() {
+    const buyButton = document.getElementById('buyTriesBtn');
+    if (buyButton) {
+        buyButton.style.display = 'block';
+    }
+}
+
+function hideBuyTriesButton() {
+    const buyButton = document.getElementById('buyTriesBtn');
+    if (buyButton) {
+        buyButton.style.display = 'none';
+    }
+}
+
+async function handleBuyTries() {
+    try {
+        const purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+        const purchased = await purchaseGameTries();
+        
+        if (purchaseMessageOverlay) {
+            document.body.removeChild(purchaseMessageOverlay);
+        }
+        
+        if (purchased) {
+            console.log('Game tries purchased successfully');
+            displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
+            await updateTryCount();
+            updateButtonState();
+            draw();
+        } else {
+            displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
+        }
+    } catch (error) {
+        console.error('Failed to purchase game tries:', error);
+        displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+    }
+}
+
+async function handleClaimPrize() {
+    try {
+        const claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.5, 0.5);
+        const result = await claimPrize();
+
+        if (claimMessageOverlay) {
+            document.body.removeChild(claimMessageOverlay);
+        }
+        
+        if (result) {
+            displayCanvasMessage('Prize claimed successfully! Congratulations!', 'success', 0.3);
+            await updateHighscoreTable();
+        } else {
+            displayCanvasMessage('Failed to claim prize. Not eligible.', 'error', 0.3);
+        }
+    } catch (error) {
+        console.error('Error claiming prize:', error);
+        displayCanvasMessage('An error occurred while claiming the prize. Please try again.', 'error', 0.3);
+    }
+}
+
+async function handleScoreSubmission(e) {
+    e.preventDefault();
+    const name = document.getElementById('nameInput').value.trim();
+    
+    if (!name) {
+        displayCanvasMessage('Please enter a valid name', 'error');
+        return;
+    }
+
+    console.log('Form submitted. Current game data:', { 
+        finalScore: window.finalScore, 
+        blocksClimbed: window.blocksClimbed, 
+        gameStartTime: window.gameStartTime 
+    });
+
+    try {
+        showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
+        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
+        hideBlockchainWaitMessage();
+        if (submitted) {
+            console.log('Score submitted successfully');
+            await updateHighscoreTable();
+            displayCanvasMessage('Score submitted successfully!', 'success');
+        } else {
+            console.error('Failed to submit score');
+            displayCanvasMessage('Failed to submit score. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Error during score submission:', error);
+        hideBlockchainWaitMessage();
+        displayCanvasMessage('An error occurred while submitting your score. Please try again.', 'error');
+    }
+
+    hideScoreSubmissionForm();
+}
+
 
 
 document.getElementById('nameForm').addEventListener('submit', async function(e) {
@@ -2080,30 +2277,4 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     // Load sprites, populate powerup descriptions, preload sounds, etc.
     // ... (rest of your initialization code)
 
-    document.addEventListener('DOMContentLoaded', function() {
-    // Call the existing initialize function
-    initialize();
-
-    // New code for the info button and modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', function() {
-            infoModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', function() {
-            infoModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = 'none';
-            }
-        });
-    } else {
-        console.error('One or more elements for the info modal are missing.');
-    }
-});
+    
