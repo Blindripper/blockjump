@@ -730,28 +730,30 @@ const contractABI = [
 
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
-      try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          web3 = new Web3(window.ethereum);
-          const accounts = await web3.eth.getAccounts();
-          account = accounts[0];
-          contract = new web3.eth.Contract(contractABI, contractAddress);
-          console.log('Contract initialized:', contract);
-          console.log('Contract methods:', contract.methods);
-
-          if (!contract.methods) {
-              throw new Error('Contract methods not available');
-          }
-
-          console.log('Web3 initialized, user connected:', account);
-          return true;
-      } catch (error) {
-          console.error('User denied account access or error occurred:', error);
-          return false;
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      if (accounts.length === 0) {
+        console.error('No accounts found');
+        return false;
       }
-  } else {
-      console.log('Non-Ethereum browser detected. Consider installing MetaMask!');
+      account = accounts[0];
+      contract = new web3.eth.Contract(contractABI, contractAddress);
+      if (!contract.methods) {
+        console.error('Contract methods not available');
+        return false;
+      }
+      console.log('Contract initialized:', contract);
+      console.log('Contract methods:', contract.methods);
+      return true;
+    } catch (error) {
+      console.error('Error initializing Web3:', error);
       return false;
+    }
+  } else {
+    console.log('Please install MetaMask!');
+    return false;
   }
 }
 
