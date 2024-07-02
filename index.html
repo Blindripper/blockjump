@@ -30,6 +30,61 @@
   margin-left: 70px;
 }
 
+.info-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: #3FE1B0;
+            color: #16213e;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            background-color: #1f2a40;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #3FE1B0;
+            width: 80%;
+            max-width: 600px;
+            color: #FFFFFF;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .close-button {
+            color: #3FE1B0;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: #FFFFFF;
+        }
+
+
+
 
         #gameCenter {
             display: flex;
@@ -673,6 +728,21 @@
             </div>
         </div>
         <div id="gameContainer">
+            <button id="infoButton" class="info-button">?</button>
+            <div id="infoModal" class="info-modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>Game Mechanics</h2>
+                    <p>BlockJump is a vertical platformer where you climb as high as you can while collecting powerups and avoiding hazards.</p>
+                    <ul>
+                        <li>Use arrow keys to move left and right, and jump.</li>
+                        <li>Collect powerups to gain special abilities or score boosts.</li>
+                        <li>Avoid red spike platforms - they'll end your game!</li>
+                        <li>The higher you climb, the higher your score.</li>
+                        <li>Wind effects will push you left or right - adapt your jumps!</li>
+                        <li>Try to achieve special milestones to unlock achievements.</li>
+                    </ul>
+                </div>
             <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
             <div id="blockCounter">Blocks Climbed: 0</div>
             <div id="floorCounter">Tezos Price: 0000000</div>
@@ -685,6 +755,7 @@
                 <p id="output"></p>
             </div>
         </div>
+
         <button id="soundToggle" class="game-button">Sound: Off</button>
     </div>
     <script type="module" src="achievements.js"></script>
@@ -2850,9 +2921,34 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
     // Load sprites, populate powerup descriptions, preload sounds, etc.
     // ... (rest of your initialization code)
 
-    (function() {
-    document.addEventListener('DOMContentLoaded', initialize);
-})();
+    document.addEventListener('DOMContentLoaded', function() {
+    // Call the existing initialize function
+    initialize();
+
+    // New code for the info button and modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
+
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', function() {
+            infoModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function() {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+    } else {
+        console.error('One or more elements for the info modal are missing.');
+    }
+});
+
         
     </script>
 </body>
