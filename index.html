@@ -691,7 +691,7 @@
     <script type="module" src="web3Integration.js"></script>
     <script type="module"> 
     import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, } from './web3Integration.js';
-    import { checkAchievements, loadUserAchievements } from './achievements.js';
+    import { checkAchievements, loadUserAchievements, updateGameStats } from './achievements.js';
 
 
         // Define base URL for the GitHub repository
@@ -1540,7 +1540,7 @@ function removeAllPowerupTimerBars() {
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
     console.log('Game ended:', { score: window.finalScore, blocksClimbed: window.blocksClimbed, gameStartTime: window.gameStartTime });
-    checkAchievements({
+    updateGameStats({
         blocksClimbed: finalBlocksClimbed,
         powerupsCollected: powerupsCollected,
         score: finalScore
@@ -2080,7 +2080,7 @@ platforms.forEach(platform => {
         console.error('Unexpected game over condition');
         endGame(score, blocksClimbed);
             }
-            checkAchievements({
+            updateGameStats({
         blocksClimbed: blocksClimbed,
         powerupsCollected: powerupsCollected,
         score: score
@@ -2634,6 +2634,7 @@ function hideAchievements() {
                 isConnected = true;
                 updateButtonState();
                 updateTryCount();
+                await loadUserAchievements();
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 await updateHighscoreTable();
                 await loadUserAchievements(); // Add this line
