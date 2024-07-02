@@ -66,7 +66,7 @@ function updateBlockCounter() {
 }
 
 async function getContractBalance() {
-    const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x9Cc0bD4399F2796ed1980acd710cEC241Ab9e099'; // Replace if needed
+    const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4'; // Replace if needed
 
     try {
         const response = await fetch(apiUrl);
