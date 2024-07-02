@@ -7,7 +7,7 @@ body {
     align-items: flex-start;
     margin: 0;
     font-family: 'Orbitron', sans-serif;
-    font-size: 14 px;
+    font-size: 14px;
     color: #e0e0e0;
     padding: 20px 0;
     min-height: 100vh;
@@ -28,7 +28,7 @@ body {
 }
 
 #leftSidebar {
-    width: 300px;
+    width: 350px;
     padding: 20px;
     background-color: #2b3a67;
     border-radius: 8px;
@@ -36,16 +36,18 @@ body {
     margin-right: 20px;
     height: calc(100vh - 40px);
     overflow-y: auto;
+    float: left;
 }
 
 #gameContainer {
-    flex-grow: 0;
+    flex-grow: 1;
     width: 800px;
     padding: 2px;
     background: #1f2a40;
     border-radius: 3px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: relative;
+    margin-left: 20px;
 }
 
 #header {
@@ -65,6 +67,7 @@ body {
     right: 20px;
     width: 250px;
     background-color: rgba(22, 33, 62, 0.9);
+    margin-left: 20px;
     padding: 15px;
     border-radius: 10px;
     color: #3FE1B0;
@@ -387,6 +390,15 @@ body {
     justify-content: flex-end;
     width: 100%;
 }
+
+
+
+#walletConnectBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
     
 #windIndicator {
     position: absolute;
@@ -413,6 +425,23 @@ body {
     width: 100%;
 }
 
+#powerupBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.powerup-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+}
+
+
+
 .powerup-item.active {
     background-color: rgba(255, 215, 0, 0.3);
     border: 2px solid #FFD700;
@@ -431,6 +460,7 @@ body {
 
 .powerup-count {
     font-size: 12px;
+    margin-top: 5px;
     color: #FFD700;
 }
 
@@ -443,13 +473,14 @@ body {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    font-size: 14px;
 }
 
 #highscoreTable th, #highscoreTable td {
     color: #3FE1B0;
     border: 1px solid #e94560;
     border-bottom: 2px solid #3FE1B0;
-    padding: 8px;
+    padding: 10px 5px;
     text-align: center;
 }
 
@@ -623,7 +654,8 @@ body {
     #gameWrapper {
         flex-direction: column;
         align-items: center;
-        display: grid;
+        display: flex;
+        justify-content: space-between;
         grid-template-columns: 300px 1fr 250px;
         gap: 20px;
         max-width: 1200px;
