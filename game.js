@@ -2256,4 +2256,3 @@ document.addEventListener('DOMContentLoaded', function() {
         // You might want to display an error message to the user here
     });
 });
-    
