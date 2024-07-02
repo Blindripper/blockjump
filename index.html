@@ -64,6 +64,12 @@
     color: #3FE1B0;
     font-family: 'Orbitron', sans-serif;
     z-index: 1000; /* Ensure it's above other elements */
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+
+#achievementsSection[style*="display: none"] {
+    opacity: 0;
 }
 
 /* Add smooth scrolling for a better user experience */
@@ -634,7 +640,7 @@
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
         </div>
 
-        <div id="achievementsSection">
+        <div id="achievementsSection" style="display: none;">            
             <h2>Achievements</h2>
             <div id="achievementsList"></div>
         </div> 
@@ -731,6 +737,7 @@
         return;
     }
     console.log('Canvas dimensions in initGame:', canvas.width, 'x', canvas.height);
+    hideAchievements();
 
             updateWindIndicator();
             // Initialize platforms
@@ -743,6 +750,7 @@
             isPlayerOnSafePlatform = false;
             gameRunning = true;
             gameOver = false 
+
 
             // Reset blast effect variables
             blastEffectActive = false;
@@ -2596,6 +2604,22 @@ function populatePowerupBar() {
     const nameForm = document.getElementById('nameForm');
 
 
+    function showAchievements() {
+    const achievementsSection = document.getElementById('achievementsSection');
+    if (achievementsSection) {
+        achievementsSection.style.display = 'block';
+    }
+}
+
+function hideAchievements() {
+    const achievementsSection = document.getElementById('achievementsSection');
+    if (achievementsSection) {
+        achievementsSection.style.display = 'none';
+    }
+}
+
+
+
     // Web3 button event listeners
     let isConnected = false;
 
@@ -2613,6 +2637,7 @@ function populatePowerupBar() {
                 document.getElementById('buyTriesBtn').style.display = 'block';
                 await updateHighscoreTable();
                 await loadUserAchievements(); // Add this line
+                showAchievements();
                 checkAndDisplayStartButton();
                 updateButtonState();
                 draw();
@@ -2629,6 +2654,7 @@ function populatePowerupBar() {
             updateButtonState();
             console.log('Disconnected from Web3');
             document.getElementById('buyTriesBtn').style.display = 'none';
+            hideAchievements();
             draw();
         } catch (error) {
             console.error('Failed to disconnect from Web3:', error);
