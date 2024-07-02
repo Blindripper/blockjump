@@ -1817,37 +1817,29 @@ function populatePowerupBar() {
     ];
 
     elements.forEach(({ id, event, handler }) => {
-        try {
-            const element = document.getElementById(id);
-            if (element) {
-                element.addEventListener(event, handler);
-            } else {
-                console.warn(`Element with id '${id}' not found`);
-            }
-        } catch (error) {
-            console.error(`Error setting up event listener for '${id}':`, error);
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener(event, handler);
+        } else {
+            console.warn(`Element with id '${id}' not found. Skipping event listener setup.`);
         }
     });
 
-    // Info button and modal setup
-    try {
-        const infoButton = document.getElementById('infoButton');
-        const infoModal = document.getElementById('infoModal');
-        const closeButton = document.querySelector('.close-button');
+    // Setup for info button and modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
 
-        if (infoButton && infoModal && closeButton) {
-            infoButton.addEventListener('click', () => infoModal.style.display = 'block');
-            closeButton.addEventListener('click', () => infoModal.style.display = 'none');
-            window.addEventListener('click', (event) => {
-                if (event.target == infoModal) infoModal.style.display = 'none';
-            });
-        } else {
-            console.warn('One or more elements for the info modal are missing.');
-        }
-    } catch (error) {
-        console.error('Error setting up info modal:', error);
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', () => infoModal.style.display = 'block');
+        closeButton.addEventListener('click', () => infoModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target == infoModal) infoModal.style.display = 'none';
+        });
+    } else {
+        console.warn('One or more elements for the info modal are missing.');
     }
-}
+} 
 
 
 
@@ -2261,9 +2253,5 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Failed to initialize Web3:', error);
         // You might want to display an error message to the user here
     });
-
-    
-
-    
 });
     
