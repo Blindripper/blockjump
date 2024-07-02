@@ -2237,6 +2237,7 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM fully loaded and parsed');
 
+
     // Initialize other game components
     initialize();
     setupEventListeners();
@@ -2245,6 +2246,43 @@ document.addEventListener('DOMContentLoaded', function() {
     populatePowerupBar();
     updateHighscoreTable().catch(error => console.error('Failed to update highscores:', error));
     getContractBalance();
+
+     // **Event Listener for Buy Tries Button**
+  const buyButton = document.getElementById('buyTriesBtn');
+  if (buyButton) {
+    buyButton.addEventListener('click', async () => {
+      try {
+        purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+        const purchased = await purchaseGameTries();
+        
+        // Always remove the message overlay
+        if (purchaseMessageOverlay) {
+            document.body.removeChild(purchaseMessageOverlay);
+            purchaseMessageOverlay = null;
+        }
+        
+        if (purchased) {
+            console.log('Game tries purchased successfully');
+            displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
+            await updateTryCount();
+            updateButtonState();
+            draw();
+        } else {
+            displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
+        }
+      } catch (error) {
+        // Ensure the message overlay is removed in case of an error
+        if (purchaseMessageOverlay) {
+            document.body.removeChild(purchaseMessageOverlay);
+            purchaseMessageOverlay = null;
+        }
+        console.error('Failed to purchase game tries:', error);
+        displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+      }
+    });
+  } else {
+    console.error('Buy Tries button not found');
+  }
 
     // Initialize Web3
     console.log('Initializing Web3...');
