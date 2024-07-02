@@ -93,11 +93,17 @@ function updateGameStats(stats) {
 }
 
 async function loadUserAchievements() {
-    if (window.ethereum && window.ethereum.selectedAddress) {
+    try {
+      if (window.ethereum && window.ethereum.selectedAddress) {
         userAchievements = await getAchievements(window.ethereum.selectedAddress);
         renderAchievements();
+      } else {
+        console.log('Wallet not connected');
+      }
+    } catch (error) {
+      console.error('Error loading achievements:', error);
     }
-}
+  }
 
 // Initialize achievements
 loadUserAchievements();
