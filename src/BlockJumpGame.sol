@@ -32,7 +32,7 @@ contract BlockJumpGame is ERC721URIStorage {
 
     constructor() ERC721("BlockJumpAchievement", "BJA") {
         owner = msg.sender;
-        _baseTokenURI = "ipfs:/QmZxVUxqQRUUV6hGJo96ik6cStPZJmd6PfdDStQJcKtThn/";
+        _baseTokenURI = "ipfs://QmZxVUxqQRUUV6hGJo96ik6cStPZJmd6PfdDStQJcKtThn/";
     }
 
     function _baseURI() internal view override returns (string memory) {
