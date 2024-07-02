@@ -1,428 +1,139 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 body {
     background: linear-gradient(to bottom, #0f1624, #1a2333);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    margin: 0;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
     color: #e0e0e0;
-    padding: 20px 0;
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
 }
 
-    h1, h2, h3 {
-    font-weight: 700;
-    }
+header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 1000;
+}
 
 #gameWrapper {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
+    justify-content: space-between;
     max-width: 1400px;
-    margin: 0 auto;
-    position: relative;
+    margin: 60px auto 0;
+    padding: 20px;
 }
 
 #leftSidebar {
     width: 350px;
-    padding: 20px;
-    background-color: #2b3a67;
+    background-color: rgba(43, 58, 103, 0.8);
     border-radius: 8px;
+    padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-right: 20px;
-    height: calc(100vh - 40px);
-    overflow-y: auto;
-    float: left;
 }
 
 #gameContainer {
     flex-grow: 1;
     width: 800px;
-    padding: 2px;
-    background: #1f2a40;
-    border-radius: 3px;
+    margin: 0 20px;
+    background: rgba(31, 42, 64, 0.8);
+    border-radius: 8px;
+    padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
-    margin-left: 20px;
-}
-
-#header {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-    z-index: 1000;
 }
 
 #achievementsSection {
-    position: fixed;
-    top: 20px;
-    right: 20px;
     width: 250px;
     background-color: rgba(22, 33, 62, 0.9);
-    margin-left: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    color: #3FE1B0;
-    font-family: 'Orbitron', sans-serif;
-}
-
-.achievement {
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: rgba(31, 42, 64, 0.8);
-    border-radius: 5px;
-}
-
-.achievement img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.achievement-content {
-    display: flex;
-    align-items: center;
-}
-
-.achievement-info {
-    flex-grow: 1;
-}
-
-.achievement h3 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-}
-
-.achievement p {
-    margin: 0;
-    font-size: 12px;
-}
-
-.mint-button {
-    display: none;
-    margin-top: 5px;
-    padding: 5px 10px;
-    background-color: #3FE1B0;
-    color: #16213e;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-}
-
-.achievement.unlocked {
-    border: 2px solid #FFD700;
-}
-
-.jackpot-info {
-    position: relative;
-    width: 85%;
-    padding: 15px;
-    background-color: rgba(63, 225, 176, 0.1);
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-    text-align: center;
-}
-
-.jackpot-info h3 {
-    color: #3FE1B0;
-    margin-bottom: 5px;
-}
-
-.contract-balance {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin: 10px 0;
-  }
-
-  #contract-balance-amount {
-    color: #3FE1B0;
-  }
-
-#contract-balance {
-    color: #FFFFFF;
-}
-
-#content {
-    display: flex;
-    flex-grow: 1;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
 }
 
 .game-button {
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 16px;
     background-color: #3FE1B0;
+    color: #16213e;
     padding: 10px 20px;
     border: none;
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: #16213e;
-    width: auto;
-    min-width: 120px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     text-transform: uppercase;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .game-button:hover {
-    transform: scale(1.05);
     background-color: #2dc898;
-    transform: scale(1.05)
+    transform: scale(1.05);
 }
 
 .game-button:active {
     transform: translateY(2px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-.connect-button:hover {
-    background-color: #FFA500;
-}
-
-.disconnect-button {
-    background-color: #E74C3C;
-}
-
-.disconnect-button:hover {
-    background-color: #C0392B;
-}
-
-.buy-button {
-    background-color: #3498DB;
-}
-
-.buy-button:hover {
-    background-color: #2980B9;
-}
-
-#buyTriesBtn {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    padding: 8px 16px;
-}
-
-#buyTriesBtn br {
-    display: none;
-}
-
-#buyTriesBtn::after {
-    content: " for 0.01 XTZ";
-    font-size: 0.8em;
-    margin-top: 2px;
 }
 
 .connect-button {
     background-color: #FF8C00;
-    color: white;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
 .connect-button:hover {
     background-color: #FFA500;
-    transform: scale(1.05);
 }
 
-.connect-button:active {
-    transform: scale(0.98);
-}  
-
-.disconnect-button {
-    background-color: #E74C3C;
-}
-
-.disconnect-button:hover {
-    background-color: #C0392B;
-}
-
-#highscoresection {
-    position: relative;
-    top: 20px;
-    left: 20px;
-    width: 400px;
-    padding: 5px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#gameLogo {
-    display: block;
-    margin: 0 auto 10px;
-    max-width: 100%;
+#highscoreTable {
+    width: 100%;
+    font-size: 14px;
+    border-collapse: separate;
+    border-spacing: 0 5px;
     margin-bottom: 20px;
-    width: 160px;
-    height: auto;
-}
-    
-#gameCanvas {
-    margin: 10px 0;
-    padding: 0;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-    margin-top: 10px;
-    z-index: 10;
-    max-width: 100%;
-    height: auto;
-    width: 100%;
 }
 
-#floorCounter {
-    width: 100%;
+#highscoreTable th, #highscoreTable td {
+    padding: 10px 5px;
     text-align: center;
-    margin-bottom: 10px;
+    color: #3FE1B0;
+    border-bottom: 1px solid #3FE1B0;
 }
 
-#startButton {
-    font-size: 24px;
-    padding: 10px 20px;
-    background-color: #3FE1B0;
-    color: #16213e;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Orbitron', sans-serif;
-    margin: 10px;
+#highscoreTable tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-#startButton:hover {
-    background-color: #ff6b6b;
-    transform: scale(1.05);
-}
-
-#soundToggle {
-    position: fixed;
-    bottom: 3px;
-    right: 3px;
-    z-index: 1000;
-    font-size: 9px;
-    background-color: #3FE1B0;
-    color: #16213e;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Orbitron', sans-serif;
-}
-
-#soundToggle:hover {
-    background-color: #ff6b6b;
-    transform: scale(1.05);
-}
-
-#claimPrizeBtn {
-    margin-top: 20px;
-    background-color: #FFD700;
-    color: #16213e;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin-left: 130px;
-    margin: 10px auto;
-    display: block;
-}
-
-#claimPrizeBtn:hover {
-    background-color: #FFA500;
-}   
-    
-#controls {
-    grid-column: 2;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-#achievementPopup {
-    position: absolute;
-    top: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(255, 215, 0, 0.8);
-    color: #16213e;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 18px;
-    display: none;
-}
-
-#blockCounter {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.powerup-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    justify-content: flex-end;
-    width: 100%;
-}
-
-
-
-#walletConnectBtn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-    
-#windIndicator {
-    position: absolute;
-    font-size: 64px;
-    color: rgb(238, 0, 0);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    pointer-events: none;
-    transition: all 0.3s ease;
-    z-index: 1000;
+#highscoreTable tr:hover {
+    background-color: rgba(63, 225, 176, 0.1);
 }
 
 .section-title {
     color: #3FE1B0;
-    font-size: 1.5em;
+    font-size: 24px;
     margin-bottom: 15px;
     text-align: center;
 }
-    
-.powerup-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    justify-content: flex-end;
-    width: 100%;
+
+#gameLogo {
+    display: block;
+    margin: 0 auto 20px;
+    max-width: 160px;
+    height: auto;
+}
+
+#gameCanvas {
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
+}
+
+#blockCounter, #floorCounter {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 18px;
 }
 
 #powerupBar {
@@ -430,7 +141,7 @@ body {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .powerup-item {
@@ -440,22 +151,9 @@ body {
     margin: 0 10px;
 }
 
-
-
-.powerup-item.active {
-    background-color: rgba(255, 215, 0, 0.3);
-    border: 2px solid #FFD700;
-    border-radius: 5px;
-    opacity: 0.8;
-}
-
 .powerup-icon {
     width: 30px;
     height: 30px;
-}
-
-.powerup-description {
-    font-size: 12px;
 }
 
 .powerup-count {
@@ -464,88 +162,37 @@ body {
     color: #FFD700;
 }
 
-.powerup-timer {
-    font-weight: bold;
-    color: #FFD700;
-}
-
-#highscoreTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-#highscoreTable th, #highscoreTable td {
-    color: #3FE1B0;
-    border: 1px solid #e94560;
-    border-bottom: 2px solid #3FE1B0;
-    padding: 10px 5px;
-    text-align: center;
-}
-
-#highscoreTable tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  #highscoreTable td, #highscoreTable th {
-    padding: 10px;
-    text-align: center;
-  }
-  
-  #highscoreTable tr:hover {
+.jackpot-info {
     background-color: rgba(63, 225, 176, 0.1);
-  }
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#contract-balance {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #3FE1B0;
+}
+
+#claimPrizeBtn {
+    display: block;
+    margin: 20px auto 0;
+}
 
 #nameForm {
     margin-top: 20px;
-    display: none;
-    width: 100%;
 }
 
 #nameInput {
-    width: 90%;
+    width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     background-color: rgba(63, 225, 176, 0.1);
     border: 1px solid #3FE1B0;
     color: #FFFFFF;
     font-family: 'Orbitron', sans-serif;
-}
-
-.canvas-button {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    padding: 15px 30px;
-    font-size: 24px;
-    font-family: 'Orbitron', sans-serif;
-    color: #FFFFFF;
-    background-color: #3FE1B0;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-    text-transform: uppercase;
-    z-index: 1000;
-}
-
-.canvas-button:hover {
-    background-color: #2DC898;
-    box-shadow: 0 0 30px rgba(63, 225, 176, 0.8);
-    transform: translate(-50%, -50%) scale(1.05);
-}
-
-.canvas-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    font-family: 'Orbitron', sans-serif;
-    color: #FFFFFF;
-    text-align: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 #submitScore {
@@ -559,19 +206,10 @@ body {
     text-transform: uppercase;
 }
 
-.special-sidebar {
-    background-color: hsl(204, 77%, 28%);
-    color: rgb(63, 225, 176, 0.8);
-    padding: 20px;
-    border-radius: 5px;
-    margin-left: 75px;
-    margin-top: 275px;
-}
-
 .info-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
     width: 30px;
     height: 30px;
     background-color: #3FE1B0;
@@ -584,7 +222,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
     transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
@@ -613,7 +250,6 @@ body {
     width: 80%;
     max-width: 600px;
     color: #FFFFFF;
-    font-family: 'Orbitron', sans-serif;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
 }
@@ -631,60 +267,40 @@ body {
     color: #FFFFFF;
 }
 
-.modal-content h2 {
-    color: #3FE1B0;
-    margin-bottom: 15px;
+#windIndicator {
+    position: absolute;
+    font-size: 64px;
+    color: #FF0000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 1000;
 }
 
-.modal-content p, .modal-content ul {
-    margin-bottom: 15px;
-    line-height: 1.6;
+#soundToggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-size: 14px;
 }
 
-.modal-content ul {
-    padding-left: 20px;
-}
-
-.modal-content li {
-    margin-bottom: 10px;
-}
-
-/* Media queries for responsiveness */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     #gameWrapper {
         flex-direction: column;
         align-items: center;
-        display: flex;
-        justify-content: space-between;
-        grid-template-columns: 300px 1fr 250px;
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px
-                 }
-
-    #leftSidebar, #gameContainer {
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: 20px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 20px;
     }
 
-    #achievementsSection {
-        position: static;
+    #leftSidebar, #gameContainer, #achievementsSection {
         width: 100%;
-        margin-top: 20px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 20px;
+        max-width: 800px;
+        margin: 20px 0;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     body {
-        padding: 10px;
+        font-size: 14px;
     }
 
     #gameCanvas {
@@ -693,21 +309,7 @@ body {
     }
 
     .game-button {
-        font-size: 10px;
-        
-    }
-
-    #highscoreTable {
-        font-size: 12px;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 5px;
-    }
-
-    @media (max-width: 600px) {
-        body {
-          font-size: 14px;
-        }
+        font-size: 14px;
+        padding: 8px 16px;
     }
 }
-/* Add any additional styles or overrides here */
