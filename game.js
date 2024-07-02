@@ -608,6 +608,8 @@ function drawParticles(ctx) {
     particles.forEach(particle => particle.draw(ctx));
 }
 
+
+
 function applyPowerUpEffect(powerupType) {
     let message = '';
     let duration = 0;
