@@ -1858,38 +1858,37 @@ function populatePowerupBar() {
 }
 
 
-async function handleWalletConnection() {
+function handleWalletConnection() {
     console.log('Wallet connect button clicked');
-    try {
-        if (!isConnected) {
-            const connected = await initWeb3();
-            console.log('Web3 initialization result:', connected);
+    if (!isConnected) {
+        initWeb3().then(connected => {
             if (connected) {
                 console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
-                await updateTryCount();
-                await loadUserAchievements();
+                updateTryCount();
+                loadUserAchievements();
                 showBuyTriesButton();
-                await updateHighscoreTable();
+                updateHighscoreTable();
                 showAchievements();
                 checkAndDisplayStartButton();
                 draw();
             }
-        } else {
-            // Implement your disconnect logic here
-            isConnected = false;
-            updateButtonState();
-            console.log('Disconnected from Web3');
-            hideBuyTriesButton();
-            hideAchievements();
-            draw();
-        }
-    } catch (error) {
-        console.error('Error handling wallet connection:', error);
-        alert('Failed to connect/disconnect. Please try again.');
+        }).catch(error => {
+            console.error('Error connecting to Web3:', error);
+            alert('Failed to connect. Please try again.');
+        });
+    } else {
+        // Implement disconnect logic here
+        isConnected = false;
+        updateButtonState();
+        console.log('Disconnected from Web3');
+        hideBuyTriesButton();
+        hideAchievements();
+        draw();
     }
 }
+
 
 const floorCounter = document.getElementById('floorCounter');
 const achievementPopup = document.getElementById('achievementPopup');
@@ -2172,12 +2171,6 @@ async function handleScoreSubmission(e) {
         return;
     }
 
-    console.log('Form submitted. Current game data:', { 
-        finalScore: window.finalScore, 
-        blocksClimbed: window.blocksClimbed, 
-        gameStartTime: window.gameStartTime 
-    });
-
     try {
         showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
@@ -2263,31 +2256,50 @@ document.getElementById('nameForm').addEventListener('submit', async function(e)
 // ... (all your previous code remains unchanged)
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Call the existing initialize function
+    console.log('DOM fully loaded and parsed');
+
+    const walletConnectBtn = document.getElementById('walletConnectBtn');
+    if (walletConnectBtn) {
+        walletConnectBtn.addEventListener('click', handleWalletConnection);
+    } else {
+        console.error('Wallet connect button not found');
+    }
+
+    const buyTriesBtn = document.getElementById('buyTriesBtn');
+    if (buyTriesBtn) {
+        buyTriesBtn.addEventListener('click', handleBuyTries);
+    } else {
+        console.error('Buy tries button not found');
+    }
+
+    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
+    if (claimPrizeBtn) {
+        claimPrizeBtn.addEventListener('click', handleClaimPrize);
+    } else {
+        console.error('Claim prize button not found');
+    }
+
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.addEventListener('submit', handleScoreSubmission);
+    } else {
+        console.error('Name form not found');
+    }
+
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', toggleSound);
+    } else {
+        console.error('Sound toggle button not found');
+    }
+
+    // Initialize other game components
     initialize();
     setupEventListeners();
-
-    // New code for the info button and modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', function() {
-            infoModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', function() {
-            infoModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = 'none';
-            }
-        });
-    } else {
-        console.error('One or more elements for the info modal are missing.');
-    }
+    loadSprites();
+    preloadSounds();
+    populatePowerupBar();
+    updateHighscoreTable().catch(error => console.error('Failed to update highscores:', error));
+    getContractBalance();
 });
     
