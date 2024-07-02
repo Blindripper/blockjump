@@ -1808,38 +1808,40 @@ function populatePowerupBar() {
   }
   
   function setupEventListeners() {
+    console.log('Setting up event listeners...');
     const elements = [
-        { id: 'walletConnectBtn', event: 'click', handler: handleWalletConnection },
-        { id: 'buyTriesBtn', event: 'click', handler: handleBuyTries },
-        { id: 'claimPrizeBtn', event: 'click', handler: handleClaimPrize },
-        { id: 'nameForm', event: 'submit', handler: handleScoreSubmission },
-        { id: 'soundToggle', event: 'click', handler: toggleSound }
+      { id: 'walletConnectBtn', event: 'click', handler: handleWalletConnection },
+      { id: 'buyTriesBtn', event: 'click', handler: handleBuyTries },
+      { id: 'claimPrizeBtn', event: 'click', handler: handleClaimPrize },
+      { id: 'nameForm', event: 'submit', handler: handleScoreSubmission },
+      { id: 'soundToggle', event: 'click', handler: toggleSound }
     ];
-
+  
     elements.forEach(({ id, event, handler }) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener(event, handler);
-        } else {
-            console.warn(`Element with id '${id}' not found. Skipping event listener setup.`);
-        }
+      try {
+        document.getElementById(id)?.addEventListener(event, handler);
+      } catch (error) {
+        console.error(`Error setting up listener for ${id}:`, error);
+      }
     });
-
+  
     // Setup for info button and modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', () => infoModal.style.display = 'block');
-        closeButton.addEventListener('click', () => infoModal.style.display = 'none');
-        window.addEventListener('click', (event) => {
-            if (event.target == infoModal) infoModal.style.display = 'none';
-        });
-    } else {
-        console.warn('One or more elements for the info modal are missing.');
+    try {
+      const infoButton = document.getElementById('infoButton');
+      const infoModal = document.getElementById('infoModal');
+      const closeButton = document.querySelector('.close-button');
+  
+      infoButton?.addEventListener('click', () => infoModal.style.display = 'block');
+      closeButton?.addEventListener('click', () => infoModal.style.display = 'none');
+      window?.addEventListener('click', (event) => {
+        if (event.target == infoModal) infoModal.style.display = 'none';
+      });
+    } catch (error) {
+      console.error('Error setting up info modal:', error);
     }
-} 
+  
+    console.log('Finished setting up event listeners');
+  } 
 
 
 
