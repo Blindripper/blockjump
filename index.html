@@ -51,16 +51,25 @@
     }
 
     #achievementsSection {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 250px;
-            background-color: rgba(22, 33, 62, 0.9);
-            padding: 15px;
-            border-radius: 10px;
-            color: #3FE1B0;
-            font-family: 'Orbitron', sans-serif;
-        }
+    position: fixed;
+    top: auto; /* Remove top positioning */
+    bottom: 20px; /* Position from the bottom */
+    right: 20px;
+    width: 250px;
+    max-height: 60vh; /* Limit height to 60% of viewport height */
+    overflow-y: auto; /* Add scrollbar if content overflows */
+    background-color: rgba(22, 33, 62, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    color: #3FE1B0;
+    font-family: 'Orbitron', sans-serif;
+    z-index: 1000; /* Ensure it's above other elements */
+}
+
+/* Add smooth scrolling for a better user experience */
+#achievementsList {
+    scroll-behavior: smooth;
+}
 
         .achievement {
             margin-bottom: 15px;
