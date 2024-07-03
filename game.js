@@ -1841,25 +1841,25 @@ function populatePowerupBar() {
         } else {
             console.warn(`Element with id '${id}' not found. Skipping event listener setup.`);
         }
-    });
+    });}
 
-    // Setup for info button and modal
-    const infoButton = document.getElementById('infoButton');
+    const infoButton = document.querySelector('.info-button');
     const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', () => infoModal.style.display = 'block');
-        closeButton.addEventListener('click', () => infoModal.style.display = 'none');
-        window.addEventListener('click', (event) => {
-            if (event.target == infoModal) infoModal.style.display = 'none';
-        });
-    } else {
-        console.warn('One or more elements for the info modal are missing.');
+    const closeButton = document.querySelector('.close');
+    
+    infoButton.onclick = function() {
+        infoModal.style.display = "block";
     }
-
-    console.log('Finished setting up event listeners');
-}
+    
+    closeButton.onclick = function() {
+        infoModal.style.display = "none";
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == infoModal) {
+            infoModal.style.display = "none";
+        }
+    } 
 
 
 async function handleWalletConnection() {
@@ -2359,13 +2359,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.warn('Name form not found in the DOM');
     }
 
-    // Setup Sound Toggle
     const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.addEventListener('click', toggleSound);
-    } else {
-        console.warn('Sound toggle button not found in the DOM');
-    }
+let isSoundOn = false;
+
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
+    // Add your sound on/off logic here
+}
+
+soundToggle.addEventListener('click', toggleSound);
 
     // Setup Info Modal
     const infoButton = document.getElementById('infoButton');
