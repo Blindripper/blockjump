@@ -2236,12 +2236,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const requiredElements = ['gameCanvas', 'blockCounter', 'floorCounter', 'powerupBar', 'achievementPopup', 'windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
-
+    
     if (missingElements.length > 0) {
         console.error('Missing required elements:', missingElements);
         alert('Some game elements are missing. Please refresh the page or contact support.');
         return;
-    } 
+    }
+
+    console.log('All required elements found');
 
     // Initialize other game components
     initialize();
