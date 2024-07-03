@@ -61,7 +61,7 @@ header {
 
 /* Left Sidebar */
 #leftSidebar {
-  width: 450px;
+  width: 550px;
   flex-shrink: 0;
   background-color: rgba(26, 35, 51, 0.9);
   border-radius: 8px;
@@ -152,7 +152,7 @@ header {
 #highscoreTable {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 6px;
+  border-spacing: 0 12px;
   font-size: 16px;
   margin-bottom: 15px;
 }
