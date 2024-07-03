@@ -5,6 +5,8 @@ let contract;
 let account;
 let gameStartTime;
 
+import { updateTryCount } from './game.js';
+
 const contractAddress = '0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4'; // Replace if this has changed
 const contractABI = [
   {
@@ -818,60 +820,34 @@ async function getGameTries() {
 
 async function purchaseGameTries() {
   if (!contract || !account) {
-    console.error('Contract not initialized or account not available');
-    return false;
+      console.error('Contract not initialized or account not available');
+      return false;
   }
 
   try {
-    const txHash = await contract.methods.purchaseGameTries().send({
-      from: account,
-      value: web3.utils.toWei('0.01', 'ether')
-    });
+      const txHash = await contract.methods.purchaseGameTries().send({
+          from: account,
+          value: web3.utils.toWei('0.01', 'ether')
+      });
 
-    console.log('Transaction sent:', txHash.transactionHash);
+      console.log('Transaction sent:', txHash.transactionHash);
 
-    const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
-    const gameTryPurchasedEvent = receipt.logs.find(log =>
-      log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
-    );
-
-    if (gameTryPurchasedEvent) {
-      console.log('Game tries purchased successfully');
+      const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
+      const gameTryPurchasedEvent = receipt.logs.find(log =>
+          log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
+      );
 
       if (gameTryPurchasedEvent) {
-        console.log('Game tries purchased successfully');
-    
-        const triesLeftSpan = document.getElementById('triesLeft');
-        if (triesLeftSpan) {
-          const tries = await getGameTries();
-          triesLeftSpan.textContent = tries;
-        } else {
-          console.warn('Element with ID "triesLeft" not found in DOM.');
-        }
-    
-        return true;
+          console.log('Game tries purchased successfully');
+          await updateTryCount(); // Call the function from game.js
+          return true;
       } else {
-        console.error('GameTryPurchased event not found in transaction receipt');
-        return false;
+          console.error('GameTryPurchased event not found in transaction receipt');
+          return false;
       }
-
-      // **Solution: Check element existence before accessing**
-      const tryCountElement = document.getElementById('gameTryCount');
-      if (tryCountElement) { // Check if element exists
-        const tries = await getGameTries(); // Assuming getGameTries returns a number
-        tryCountElement.textContent = `Tries Remaining: ${tries}`;
-      } else {
-        console.warn('Element with ID "gameTryCount" not found in DOM.');
-      }
-
-      return true;
-    } else {
-      console.error('GameTryPurchased event not found in transaction receipt');
-      return false;
-    }
   } catch (error) {
-    console.error('Error purchasing game tries:', error);
-    return false;
+      console.error('Error purchasing game tries:', error);
+      return false;
   }
 }
 
