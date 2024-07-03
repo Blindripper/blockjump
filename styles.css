@@ -60,10 +60,10 @@ header {
 }
 
 #leftSidebar {
-    min-height: 100vh;
+    min-height: auto;
     overflow-y: visible;
     padding-bottom: 20px;
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     height: auto;
@@ -71,7 +71,7 @@ header {
     max-width: 300px;
     max-height: none;
     margin-left: 20px;
-    width: 300px;
+    width: 320px;
     padding: 15px;
     background-color: rgba(26, 35, 51, 0.9);
     border-radius: 8px;
@@ -128,6 +128,7 @@ header {
   border-collapse: separate;
   border-spacing: 0 2px;
   font-size: 12px;
+  margin-bottom: 15px;
 }
 
 #tryCounter {
@@ -135,7 +136,7 @@ header {
 }
 
 #highscoreTable th, #highscoreTable td {
-  padding: 4px 6px;
+  padding: 6px 8px;
   text-align: left;
   background-color: rgba(255, 255, 255, 0.05);
 }
@@ -156,7 +157,7 @@ header {
 .section-title {
     font-size: 18px;
     color: #3FE1B0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     text-align: center;
     text-transform: uppercase;
 }
@@ -274,7 +275,7 @@ header {
 }
 
 .jackpot-info {
-    margin-top: 10px;
+    margin-top: 15px;
     text-align: center;
     font-size: 12px;
     padding: 10px;
