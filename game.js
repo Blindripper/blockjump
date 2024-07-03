@@ -1886,7 +1886,10 @@ async function handleWalletConnection() {
                 await updateHighscoreTable();
                 showAchievements();
                 checkAndDisplayStartButton();
-                requestAnimationFrame(draw); // Request a redraw
+                // Only call draw if the game is running
+                if (gameRunning) {
+                    requestAnimationFrame(draw);
+                }
             } else {
                 console.log('Failed to connect to Web3');
                 alert('Failed to connect. Please try again.');
@@ -1898,13 +1901,16 @@ async function handleWalletConnection() {
             console.log('Disconnected from Web3');
             hideBuyTriesButton();
             hideAchievements();
-            requestAnimationFrame(draw); // Request a redraw
+            // Only call draw if the game is running
+            if (gameRunning) {
+                requestAnimationFrame(draw);
+            }
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
         alert('An error occurred. Please try again.');
     }
-} 
+}
 
 
 const floorCounter = document.getElementById('floorCounter');
@@ -2227,6 +2233,9 @@ document.getElementById('nameForm')?.addEventListener('submit', async function(e
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM fully loaded and parsed');
+
+    const requiredElements = ['gameCanvas', 'blockCounter', 'floorCounter', 'powerupBar', 'achievementPopup', 'windIndicator'];
+    const missingElements = requiredElements.filter(id => !document.getElementById(id));
 
     if (missingElements.length > 0) {
         console.error('Missing required elements:', missingElements);
