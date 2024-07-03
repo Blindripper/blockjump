@@ -61,12 +61,15 @@ header {
 
 #leftSidebar {
     min-height: 100vh;
-    overflow-y: auto;
+    overflow-y: visible;
     padding-bottom: 20px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: auto;
     min-width: 250px;
     max-width: 300px;
-    max-height: calc(100vh - 40px);
+    max-height: none;
     margin-left: 20px;
     width: 300px;
     padding: 15px;
@@ -123,8 +126,8 @@ header {
 #highscoreTable {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 5px;
-  font-size: 14px;
+  border-spacing: 0 2px;
+  font-size: 12px;
 }
 
 #tryCounter {
@@ -132,7 +135,7 @@ header {
 }
 
 #highscoreTable th, #highscoreTable td {
-  padding: 8px 10px;
+  padding: 4px 6px;
   text-align: left;
   background-color: rgba(255, 255, 255, 0.05);
 }
@@ -151,9 +154,9 @@ header {
 }
 
 .section-title {
-    font-size: 20px;
+    font-size: 18px;
     color: #3FE1B0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     text-align: center;
     text-transform: uppercase;
 }
@@ -271,9 +274,9 @@ header {
 }
 
 .jackpot-info {
-    margin-top: 15px;
+    margin-top: 10px;
     text-align: center;
-    font-size: 16px;
+    font-size: 12px;
     padding: 10px;
     background-color: rgba(63, 225, 176, 0.1);
     border-radius: 5px;
@@ -287,8 +290,9 @@ header {
 #claimPrizeBtn {
     display: block;
     width: 100%;
-    margin-top: 15px;
-    padding: 10px;
+    font-size: 14px;
+    margin-top: 10px;
+    padding: 8px;
     background-color: #3FE1B0;
     color: #0f1624;
     border: none;
@@ -296,6 +300,7 @@ header {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
+    text-align: center;
 }
 
 #claimPrizeBtn:hover {
