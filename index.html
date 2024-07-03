@@ -44,7 +44,6 @@
             </div>
         </div>
         <div id="gameContainer">
-            <button id="infoButton" class="info-button">?</button>
             <img id="gameLogo" src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/Logo.png" alt="Game Logo">
             <div id="tryCounter">Tries Remaining: 0</div>
             <div id="blockCounter">Blocks Climbed: 0</div>
@@ -61,21 +60,17 @@
         </div>
     </div>
 
-    <div id="infoModal" class="info-modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Game Mechanics</h2>
-            <p>BlockJump is a vertical platformer where you climb as high as you can while collecting powerups and avoiding hazards.</p>
-            <ul>
-                <li>Use arrow keys to move left and right, and jump.</li>
-                <li>Collect powerups to gain special abilities or score boosts.</li>
-                <li>Avoid red spike platforms - they'll end your game!</li>
-                <li>The higher you climb, the higher your score.</li>
-                <li>Wind effects will push you left or right - adapt your jumps!</li>
-                <li>Try to achieve special milestones to unlock achievements.</li>
-            </ul>
-        </div>
-    </div>
+    <button class="info-button">?</button>
+
+<div id="gameMechanicsModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Game Mechanics</h2>
+    <p>
+      [Insert your game mechanics explanation here]
+    </p>
+  </div>
+</div>
 
     <button id="soundToggle" class="game-button">Sound: Off</button>
 
