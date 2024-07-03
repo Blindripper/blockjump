@@ -2352,22 +2352,7 @@ function toggleSound() {
 
 soundToggle.addEventListener('click', toggleSound);
 
-    // Setup Info Modal
-    const infoButton = document.getElementById('infoButton');
-    const infoModal = document.getElementById('infoModal');
-    const closeButton = document.querySelector('.close-button');
-
-    if (infoButton && infoModal && closeButton) {
-        infoButton.addEventListener('click', () => infoModal.style.display = 'block');
-        closeButton.addEventListener('click', () => infoModal.style.display = 'none');
-        window.addEventListener('click', (event) => {
-            if (event.target == infoModal) infoModal.style.display = 'none';
-        });
-    } else {
-        console.warn('Info modal elements not found in the DOM');
-    }
-
-    console.log('Finished setting up event listeners');
+   
 });
 
 export { updateTryCount };
