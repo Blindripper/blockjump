@@ -1318,6 +1318,18 @@ function update(dt) {
     
     function draw() {
         console.log('Drawing. gameRunning:', gameRunning, 'isConnected:', isConnected, 'gameOver:', gameOver);
+
+    const canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Unable to get 2D context');
+        return;
+    }
         console.log('Drawing frame');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'red';
@@ -1845,34 +1857,45 @@ function populatePowerupBar() {
 
 
 
-function handleWalletConnection() {
+  async function handleWalletConnection() {
     console.log('Wallet connect button clicked');
-    if (!isConnected) {
-        initWeb3().then(connected => {
+    try {
+        if (!isConnected) {
+            const connected = await initWeb3();
             if (connected) {
                 console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
-                updateTryCount();
-                loadUserAchievements();
+                await updateTryCount();
+                await loadUserAchievements();
                 showBuyTriesButton();
-                updateHighscoreTable();
+                await updateHighscoreTable();
                 showAchievements();
                 checkAndDisplayStartButton();
-                draw();
+            } else {
+                console.log('Failed to connect to Web3');
+                alert('Failed to connect. Please try again.');
+                return;
             }
-        }).catch(error => {
-            console.error('Error connecting to Web3:', error);
-            alert('Failed to connect. Please try again.');
-        });
-    } else {
-        // Implement disconnect logic here
-        isConnected = false;
-        updateButtonState();
-        console.log('Disconnected from Web3');
-        hideBuyTriesButton();
-        hideAchievements();
-        draw();
+        } else {
+            // Implement disconnect logic here
+            isConnected = false;
+            updateButtonState();
+            console.log('Disconnected from Web3');
+            hideBuyTriesButton();
+            hideAchievements();
+        }
+        
+        // Only call draw if the canvas exists
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            draw();
+        } else {
+            console.error('Canvas element not found when trying to draw');
+        }
+    } catch (error) {
+        console.error('Error in handleWalletConnection:', error);
+        alert('An error occurred. Please try again.');
     }
 }
 
