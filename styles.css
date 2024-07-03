@@ -101,13 +101,14 @@ header {
   aspect-ratio: 4 / 3;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-  margin-left: 35px;
+  margin-left: 38px;
+  margin-bottom: 20px;
 }
 
 #gameInfo {
   position: absolute;
   top: 3px;
-  left: 30px;
+  left: 38px;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 5px;
