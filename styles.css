@@ -79,7 +79,8 @@ header {
 
 #gameContainer {
   width:50%;
-  flex: 0 0 auto;
+  flex: 0 0 50%;
+  max-width: 800px;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
@@ -230,6 +231,7 @@ header {
   border-radius: 8px;
   padding: 10px;
   text-align: center;
+  width: 100%;
 }
 
 .achievement img {
@@ -383,4 +385,5 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    align-self: flex-start;
   }
