@@ -64,7 +64,7 @@ header {
     overflow-y: visible;
     padding-bottom: 20px;
     display: flex;
-    flex: 0 0 30%;
+    flex: 0 0 20%;
     flex-direction: column;
     height: auto;
     max-height: none;
@@ -77,8 +77,6 @@ header {
 
 #gameContainer {
   flex: 3;
-  min-width: 320px;
-  max-width: 800px;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
@@ -344,7 +342,7 @@ header {
 
   #gameWrapper {
     gap: 20px;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   #achievementsSection {
