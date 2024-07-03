@@ -745,7 +745,7 @@ async function initWeb3() {
         return false;
       }
       console.log('Contract initialized:', contract);
-      console.log('Contract methods:', contract.methods);
+      console.log('Current account:', account);
       return true;
     } catch (error) {
       console.error('Error initializing Web3:', error);
@@ -850,20 +850,23 @@ async function purchaseGameTries() {
 
 async function getHighscores() {
   if (!contract) {
-      console.error('Contract not initialized');
-      return [];
+    console.error('Contract not initialized');
+    await initWeb3(); // Try to initialize Web3
+    if (!contract) {
+      return []; // Return empty array if still not initialized
+    }
   }
   try {
-      const highscores = await contract.methods.getHighscores().call();
-      return highscores.map(score => ({
-          player: score.player,
-          name: score.name,
-          score: parseInt(score.score),
-          blocksClimbed: parseInt(score.blocksClimbed)
-      }));
+    const highscores = await contract.methods.getHighscores().call();
+    return highscores.map(score => ({
+      player: score.player,
+      name: score.name,
+      score: parseInt(score.score),
+      blocksClimbed: parseInt(score.blocksClimbed)
+    }));
   } catch (error) {
-      console.error('Error getting highscores:', error);
-      return [];
+    console.error('Error getting highscores:', error);
+    return [];
   }
 }
 
