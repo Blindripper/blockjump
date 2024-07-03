@@ -14,7 +14,6 @@
         <button id="walletConnectBtn" class="game-button connect-button">Connect wallet</button>
         <button id="buyTriesBtn" class="game-button" style="display: none;">Buy Tries</button>
         <div id="tryCounter" style="display: none;">Tries left: <span id="triesLeft">0</span></div>
-        <button id="infoButton" class="info-button">?</button>
     </header>
 
     <div class="main-content">
@@ -67,6 +66,8 @@
         </div>
     </div>
 
+    <button id="infoButton" class="info-button">?</button>
+
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -82,5 +83,25 @@
     <script type="module" src="achievements.js"></script>
     <script type="module" src="game.js"></script>
     <script type="module" src="web3Integration.js"></script>
+    <script>
+        // Modal functionality
+        var modal = document.getElementById("infoModal");
+        var btn = document.getElementById("infoButton");
+        var span = document.getElementsByClassName("close")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
