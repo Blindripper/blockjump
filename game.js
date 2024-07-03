@@ -2096,24 +2096,6 @@ function showBuyTriesButton() {
     }
 }
 
-const infoButton = document.querySelector('.info-button');
-const modal = document.getElementById('gameMechanicsModal');
-const closeButton = document.getElementsByClassName('close')[0];
-
-infoButton.onclick = function() {
-  modal.style.display = "block";
-}
-
-closeButton.onclick = function() {
-  modal.style.display = "none";
-}
-
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
-
 function hideBuyTriesButton() {
     const buyButton = document.getElementById('buyTriesBtn');
     if (buyButton) {
