@@ -68,11 +68,11 @@ header {
     flex-direction: column;
     height: auto;
     max-height: none;
-    margin-left: 20px;
+    margin-left: 10px;
     padding: 15px;
     background-color: rgba(26, 35, 51, 0.9);
     border-radius: 8px;
-    margin-right: 20px;
+    margin-right: 10px;
   }
 
 #gameContainer {
@@ -87,8 +87,7 @@ header {
 }
 
 #gameCanvas {
-  width: 125%;
-  height: auto;
+  width: 150%;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
 }
