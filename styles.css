@@ -35,7 +35,7 @@ body {
 
 header {
   width: 100%;
-  padding: 20px;
+  padding: 10px 20px;
   background-color: rgba(26, 35, 51, 0.8);
   backdrop-filter: blur(5px);
   position: sticky;
@@ -57,11 +57,16 @@ header {
     min-height: 100vh;
     overflow-y: auto;
     padding-bottom: 20px;
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    margin-left: 20px;
   }
 
 #gameContainer {
   flex: 2;
   min-width: 320px;
+  max-width: 800px;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
@@ -193,11 +198,23 @@ header {
 }
 
 .info-button {
-    z-index: 1001;
     position: fixed;
-    top: 20px;
-    right: 150px; 
-  }
+    bottom: 20px;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
 
 .info-button:hover {
   background-color: #2dc898;
@@ -212,34 +229,55 @@ header {
   pointer-events: none;
 }
 
+.sound-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+.jackpot-info {
+    text-align: center;
+    margin-top: 20px;
+}
+
 .modal {
     display: none;
     position: fixed;
-    z-index: 1002;
+    z-index: 1001;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(0,0,0,0.7);
     overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-  }
+}
 
-  .modal-content {
-    background-color: #1f2a40;
+.modal-content {
+    background-color: var(--secondary-background);
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #3FE1B0;
+    border: 1px solid var(--primary-color);
     width: 80%;
     max-width: 600px;
-  }
-  
-  .close {
-    color: #aaa;
+    color: var(--text-color);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
+}
+
+.close {
+    color: var(--primary-color);
     float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-  }
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--text-color);
+}
 
 
 @media (max-width: 768px) {
