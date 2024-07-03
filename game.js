@@ -2047,7 +2047,6 @@ function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
     const buyButton = document.getElementById('buyTriesBtn');
     const tryCounter = document.getElementById('tryCounter');
-    const triesLeftSpan = document.getElementById('triesLeft');
     
     if (connectButton) {
         if (isConnected) {
@@ -2080,6 +2079,8 @@ async function updateTryCount() {
         const triesLeftSpan = document.getElementById('triesLeft');
         if (triesLeftSpan) {
             triesLeftSpan.textContent = tries;
+        } else {
+            console.warn('Element with ID "triesLeft" not found in DOM.');
         }
     } catch (error) {
         console.error('Failed to get Game tries:', error);
@@ -2353,3 +2354,5 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     console.log('Finished setting up event listeners');
 });
+
+export { updateTryCount };
