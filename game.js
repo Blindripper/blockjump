@@ -1681,17 +1681,6 @@ async function loadHighscores() {
     }
 }
 
-async function updateTryCount() {
-    try {
-        const tries = await getGameTries();
-        const triesLeftSpan = document.getElementById('triesLeft');
-        if (triesLeftSpan) {
-            triesLeftSpan.textContent = tries;
-        }
-    } catch (error) {
-        console.error('Failed to get Game tries:', error);
-    }
-}
 
 async function updateHighscoreTable() {
     try {
@@ -2058,6 +2047,7 @@ function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
     const buyButton = document.getElementById('buyTriesBtn');
     const tryCounter = document.getElementById('tryCounter');
+    const triesLeftSpan = document.getElementById('triesLeft');
     
     if (connectButton) {
         if (isConnected) {
@@ -2081,6 +2071,18 @@ function updateButtonState() {
 
     if (isConnected) {
         updateTryCount();
+    }
+}
+
+async function updateTryCount() {
+    try {
+        const tries = await getGameTries();
+        const triesLeftSpan = document.getElementById('triesLeft');
+        if (triesLeftSpan) {
+            triesLeftSpan.textContent = tries;
+        }
+    } catch (error) {
+        console.error('Failed to get Game tries:', error);
     }
 }
 
@@ -2225,11 +2227,6 @@ document.getElementById('nameForm')?.addEventListener('submit', async function(e
         keys[e.code] = false;
     });
 
-    
-
-    // Load sprites, populate powerup descriptions, preload sounds, etc.
-    // ... (rest of your initialization code)
-// ... (all your previous code remains unchanged)
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM fully loaded and parsed');
