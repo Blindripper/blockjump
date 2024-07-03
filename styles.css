@@ -84,7 +84,7 @@ header {
 }
 
 #gameLogo {
-  max-width: 120px;
+  max-width: 180px;
   height: auto;
   margin: 10px 0 20px 0;
 }
@@ -137,6 +137,7 @@ header {
   transition: all 0.3s ease;
   text-transform: uppercase;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  gap: 10px;
 }
 
 .game-button:hover {
