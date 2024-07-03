@@ -53,14 +53,11 @@ header {
   margin-top: 20px;
 }
 
-#leftSidebar, #achievementsSection {
-  flex: 1;
-  min-width: 250px;
-  background-color: rgba(43, 58, 103, 0.8);
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+#leftSidebar {
+    width: 25%;
+    min-height: 100vh;
+    background-color: rgba(43, 58, 103, 0.8);
+  }
 
 #gameContainer {
   flex: 2;
@@ -181,12 +178,10 @@ header {
 }
 
 .achievement img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 5px;
-}
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+  }
 
 .achievement h3 {
   font-size: 12px;
@@ -235,7 +230,8 @@ header {
   }
 
   #gameWrapper {
-    flex-direction: column;
+    display: flex;
+    justify-content: space-between;
   }
 
   #leftSidebar, #achievementsSection, #gameContainer {
