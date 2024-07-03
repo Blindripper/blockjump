@@ -67,6 +67,7 @@ header {
   border-radius: 8px;
   padding: 15px;
   overflow-y: auto;
+  margin-right: 75px;
 }
 
 /* Game Container */
@@ -151,8 +152,8 @@ header {
 #highscoreTable {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 2px;
-  font-size: 12px;
+  border-spacing: 0 6px;
+  font-size: 16px;
   margin-bottom: 15px;
 }
 
