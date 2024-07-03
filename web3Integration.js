@@ -818,37 +818,47 @@ async function getGameTries() {
   }
 }
 
+let isPurchasingTries = false;
+
 async function purchaseGameTries() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
-  }
+    if (isPurchasingTries) {
+        console.log('A purchase is already in progress. Please wait.');
+        return false;
+    }
 
-  try {
-      const txHash = await contract.methods.purchaseGameTries().send({
-          from: account,
-          value: web3.utils.toWei('0.01', 'ether')
-      });
+    if (!contract || !account) {
+        console.error('Contract not initialized or account not available');
+        return false;
+    }
 
-      console.log('Transaction sent:', txHash.transactionHash);
+    isPurchasingTries = true;
+    try {
+        const txHash = await contract.methods.purchaseGameTries().send({
+            from: account,
+            value: web3.utils.toWei('0.01', 'ether')
+        });
 
-      const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
-      const gameTryPurchasedEvent = receipt.logs.find(log =>
-          log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
-      );
+        console.log('Transaction sent:', txHash.transactionHash);
 
-      if (gameTryPurchasedEvent) {
-          console.log('Game tries purchased successfully');
-          await updateTryCount(); // Call the function from game.js
-          return true;
-      } else {
-          console.error('GameTryPurchased event not found in transaction receipt');
-          return false;
-      }
-  } catch (error) {
-      console.error('Error purchasing game tries:', error);
-      return false;
-  }
+        const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
+        const gameTryPurchasedEvent = receipt.logs.find(log =>
+            log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
+        );
+
+        if (gameTryPurchasedEvent) {
+            console.log('Game tries purchased successfully');
+            await updateTryCount(); // Call the function from game.js
+            return true;
+        } else {
+            console.error('GameTryPurchased event not found in transaction receipt');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error purchasing game tries:', error);
+        return false;
+    } finally {
+        isPurchasingTries = false;
+    }
 }
 
 async function getHighscores() {
