@@ -838,6 +838,23 @@ async function purchaseGameTries() {
     if (gameTryPurchasedEvent) {
       console.log('Game tries purchased successfully');
 
+      if (gameTryPurchasedEvent) {
+        console.log('Game tries purchased successfully');
+    
+        const triesLeftSpan = document.getElementById('triesLeft');
+        if (triesLeftSpan) {
+          const tries = await getGameTries();
+          triesLeftSpan.textContent = tries;
+        } else {
+          console.warn('Element with ID "triesLeft" not found in DOM.');
+        }
+    
+        return true;
+      } else {
+        console.error('GameTryPurchased event not found in transaction receipt');
+        return false;
+      }
+
       // **Solution: Check element existence before accessing**
       const tryCountElement = document.getElementById('gameTryCount');
       if (tryCountElement) { // Check if element exists
