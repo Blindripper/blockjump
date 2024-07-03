@@ -838,12 +838,14 @@ async function purchaseGameTries() {
     if (gameTryPurchasedEvent) {
       console.log('Game tries purchased successfully');
 
-      // **Using window.onload for element access**
-      window.onload = () => {
-        const tryCountElement = document.getElementById('gameTryCount');
-        // Assuming the response from getGameTries is a number
+      // **Solution: Check element existence before accessing**
+      const tryCountElement = document.getElementById('gameTryCount');
+      if (tryCountElement) { // Check if element exists
+        const tries = await getGameTries(); // Assuming getGameTries returns a number
         tryCountElement.textContent = `Tries Remaining: ${tries}`;
-      };
+      } else {
+        console.warn('Element with ID "gameTryCount" not found in DOM.');
+      }
 
       return true;
     } else {
