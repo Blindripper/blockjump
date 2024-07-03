@@ -76,7 +76,7 @@ header {
   }
 
 #gameContainer {
-  flex: 3;
+  flex: 2;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
