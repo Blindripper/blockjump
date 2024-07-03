@@ -54,9 +54,9 @@ header {
 }
 
 #leftSidebar {
-    width: 25%;
     min-height: 100vh;
-    background-color: rgba(43, 58, 103, 0.8);
+    overflow-y: auto;
+    padding-bottom: 20px;
   }
 
 #gameContainer {
@@ -193,23 +193,11 @@ header {
 }
 
 .info-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
-  background-color: var(--primary-color);
-  color: var(--background-color);
-  border: none;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s ease;
-}
+    z-index: 1001;
+    position: fixed;
+    top: 20px;
+    right: 150px; 
+  }
 
 .info-button:hover {
   background-color: #2dc898;
@@ -223,6 +211,36 @@ header {
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   pointer-events: none;
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1002;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+
+  .modal-content {
+    background-color: #1f2a40;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #3FE1B0;
+    width: 80%;
+    max-width: 600px;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
 
 @media (max-width: 768px) {
   .container {
