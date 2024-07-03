@@ -1318,6 +1318,18 @@ function update(dt) {
     
     function draw() {
 
+    console.log('Attempting to draw...');
+    
+    const elementsToCheck = ['gameCanvas', 'blockCounter', 'floorCounter', 'powerupBar', 'achievementPopup', 'windIndicator'];   
+    
+    for (const elementId of elementsToCheck) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.error(`Element with id '${elementId}' not found in draw function`);
+            return; // Exit the function if any element is missing
+        }
+    }
+
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) {
         console.error('Canvas element not found');
@@ -1326,7 +1338,7 @@ function update(dt) {
     
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-        console.error('Unable to get 2D context');
+        console.error('Unable to get 2D context in draw function');
         return;
     }
         console.log('Drawing frame');
@@ -1479,6 +1491,7 @@ function update(dt) {
         // Update wind indicator position
         updateWindIndicator();
         resetScreenShake(ctx);
+        console.log('All required elements found. Proceeding with draw...');
         console.log('Drawing. gameRunning:', gameRunning, 'isConnected:', isConnected, 'gameOver:', gameOver);
 
     }
@@ -1858,7 +1871,7 @@ function populatePowerupBar() {
 }
 
 
-  async function handleWalletConnection() {
+async function handleWalletConnection() {
     console.log('Wallet connect button clicked');
     try {
         if (!isConnected) {
@@ -1873,10 +1886,10 @@ function populatePowerupBar() {
                 await updateHighscoreTable();
                 showAchievements();
                 checkAndDisplayStartButton();
+                requestAnimationFrame(draw); // Request a redraw
             } else {
                 console.log('Failed to connect to Web3');
                 alert('Failed to connect. Please try again.');
-                return;
             }
         } else {
             // Implement disconnect logic here
@@ -1885,20 +1898,13 @@ function populatePowerupBar() {
             console.log('Disconnected from Web3');
             hideBuyTriesButton();
             hideAchievements();
-        }
-        
-        // Only call draw if the canvas exists
-        const canvas = document.getElementById('gameCanvas');
-        if (canvas) {
-            draw();
-        } else {
-            console.error('Canvas element not found when trying to draw');
+            requestAnimationFrame(draw); // Request a redraw
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
         alert('An error occurred. Please try again.');
     }
-}
+} 
 
 
 const floorCounter = document.getElementById('floorCounter');
@@ -2221,6 +2227,12 @@ document.getElementById('nameForm')?.addEventListener('submit', async function(e
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM fully loaded and parsed');
+
+    if (missingElements.length > 0) {
+        console.error('Missing required elements:', missingElements);
+        alert('Some game elements are missing. Please refresh the page or contact support.');
+        return;
+    } 
 
     // Initialize other game components
     initialize();
