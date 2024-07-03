@@ -72,8 +72,7 @@ header {
 
 /* Game Container */
 #gameContainer {
-  flex: 1;
-  max-width: 1200px;
+  max-width: 800px;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
@@ -98,6 +97,7 @@ header {
 #gameCanvas {
   width: 93%;
   height: auto;
+  aspect-ratio: 4/3;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
   margin-left: 40px;
