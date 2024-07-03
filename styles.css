@@ -350,8 +350,17 @@ header {
   }
 
   #gameWrapper {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
     justify-content: space-between;
+  }
+
+  #achievementsSection {
+    grid-column: 2; /* Place achievements in the second column (right side) */
+    background-color: rgba(26, 35, 51, 0.9); /* Optional background color for sidebar */
+    border-radius: 8px; /* Consistent border radius */
+    padding: 15px; /* Maintain padding for content */
   }
 
   #leftSidebar, #achievementsSection, #gameContainer {
