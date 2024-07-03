@@ -237,6 +237,12 @@ header {
     flex-direction: column;
   }
 
+  #gameLogo {
+    max-width: 80px; /* Adjust this value to your preferred size */
+    height: auto;
+    margin: 10px 0 20px 0; /* Top Right Bottom Left */
+  }
+
   #leftSidebar, #gameContainer, #achievementsSection {
     width: 100%;
     max-width: 800px;
