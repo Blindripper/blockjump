@@ -1859,6 +1859,12 @@ function populatePowerupBar() {
 
   async function handleWalletConnection() {
     console.log('Wallet connect button clicked');
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        draw();
+    } else {
+        console.error('Canvas element not found when trying to draw');
+    }
     try {
         if (!isConnected) {
             const connected = await initWeb3();
@@ -2227,6 +2233,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadSprites();
     preloadSounds();
     populatePowerupBar();
+
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        draw();
+    } else {
+        console.error('Canvas element not found when trying to draw');
+    }
 
     try {
         // Initialize Web3
