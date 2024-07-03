@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
-
+    
     try {
         console.log('Initializing Web3...');
         const web3Initialized = await initWeb3();
@@ -737,6 +737,10 @@ async function handleWalletConnection() {
         alert('An error occurred. Please try again.');
     }
 }
+
+
+
+let isBuyingTries = false;
 
 async function handleBuyTries() {
     if (isBuyingTries) {
