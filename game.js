@@ -498,6 +498,16 @@ function playSound(soundName) {
     }
 }
 
+function preloadSounds() {
+    return Promise.all(Object.values(sounds).map(audio => {
+        return new Promise((resolve, reject) => {
+            audio.addEventListener('canplaythrough', resolve, { once: true });
+            audio.addEventListener('error', reject);
+            audio.load();
+        });
+    }));
+}
+
 // Sprite loading
 const sprites = new Map();
 
