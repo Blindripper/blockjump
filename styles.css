@@ -96,7 +96,7 @@ header {
 }
 
 #gameCanvas {
-  width: 93%;
+  width: 92%;
   height: auto;
   aspect-ratio: 4/3;
   border-radius: 8px;
