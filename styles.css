@@ -72,7 +72,8 @@ header {
 
 /* Game Container */
 #gameContainer {
-  max-width: 800px;
+  flex: 1;
+  max-width: 1200px;
   background: rgba(31, 42, 64, 0.8);
   border-radius: 8px;
   padding: 20px;
