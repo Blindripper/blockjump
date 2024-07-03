@@ -1835,6 +1835,8 @@ function populatePowerupBar() {
     elements.forEach(({ id, event, handler }) => {
         const element = document.getElementById(id);
         if (element) {
+            // Remove any existing event listeners before adding a new one
+            element.removeEventListener(event, handler);
             element.addEventListener(event, handler);
         } else {
             console.warn(`Element with id '${id}' not found. Skipping event listener setup.`);
@@ -2101,7 +2103,15 @@ function hideBuyTriesButton() {
     }
 }
 
+let isBuyingTries = false;
+
 async function handleBuyTries() {
+    if (isBuyingTries) {
+        console.log('Already processing a purchase. Please wait.');
+        return;
+    }
+
+    isBuyingTries = true;
     try {
         const purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
         const purchased = await purchaseGameTries();
@@ -2122,6 +2132,8 @@ async function handleBuyTries() {
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
         displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+    } finally {
+        isBuyingTries = false;
     }
 }
 
