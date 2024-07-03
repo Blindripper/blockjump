@@ -35,7 +35,7 @@ body {
 
 header {
   width: 100%;
-  padding: 10px 20px;
+  padding: 10px;
   background-color: rgba(26, 35, 51, 0.8);
   backdrop-filter: blur(5px);
   position: sticky;
@@ -44,6 +44,12 @@ header {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Creates space between buttons */
 }
 
 #gameWrapper {
@@ -61,6 +67,11 @@ header {
     min-width: 250px;
     max-width: 300px;
     margin-left: 20px;
+    width: 250px;
+    padding: 10px;
+    background-color: rgba(26, 35, 51, 0.8);
+    border-radius: 8px;
+    margin-right: 20px;
   }
 
 #gameContainer {
@@ -90,7 +101,7 @@ header {
   font-size: 14px;
   background-color: var(--primary-color);
   color: var(--background-color);
-  padding: 10px 20px;
+  padding: 8px 15px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
@@ -110,13 +121,18 @@ header {
 
 #highscoreTable {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0 5px;
+  font-size: 12px;
+}
+
+#tryCounter {
+    margin-left: 10px; /* Additional space after the last button */
 }
 
 #highscoreTable th, #highscoreTable td {
-  padding: 10px;
-  text-align: center;
+  padding: 5px;
+  text-align: left;
   background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -231,15 +247,26 @@ header {
 
 .sound-toggle {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    font-size: 12px;
-    padding: 5px 10px;
+    bottom: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #3FE1B0;
+    color: #0f1624;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .jackpot-info {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
+    font-size: 14px;
 }
 
 .modal {
