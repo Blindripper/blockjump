@@ -1895,48 +1895,6 @@ function hideAchievements() {
     }
 }
 
-
-
-document.getElementById('walletConnectBtn').addEventListener('click', async () => {
-    console.log('Wallet connect button clicked');
-    if (!isConnected) {
-        try {
-            const connected = await initWeb3();
-            console.log('Web3 initialization result:', connected);
-            if (connected) {
-                console.log('Successfully connected to Web3');
-                isConnected = true;
-                updateButtonState();
-                updateTryCount();
-                await loadUserAchievements();
-                await updateHighscoreTable();
-                document.getElementById('buyTriesBtn')?.style.display = 'block'; // Optional chaining
-                showAchievements();
-                checkAndDisplayStartButton();
-                updateButtonState();
-                draw();
-            }
-        } catch (error) {
-            console.error('Failed to connect to Web3:', error);
-            alert('Failed to connect to Web3. Please try again.');
-        }
-    } else {
-        try {
-            // Implement your disconnect logic here
-            // For example: await disconnectWeb3();
-            isConnected = false;
-            updateButtonState();
-            console.log('Disconnected from Web3');
-            document.getElementById('buyTriesBtn').style.display = 'none';
-            hideAchievements();
-            draw();
-        } catch (error) {
-            console.error('Failed to disconnect from Web3:', error);
-            alert('Failed to disconnect from Web3. Please try again.');
-        }
-    }
-});
-
 let purchaseMessageOverlay;
 
 document.getElementById('buyTriesBtn')?.addEventListener('click', async () => {
