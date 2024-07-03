@@ -87,7 +87,7 @@ header {
 }
 
 #gameCanvas {
-  width: 100%;
+  width: 125%;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
