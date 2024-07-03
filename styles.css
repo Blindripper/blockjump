@@ -88,7 +88,6 @@ header {
 
 #gameCanvas {
   width: 100%;
-  max-width: 800px;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
@@ -350,6 +349,3 @@ header {
     border-radius: 8px; /* Consistent border radius */
     padding: 15px; /* Maintain padding for content */
   }
-
- 
-
