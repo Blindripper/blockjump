@@ -2195,70 +2195,110 @@ document.getElementById('nameForm')?.addEventListener('submit', async function(e
     // ... (rest of your initialization code)
 // ... (all your previous code remains unchanged)
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM fully loaded and parsed');
-  
+
     // Initialize other game components
     initialize();
     setupEventListeners();
     loadSprites();
     preloadSounds();
     populatePowerupBar();
-  
-    updateHighscoreTable().catch(error => {
-      console.error('Failed to update highscores:', error);
-      // Display user-friendly message, e.g., "An error occurred while updating highscores"
-    });
-  
-    getContractBalance();
-  
-    // Event Listener for Buy Tries Button
-    if (document.getElementById('buyTriesBtn')) { // Check for element first
-      const buyButton = document.getElementById('buyTriesBtn');
-      buyButton.addEventListener('click', async () => {
-        try {
-          purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
-          const purchased = await purchaseGameTries();
-          
-          // Always remove the message overlay
-          if (purchaseMessageOverlay) {
-              document.body.removeChild(purchaseMessageOverlay);
-              purchaseMessageOverlay = null;
-          }
-          
-          if (purchased) {
-              console.log('Game tries purchased successfully');
-              displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
-              await updateTryCount();
-              updateButtonState();
-              draw();
-          } else {
-              displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
-          }
-        } catch (error) {
-          // Ensure the message overlay is removed in case of an error
-          if (purchaseMessageOverlay) {
-              document.body.removeChild(purchaseMessageOverlay);
-              purchaseMessageOverlay = null;
-          }
-          console.error('Failed to purchase game tries:', error);
-          displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+
+    try {
+        // Initialize Web3
+        console.log('Initializing Web3...');
+        const web3Initialized = await initWeb3();
+        if (web3Initialized) {
+            console.log('Web3 initialized successfully');
+            await loadHighscores();
+            await updateHighscoreTable();
+            await getContractBalance();
+        } else {
+            console.error('Failed to initialize Web3');
+            displayCanvasMessage('Failed to connect to blockchain. Please try again later.', 'error', 0.3);
         }
-      });
-    } else {
-      console.error('Buy Tries button not found');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        displayCanvasMessage('An error occurred during initialization. Please refresh the page.', 'error', 0.3);
     }
-  
-    // Initialize Web3
-    console.log('Initializing Web3...');
-    initWeb3().then(() => {
-      console.log('Web3 initialized');
-      loadHighscores().catch(error => {
-        console.error('Failed to load highscores:', error);
-        // Display user-friendly message, e.g., "An error occurred while loading highscores"
-      });
-    }).catch(error => {
-      console.error('Failed to initialize Web3:', error);
-      // You might want to display an error message to the user here
-    });
-  });
+
+    // Setup Buy Tries Button
+    const buyTriesBtn = document.getElementById('buyTriesBtn');
+    if (buyTriesBtn) {
+        buyTriesBtn.addEventListener('click', async () => {
+            try {
+                const purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+                const purchased = await purchaseGameTries();
+                
+                if (purchaseMessageOverlay) {
+                    document.body.removeChild(purchaseMessageOverlay);
+                }
+                
+                if (purchased) {
+                    console.log('Game tries purchased successfully');
+                    displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
+                    await updateTryCount();
+                    updateButtonState();
+                    draw();
+                } else {
+                    displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
+                }
+            } catch (error) {
+                console.error('Failed to purchase game tries:', error);
+                displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+            }
+        });
+    } else {
+        console.warn('Buy Tries button not found in the DOM');
+    }
+
+    // Setup Wallet Connect Button
+    const walletConnectBtn = document.getElementById('walletConnectBtn');
+    if (walletConnectBtn) {
+        walletConnectBtn.addEventListener('click', handleWalletConnection);
+    } else {
+        console.warn('Wallet Connect button not found in the DOM');
+    }
+
+    // Setup Claim Prize Button
+    const claimPrizeBtn = document.getElementById('claimPrizeBtn');
+    if (claimPrizeBtn) {
+        claimPrizeBtn.addEventListener('click', handleClaimPrize);
+    } else {
+        console.warn('Claim Prize button not found in the DOM');
+    }
+
+    // Setup Name Form
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.addEventListener('submit', handleScoreSubmission);
+    } else {
+        console.warn('Name form not found in the DOM');
+    }
+
+    // Setup Sound Toggle
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', toggleSound);
+    } else {
+        console.warn('Sound toggle button not found in the DOM');
+    }
+
+    // Setup Info Modal
+    const infoButton = document.getElementById('infoButton');
+    const infoModal = document.getElementById('infoModal');
+    const closeButton = document.querySelector('.close-button');
+
+    if (infoButton && infoModal && closeButton) {
+        infoButton.addEventListener('click', () => infoModal.style.display = 'block');
+        closeButton.addEventListener('click', () => infoModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target == infoModal) infoModal.style.display = 'none';
+        });
+    } else {
+        console.warn('Info modal elements not found in the DOM');
+    }
+
+    console.log('Finished setting up event listeners');
+});
