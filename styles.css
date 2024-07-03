@@ -61,7 +61,7 @@ header {
 
 /* Left Sidebar */
 #leftSidebar {
-  width: 550px;
+  width: 560px;
   flex-shrink: 0;
   background-color: rgba(26, 35, 51, 0.9);
   border-radius: 8px;
@@ -84,7 +84,7 @@ header {
 }
 
 #gameLogo {
-  max-width: 80px;
+  max-width: 120px;
   height: auto;
   margin: 10px 0 20px 0;
 }
@@ -110,7 +110,7 @@ header {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--primary-color);
 }
 
@@ -279,8 +279,8 @@ header {
 /* Info and Sound Buttons */
 .info-button, .sound-toggle {
   position: fixed;
-  width: 40px;
-  height: 40px;
+  width: 75px;
+  height: 75px;
   background-color: var(--primary-color);
   color: var(--background-color);
   border: none;
