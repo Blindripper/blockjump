@@ -101,7 +101,7 @@ header {
   aspect-ratio: 4 / 3;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-  margin-left: 38px;
+  margin-left: 40px;
   margin-bottom: 20px;
 }
 
@@ -218,18 +218,18 @@ header {
 }
 
 .achievement img {
-  width: 54px;
-  height: 54px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
 }
 
 .achievement h3 {
-  font-size: 12px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
 .achievement p {
-  font-size: 10px;
+  font-size: 13px;
 }
 
 /* Utility Classes */
