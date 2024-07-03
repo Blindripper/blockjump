@@ -67,8 +67,6 @@ header {
     display: flex;
     flex-direction: column;
     height: auto;
-    min-width: 250px;
-    max-width: 450px;
     max-height: none;
     margin-left: 20px;
     width: 500px;
