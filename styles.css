@@ -343,12 +343,6 @@ header {
     color: var(--text-color);
 }
 
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
   #gameWrapper {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -366,4 +360,4 @@ header {
   #leftSidebar, #achievementsSection, #gameContainer {
     width: 100%;
   }
-}
+
