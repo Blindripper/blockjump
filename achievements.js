@@ -1,4 +1,4 @@
-import { getAchievements, mintAchievement } from './web3Integration.js';
+import { getAchievements, mintAchievement, initWeb3 } from './web3Integration.js';
 
 const achievements = [
     {
@@ -97,19 +97,22 @@ function updateGameStats(stats) {
 
 async function loadUserAchievements() {
     try {
-      if (window.ethereum && window.ethereum.selectedAddress) {
-        userAchievements = await getAchievements(window.ethereum.selectedAddress);
-        renderAchievements();
-      } else {
-        console.log('Wallet not connected');
-      }
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            const web3Initialized = await initWeb3();
+            if (!web3Initialized) {
+                console.log('Web3 not initialized, cannot load achievements');
+                return;
+            }
+            
+            userAchievements = await getAchievements(window.ethereum.selectedAddress);
+            renderAchievements();
+        } else {
+            console.log('Wallet not connected');
+        }
     } catch (error) {
-      console.error('Error loading achievements:', error);
+        console.error('Error loading achievements:', error);
     }
-  }
-
-// Initialize achievements
-loadUserAchievements();
+}
 
 // Export functions to be used in the main game logic
 export { updateGameStats, loadUserAchievements };
