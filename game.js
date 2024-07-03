@@ -656,7 +656,7 @@ let isConnected = false;
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM fully loaded and parsed');
 
-    const requiredElements = ['gameCanvas', 'blockCounter', 'floorCounter', 'powerupBar', 'achievementPopup', 'windIndicator'];
+    const requiredElements = ['gameCanvas', 'powerupBar', 'achievementPopup', 'windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
     
     if (missingElements.length > 0) {
