@@ -818,37 +818,41 @@ async function getGameTries() {
 
 async function purchaseGameTries() {
   if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+    console.error('Contract not initialized or account not available');
+    return false;
   }
 
   try {
-      const txHash = await contract.methods.purchaseGameTries().send({ 
-          from: account, 
-          value: web3.utils.toWei('0.01', 'ether')
-      });
+    const txHash = await contract.methods.purchaseGameTries().send({
+      from: account,
+      value: web3.utils.toWei('0.01', 'ether')
+    });
 
-      console.log('Transaction sent:', txHash.transactionHash);
+    console.log('Transaction sent:', txHash.transactionHash);
 
-      const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
-      const gameTryPurchasedEvent = receipt.logs.find(log => 
-          log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
-      );
+    const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
+    const gameTryPurchasedEvent = receipt.logs.find(log =>
+      log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
+    );
 
-      if (gameTryPurchasedEvent) {
-            console.log('Game tries purchased successfully');
-            const tryCountElement = document.getElementById('gameTryCount');
-            // Assuming the response from getGameTries is a number
-            const tries = await getGameTries(); 
-            tryCountElement.textContent = `Tries Remaining: ${tries}`;
-            return true;
-          } else {
-          console.error('GameTryPurchased event not found in transaction receipt');
-          return false;
-      }
-  } catch (error) {
-      console.error('Error purchasing game tries:', error);
+    if (gameTryPurchasedEvent) {
+      console.log('Game tries purchased successfully');
+
+      // **Using window.onload for element access**
+      window.onload = () => {
+        const tryCountElement = document.getElementById('gameTryCount');
+        // Assuming the response from getGameTries is a number
+        tryCountElement.textContent = `Tries Remaining: ${tries}`;
+      };
+
+      return true;
+    } else {
+      console.error('GameTryPurchased event not found in transaction receipt');
       return false;
+    }
+  } catch (error) {
+    console.error('Error purchasing game tries:', error);
+    return false;
   }
 }
 
