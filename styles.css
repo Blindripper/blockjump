@@ -61,7 +61,7 @@ header {
 
 /* Left Sidebar */
 #leftSidebar {
-  width: 400px;
+  width: 450px;
   flex-shrink: 0;
   background-color: rgba(26, 35, 51, 0.9);
   border-radius: 8px;
@@ -104,12 +104,12 @@ header {
 
 #gameInfo {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 2px;
+  left: 2px;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--primary-color);
 }
 
