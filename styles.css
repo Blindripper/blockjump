@@ -82,6 +82,12 @@ header {
   align-items: center;
 }
 
+#gameLogo {
+  max-width: 80px; 
+  height: auto;
+  margin: 10px 0 20px 0; 
+}
+
 #gameCanvas {
   width: 100%;
   height: auto;
@@ -235,12 +241,6 @@ header {
   #gameWrapper {
     width: 100%;
     flex-direction: column;
-  }
-
-  #gameLogo {
-    max-width: 10px; /* Adjust this value to your preferred size */
-    height: 10px;
-    margin: 10px 0 20px 0; /* Top Right Bottom Left */
   }
 
   #leftSidebar, #gameContainer, #achievementsSection {
