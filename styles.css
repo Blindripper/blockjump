@@ -61,7 +61,7 @@ header {
 
 /* Left Sidebar */
 #leftSidebar {
-  width: 300px;
+  width: 400px;
   flex-shrink: 0;
   background-color: rgba(26, 35, 51, 0.9);
   border-radius: 8px;
@@ -293,7 +293,7 @@ header {
 }
 
 .info-button {
-  top: 20px;
+  bottom: 20px;
   left: 20px;
 }
 
