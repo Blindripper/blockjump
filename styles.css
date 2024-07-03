@@ -62,8 +62,7 @@ header {
 }
 
 #leftSidebar {
-    min-width: 200px;
-    max-width: 300px;
+    width: 400px;
     overflow-y: visible;
     padding-bottom: 20px;
     display: flex;
@@ -79,7 +78,6 @@ header {
   }
 
 #gameContainer {
-  max-width: 800px;
   width:50%;
   flex: 0 0 auto;
   background: rgba(31, 42, 64, 0.8);
