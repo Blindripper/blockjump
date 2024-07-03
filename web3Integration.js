@@ -836,9 +836,13 @@ async function purchaseGameTries() {
       );
 
       if (gameTryPurchasedEvent) {
-          console.log('Game tries purchased successfully');
-          return true;
-      } else {
+            console.log('Game tries purchased successfully');
+            const tryCountElement = document.getElementById('gameTryCount');
+            // Assuming the response from getGameTries is a number
+            const tries = await getGameTries(); 
+            tryCountElement.textContent = `Tries Remaining: ${tries}`;
+            return true;
+          } else {
           console.error('GameTryPurchased event not found in transaction receipt');
           return false;
       }
