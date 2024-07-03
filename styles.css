@@ -238,8 +238,8 @@ header {
   }
 
   #gameLogo {
-    max-width: 80px; /* Adjust this value to your preferred size */
-    height: auto;
+    max-width: 10px; /* Adjust this value to your preferred size */
+    height: 10px;
     margin: 10px 0 20px 0; /* Top Right Bottom Left */
   }
 
