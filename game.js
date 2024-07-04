@@ -25,6 +25,7 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
         this.gameRunning = false;
+        this.bottomPlatformRemoved = false;
         this.gameOver = false;
         this.score = 0;
         this.blocksClimbed = 0;
@@ -50,11 +51,13 @@ class Game {
         console.log('Player:', this.player ? 
             `x: ${this.player.x.toFixed(2)}, y: ${this.player.y.toFixed(2)}` : 'null');
         console.log('Bottom Platform:', this.bottomPlatform ? 
-            `y: ${this.bottomPlatform.y.toFixed(2)}` : 'null');
+            `y: ${this.bottomPlatform.y.toFixed(2)}` : 'removed');
+        console.log('Bottom Platform Removed:', this.bottomPlatformRemoved);
         console.log('Platforms:', this.platforms.length);
         console.log('Score:', this.score);
         console.log('Blocks Climbed:', this.blocksClimbed);
         console.log('---------------------------');
+    
     }
 
     async initializeGame() {
@@ -74,6 +77,7 @@ class Game {
             }
 
             this.bottomPlatform = this.createBottomPlatform();
+            this.bottomPlatformRemoved = false;
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
@@ -121,11 +125,11 @@ class Game {
     createBottomPlatform() {
         return {
             x: 0,
-            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, // Subtract 1 to ensure it's visible
+            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, 
             width: GAME_WIDTH,
             height: PLATFORM_HEIGHT,
             isSafe: true,
-            isBottomPlatform: true // Add this flag to identify the bottom platform
+            isBottomPlatform: true 
 
         };
         console.log('Bottom platform created:', platform);
@@ -259,16 +263,17 @@ class Game {
         }
 
         // Handle the bottom platform
-        if (this.bottomPlatform) {
+        if (this.bottomPlatform && !this.bottomPlatformRemoved) {
             this.bottomPlatform.y += this.platformSpeed * dt;
             if (this.bottomPlatform.y > GAME_HEIGHT) {
-                console.log('Bottom platform left the screen, removing it');
+                console.log('Bottom platform left the screen, removing it permanently');
                 this.bottomPlatform = null;
+                this.bottomPlatformRemoved = true;
             }
         }
 
         if (this.debugMode) {
-            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'null');
+            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'removed');
         }
     }
 
@@ -475,8 +480,8 @@ class Game {
             }
         }
         
-        // Draw bottom platform if it exists
-        if (this.bottomPlatform) {
+        // Draw bottom platform if it exists and hasn't been removed
+        if (this.bottomPlatform && !this.bottomPlatformRemoved) {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
         }
