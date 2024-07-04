@@ -173,8 +173,6 @@ class Game {
         }
     }
 
-
-
     update(dt) {
         if (!this.gameRunning || this.gameOver) return;
 
