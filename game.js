@@ -36,8 +36,8 @@ class Game {
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
         this.platformSpeed = 50;
-        this.bottomPlatform = this.createBottomPlatform();
-        this.player = this.createPlayer();
+        this.bottomPlatform = null;
+        this.player = null;
         this.gameStarted = false;
         this.setupEventListeners();
     }
@@ -71,12 +71,10 @@ class Game {
 
             await updateTryCount();
             
-            console.log('Game initialized. Player:', this.player);
-            console.log('Bottom Platform:', this.bottomPlatform);
-            console.log('Platforms:', this.platforms);
+            this.logGameState('After initialization');
             
             // Start the game loop
-            this.gameLoop(performance.now());
+            requestAnimationFrame((time) => this.gameLoop(time));
         } catch (error) {
             console.error('Error initializing game:', error);
             displayCanvasMessage('Error starting game. Please try again.', 'error');
@@ -86,7 +84,7 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT,
+            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1, // Position above bottom platform
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 500,
@@ -101,7 +99,7 @@ class Game {
     createBottomPlatform() {
         return {
             x: 0,
-            y: GAME_HEIGHT - PLATFORM_HEIGHT,
+            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, // Subtract 1 to ensure it's visible
             width: GAME_WIDTH,
             height: PLATFORM_HEIGHT,
             isSafe: true
@@ -168,7 +166,6 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
     }
-
     
     handleCollisions() {
         let onPlatform = false;
@@ -501,13 +498,18 @@ class Game {
     }
 
     gameLoop(currentTime) {
-        if (!this.gameRunning) return;
+        if (!this.gameRunning) {
+            console.log('Game loop stopped: gameRunning is false');
+            return;
+        }
 
         const dt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
         this.update(dt);
         this.draw();
+
+        this.logGameState('During game loop');
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
