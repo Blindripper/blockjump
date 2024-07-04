@@ -4,6 +4,7 @@ let web3;
 let contract;
 let account;
 let gameStartTime;
+let isConnected = false;
 
 import { updateTryCount } from './game.js';
 
@@ -732,30 +733,38 @@ const contractABI = [
 
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
-    try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
       web3 = new Web3(window.ethereum);
-      const accounts = await web3.eth.getAccounts();
+      return true;
+  } else {
+      console.log('Please install MetaMask!');
+      return false;
+  }
+}
+
+async function connectWallet() {
+  if (!web3) {
+      showOverlay('Web3 not initialized. Please refresh the page.');
+      return false;
+  }
+
+  try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       if (accounts.length === 0) {
-        console.error('No accounts found');
-        return false;
+          console.error('No accounts found');
+          return false;
       }
       account = accounts[0];
       contract = new web3.eth.Contract(contractABI, contractAddress);
       if (!contract.methods) {
-        console.error('Contract methods not available');
-        return false;
+          console.error('Contract methods not available');
+          return false;
       }
-      console.log('Contract initialized:', contract);
-      console.log('Current account:', account);
+      console.log('Wallet connected:', account);
+      isConnected = true;
       return true;
-    } catch (error) {
-      console.error('Error initializing Web3:', error);
+  } catch (error) {
+      console.error('Error connecting wallet:', error);
       return false;
-    }
-  } else {
-    console.log('Please install MetaMask!');
-    return false;
   }
 }
 
@@ -959,4 +968,5 @@ export {
   claimPrize,
   getAchievements,
   mintAchievement, 
+  connectWallet
 };
