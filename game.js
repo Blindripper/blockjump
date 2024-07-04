@@ -72,6 +72,11 @@ class Game {
                 displayCanvasMessage('Failed to start game. Please try again.', 'error');
                 return;
             }
+
+            this.bottomPlatform = this.createBottomPlatform();
+            this.player = this.createPlayer();
+            this.platforms = this.createInitialPlatforms();
+            this.gameStarted = false;
     
             this.gameRunning = true;
             this.gameOver = false;
@@ -237,11 +242,8 @@ class Game {
     updatePlatforms(dt) {
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
-            if (platform) {
-                platform.y += this.platformSpeed * dt;
-                return platform.y <= GAME_HEIGHT;
-            }
-            return false;
+            platform.y += this.platformSpeed * dt;
+            return platform.y <= GAME_HEIGHT;
         });
 
         // Add new platforms if needed
@@ -250,14 +252,15 @@ class Game {
             this.blocksClimbed++;
         }
 
-        // Handle the bottom platform
-        if (this.bottomPlatform) {
+        // Only move the bottom platform if the game has started
+        if (this.gameStarted && this.bottomPlatform) {
             this.bottomPlatform.y += this.platformSpeed * dt;
             if (this.bottomPlatform.y > GAME_HEIGHT) {
                 this.bottomPlatform = null;
             }
         }
     }
+
 
     updatePlayer(dt) {
         if (!this.player) {
@@ -274,11 +277,10 @@ class Game {
 
         this.handleCollisions();
 
-        // Check if the game has started and remove bottom platform
-        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT) {
+        // Check if the game has started
+        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
             this.gameStarted = true;
-            console.log('Game started, removing bottom platform');
-            this.bottomPlatform = null;
+            console.log('Game started');
         }
 
         // Apply wind effect
