@@ -222,13 +222,13 @@ header {
 }
 
 .achievement img {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
 }
 
 .achievement h3 {
-  font-size: 18px;
+  font-size: 16px;
   margin-bottom: 5px;
 }
 
