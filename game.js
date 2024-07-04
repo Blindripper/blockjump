@@ -1,7 +1,7 @@
 import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
-// Define base URL for the GitHub repository 
+// Define base URL for the GitHub repository
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
 const soundUrl = `${repoBaseUrl}sound/`;
 const picsUrl = `${repoBaseUrl}pics/`;
@@ -27,6 +27,7 @@ class Game {
         this.gameRunning = false;
         this.bottomPlatformRemoved = false;
         this.gameOver = false;
+        this.activePowerups = new Map();
         this.score = 0;
         this.blocksClimbed = 0;
         this.gameStartTime = 0;
@@ -322,6 +323,18 @@ class Game {
     
 
     updatePowerups(dt) {
+        // Update active powerups
+        for (const [type, powerup] of this.activePowerups.entries()) {
+            powerup.duration -= dt;
+            if (powerup.duration <= 0) {
+                // Remove expired powerup
+                this.activePowerups.delete(type);
+                // Revert the powerup effect if necessary
+                // You might need to implement revert logic for each powerup type
+            }
+        }
+    
+        // Update powerup items in the game world
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             this.powerups[i].y += this.platformSpeed * dt;
             if (this.checkCollision(this.player, this.powerups[i])) {
@@ -331,7 +344,8 @@ class Game {
                 this.powerups.splice(i, 1);
             }
         }
-
+    
+        // Spawn new powerups
         if (Math.random() < 0.01) {
             this.powerups.push(this.createPowerup(0));
         }
@@ -350,35 +364,31 @@ class Game {
     }
 
     applyPowerUpEffect(type) {
-        switch (type) {
-            case 'bitcoin':
-                this.player.velocityY = JUMP_VELOCITY * 1.5;
-                break;
-            case 'solana':
-                this.endGame();
-                break;
-            case 'ethereum':
-                this.platformSpeed *= 0.5;
-                setTimeout(() => { this.platformSpeed *= 2; }, 5000);
-                break;
-            case 'etherLink':
-                this.score += 1000;
-                break;
-            case 'greenTezos':
-                this.player.maxJumps = 3;
-                setTimeout(() => { this.player.maxJumps = 2; }, 30000);
-                break;
-            case 'blast':
-                // Implement blast effect
-                break;
-            case 'mintTezos':
-                this.platformSpeed *= 0.5;
-                setTimeout(() => { this.platformSpeed *= 2; }, 30000);
-                break;
-            case 'tezosX':
-                // Implement tezosX effect
-                break;
+        const powerupConfig = {
+            'bitcoin': { duration: 10, effect: () => this.player.velocityY = JUMP_VELOCITY * 1.5 },
+            'ethereum': { duration: 5, effect: () => this.platformSpeed *= 0.5 },
+            'greenTezos': { duration: 30, effect: () => this.player.maxJumps = 3 },
+            'mintTezos': { duration: 30, effect: () => this.platformSpeed *= 0.5 },
+            'etherLink': { duration: 5, effect: () => this.score += 1000 },
+            'blast': { duration: 10, effect: () => { /* Implement blast effect */ } },
+            'tezosX': { duration: 15, effect: () => { /* Implement tezosX effect */ } },
+        };
+    
+        if (powerupConfig[type]) {
+            if (this.activePowerups.has(type)) {
+                // If powerup is already active, extend its duration
+                this.activePowerups.get(type).duration += powerupConfig[type].duration;
+            } else {
+                // Apply the powerup effect
+                powerupConfig[type].effect();
+                // Add to active powerups
+                this.activePowerups.set(type, {
+                    duration: powerupConfig[type].duration,
+                    maxDuration: powerupConfig[type].duration
+                });
+            }
         }
+    
         playSound('powerup');
     }
 
@@ -440,10 +450,9 @@ class Game {
         this.drawPlayer();
         this.drawPowerups();
         this.drawParticles();
-
-    
-        this.ctx.restore();
         this.drawHUD();
+        this.drawPowerupHUD();
+        this.ctx.restore();
     }
 
     drawPlatforms() {
@@ -517,6 +526,37 @@ class Game {
         this.ctx.font = '20px Orbitron, sans-serif';
         this.ctx.fillText(`Score: ${this.score}`, 10, 30);
         this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
+    }
+
+    drawPowerupHUD() {
+        const powerupSize = 40;
+        const padding = 10;
+        const barHeight = 5;
+        let xOffset = padding;
+    
+        this.activePowerups.forEach((powerup, type) => {
+            // Draw powerup icon
+            const powerupSprite = sprites.get(type);
+            if (powerupSprite) {
+                this.ctx.drawImage(powerupSprite, xOffset, padding, powerupSize, powerupSize);
+            } else {
+                // Fallback if sprite is not available
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(xOffset, padding, powerupSize, powerupSize);
+            }
+    
+            // Draw duration bar
+            const barWidth = powerupSize;
+            const remainingWidth = (powerup.duration / powerup.maxDuration) * barWidth;
+            
+            this.ctx.fillStyle = '#333333';
+            this.ctx.fillRect(xOffset, padding + powerupSize + 5, barWidth, barHeight);
+            
+            this.ctx.fillStyle = '#00FF00';
+            this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
+    
+            xOffset += powerupSize + padding;
+        });
     }
 
 
