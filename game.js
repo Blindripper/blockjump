@@ -20,6 +20,7 @@ const TEZOSX_EFFECT_DURATION = 30;
 // Game class
 class Game {
     constructor() {
+        this.debugMode = true;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -45,8 +46,10 @@ class Game {
     logGameState(context) {
         console.log(`--- Game State (${context}) ---`);
         console.log('Game Running:', this.gameRunning);
-        console.log('Player:', this.player);
-        console.log('Bottom Platform:', this.bottomPlatform);
+        console.log('Player:', this.player ? 
+            `x: ${this.player.x.toFixed(2)}, y: ${this.player.y.toFixed(2)}` : 'null');
+        console.log('Bottom Platform:', this.bottomPlatform ? 
+            `y: ${this.bottomPlatform.y.toFixed(2)}` : 'null');
         console.log('Platforms:', this.platforms.length);
         console.log('Score:', this.score);
         console.log('Blocks Climbed:', this.blocksClimbed);
@@ -399,6 +402,11 @@ class Game {
     }
 
     draw() {
+        if (!this.ctx) {
+            console.error('Canvas context is not initialized');
+            return;
+        }
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.save();
     
@@ -427,7 +435,7 @@ class Game {
         this.ctx.fillStyle = 'white';
         this.ctx.font = '14px Arial';
         this.ctx.fillText(`Game Running: ${this.gameRunning}`, 10, 80);
-        this.ctx.fillText(`Player: x=${this.player?.x.toFixed(2) ?? 'N/A'}, y=${this.player?.y.toFixed(2) ?? 'N/A'}`, 10, 100);
+        this.ctx.fillText(`Player: ${this.player ? `x=${this.player.x.toFixed(2)}, y=${this.player.y.toFixed(2)}` : 'null'}`, 10, 100);
         this.ctx.fillText(`Platforms: ${this.platforms.length}`, 10, 120);
         this.ctx.fillText(`Bottom Platform: ${this.bottomPlatform ? `y=${this.bottomPlatform.y.toFixed(2)}` : 'null'}`, 10, 140);
     
@@ -469,7 +477,10 @@ class Game {
     }
 
     drawPlayer() {
-        if (!this.player) return;
+        if (!this.player) {
+            console.warn('Player is null in drawPlayer');
+            return;
+        }
         
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
@@ -527,12 +538,23 @@ class Game {
         this.lastTime = currentTime;
 
         this.update(dt);
-        this.draw();
 
-        this.logGameState('During game loop');
+        try {
+            this.draw();
+        } catch (error) {
+            console.error('Error in draw method:', error);
+            this.logGameState('Error in draw');
+            this.gameRunning = false;
+            return;
+        }
+
+        if (this.debugMode) {
+            this.logGameState('During game loop');
+        }
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
+
 }
 
 class Particle {
