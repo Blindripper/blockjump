@@ -51,7 +51,7 @@ class Game {
                 return;
             }
     
-            const gameStarted = await startGameWeb3(); // Call the web3 function
+            const gameStarted = await startGameWeb3();
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
                 displayCanvasMessage('Failed to start game. Please try again.', 'error');
@@ -64,29 +64,15 @@ class Game {
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
-            this.player = this.createPlayer();
-            this.platforms = [];
-            for (let i = 0; i < 7; i++) {
-                this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
-            }
-            
             this.bottomPlatform = this.createBottomPlatform();
             this.player = this.createPlayer();
+            this.platforms = this.createInitialPlatforms();
             this.powerups = [];
-            await updateTryCount(); // Update the displayed try count
-            
-            this.platforms = [];
-            for (let i = 0; i < 7; i++) {
-            this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
-            }
 
-            // Remove the Start Game button
-            const startButton = document.querySelector('.canvas-button');
-            if (startButton) {
-                startButton.remove();
-            }
+            await updateTryCount();
             
             console.log('Game initialized. Player:', this.player);
+            console.log('Bottom Platform:', this.bottomPlatform);
             console.log('Platforms:', this.platforms);
             
             // Start the game loop
@@ -416,12 +402,19 @@ class Game {
         this.drawPowerups();
         this.drawParticles();
     
+        // Debug rendering
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(0, GAME_HEIGHT - 5, GAME_WIDTH, 5); // Bottom line
+        this.ctx.fillRect(0, 0, 5, GAME_HEIGHT); // Left line
+        this.ctx.fillRect(GAME_WIDTH - 5, 0, 5, GAME_HEIGHT); // Right line
+
         // Debug information
         this.ctx.fillStyle = 'white';
         this.ctx.font = '14px Arial';
         this.ctx.fillText(`Game Running: ${this.gameRunning}`, 10, 80);
         this.ctx.fillText(`Player: x=${this.player.x.toFixed(2)}, y=${this.player.y.toFixed(2)}`, 10, 100);
         this.ctx.fillText(`Platforms: ${this.platforms.length}`, 10, 120);
+        this.ctx.fillText(`Bottom Platform: y=${this.bottomPlatform.y.toFixed(2)}`, 10, 140);
     
         this.ctx.restore();
         this.drawHUD();
@@ -468,6 +461,11 @@ class Game {
             this.ctx.fillStyle = '#FF0000';
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
+        
+        // Debug outline for player
+        this.ctx.strokeStyle = 'yellow';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
