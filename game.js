@@ -64,8 +64,6 @@ class Game {
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
-            this.bottomPlatform = this.createBottomPlatform();
-            this.gameStarted = false;
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
@@ -104,7 +102,7 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - 50,
+            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 500,
@@ -112,8 +110,7 @@ class Game {
             velocityX: 0,
             isJumping: false,
             jumpCount: 0,
-            maxJumps: 2,
-            canJump: true
+            maxJumps: 2
         };
     }
 
@@ -446,9 +443,8 @@ class Game {
             }
         }
         
-        // Draw bottom platform if it exists
         if (this.bottomPlatform) {
-            this.ctx.fillStyle = '#4CAF50';  // Solid green color for the bottom platform
+            this.ctx.fillStyle = '#4CAF50';
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
         }
     }
@@ -464,15 +460,16 @@ class Game {
     }
 
     drawPlayer() {
-        console.log('Drawing player:', this.player);
+        if (!this.player) return;
+        
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
         } else {
-            this.ctx.fillStyle = '#FF0000'; // Changed to red for visibility
+            this.ctx.fillStyle = '#FF0000';
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
-    } 
+    }
 
     drawPowerups() {
         for (let powerup of this.powerups) {
