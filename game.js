@@ -46,6 +46,7 @@ class Game {
     logGameState(context) {
         console.log(`--- Game State (${context}) ---`);
         console.log('Game Running:', this.gameRunning);
+        console.log('Game Started:', this.gameStarted);
         console.log('Player:', this.player ? 
             `x: ${this.player.x.toFixed(2)}, y: ${this.player.y.toFixed(2)}` : 'null');
         console.log('Bottom Platform:', this.bottomPlatform ? 
@@ -53,7 +54,6 @@ class Game {
         console.log('Platforms:', this.platforms.length);
         console.log('Score:', this.score);
         console.log('Blocks Climbed:', this.blocksClimbed);
-        console.log('Game Started:', this.gameStarted);
         console.log('---------------------------');
     }
 
@@ -77,6 +77,8 @@ class Game {
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
+            console.log('Game initialized. Bottom platform:', this.bottomPlatform);
+
     
             this.gameRunning = true;
             this.gameOver = false;
@@ -122,8 +124,12 @@ class Game {
             y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, // Subtract 1 to ensure it's visible
             width: GAME_WIDTH,
             height: PLATFORM_HEIGHT,
-            isSafe: true
+            isSafe: true,
+            isBottomPlatform: true // Add this flag to identify the bottom platform
+
         };
+        console.log('Bottom platform created:', platform);
+        return platform;
     }
 
     createInitialPlatforms() {
@@ -240,6 +246,11 @@ class Game {
     }
 
     updatePlatforms(dt) {
+        // Log the state before updating
+        if (this.debugMode) {
+            console.log('Before update - Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform);
+        }
+
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
             platform.y += this.platformSpeed * dt;
@@ -252,14 +263,21 @@ class Game {
             this.blocksClimbed++;
         }
 
-        // Only move the bottom platform if the game has started
+        // Always keep the bottom platform, just move it if the game has started
         if (this.gameStarted && this.bottomPlatform) {
             this.bottomPlatform.y += this.platformSpeed * dt;
             if (this.bottomPlatform.y > GAME_HEIGHT) {
-                this.bottomPlatform = null;
+                // Instead of removing, reset its position to the top
+                this.bottomPlatform.y = 0;
             }
         }
+
+        // Log the state after updating
+        if (this.debugMode) {
+            console.log('After update - Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform);
+        }
     }
+
 
 
     updatePlayer(dt) {
@@ -271,6 +289,10 @@ class Game {
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
         this.player.velocityY += GRAVITY * dt;
+
+        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
+            this.gameStarted = true;
+            console.log('Game started');}
 
         // Keep player within bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -463,8 +485,10 @@ class Game {
         if (this.bottomPlatform) {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
-        } else if (this.debugMode) {
-            console.warn('Bottom platform is null in drawPlatforms');
+        } else {
+            console.error('Bottom platform is null in drawPlatforms');
+            // Attempt to recreate the bottom platform if it's null
+            this.bottomPlatform = this.createBottomPlatform();
         }
     }
 
