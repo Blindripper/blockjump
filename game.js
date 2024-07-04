@@ -39,6 +39,8 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 50;
         this.currentBackgroundIndex = 0;
+        this.bottomPlatform = this.createBottomPlatform();
+        this.platforms = this.createInitialPlatforms();
         this.setupEventListeners();
     }
 
@@ -116,6 +118,14 @@ class Game {
         };
     }
 
+    createInitialPlatforms() {
+        const platforms = [];
+        for (let i = 0; i < 7; i++) {
+            platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
+        }
+        return platforms;
+    }
+
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         document.addEventListener('keyup', (e) => this.handleKeyUp(e));
@@ -155,61 +165,26 @@ class Game {
         this.updateUI();
     }
 
-    updatePlayer(dt) {
-        this.player.x += this.player.velocityX * dt;
-        this.player.y += this.player.velocityY * dt;
-        this.player.velocityY += GRAVITY * dt;
-
-        // Keep player within bounds
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-
-        // Check if player is on the ground or a platform
-        let onGround = false;
-        if (this.checkCollision(this.player, this.bottomPlatform)) {
-            onGround = true;
-        }
-        for (let platform of this.platforms) {
-            if (this.checkCollision(this.player, platform)) {
-                onGround = true;
-                break;
-            }
-        }
-
-        if (onGround) {
-            this.player.jumpCount = 0;
-            if (this.player.velocityY > 0) {
-                this.player.velocityY = 0;
-                this.player.y = this.bottomPlatform.y - this.player.height;
-            }
-        }
-
-        this.handleCollisions();
-
-        // Apply wind effect
-        this.player.x += this.wind.speed * this.wind.direction * dt;
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-    }
-
-
+    
     handleCollisions() {
         let onPlatform = false;
-        if (this.player.velocityY >= 0) {
-            if (this.checkCollision(this.player, this.bottomPlatform)) {
-                this.landOnPlatform(this.bottomPlatform);
-                onPlatform = true;
-            }
 
-            for (let platform of this.platforms) {
-                if (this.checkCollision(this.player, platform)) {
-                    if (platform.isSpike) {
-                        this.endGame();
-                    } else {
-                        this.landOnPlatform(platform);
-                        onPlatform = true;
-                        if (platform.isGolden) {
-                            this.handleGoldenPlatform();
-                        }
+        // Check collision with bottom platform
+        if (this.checkCollision(this.player, this.bottomPlatform)) {
+            this.landOnPlatform(this.bottomPlatform);
+            onPlatform = true;
+        }
+
+        // Check collision with other platforms
+        for (let platform of this.platforms) {
+            if (this.checkCollision(this.player, platform)) {
+                if (this.player.velocityY >= 0) {  // Only land if moving downwards
+                    this.landOnPlatform(platform);
+                    onPlatform = true;
+                    if (platform.isGolden) {
+                        this.handleGoldenPlatform();
                     }
+                    break;  // Exit the loop once we've landed
                 }
             }
         }
@@ -218,16 +193,18 @@ class Game {
             this.player.isJumping = true;
         }
 
+        // Check if player has fallen off the bottom of the screen
         if (this.player.y > GAME_HEIGHT) {
             this.endGame();
         }
     }
+    
 
     checkCollision(obj1, obj2) {
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
-               obj1.y < obj2.y + obj2.height &&
-               obj1.y + obj1.height > obj2.y;
+               obj1.y + obj1.height > obj2.y &&
+               obj1.y < obj2.y + obj2.height;
     }
 
     landOnPlatform(platform) {
@@ -260,6 +237,22 @@ class Game {
             this.bottomPlatform = this.createBottomPlatform();
         }
     }
+
+    updatePlayer(dt) {
+        this.player.x += this.player.velocityX * dt;
+        this.player.y += this.player.velocityY * dt;
+        this.player.velocityY += GRAVITY * dt;
+
+        // Keep player within bounds
+        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+
+        this.handleCollisions();
+
+        // Apply wind effect
+        this.player.x += this.wind.speed * this.wind.direction * dt;
+        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+    }
+
 
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
@@ -413,7 +406,6 @@ class Game {
     }
 
     drawPlatforms() {
-        console.log('Drawing platforms:', this.platforms.length);
         this.ctx.fillStyle = '#1E293B';
         for (let platform of this.platforms) {
             if (platform.isSpike) {
@@ -421,11 +413,14 @@ class Game {
             } else if (platform.isGolden) {
                 this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                this.ctx.fillStyle = '#1E293B';  // Reset fill style
             } else {
                 this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
             }
         }
-        this.ctx.fillStyle = this.bottomPlatform.isSafe ? '#4CAF50' : '#0f3460';
+        
+        // Draw bottom platform
+        this.ctx.fillStyle = this.bottomPlatform.isSafe ? '#4CAF50' : '#1E293B';
         this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
     }
 
