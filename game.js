@@ -14,8 +14,6 @@ const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
 const JUMP_VELOCITY = -800;
 const GRAVITY = 2000;
-const BLAST_POWERUP_DURATION = 30;
-const TEZOSX_EFFECT_DURATION = 30;
 
 // Game class
 class Game {
@@ -369,7 +367,7 @@ class Game {
             'ethereum': { duration: 5, effect: () => this.platformSpeed *= 0.5 },
             'greenTezos': { duration: 30, effect: () => this.player.maxJumps = 3 },
             'mintTezos': { duration: 30, effect: () => this.platformSpeed *= 0.5 },
-            'etherLink': { duration: 5, effect: () => this.score += 1000 },
+            'etherLink': { duration: 1, effect: () => this.score += 1000 },
             'blast': { duration: 10, effect: () => { /* Implement blast effect */ } },
             'tezosX': { duration: 15, effect: () => { /* Implement tezosX effect */ } },
         };
@@ -532,9 +530,12 @@ class Game {
         const powerupSize = 40;
         const padding = 10;
         const barHeight = 5;
-        let xOffset = padding;
+        let xOffset = GAME_WIDTH - padding;  // Start from the right edge
     
-        this.activePowerups.forEach((powerup, type) => {
+        // Draw powerups from right to left
+        Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
+            xOffset -= powerupSize;  // Move left by the size of the powerup
+    
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
             if (powerupSprite) {
@@ -555,7 +556,7 @@ class Game {
             this.ctx.fillStyle = '#00FF00';
             this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
     
-            xOffset += powerupSize + padding;
+            xOffset -= padding;  // Add padding between powerups
         });
     }
 
