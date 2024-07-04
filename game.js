@@ -34,6 +34,8 @@ class Game {
         this.powerups = [];
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
+        this.backgroundChangeThreshold = 5000;
+        this.lastBackgroundChange = 0;
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
         this.platformSpeed = 50;
@@ -183,6 +185,14 @@ class Game {
         this.updateWind(dt);
         this.updateDifficulty();
         this.updateUI();
+        this.updateBackground();
+    }
+
+    updateBackground() {
+        if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
+            this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
+            this.lastBackgroundChange = this.score;
+        }
     }
     
     handleCollisions() {
@@ -197,21 +207,32 @@ class Game {
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
-                if (this.player.velocityY >= 0) {  // Only land if moving downwards
+                if (this.player.velocityY >= 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * 2) {
+                    // Only land if moving downwards and above the platform
                     this.landOnPlatform(platform);
                     onPlatform = true;
                     if (platform.isGolden) {
                         this.handleGoldenPlatform();
+                    } else if (platform.isSpike) {
+                        this.endGame();
+                        return;
                     }
                     break;  // Exit the loop once we've landed
+                } else {
+                    // If not landing from above, adjust player position
+                    if (this.player.x < platform.x) {
+                        this.player.x = platform.x - this.player.width;
+                    } else {
+                        this.player.x = platform.x + platform.width;
+                    }
                 }
             }
         }
-
+        
         if (!onPlatform) {
             this.player.isJumping = true;
         }
-    } 
+    }
     
 
     checkCollision(obj1, obj2) {
@@ -409,6 +430,9 @@ class Game {
     updateDifficulty() {
         this.difficultyLevel = Math.floor(this.score / 5000) + 1;
         this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
+        
+        // Change background
+        this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
     }
 
     createParticles(x, y, count, color) {
@@ -454,7 +478,6 @@ class Game {
     }
 
     drawPlatforms() {
-        // Draw regular platforms
         this.ctx.fillStyle = '#1E293B';
         for (let platform of this.platforms) {
             if (platform.isSpike) {
@@ -521,13 +544,13 @@ class Game {
 
     drawHUD() {
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '20px Orbitron, sans-serif';
+        this.ctx.font = '12px Orbitron, sans-serif';
         this.ctx.fillText(`Score: ${this.score}`, 10, 30);
         this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
     }
 
     drawPowerupHUD() {
-        const powerupSize = 40;
+        const powerupSize = 20;
         const padding = 10;
         const barHeight = 5;
         let xOffset = GAME_WIDTH - padding;  // Start from the right edge
@@ -564,7 +587,9 @@ class Game {
     endGame() {
         this.gameRunning = false;
         this.gameOver = true;
-        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+        showOverlay('Game Over', () => {
+            handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+        });
     }
 
     gameLoop(currentTime) {
@@ -764,6 +789,51 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
     return overlay;
 }
 
+function showOverlay(message, callback = null) {
+    const canvas = document.getElementById('gameCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'game-overlay';
+    overlay.style.position = 'absolute';
+    overlay.style.left = `${canvasRect.left}px`;
+    overlay.style.top = `${canvasRect.top}px`;
+    overlay.style.width = `${canvasRect.width}px`;
+    overlay.style.height = `${canvasRect.height}px`;
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.style.color = '#3FE1B0';
+    messageElement.style.fontSize = '24px';
+    messageElement.style.fontFamily = 'Orbitron, sans-serif';
+    messageElement.style.fontWeight = 'bold';
+    messageElement.style.textAlign = 'center';
+    messageElement.style.maxWidth = '80%';
+
+    overlay.appendChild(messageElement);
+    document.body.appendChild(overlay);
+
+    if (callback) {
+        setTimeout(() => {
+            document.body.removeChild(overlay);
+            callback();
+        }, 2000);
+    }
+
+    return overlay;
+}
+
+function hideOverlay(overlay) {
+    if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+    }
+}
+
 function hideBlockchainWaitMessage() {
     const waitMessage = document.getElementById('blockchain-wait-message');
     if (waitMessage) {
@@ -883,8 +953,6 @@ async function handleWalletConnection() {
     }
 }
 
-
-
 let isBuyingTries = false;
 
 async function handleBuyTries() {
@@ -894,24 +962,23 @@ async function handleBuyTries() {
 
     isBuyingTries = true;
     try {
-        const purchaseMessageOverlay = showBlockchainWaitMessage("Getting Game tries from Etherlink...", 0.5, 0.5);
+        const purchaseMessageOverlay = showOverlay("Getting Game tries from Etherlink...");
         const purchased = await purchaseGameTries();
         
-        if (purchaseMessageOverlay) {
-            document.body.removeChild(purchaseMessageOverlay);
-        }
+        hideOverlay(purchaseMessageOverlay);
         
         if (purchased) {
-            displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
-            await updateTryCount();
-            updateButtonState();
-            game.draw();
+            showOverlay('10 Game tries added successfully!', () => {
+                updateTryCount();
+                updateButtonState();
+                game.draw();
+            });
         } else {
-            displayCanvasMessage('Failed to purchase Game tries. Please try again.', 'error', 0.3);
+            showOverlay('Failed to purchase Game tries. Please try again.');
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
-        displayCanvasMessage('Error purchasing Game tries. Please try again.', 'error', 0.3);
+        showOverlay('Error purchasing Game tries. Please try again.');
     } finally {
         isBuyingTries = false;
     }
@@ -943,25 +1010,23 @@ async function handleScoreSubmission(e) {
     const name = document.getElementById('nameInput').value.trim();
     
     if (!name) {
-        displayCanvasMessage('Please enter a valid name', 'error');
+        showOverlay('Please enter a valid name');
         return;
     }
 
     try {
-        showBlockchainWaitMessage("Waiting for Etherlink...", 0.5, 0.5);
+        const submitOverlay = showOverlay("Submitting score to Etherlink...");
         const submitted = await submitScore(name, game.score, game.blocksClimbed, game.gameStartTime);
-        hideBlockchainWaitMessage();
+        hideOverlay(submitOverlay);
         if (submitted) {
             await updateHighscoreTable();
-            displayCanvasMessage('Score submitted successfully!', 'success');
+            showOverlay('Score submitted successfully!');
         } else {
-            console.error('Failed to submit score');
-            displayCanvasMessage('Failed to submit score. Please try again.', 'error');
+            showOverlay('Failed to submit score. Please try again.');
         }
     } catch (error) {
         console.error('Error during score submission:', error);
-        hideBlockchainWaitMessage();
-        displayCanvasMessage('An error occurred while submitting your score. Please try again.', 'error');
+        showOverlay('An error occurred while submitting your score. Please try again.');
     }
 
     hideScoreSubmissionForm();
@@ -1130,18 +1195,19 @@ function showScoreSubmissionForm() {
     }
 }
 
-async function checkAndDisplayStartButton() {
+function checkAndDisplayStartButton() {
     try {
-        const tries = await getGameTries();
+        const tries = getGameTries();
         if (tries > 0) {
-            drawCanvasButton('Start Game', () => {
+            showOverlay('Starting Game...', () => {
                 game.initializeGame();
             });
         } else {
+            showOverlay('No tries left. Please purchase more.');
         }
     } catch (error) {
         console.error('Error checking Game tries:', error);
-        drawCanvasMessage('Error checking Game tries. Please try again.');
+        showOverlay('Error checking Game tries. Please try again.');
     }
 }
 
@@ -1208,10 +1274,12 @@ function drawCanvasMessage(text) {
 }
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
-    showScoreSubmissionForm();
-    window.finalScore = score;
-    window.blocksClimbed = blocksClimbed;
-    window.gameStartTime = gameStartTime;
+    showOverlay('Game Over', () => {
+        showScoreSubmissionForm();
+        window.finalScore = score;
+        window.blocksClimbed = blocksClimbed;
+        window.gameStartTime = gameStartTime;
+    });
 }
 
 export { updateTryCount };
