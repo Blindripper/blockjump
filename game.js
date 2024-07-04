@@ -45,6 +45,7 @@ class Game {
         this.setupEventListeners();
     }
 
+    
     async initializeGame() {
         try {
             const currentTries = await getGameTries();
@@ -86,7 +87,8 @@ class Game {
                 console.log('- Bottom platform present:', this.platforms.some(p => p.isBottomPlatform));
                 this.logGameState('After initialization');
             }
-            
+            hideOverlay();
+
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
         } catch (error) {
@@ -789,10 +791,13 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
 }
 
 function showOverlay(message, callback = null, includeButton = false) {
+    hideOverlay(); // Remove any existing overlay
+
     const canvas = document.getElementById('gameCanvas');
     const canvasRect = canvas.getBoundingClientRect();
 
     const overlay = document.createElement('div');
+    overlay.id = 'game-overlay';
     overlay.className = 'game-overlay';
     overlay.style.position = 'absolute';
     overlay.style.left = `${canvasRect.left}px`;
@@ -844,7 +849,6 @@ function showOverlay(message, callback = null, includeButton = false) {
 
         startButton.onclick = () => {
             if (callback) callback();
-            document.body.removeChild(overlay);
         };
 
         overlay.appendChild(startButton);
@@ -854,12 +858,19 @@ function showOverlay(message, callback = null, includeButton = false) {
 
     if (callback && !includeButton) {
         setTimeout(() => {
-            document.body.removeChild(overlay);
+            hideOverlay();
             callback();
         }, 2000);
     }
 
     return overlay;
+}
+
+function hideOverlay() {
+    const existingOverlay = document.getElementById('game-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
 }
 
 function displayCanvasMessage(message, type = 'info', yOffset = 0.3) {
@@ -932,9 +943,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             await loadHighscores();
             await updateHighscoreTable();
             await getContractBalance();
-            await checkAndDisplayStartButton(); // This will now show the start button
+            isConnected = true;
+            updateButtonState();
+            await checkAndDisplayStartButton();
         } else {
-            showOverlay('Failed to connect to blockchain. Please try again later.');
+            showOverlay('Please connect wallet');
         }
     } catch (error) {
         showOverlay('An error occurred during initialization. Please refresh the page.');
@@ -954,24 +967,19 @@ async function handleWalletConnection() {
                 await updateHighscoreTable();
                 showAchievements();
                 await checkAndDisplayStartButton(); 
-                if (game.gameRunning) {
-                    requestAnimationFrame(() => game.draw());
-                }
             } else {
-                alert('Failed to connect. Please try again.');
+                showOverlay('Failed to connect. Please try again.');
             }
         } else {
             isConnected = false;
             updateButtonState();
             hideBuyTriesButton();
             hideAchievements();
-            if (game.gameRunning) {
-                requestAnimationFrame(() => game.draw());
-            }
+            showOverlay('Please connect wallet');
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
-        alert('An error occurred. Please try again.');
+        showOverlay('An error occurred. Please try again.');
     }
 }
 
@@ -1218,6 +1226,11 @@ function showScoreSubmissionForm() {
 }
 
 async function checkAndDisplayStartButton() {
+    if (!isConnected) {
+        showOverlay('Please connect wallet');
+        return;
+    }
+
     try {
         const tries = await getGameTries();
         if (tries > 0) {
