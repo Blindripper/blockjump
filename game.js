@@ -124,7 +124,7 @@ class Game {
     handleKeyDown(e) {
         if (e.code === 'ArrowLeft') this.player.velocityX = -this.player.speed;
         if (e.code === 'ArrowRight') this.player.velocityX = this.player.speed;
-        if (e.code === 'ArrowUp') this.jump();
+        if (e.code === 'ArrowUp' || e.code === 'Space') this.jump();
     }
 
     handleKeyUp(e) {
@@ -132,11 +132,10 @@ class Game {
     }
 
     jump() {
-        if (this.player.jumpCount < this.player.maxJumps && this.player.canJump) {
+        if (this.player.jumpCount < this.player.maxJumps) {
             this.player.velocityY = JUMP_VELOCITY;
             this.player.isJumping = true;
             this.player.jumpCount++;
-            this.player.canJump = false;
             this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
             playSound('jump');
         }
@@ -164,12 +163,33 @@ class Game {
         // Keep player within bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
 
+        // Check if player is on the ground or a platform
+        let onGround = false;
+        if (this.checkCollision(this.player, this.bottomPlatform)) {
+            onGround = true;
+        }
+        for (let platform of this.platforms) {
+            if (this.checkCollision(this.player, platform)) {
+                onGround = true;
+                break;
+            }
+        }
+
+        if (onGround) {
+            this.player.jumpCount = 0;
+            if (this.player.velocityY > 0) {
+                this.player.velocityY = 0;
+                this.player.y = this.bottomPlatform.y - this.player.height;
+            }
+        }
+
         this.handleCollisions();
 
         // Apply wind effect
         this.player.x += this.wind.speed * this.wind.direction * dt;
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
     }
+
 
     handleCollisions() {
         let onPlatform = false;
