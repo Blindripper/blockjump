@@ -66,7 +66,6 @@ class Game {
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
-    
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
