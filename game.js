@@ -1,4 +1,4 @@
-import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
+import { initWeb3,connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 // Define base URL for the GitHub repository
@@ -66,6 +66,7 @@ class Game {
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
+    
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
@@ -172,6 +173,8 @@ class Game {
             playSound('jump');
         }
     }
+
+
 
     update(dt) {
         if (!this.gameRunning || this.gameOver) return;
@@ -940,7 +943,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             await loadHighscores();
             await updateHighscoreTable();
             await getContractBalance();
-            isConnected = true;
             updateButtonState();
             await checkAndDisplayStartButton();
         } else {
@@ -954,9 +956,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function handleWalletConnection() {
     try {
         if (!isConnected) {
-            const connected = await initWeb3();
+            const connected = await connectWallet();
             if (connected) {
-                isConnected = true;
                 updateButtonState();
                 await updateTryCount();
                 await loadUserAchievements();
@@ -968,11 +969,13 @@ async function handleWalletConnection() {
                 showOverlay('Failed to connect. Please try again.');
             }
         } else {
+            // Disconnect wallet
             isConnected = false;
+            account = null;
             updateButtonState();
             hideBuyTriesButton();
             hideAchievements();
-            showOverlay('Please connect wallet');
+            showOverlay('Wallet disconnected. Please connect to play.');
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
