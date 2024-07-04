@@ -29,20 +29,15 @@ class Game {
         this.blocksClimbed = 0;
         this.gameStartTime = 0;
         this.lastTime = 0;
-        this.player = this.createPlayer();
         this.platforms = [];
         this.powerups = [];
-        this.player = null;
-        this.player = null;
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
         this.platformSpeed = 50;
-        this.currentBackgroundIndex = 0;
         this.bottomPlatform = this.createBottomPlatform();
-        this.platforms = this.createInitialPlatforms();
-        this.bottomPlatform = null;
+        this.player = this.createPlayer();
         this.gameStarted = false;
         this.setupEventListeners();
     }
@@ -105,7 +100,7 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: this.bottomPlatform.y - PLAYER_HEIGHT,
+            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 500,
