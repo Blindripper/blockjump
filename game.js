@@ -229,16 +229,31 @@ class Game {
 
     updatePlatforms(dt) {
         for (let i = this.platforms.length - 1; i >= 0; i--) {
-            this.platforms[i].y += this.platformSpeed * dt;
-            if (this.platforms[i].y > GAME_HEIGHT) {
+            let platform = this.platforms[i];
+            if (platform) {
+                platform.y += this.platformSpeed * dt;
+                if (platform.y > GAME_HEIGHT) {
+                    // Replace the platform that went off-screen
+                    this.platforms[i] = this.createPlatform(0);
+                    this.blocksClimbed++;
+                }
+            } else {
+                // If we encounter a null platform, replace it
                 this.platforms[i] = this.createPlatform(0);
-                this.blocksClimbed++;
             }
         }
 
-        this.bottomPlatform.y += this.platformSpeed * dt;
-        if (this.bottomPlatform.y > GAME_HEIGHT) {
-            this.bottomPlatform = this.createBottomPlatform();
+        // Handle the bottom platform
+        if (this.bottomPlatform) {
+            this.bottomPlatform.y += this.platformSpeed * dt;
+            if (this.bottomPlatform.y > GAME_HEIGHT) {
+                this.bottomPlatform = null;
+            }
+        }
+
+        // Ensure we always have a minimum number of platforms
+        while (this.platforms.length < 7) {
+            this.platforms.push(this.createPlatform(0));
         }
     }
 
