@@ -789,7 +789,7 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
     return overlay;
 }
 
-function showOverlay(message, callback = null) {
+function showOverlay(message, callback = null, includeButton = false) {
     const canvas = document.getElementById('gameCanvas');
     const canvasRect = canvas.getBoundingClientRect();
 
@@ -802,6 +802,7 @@ function showOverlay(message, callback = null) {
     overlay.style.height = `${canvasRect.height}px`;
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
     overlay.style.justifyContent = 'center';
     overlay.style.alignItems = 'center';
     overlay.style.zIndex = '1000';
@@ -814,11 +815,45 @@ function showOverlay(message, callback = null) {
     messageElement.style.fontWeight = 'bold';
     messageElement.style.textAlign = 'center';
     messageElement.style.maxWidth = '80%';
+    messageElement.style.marginBottom = '20px';
 
     overlay.appendChild(messageElement);
+
+    if (includeButton) {
+        const startButton = document.createElement('button');
+        startButton.textContent = 'Start Game';
+        startButton.className = 'start-button';
+        startButton.style.backgroundColor = '#3FE1B0';
+        startButton.style.color = '#0f1624';
+        startButton.style.border = 'none';
+        startButton.style.padding = '10px 20px';
+        startButton.style.fontSize = '18px';
+        startButton.style.fontFamily = 'Orbitron, sans-serif';
+        startButton.style.fontWeight = 'bold';
+        startButton.style.borderRadius = '5px';
+        startButton.style.cursor = 'pointer';
+        startButton.style.transition = 'all 0.3s ease';
+
+        startButton.onmouseover = () => {
+            startButton.style.backgroundColor = '#2dc898';
+            startButton.style.transform = 'scale(1.05)';
+        };
+        startButton.onmouseout = () => {
+            startButton.style.backgroundColor = '#3FE1B0';
+            startButton.style.transform = 'scale(1)';
+        };
+
+        startButton.onclick = () => {
+            if (callback) callback();
+            document.body.removeChild(overlay);
+        };
+
+        overlay.appendChild(startButton);
+    }
+
     document.body.appendChild(overlay);
 
-    if (callback) {
+    if (callback && !includeButton) {
         setTimeout(() => {
             document.body.removeChild(overlay);
             callback();
@@ -826,19 +861,6 @@ function showOverlay(message, callback = null) {
     }
 
     return overlay;
-}
-
-function hideOverlay(overlay) {
-    if (overlay && overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
-    }
-}
-
-function hideBlockchainWaitMessage() {
-    const waitMessage = document.getElementById('blockchain-wait-message');
-    if (waitMessage) {
-        waitMessage.remove();
-    }
 }
 
 function displayCanvasMessage(message, type = 'info', yOffset = 0.3) {
@@ -911,11 +933,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             await loadHighscores();
             await updateHighscoreTable();
             await getContractBalance();
+            await checkAndDisplayStartButton(); // This will now show the start button
         } else {
-            displayCanvasMessage('Failed to connect to blockchain. Please try again later.', 'error', 0.3);
+            showOverlay('Failed to connect to blockchain. Please try again later.');
         }
     } catch (error) {
-        displayCanvasMessage('An error occurred during initialization. Please refresh the page.', 'error', 0.3);
+        showOverlay('An error occurred during initialization. Please refresh the page.');
     }
 });
 
@@ -1195,13 +1218,13 @@ function showScoreSubmissionForm() {
     }
 }
 
-function checkAndDisplayStartButton() {
+async function checkAndDisplayStartButton() {
     try {
-        const tries = getGameTries();
+        const tries = await getGameTries();
         if (tries > 0) {
-            showOverlay('Starting Game...', () => {
+            showOverlay('Ready to play?', () => {
                 game.initializeGame();
-            });
+            }, true);
         } else {
             showOverlay('No tries left. Please purchase more.');
         }
