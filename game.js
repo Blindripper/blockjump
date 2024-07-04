@@ -41,6 +41,44 @@ class Game {
         this.setupEventListeners();
     }
 
+
+    async initializeGame() {
+        try {
+            const currentTries = await getGameTries();
+            if (currentTries <= 0) {
+                console.error('No tries left');
+                displayCanvasMessage('No tries left. Please purchase more.', 'error');
+                return;
+            }
+
+            const gameStarted = await startGameWeb3(); // Call the web3 function
+            if (!gameStarted) {
+                console.error('Failed to start game on blockchain');
+                displayCanvasMessage('Failed to start game. Please try again.', 'error');
+                return;
+            }
+
+            this.gameRunning = true;
+            this.gameOver = false;
+            this.score = 0;
+            this.blocksClimbed = 0;
+            this.gameStartTime = Date.now();
+            this.lastTime = performance.now();
+            this.player = this.createPlayer();
+            this.platforms = [];
+            for (let i = 0; i < 7; i++) {
+                this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
+            }
+            this.bottomPlatform = this.createBottomPlatform();
+            this.powerups = [];
+            await updateTryCount(); // Update the displayed try count
+            this.gameLoop();
+        } catch (error) {
+            console.error('Error initializing game:', error);
+            displayCanvasMessage('Error starting game. Please try again.', 'error');
+        }
+    }
+
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
@@ -92,6 +130,8 @@ class Game {
             playSound('jump');
         }
     }
+
+
 
     update(dt) {
         if (!this.gameRunning || this.gameOver) return;
@@ -711,7 +751,7 @@ async function handleWalletConnection() {
                 showBuyTriesButton();
                 await updateHighscoreTable();
                 showAchievements();
-                checkAndDisplayStartButton();
+                await checkAndDisplayStartButton(); 
                 if (game.gameRunning) {
                     requestAnimationFrame(() => game.draw());
                 }
@@ -995,8 +1035,10 @@ async function checkAndDisplayStartButton() {
         console.log('Current Game tries:', tries);
         if (tries > 0) {
             console.log('Drawing Start Game button');
-            drawCanvasButton('Start Game', () => game.startGame());
-        } 
+            drawCanvasButton('Start Game', () => game.initializeGame());
+        } else {
+            console.log('No tries left, not displaying Start Game button');
+        }
     } catch (error) {
         console.error('Error checking Game tries:', error);
         drawCanvasMessage('Error checking Game tries. Please try again.');
@@ -1043,6 +1085,7 @@ function updateBalanceDisplay(formattedBalance) {
     balanceElement.textContent = `Contract Balance: ${formattedBalance} XTZ`;
 }
 
+
 function drawCanvasButton(text, onClick) {
     const button = document.createElement('button');
     button.textContent = text;
@@ -1051,9 +1094,13 @@ function drawCanvasButton(text, onClick) {
     
     const canvas = document.getElementById('gameCanvas');
     const canvasRect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / GAME_WIDTH;
+    const scaleY = canvas.height / GAME_HEIGHT;
+    const scale = Math.min(scaleX, scaleY);
+    
     button.style.position = 'absolute';
-    button.style.left = `${canvasRect.left + GAME_WIDTH / 2}px`;
-    button.style.top = `${canvasRect.top + GAME_HEIGHT / 2}px`;
+    button.style.left = `${canvasRect.left + (GAME_WIDTH * scale) / 2}px`;
+    button.style.top = `${canvasRect.top + (GAME_HEIGHT * scale) / 2}px`;
     button.style.transform = 'translate(-50%, -50%)';
 
     document.body.appendChild(button);
