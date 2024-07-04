@@ -246,11 +246,6 @@ class Game {
     }
 
     updatePlatforms(dt) {
-        // Log the state before updating
-        if (this.debugMode) {
-            console.log('Before update - Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform);
-        }
-
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
             platform.y += this.platformSpeed * dt;
@@ -263,18 +258,17 @@ class Game {
             this.blocksClimbed++;
         }
 
-        // Always keep the bottom platform, just move it if the game has started
-        if (this.gameStarted && this.bottomPlatform) {
+        // Handle the bottom platform
+        if (this.bottomPlatform) {
             this.bottomPlatform.y += this.platformSpeed * dt;
             if (this.bottomPlatform.y > GAME_HEIGHT) {
-                // Instead of removing, reset its position to the top
-                this.bottomPlatform.y = 0;
+                console.log('Bottom platform left the screen, removing it');
+                this.bottomPlatform = null;
             }
         }
 
-        // Log the state after updating
         if (this.debugMode) {
-            console.log('After update - Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform);
+            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'null');
         }
     }
 
@@ -481,14 +475,10 @@ class Game {
             }
         }
         
-        // Draw bottom platform
+        // Draw bottom platform if it exists
         if (this.bottomPlatform) {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
-        } else {
-            console.error('Bottom platform is null in drawPlatforms');
-            // Attempt to recreate the bottom platform if it's null
-            this.bottomPlatform = this.createBottomPlatform();
         }
     }
 
