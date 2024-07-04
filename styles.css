@@ -112,6 +112,24 @@ header {
   object-fit: contain;
 }
 
+.game-overlay {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.game-overlay div {
+  color: #3FE1B0;
+  font-size: 24px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  max-width: 80%;
+}
+
 #gameInfo {
   width: 100%;
   display: flex;
