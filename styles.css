@@ -212,6 +212,7 @@ header {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-left: 50px;
 }
 
 .achievement {
