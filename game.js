@@ -38,6 +38,7 @@ class Game {
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
         this.platformSpeed = 50;
+        this.currentBackgroundIndex = 0;
         this.setupEventListeners();
     }
 
@@ -237,6 +238,17 @@ class Game {
         this.bottomPlatform.y += this.platformSpeed * dt;
         if (this.bottomPlatform.y > GAME_HEIGHT) {
             this.bottomPlatform = this.createBottomPlatform();
+        }
+    }
+
+    drawBackground() {
+        const bg = backgrounds[this.currentBackgroundIndex];
+        if (bg.image) {
+            this.ctx.drawImage(bg.image, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+        } else {
+            // Fallback to color if image is not loaded
+            this.ctx.fillStyle = bg.color;
+            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         }
     }
 
