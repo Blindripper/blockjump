@@ -50,14 +50,11 @@ class Game {
         console.log('Game Started:', this.gameStarted);
         console.log('Player:', this.player ? 
             `x: ${this.player.x.toFixed(2)}, y: ${this.player.y.toFixed(2)}` : 'null');
-        console.log('Bottom Platform:', this.bottomPlatform ? 
-            `y: ${this.bottomPlatform.y.toFixed(2)}` : 'removed');
-        console.log('Bottom Platform Removed:', this.bottomPlatformRemoved);
         console.log('Platforms:', this.platforms.length);
+        console.log('Bottom Platform Present:', this.platforms.some(p => p.isBottomPlatform));
         console.log('Score:', this.score);
         console.log('Blocks Climbed:', this.blocksClimbed);
         console.log('---------------------------');
-    
     }
 
     async initializeGame() {
@@ -68,21 +65,13 @@ class Game {
                 displayCanvasMessage('No tries left. Please purchase more.', 'error');
                 return;
             }
-
+    
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
                 displayCanvasMessage('Failed to start game. Please try again.', 'error');
                 return;
             }
-
-            this.bottomPlatform = this.createBottomPlatform();
-            this.bottomPlatformRemoved = false;
-            this.player = this.createPlayer();
-            this.platforms = this.createInitialPlatforms();
-            this.gameStarted = false;
-            console.log('Game initialized. Bottom platform:', this.bottomPlatform);
-
     
             this.gameRunning = true;
             this.gameOver = false;
@@ -90,14 +79,20 @@ class Game {
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
-            this.bottomPlatform = this.createBottomPlatform();
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.powerups = [];
-
+            this.gameStarted = false;
+    
             await updateTryCount();
             
-            this.logGameState('After initialization');
+            if (this.debugMode) {
+                console.log('Game initialized:');
+                console.log('- Player:', this.player);
+                console.log('- Platforms:', this.platforms.length);
+                console.log('- Bottom platform present:', this.platforms.some(p => p.isBottomPlatform));
+                this.logGameState('After initialization');
+            }
             
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
@@ -138,9 +133,22 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        for (let i = 0; i < 7; i++) {
-            platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
+        
+        // Create bottom platform
+        platforms.push({
+            x: 0,
+            y: GAME_HEIGHT - PLATFORM_HEIGHT,
+            width: GAME_WIDTH,
+            height: PLATFORM_HEIGHT,
+            isSafe: true,
+            isBottomPlatform: true
+        });
+
+        // Create other initial platforms
+        for (let i = 1; i < 7; i++) {
+            platforms.push(this.createPlatform(GAME_HEIGHT - (i + 1) * 100));
         }
+
         return platforms;
     }
 
@@ -157,6 +165,7 @@ class Game {
             isSpike: Math.random() < 0.05
         };
     }
+    
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
@@ -262,18 +271,8 @@ class Game {
             this.blocksClimbed++;
         }
 
-        // Handle the bottom platform
-        if (this.bottomPlatform && !this.bottomPlatformRemoved) {
-            this.bottomPlatform.y += this.platformSpeed * dt;
-            if (this.bottomPlatform.y > GAME_HEIGHT) {
-                console.log('Bottom platform left the screen, removing it permanently');
-                this.bottomPlatform = null;
-                this.bottomPlatformRemoved = true;
-            }
-        }
-
         if (this.debugMode) {
-            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'removed');
+            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.platforms.some(p => p.isBottomPlatform) ? 'present' : 'gone');
         }
     }
 
@@ -467,24 +466,19 @@ class Game {
     }
 
     drawPlatforms() {
-        this.ctx.fillStyle = '#1E293B';
-        for (let platform of this.platforms) {
-            if (platform.isSpike) {
+        this.platforms.forEach(platform => {
+            if (platform.isBottomPlatform) {
+                this.ctx.fillStyle = '#4CAF50'; // Green color for bottom platform
+            } else if (platform.isSpike) {
                 this.drawSpikePlatform(platform);
+                return; // Skip the rest for spike platforms
             } else if (platform.isGolden) {
-                this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-                this.ctx.fillStyle = '#1E293B';  // Reset fill style
+                this.ctx.fillStyle = '#FFD700'; // Gold color
             } else {
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                this.ctx.fillStyle = '#1E293B'; // Default color
             }
-        }
-        
-        // Draw bottom platform if it exists and hasn't been removed
-        if (this.bottomPlatform && !this.bottomPlatformRemoved) {
-            this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
-            this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
-        }
+            this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        });
     }
 
     drawSpikePlatform(platform) {
