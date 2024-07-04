@@ -72,6 +72,11 @@ class Game {
                 displayCanvasMessage('Failed to start game. Please try again.', 'error');
                 return;
             }
+
+            this.bottomPlatform = this.createBottomPlatform();
+            this.player = this.createPlayer();
+            this.platforms = this.createInitialPlatforms();
+            this.gameStarted = false;
     
             this.gameRunning = true;
             this.gameOver = false;
@@ -133,22 +138,10 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        
-        // Create bottom platform
-        platforms.push({
-            x: 0,
-            y: GAME_HEIGHT - PLATFORM_HEIGHT,
-            width: GAME_WIDTH,
-            height: PLATFORM_HEIGHT,
-            isSafe: true,
-            isBottomPlatform: true
-        });
-
         // Create other initial platforms
         for (let i = 1; i < 7; i++) {
             platforms.push(this.createPlatform(GAME_HEIGHT - (i + 1) * 100));
         }
-
         return platforms;
     }
 
@@ -271,8 +264,16 @@ class Game {
             this.blocksClimbed++;
         }
 
+        // Update bottom platform
+        if (this.bottomPlatform && this.gameStarted) {
+            this.bottomPlatform.y += this.platformSpeed * dt;
+            if (this.bottomPlatform.y > GAME_HEIGHT) {
+                this.bottomPlatform = null;
+            }
+        }
+
         if (this.debugMode) {
-            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.platforms.some(p => p.isBottomPlatform) ? 'present' : 'gone');
+            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'gone');
         }
     }
 
@@ -287,10 +288,6 @@ class Game {
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
         this.player.velocityY += GRAVITY * dt;
-
-        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
-            this.gameStarted = true;
-            console.log('Game started');}
 
         // Keep player within bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -466,19 +463,25 @@ class Game {
     }
 
     drawPlatforms() {
-        this.platforms.forEach(platform => {
-            if (platform.isBottomPlatform) {
-                this.ctx.fillStyle = '#4CAF50'; // Green color for bottom platform
-            } else if (platform.isSpike) {
+        // Draw regular platforms
+        this.ctx.fillStyle = '#1E293B';
+        for (let platform of this.platforms) {
+            if (platform.isSpike) {
                 this.drawSpikePlatform(platform);
-                return; // Skip the rest for spike platforms
             } else if (platform.isGolden) {
-                this.ctx.fillStyle = '#FFD700'; // Gold color
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                this.ctx.fillStyle = '#1E293B';  // Reset fill style
             } else {
-                this.ctx.fillStyle = '#1E293B'; // Default color
+                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
             }
-            this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-        });
+        }
+        
+        // Draw bottom platform
+        if (this.bottomPlatform) {
+            this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
+            this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
+        }
     }
 
     drawSpikePlatform(platform) {
