@@ -3,8 +3,8 @@
 let web3;
 let contract;
 let account;
-let gameStartTime;
-let isConnected = false;
+let isInitialized = false;
+
 
 import { updateTryCount } from './game.js';
 
@@ -760,7 +760,7 @@ async function connectWallet() {
           return false;
       }
       console.log('Wallet connected:', account);
-      isConnected = true;
+      isInitialized = true;
       return true;
   } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -769,114 +769,97 @@ async function connectWallet() {
 }
 
 async function getAchievements(account) {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return [];
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return [];
   }
   try {
-      const achievements = await contract.methods.getAchievements(account).call();
-      return achievements.map(Number);
+    const achievements = await contract.methods.getAchievements(account).call();
+    return achievements.map(Number);
   } catch (error) {
-      console.error('Error getting achievements:', error);
-      return [];
+    console.error('Error getting achievements:', error);
+    return [];
   }
 }
 
+
 async function mintAchievement(account, achievementId) {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return false;
   }
   try {
-      await contract.methods.mintAchievement(achievementId).send({ from: account });
-      return true;
+    await contract.methods.mintAchievement(achievementId).send({ from: account });
+    return true;
   } catch (error) {
-      console.error('Error minting achievement:', error);
-      return false;
+    console.error('Error minting achievement:', error);
+    return false;
   }
 }
 
 async function startGame() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return false;
   }
   try {
-      const result = await contract.methods.startGame().send({ from: account });
-      gameStartTime = Math.floor(Date.now() / 1000);
-      window.gameStartTime = gameStartTime;
-      console.log('Game started successfully:', result);
-      return true;
+    const result = await contract.methods.startGame().send({ from: account });
+    console.log('Game started successfully:', result);
+    return true;
   } catch (error) {
-      console.error('Error starting game:', error);
-      return false;
+    console.error('Error starting game:', error);
+    return false;
   }
 }
 
 async function getGameTries() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return 0;
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return 0;
   }
   try {
-      const tries = await contract.methods.getGameTries(account).call({ from: account });
-      return parseInt(tries);
+    const tries = await contract.methods.getGameTries(account).call();
+    return parseInt(tries);
   } catch (error) {
-      console.error('Error getting game tries:', error);
-      return 0;
+    console.error('Error getting game tries:', error);
+    return 0;
   }
 }
 
-let isPurchasingTries = false;
+
 
 async function purchaseGameTries() {
-    if (isPurchasingTries) {
-        console.log('A purchase is already in progress. Please wait.');
-        return false;
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return false;
+  }
+  try {
+    const txHash = await contract.methods.purchaseGameTries().send({
+      from: account,
+      value: web3.utils.toWei('0.01', 'ether')
+    });
+    console.log('Transaction sent:', txHash.transactionHash);
+    const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
+    const gameTryPurchasedEvent = receipt.logs.find(log =>
+      log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
+    );
+    if (gameTryPurchasedEvent) {
+      console.log('Game tries purchased successfully');
+      return true;
+    } else {
+      console.error('GameTryPurchased event not found in transaction receipt');
+      return false;
     }
-
-    if (!contract || !account) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
-
-    isPurchasingTries = true;
-    try {
-        const txHash = await contract.methods.purchaseGameTries().send({
-            from: account,
-            value: web3.utils.toWei('0.01', 'ether')
-        });
-
-        console.log('Transaction sent:', txHash.transactionHash);
-
-        const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
-        const gameTryPurchasedEvent = receipt.logs.find(log =>
-            log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
-        );
-
-        if (gameTryPurchasedEvent) {
-            console.log('Game tries purchased successfully');
-            await updateTryCount(); // Call the function from game.js
-            return true;
-        } else {
-            console.error('GameTryPurchased event not found in transaction receipt');
-            return false;
-        }
-    } catch (error) {
-        console.error('Error purchasing game tries:', error);
-        return false;
-    } finally {
-        isPurchasingTries = false;
-    }
+  } catch (error) {
+    console.error('Error purchasing game tries:', error);
+    return false;
+  }
 }
 
 async function getHighscores() {
-  if (!contract) {
+  if (!isInitialized) {
     console.error('Contract not initialized');
-    await initWeb3(); // Try to initialize Web3
-    if (!contract) {
-      return []; // Return empty array if still not initialized
-    }
+    return [];
   }
   try {
     const highscores = await contract.methods.getHighscores().call();
@@ -893,7 +876,7 @@ async function getHighscores() {
 }
 
 async function submitScore(name, score, blocksClimbed, gameStartTime) {
-  if (!contract || !account) {
+  if (!isInitialized) {
       console.error('Contract not initialized or account not available');
       return false;
   }
@@ -938,23 +921,23 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
 }
 
 async function claimPrize() {
-  if (!contract || !account) {
-      console.error('Contract not initialized or account not available');
-      return false;
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return false;
   }
   try {
-      const result = await contract.methods.claimPrize().call({ from: account });
-      if (result) {
-          const tx = await contract.methods.claimPrize().send({ from: account });
-          console.log('Prize claimed successfully:', tx);
-          return true;
-      } else {
-          console.error('Prize claim failed in call');
-          return false;
-      }
-  } catch (error) {
-      console.error('Error claiming prize:', error);
+    const result = await contract.methods.claimPrize().call({ from: account });
+    if (result) {
+      const tx = await contract.methods.claimPrize().send({ from: account });
+      console.log('Prize claimed successfully:', tx);
+      return true;
+    } else {
+      console.error('Prize claim failed in call');
       return false;
+    }
+  } catch (error) {
+    console.error('Error claiming prize:', error);
+    return false;
   }
 }
 
