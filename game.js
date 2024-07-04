@@ -41,7 +41,6 @@ class Game {
         this.setupEventListeners();
     }
 
-
     async initializeGame() {
         try {
             const currentTries = await getGameTries();
@@ -50,14 +49,14 @@ class Game {
                 displayCanvasMessage('No tries left. Please purchase more.', 'error');
                 return;
             }
-
+    
             const gameStarted = await startGameWeb3(); // Call the web3 function
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
                 displayCanvasMessage('Failed to start game. Please try again.', 'error');
                 return;
             }
-
+    
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
@@ -72,13 +71,21 @@ class Game {
             this.bottomPlatform = this.createBottomPlatform();
             this.powerups = [];
             await updateTryCount(); // Update the displayed try count
-            this.gameLoop();
+            
+            // Remove the Start Game button
+            const startButton = document.querySelector('.canvas-button');
+            if (startButton) {
+                startButton.remove();
+            }
+            
+            // Start the game loop
+            requestAnimationFrame((time) => this.gameLoop(time));
         } catch (error) {
             console.error('Error initializing game:', error);
             displayCanvasMessage('Error starting game. Please try again.', 'error');
         }
     }
-
+    
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
@@ -434,21 +441,6 @@ class Game {
         this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
     }
 
-    startGame() {
-        this.gameRunning = true;
-        this.gameOver = false;
-        this.score = 0;
-        this.blocksClimbed = 0;
-        this.gameStartTime = Date.now();
-        this.lastTime = performance.now();
-        this.player = this.createPlayer();
-        this.platforms = [];
-        for (let i = 0; i < 7; i++) {
-            this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
-        }
-        this.bottomPlatform = this.createBottomPlatform();
-        this.gameLoop();
-    }
 
     endGame() {
         this.gameRunning = false;
