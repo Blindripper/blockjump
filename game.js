@@ -66,7 +66,6 @@ class Game {
                 return;
             }
 
-    
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
@@ -292,6 +291,7 @@ class Game {
     }
 
 
+
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
         if (bg.image) {
@@ -461,7 +461,7 @@ class Game {
         if (this.bottomPlatform) {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
-        } else {
+        } else if (this.debugMode) {
             console.warn('Bottom platform is null in drawPlatforms');
         }
     }
