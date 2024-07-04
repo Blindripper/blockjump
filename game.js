@@ -1,7 +1,7 @@
 import { initWeb3, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
-// Define base URL for the GitHub repository
+// Define base URL for the GitHub repository 
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
 const soundUrl = `${repoBaseUrl}sound/`;
 const picsUrl = `${repoBaseUrl}pics/`;
