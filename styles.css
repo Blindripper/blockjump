@@ -77,6 +77,16 @@ header {
   transform: scale(1.05);
 }
 
+.connect-button {
+  background-color: #3FE1B0;
+  color: #0f1624;
+}
+
+.disconnect-button {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
 /* Left Sidebar */
 #leftSidebar {
   width: 450px;
