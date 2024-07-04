@@ -50,6 +50,7 @@ class Game {
         console.log('Platforms:', this.platforms.length);
         console.log('Score:', this.score);
         console.log('Blocks Climbed:', this.blocksClimbed);
+        console.log('Game Started:', this.gameStarted);
         console.log('---------------------------');
     }
 
@@ -257,6 +258,11 @@ class Game {
     }
 
     updatePlayer(dt) {
+        if (!this.player) {
+            console.warn('Player is null in updatePlayer');
+            return;
+        }
+
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
         this.player.velocityY += GRAVITY * dt;
@@ -269,6 +275,7 @@ class Game {
         // Check if the game has started and remove bottom platform
         if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT) {
             this.gameStarted = true;
+            console.log('Game started, removing bottom platform');
             this.bottomPlatform = null;
         }
 
@@ -279,7 +286,6 @@ class Game {
         if (this.player.y > GAME_HEIGHT) {
             this.endGame();
         }
-
     }
 
 
@@ -421,9 +427,9 @@ class Game {
         this.ctx.fillStyle = 'white';
         this.ctx.font = '14px Arial';
         this.ctx.fillText(`Game Running: ${this.gameRunning}`, 10, 80);
-        this.ctx.fillText(`Player: x=${this.player.x.toFixed(2)}, y=${this.player.y.toFixed(2)}`, 10, 100);
+        this.ctx.fillText(`Player: x=${this.player?.x.toFixed(2) ?? 'N/A'}, y=${this.player?.y.toFixed(2) ?? 'N/A'}`, 10, 100);
         this.ctx.fillText(`Platforms: ${this.platforms.length}`, 10, 120);
-        this.ctx.fillText(`Bottom Platform: y=${this.bottomPlatform.y.toFixed(2)}`, 10, 140);
+        this.ctx.fillText(`Bottom Platform: ${this.bottomPlatform ? `y=${this.bottomPlatform.y.toFixed(2)}` : 'null'}`, 10, 140);
     
         this.ctx.restore();
         this.drawHUD();
@@ -447,6 +453,8 @@ class Game {
         if (this.bottomPlatform) {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
+        } else {
+            console.warn('Bottom platform is null in drawPlatforms');
         }
     }
 
