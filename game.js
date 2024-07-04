@@ -31,7 +31,6 @@ class Game {
         this.lastTime = 0;
         this.player = this.createPlayer();
         this.platforms = [];
-        this.bottomPlatform = this.createBottomPlatform();
         this.powerups = [];
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
@@ -75,6 +74,12 @@ class Game {
             for (let i = 0; i < 7; i++) {
                 this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
             }
+            
+            this.platforms = [];
+            for (let i = 0; i < 7; i++) {
+            this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
+            }
+
             this.bottomPlatform = this.createBottomPlatform();
             this.powerups = [];
             await updateTryCount(); // Update the displayed try count
@@ -128,6 +133,20 @@ class Game {
             platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
         }
         return platforms;
+    }
+
+    createPlatform(y) {
+        const minWidth = 60;
+        const maxWidth = 180;
+        const width = Math.random() * (maxWidth - minWidth) + minWidth;
+        return {
+            x: Math.random() * (GAME_WIDTH - width),
+            y: y,
+            width: width,
+            height: PLATFORM_HEIGHT,
+            isGolden: Math.random() < 0.1,
+            isSpike: Math.random() < 0.05
+        };
     }
 
     setupEventListeners() {
@@ -228,19 +247,19 @@ class Game {
     }
 
     updatePlatforms(dt) {
-        for (let i = this.platforms.length - 1; i >= 0; i--) {
-            let platform = this.platforms[i];
+        // Update existing platforms
+        this.platforms = this.platforms.filter(platform => {
             if (platform) {
                 platform.y += this.platformSpeed * dt;
-                if (platform.y > GAME_HEIGHT) {
-                    // Replace the platform that went off-screen
-                    this.platforms[i] = this.createPlatform(0);
-                    this.blocksClimbed++;
-                }
-            } else {
-                // If we encounter a null platform, replace it
-                this.platforms[i] = this.createPlatform(0);
+                return platform.y <= GAME_HEIGHT;
             }
+            return false;
+        });
+
+        // Add new platforms if needed
+        while (this.platforms.length < 7) {
+            this.platforms.unshift(this.createPlatform(0));
+            this.blocksClimbed++;
         }
 
         // Handle the bottom platform
@@ -249,11 +268,6 @@ class Game {
             if (this.bottomPlatform.y > GAME_HEIGHT) {
                 this.bottomPlatform = null;
             }
-        }
-
-        // Ensure we always have a minimum number of platforms
-        while (this.platforms.length < 7) {
-            this.platforms.push(this.createPlatform(0));
         }
     }
 
@@ -290,19 +304,7 @@ class Game {
         }
     }
 
-    createPlatform(y) {
-        const minWidth = 60;
-        const maxWidth = 180;
-        const width = Math.random() * (maxWidth - minWidth) + minWidth;
-        return {
-            x: Math.random() * (GAME_WIDTH - width),
-            y: y,
-            width: width,
-            height: PLATFORM_HEIGHT,
-            isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05
-        };
-    }
+    
 
     updatePowerups(dt) {
         for (let i = this.powerups.length - 1; i >= 0; i--) {
