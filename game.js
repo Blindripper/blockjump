@@ -41,6 +41,8 @@ class Game {
         this.currentBackgroundIndex = 0;
         this.bottomPlatform = this.createBottomPlatform();
         this.platforms = this.createInitialPlatforms();
+        this.bottomPlatform = null;
+        this.gameStarted = false;
         this.setupEventListeners();
     }
 
@@ -63,6 +65,8 @@ class Game {
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
+            this.bottomPlatform = this.createBottomPlatform();
+            this.gameStarted = false;
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
@@ -169,8 +173,8 @@ class Game {
     handleCollisions() {
         let onPlatform = false;
 
-        // Check collision with bottom platform
-        if (this.checkCollision(this.player, this.bottomPlatform)) {
+        // Check collision with bottom platform if it exists
+        if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
             this.landOnPlatform(this.bottomPlatform);
             onPlatform = true;
         }
@@ -197,7 +201,7 @@ class Game {
         if (this.player.y > GAME_HEIGHT) {
             this.endGame();
         }
-    }
+    } 
     
 
     checkCollision(obj1, obj2) {
@@ -247,6 +251,12 @@ class Game {
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
 
         this.handleCollisions();
+
+        // Check if the game has started and remove bottom platform
+        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT) {
+            this.gameStarted = true;
+            this.bottomPlatform = null;
+        }
 
         // Apply wind effect
         this.player.x += this.wind.speed * this.wind.direction * dt;
@@ -419,9 +429,11 @@ class Game {
             }
         }
         
-        // Draw bottom platform
-        this.ctx.fillStyle = this.bottomPlatform.isSafe ? '#4CAF50' : '#1E293B';
-        this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
+        // Draw bottom platform if it exists
+        if (this.bottomPlatform) {
+            this.ctx.fillStyle = '#4CAF50';  // Solid green color for the bottom platform
+            this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
+        }
     }
 
     drawSpikePlatform(platform) {
