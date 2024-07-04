@@ -45,7 +45,6 @@ class Game {
         this.setupEventListeners();
     }
 
-    
     async initializeGame() {
         try {
             const currentTries = await getGameTries();
