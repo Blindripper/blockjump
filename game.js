@@ -32,6 +32,8 @@ class Game {
         this.player = this.createPlayer();
         this.platforms = [];
         this.powerups = [];
+        this.player = null;
+        this.player = null;
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
         this.currentBackgroundIndex = 0;
@@ -73,15 +75,16 @@ class Game {
                 this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
             }
             
+            this.bottomPlatform = this.createBottomPlatform();
+            this.player = this.createPlayer();
+            this.powerups = [];
+            await updateTryCount(); // Update the displayed try count
+            
             this.platforms = [];
             for (let i = 0; i < 7; i++) {
             this.platforms.push(this.createPlatform(GAME_HEIGHT - (i + 2) * 100));
             }
 
-            this.bottomPlatform = this.createBottomPlatform();
-            this.powerups = [];
-            await updateTryCount(); // Update the displayed try count
-            
             // Remove the Start Game button
             const startButton = document.querySelector('.canvas-button');
             if (startButton) {
@@ -102,7 +105,7 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT,
+            y: this.bottomPlatform.y - PLAYER_HEIGHT,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 500,
@@ -189,7 +192,7 @@ class Game {
     handleCollisions() {
         let onPlatform = false;
 
-        // Check collision with bottom platform if it exists
+        // Check collision with bottom platform
         if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
             this.landOnPlatform(this.bottomPlatform);
             onPlatform = true;
@@ -211,11 +214,6 @@ class Game {
 
         if (!onPlatform) {
             this.player.isJumping = true;
-        }
-
-        // Check if player has fallen off the bottom of the screen
-        if (this.player.y > GAME_HEIGHT) {
-            this.endGame();
         }
     } 
     
@@ -287,6 +285,11 @@ class Game {
         // Apply wind effect
         this.player.x += this.wind.speed * this.wind.direction * dt;
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+
+        if (this.player.y > GAME_HEIGHT) {
+            this.endGame();
+        }
+
     }
 
 
@@ -443,8 +446,9 @@ class Game {
             }
         }
         
+        // Draw bottom platform
         if (this.bottomPlatform) {
-            this.ctx.fillStyle = '#4CAF50';
+            this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
         }
     }
