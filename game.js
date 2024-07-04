@@ -62,8 +62,6 @@ class Game {
                 return;
             }
 
-            this.logGameState('After initialization');
-
     
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
