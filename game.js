@@ -42,6 +42,17 @@ class Game {
         this.setupEventListeners();
     }
 
+    logGameState(context) {
+        console.log(`--- Game State (${context}) ---`);
+        console.log('Game Running:', this.gameRunning);
+        console.log('Player:', this.player);
+        console.log('Bottom Platform:', this.bottomPlatform);
+        console.log('Platforms:', this.platforms.length);
+        console.log('Score:', this.score);
+        console.log('Blocks Climbed:', this.blocksClimbed);
+        console.log('---------------------------');
+    }
+
     async initializeGame() {
         try {
             const currentTries = await getGameTries();
@@ -50,6 +61,9 @@ class Game {
                 displayCanvasMessage('No tries left. Please purchase more.', 'error');
                 return;
             }
+
+            this.logGameState('After initialization');
+
     
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
