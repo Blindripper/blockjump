@@ -78,8 +78,11 @@ class Game {
                 startButton.remove();
             }
             
+            console.log('Game initialized. Player:', this.player);
+            console.log('Platforms:', this.platforms);
+            
             // Start the game loop
-            requestAnimationFrame((time) => this.gameLoop(time));
+            this.gameLoop(performance.now());
         } catch (error) {
             console.error('Error initializing game:', error);
             displayCanvasMessage('Error starting game. Please try again.', 'error');
@@ -350,37 +353,35 @@ class Game {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.save();
-
+    
         const scaleX = this.canvas.width / GAME_WIDTH;
         const scaleY = this.canvas.height / GAME_HEIGHT;
         const scale = Math.min(scaleX, scaleY);
         this.ctx.scale(scale, scale);
-
+    
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
         this.ctx.translate(translateX, translateY);
-
+    
         this.drawBackground();
         this.drawPlatforms();
         this.drawPlayer();
         this.drawPowerups();
         this.drawParticles();
-
+    
+        // Debug information
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText(`Game Running: ${this.gameRunning}`, 10, 80);
+        this.ctx.fillText(`Player: x=${this.player.x.toFixed(2)}, y=${this.player.y.toFixed(2)}`, 10, 100);
+        this.ctx.fillText(`Platforms: ${this.platforms.length}`, 10, 120);
+    
         this.ctx.restore();
         this.drawHUD();
     }
 
-    drawBackground() {
-        const currentBg = backgrounds[this.currentBackgroundIndex];
-        if (currentBg.image && currentBg.image.complete && currentBg.image.naturalHeight !== 0) {
-            this.ctx.drawImage(currentBg.image, 0, 0, GAME_WIDTH, GAME_HEIGHT);
-        } else {
-            this.ctx.fillStyle = currentBg.color;
-            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-        }
-    }
-
     drawPlatforms() {
+        console.log('Drawing platforms:', this.platforms.length);
         this.ctx.fillStyle = '#1E293B';
         for (let platform of this.platforms) {
             if (platform.isSpike) {
@@ -407,14 +408,15 @@ class Game {
     }
 
     drawPlayer() {
+        console.log('Drawing player:', this.player);
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
         } else {
-            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillStyle = '#FF0000'; // Changed to red for visibility
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
-    }
+    } 
 
     drawPowerups() {
         for (let powerup of this.powerups) {
@@ -469,6 +471,7 @@ class Particle {
         this.vy = Math.random() * -2 - 1;
         this.alpha = 1;
         this.color = color;
+        this.debug = true; 
     }
 
     update(dt) {
@@ -1022,12 +1025,16 @@ function showScoreSubmissionForm() {
 }
 
 async function checkAndDisplayStartButton() {
+    console.log('checkAndDisplayStartButton called');
     try {
         const tries = await getGameTries();
         console.log('Current Game tries:', tries);
         if (tries > 0) {
             console.log('Drawing Start Game button');
-            drawCanvasButton('Start Game', () => game.initializeGame());
+            drawCanvasButton('Start Game', () => {
+                console.log('Start Game button clicked');
+                game.initializeGame();
+            });
         } else {
             console.log('No tries left, not displaying Start Game button');
         }
