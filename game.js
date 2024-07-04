@@ -20,7 +20,7 @@ const TEZOSX_EFFECT_DURATION = 30;
 // Game class
 class Game {
     constructor() {
-        this.debugMode = true;
+        this.debugMode = false;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -44,19 +44,7 @@ class Game {
         this.setupEventListeners();
     }
 
-    logGameState(context) {
-        console.log(`--- Game State (${context}) ---`);
-        console.log('Game Running:', this.gameRunning);
-        console.log('Game Started:', this.gameStarted);
-        console.log('Player:', this.player ? 
-            `x: ${this.player.x.toFixed(2)}, y: ${this.player.y.toFixed(2)}` : 'null');
-        console.log('Platforms:', this.platforms.length);
-        console.log('Bottom Platform Present:', this.platforms.some(p => p.isBottomPlatform));
-        console.log('Score:', this.score);
-        console.log('Blocks Climbed:', this.blocksClimbed);
-        console.log('---------------------------');
-    }
-
+    
     async initializeGame() {
         try {
             const currentTries = await getGameTries();
@@ -132,8 +120,7 @@ class Game {
             isBottomPlatform: true 
 
         };
-        console.log('Bottom platform created:', platform);
-        return platform;
+
     }
 
     createInitialPlatforms() {
@@ -273,7 +260,6 @@ class Game {
         }
 
         if (this.debugMode) {
-            console.log('Platforms:', this.platforms.length, 'Bottom platform:', this.bottomPlatform ? 'present' : 'gone');
         }
     }
 
@@ -284,26 +270,37 @@ class Game {
             console.warn('Player is null in updatePlayer');
             return;
         }
-
+    
+        // Update player position
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
         this.player.velocityY += GRAVITY * dt;
-
-        // Keep player within bounds
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-
+    
+        // Handle left and right wraparound
+        if (this.player.x + this.player.width < 0) {
+            this.player.x = GAME_WIDTH; // Wrap to right side
+        } else if (this.player.x > GAME_WIDTH) {
+            this.player.x = -this.player.width; // Wrap to left side
+        }
+    
+        // Prevent player from going above the screen
+        if (this.player.y < 0) {
+            this.player.y = 0;
+            this.player.velocityY = 0; // Stop upward movement
+        }
+    
         this.handleCollisions();
-
+    
         // Check if the game has started
         if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
             this.gameStarted = true;
             console.log('Game started');
         }
-
+    
         // Apply wind effect
         this.player.x += this.wind.speed * this.wind.direction * dt;
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-
+    
+        // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
             this.endGame();
         }
@@ -443,20 +440,7 @@ class Game {
         this.drawPlayer();
         this.drawPowerups();
         this.drawParticles();
-    
-        // Debug rendering
-        this.ctx.fillStyle = 'red';
-        this.ctx.fillRect(0, GAME_HEIGHT - 5, GAME_WIDTH, 5); // Bottom line
-        this.ctx.fillRect(0, 0, 5, GAME_HEIGHT); // Left line
-        this.ctx.fillRect(GAME_WIDTH - 5, 0, 5, GAME_HEIGHT); // Right line
 
-        // Debug information
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = '14px Arial';
-        this.ctx.fillText(`Game Running: ${this.gameRunning}`, 10, 80);
-        this.ctx.fillText(`Player: ${this.player ? `x=${this.player.x.toFixed(2)}, y=${this.player.y.toFixed(2)}` : 'null'}`, 10, 100);
-        this.ctx.fillText(`Platforms: ${this.platforms.length}`, 10, 120);
-        this.ctx.fillText(`Bottom Platform: ${this.bottomPlatform ? `y=${this.bottomPlatform.y.toFixed(2)}` : 'null'}`, 10, 140);
     
         this.ctx.restore();
         this.drawHUD();
@@ -508,10 +492,6 @@ class Game {
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
         
-        // Debug outline for player
-        this.ctx.strokeStyle = 'yellow';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
@@ -548,7 +528,6 @@ class Game {
 
     gameLoop(currentTime) {
         if (!this.gameRunning) {
-            console.log('Game loop stopped: gameRunning is false');
             return;
         }
 
@@ -560,15 +539,10 @@ class Game {
         try {
             this.draw();
         } catch (error) {
-            console.error('Error in draw method:', error);
-            this.logGameState('Error in draw');
             this.gameRunning = false;
             return;
         }
 
-        if (this.debugMode) {
-            this.logGameState('During game loop');
-        }
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
@@ -680,10 +654,8 @@ function loadSprites() {
     return Promise.all(spritesToLoad.map(sprite => loadSprite(sprite.name, sprite.file)))
         .then(loadedSprites => {
             loadedSprites.forEach(({key, image}) => sprites.set(key, image));
-            console.log('All sprites loaded successfully');
         })
         .catch(error => {
-            console.error('Error loading sprites:', error);
         });
 }
 
@@ -703,9 +675,7 @@ function loadBackgrounds() {
                 // Keep the fallback color
             })
     )).then(() => {
-        console.log("All background images loaded (or failed gracefully)");
     }).catch(error => {
-        console.error("Error in background loading:", error);
     });
 }
 
@@ -798,7 +768,6 @@ let isConnected = false;
 
 // Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('DOM fully loaded and parsed');
 
     const requiredElements = ['gameCanvas', 'powerupBar', 'achievementPopup', 'windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
@@ -809,7 +778,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    console.log('All required elements found');
 
     await Promise.all([
         loadSprites(),
@@ -827,30 +795,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
     
     try {
-        console.log('Initializing Web3...');
         const web3Initialized = await initWeb3();
         if (web3Initialized) {
-            console.log('Web3 initialized successfully');
             await loadHighscores();
             await updateHighscoreTable();
             await getContractBalance();
         } else {
-            console.error('Failed to initialize Web3');
             displayCanvasMessage('Failed to connect to blockchain. Please try again later.', 'error', 0.3);
         }
     } catch (error) {
-        console.error('Error during initialization:', error);
         displayCanvasMessage('An error occurred during initialization. Please refresh the page.', 'error', 0.3);
     }
 });
 
 async function handleWalletConnection() {
-    console.log('Wallet connect button clicked');
     try {
         if (!isConnected) {
             const connected = await initWeb3();
             if (connected) {
-                console.log('Successfully connected to Web3');
                 isConnected = true;
                 updateButtonState();
                 await updateTryCount();
@@ -863,13 +825,11 @@ async function handleWalletConnection() {
                     requestAnimationFrame(() => game.draw());
                 }
             } else {
-                console.log('Failed to connect to Web3');
                 alert('Failed to connect. Please try again.');
             }
         } else {
             isConnected = false;
             updateButtonState();
-            console.log('Disconnected from Web3');
             hideBuyTriesButton();
             hideAchievements();
             if (game.gameRunning) {
@@ -888,7 +848,6 @@ let isBuyingTries = false;
 
 async function handleBuyTries() {
     if (isBuyingTries) {
-        console.log('Already processing a purchase. Please wait.');
         return;
     }
 
@@ -902,7 +861,6 @@ async function handleBuyTries() {
         }
         
         if (purchased) {
-            console.log('Game tries purchased successfully');
             displayCanvasMessage('10 Game tries added successfully!', 'success', 0.3);
             await updateTryCount();
             updateButtonState();
@@ -953,7 +911,6 @@ async function handleScoreSubmission(e) {
         const submitted = await submitScore(name, game.score, game.blocksClimbed, game.gameStartTime);
         hideBlockchainWaitMessage();
         if (submitted) {
-            console.log('Score submitted successfully');
             await updateHighscoreTable();
             displayCanvasMessage('Score submitted successfully!', 'success');
         } else {
@@ -974,7 +931,6 @@ async function updateHighscoreTable() {
         const highscores = await getHighscores();
         let currentAccount;
 
-        console.log('Fetched highscores:', highscores);
 
         if (!highscores || !Array.isArray(highscores)) {
             console.error('Invalid highscores data:', highscores);
@@ -984,9 +940,7 @@ async function updateHighscoreTable() {
         if (window.ethereum) {
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
             currentAccount = accounts[0];
-            console.log('Current account:', currentAccount);
         } else {
-            console.log('Ethereum provider not found. Using alternative method.');
         }
 
         const highscoreBody = document.getElementById('highscoreBody');
@@ -1011,7 +965,6 @@ async function updateHighscoreTable() {
         });
 
         if (currentAccount) {
-            console.log('Calling updateClaimPrizeButton with:', { highscores, currentAccount });
             updateClaimPrizeButton(highscores, currentAccount);
         } else {
             console.log('No account connected, not updating claim prize button');
@@ -1137,18 +1090,13 @@ function showScoreSubmissionForm() {
 }
 
 async function checkAndDisplayStartButton() {
-    console.log('checkAndDisplayStartButton called');
     try {
         const tries = await getGameTries();
-        console.log('Current Game tries:', tries);
         if (tries > 0) {
-            console.log('Drawing Start Game button');
             drawCanvasButton('Start Game', () => {
-                console.log('Start Game button clicked');
                 game.initializeGame();
             });
         } else {
-            console.log('No tries left, not displaying Start Game button');
         }
     } catch (error) {
         console.error('Error checking Game tries:', error);
@@ -1157,23 +1105,17 @@ async function checkAndDisplayStartButton() {
 }
 
 function updateClaimPrizeButton(highscores, currentAccount) {
-    console.log('Updating claim prize button:', { isConnected, highscores, currentAccount });
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
     if (claimPrizeBtn) {
         if (isConnected && highscores && highscores.length > 0) {
             const leadingAccount = highscores[0].player;
-            console.log('Leading account:', leadingAccount);
-            console.log('Current account:', currentAccount);
             
             if (leadingAccount && currentAccount && leadingAccount.toLowerCase() === currentAccount.toLowerCase()) {
-                console.log('Showing claim prize button - account matches leading highscore');
                 claimPrizeBtn.style.display = 'block';
             } else {
-                console.log('Hiding claim prize button - account does not match leading highscore');
                 claimPrizeBtn.style.display = 'none';
             }
         } else {
-            console.log('Hiding claim prize button - not connected or no highscores');
             claimPrizeBtn.style.display = 'none';
         }
     } else {
