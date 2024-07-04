@@ -102,8 +102,6 @@ class Game {
         this.updateParticles(dt);
         this.updateWind(dt);
         this.updateDifficulty();
-
-        this.score++;
         this.updateUI();
     }
 
@@ -299,8 +297,7 @@ class Game {
     }
 
     updateUI() {
-        document.getElementById('blockCounter').textContent = `Blocks Climbed: ${this.blocksClimbed}`;
-        document.getElementById('floorCounter').textContent = `Tezos Price: ${this.score.toString().padStart(7, '0')}`;
+        this.score++;
     }
 
     draw() {
