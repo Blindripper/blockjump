@@ -157,10 +157,10 @@ header {
 
 /* Highscore Table */
 #highscoreTable {
-  width: 100%;
+  width: 90%;
   border-collapse: separate;
-  border-spacing: 0 12px;
-  font-size: 16px;
+  border-spacing: 0 10px;
+  font-size: 14px;
   margin-bottom: 15px;
 }
 
