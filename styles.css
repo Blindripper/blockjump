@@ -59,6 +59,24 @@ header {
   width: calc(100% - 270px); /* Adjust based on achievements section width */
 }
 
+.start-button {
+  background-color: #3FE1B0;
+  color: #0f1624;
+  border: none;
+  padding: 10px 20px;
+  font-size: 18px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.start-button:hover {
+  background-color: #2dc898;
+  transform: scale(1.05);
+}
+
 /* Left Sidebar */
 #leftSidebar {
   width: 450px;
