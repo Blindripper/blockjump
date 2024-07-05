@@ -767,12 +767,18 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.appendChild(messageElement);
 
     if (includeNameForm) {
+        const formContainer = document.createElement('div');
+        formContainer.style.display = 'flex';
+        formContainer.style.justifyContent = 'center';
+        formContainer.style.alignItems = 'flex-start';
+        formContainer.style.gap = '20px';
+        formContainer.style.width = '100%';
+
         const nameForm = document.createElement('form');
         nameForm.id = 'nameForm';
         nameForm.style.display = 'flex';
         nameForm.style.flexDirection = 'column';
         nameForm.style.alignItems = 'center';
-        nameForm.style.marginBottom = '20px';
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -800,10 +806,20 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
             }
         };
 
-        overlay.appendChild(nameForm);
-    }
+        formContainer.appendChild(nameForm);
 
-    if (includeButton && !includeNameForm) {
+        const tryAgainButton = document.createElement('button');
+        tryAgainButton.textContent = 'Try Again';
+        tryAgainButton.className = 'game-button';
+        tryAgainButton.onclick = () => {
+            hideOverlay();
+            game.initializeGame();
+        };
+
+        formContainer.appendChild(tryAgainButton);
+
+        overlay.appendChild(formContainer);
+    } else if (includeButton) {
         const button = document.createElement('button');
         button.textContent = buttonText;
         button.className = 'game-button';
@@ -1087,29 +1103,10 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
 
-    // Show the game over overlay with the name form
-    showOverlay('Game Over', null, false, '', true);
+    // Show the game over overlay with the name form and Try Again button
+    showOverlay(`Game Over\nScore: ${score}\nBlocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
 
-function showScoreSubmissionForm() {
-    console.log('showScoreSubmissionForm called');
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-      nameForm.style.display = 'block';
-      
-      // Position the form in the center of the screen
-      nameForm.style.position = 'fixed';
-      nameForm.style.left = '50%';
-      nameForm.style.top = '50%';
-      nameForm.style.transform = 'translate(-50%, -50%)';
-      nameForm.style.zIndex = '9999'; // Very high z-index
-      nameForm.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Bright red background for visibility
-      nameForm.style.padding = '20px';
-      nameForm.style.borderRadius = '8px';
-      nameForm.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
-      nameForm.style.border = '5px solid white'; // White border for contrast
-    }
-  }
   
   async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
