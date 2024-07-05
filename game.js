@@ -1,4 +1,4 @@
-import { initWeb3,connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
+import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 // Define base URL for the GitHub repository
@@ -1124,6 +1124,11 @@ async function updateHighscoreTable() {
 }
 
 async function loadHighscores() {
+    if (!isConnected || !isContractInitialized()) {
+        console.log('Not connected or contract not initialized, skipping highscore loading');
+        return;
+    }
+
     try {
         const highscores = await getHighscores();
         updateHighscoreTable(highscores);
