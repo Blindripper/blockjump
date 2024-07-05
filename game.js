@@ -750,9 +750,10 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     overlay.style.display = 'flex';
     overlay.style.flexDirection = 'column';
-    overlay.style.justifyContent = 'center';
+    overlay.style.justifyContent = 'flex-start';  // Changed from 'center' to 'flex-start'
     overlay.style.alignItems = 'center';
     overlay.style.zIndex = '2000';
+    overlay.style.padding = '20px';  // Added padding to ensure content doesn't touch the edges
 
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
@@ -763,6 +764,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     messageElement.style.textAlign = 'center';
     messageElement.style.maxWidth = '80%';
     messageElement.style.marginBottom = '20px';
+    messageElement.style.marginTop = '20%';  // Added top margin to push content down
 
     overlay.appendChild(messageElement);
 
@@ -775,6 +777,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         nameForm.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
         nameForm.style.padding = '20px';
         nameForm.style.borderRadius = '10px';
+        nameForm.style.marginTop = '20px';  // Added top margin to separate from message
 
         // Clear existing content
         nameForm.innerHTML = '';
