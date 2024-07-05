@@ -1109,7 +1109,7 @@ function showScoreSubmissionForm() {
   
 
 
-async function handleScoreSubmission(e) {
+  async function handleScoreSubmission(e) {
     e.preventDefault();
     if (!checkWalletConnection()) return;
 
@@ -1126,7 +1126,10 @@ async function handleScoreSubmission(e) {
         hideOverlay(submitOverlay);
         if (submitted) {
             await updateHighscoreTable();
-            showOverlay('Score submitted successfully!');
+            showOverlay('Score submitted successfully!', () => {
+                hideScoreSubmissionForm();
+                checkAndDisplayStartButton();
+            }, true, 'Play Again');
         } else {
             showOverlay('Failed to submit score. Please try again.');
         }
