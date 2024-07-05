@@ -284,8 +284,6 @@ class Game {
         }
     }
 
-
-
     updatePlayer(dt) {
         if (!this.player) {
             console.warn('Player is null in updatePlayer');
@@ -326,7 +324,6 @@ class Game {
             this.endGame();
         }
     }
-
 
 
     drawBackground() {
