@@ -848,7 +848,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.style.flexDirection = 'column';
     overlay.style.justifyContent = 'center';
     overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '1000';
+    overlay.style.zIndex = '2000';
 
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
@@ -898,13 +898,6 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     }
 
     document.body.appendChild(overlay);
-
-    if (callback && !includeButton) {
-        setTimeout(() => {
-            hideOverlay();
-            callback();
-        }, 2000);
-    }
 
     return overlay;
 }
@@ -1067,6 +1060,40 @@ async function handleBuyTries() {
         console.error('Failed to purchase game tries:', error);
         showOverlay('Error purchasing Game tries. Please try again.');
     }
+}
+
+
+function handleGameOver(score, blocksClimbed, gameStartTime) {
+    // Store the game data for later use
+    window.finalScore = score;
+    window.blocksClimbed = blocksClimbed;
+    window.gameStartTime = gameStartTime;
+
+    // Show the score submission form
+    showScoreSubmissionForm();
+
+    // Show the game over overlay with Try Again button
+    showOverlay('Game Over', null, true, 'Try Again');
+
+    // Update the UI to show the final score
+    const scoreDisplay = document.getElementById('finalScoreDisplay');
+    if (scoreDisplay) {
+        scoreDisplay.textContent = `Final Score: ${score}`;
+    }
+
+    // Optionally, you can also display the blocks climbed
+    const blocksDisplay = document.getElementById('blocksClimbedDisplay');
+    if (blocksDisplay) {
+        blocksDisplay.textContent = `Blocks Climbed: ${blocksClimbed}`;
+    }
+
+    // Disable game controls here if necessary
+    // For example: game.disableControls();
+
+    // If you have any animations or sound effects for game over, trigger them here
+    // For example: playGameOverSound();
+
+    console.log('Game Over. Score:', score, 'Blocks Climbed:', blocksClimbed);
 }
 
 
@@ -1263,7 +1290,9 @@ function showScoreSubmissionForm() {
         nameForm.style.position = 'absolute';
         nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`; // Adjust the 150 value as needed
         nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`; // Adjust the 100 value as needed
-        nameForm.style.zIndex = '2000'; // Ensure it's above the game over overlay
+        nameForm.style.zIndex = '2001'; // Ensure it's above the game over overlay
+    } else {
+        console.error('Score submission form not found in the DOM');
     }
 }
 
@@ -1349,15 +1378,6 @@ function drawCanvasMessage(text) {
     message.textContent = text;
     message.className = 'canvas-message';
     document.body.appendChild(message);
-}
-
-function handleGameOver(score, blocksClimbed, gameStartTime) {
-    showOverlay('Game Over', () => {
-        showScoreSubmissionForm();
-        window.finalScore = score;
-        window.blocksClimbed = blocksClimbed;
-        window.gameStartTime = gameStartTime;
-    }, true, 'Try Again');
 }
 
 
