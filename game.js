@@ -1094,17 +1094,19 @@ async function handleBuyTries() {
         hideOverlay(purchaseMessageOverlay);
         
         if (purchased) {
-            showOverlay('10 Game tries added successfully!', () => {
-                updateTryCount();
+            showOverlay('10 Game tries added successfully!', async () => {
+                await updateTryCount();
                 updateButtonState();
                 game.draw();
-            });
+                hideOverlay();
+                checkAndDisplayStartButton(); 
+            }, true, 'OK');
         } else {
-            showOverlay('Failed to purchase Game tries. Please try again.');
+            showOverlay('Failed to purchase Game tries. Please try again.', null, true, 'OK');
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
-        hideOverlay()
+        showOverlay('Error purchasing Game tries. Please try again.', null, true, 'OK');
     }
 }
 
