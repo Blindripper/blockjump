@@ -769,16 +769,16 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     if (includeNameForm) {
         const formContainer = document.createElement('div');
         formContainer.style.display = 'flex';
-        formContainer.style.justifyContent = 'center';
-        formContainer.style.alignItems = 'flex-start';
-        formContainer.style.gap = '20px';
-        formContainer.style.width = '100%';
+        formContainer.style.flexDirection = 'column';
+        formContainer.style.alignItems = 'center';
+        formContainer.style.gap = '10px';
 
         const nameForm = document.createElement('form');
         nameForm.id = 'nameForm';
         nameForm.style.display = 'flex';
         nameForm.style.flexDirection = 'column';
         nameForm.style.alignItems = 'center';
+        nameForm.style.marginBottom = '10px';
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -811,6 +811,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         const tryAgainButton = document.createElement('button');
         tryAgainButton.textContent = 'Try Again';
         tryAgainButton.className = 'game-button';
+        tryAgainButton.style.marginTop = '10px';
         tryAgainButton.onclick = () => {
             hideOverlay();
             game.initializeGame();
