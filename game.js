@@ -13,6 +13,22 @@ function checkWalletConnection() {
     return true;
 }
 
+async function updateTryCount() {
+    if (!checkWalletConnection()) return;
+
+    try {
+        const tries = await getGameTries();
+        const triesLeftSpan = document.getElementById('triesLeft');
+        if (triesLeftSpan) {
+            triesLeftSpan.textContent = tries;
+        } else {
+            console.warn('Element with ID "triesLeft" not found in DOM.');
+        }
+    } catch (error) {
+        console.error('Failed to get Game tries:', error);
+    }
+}
+
 // Define base URL for the GitHub repository
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
 const soundUrl = `${repoBaseUrl}sound/`;
