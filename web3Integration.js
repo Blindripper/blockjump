@@ -812,17 +812,19 @@ async function mintAchievement(account, achievementId) {
 
 async function startGame() {
   if (!isInitialized) {
-    console.error('Contract not initialized');
-    return false;
+      console.error('Contract not initialized');
+      return false;
   }
   try {
-    const result = await contract.methods.startGame().send({ from: account });
-    console.log('Game started successfully:', result);
-    window.gameStartTime = Math.floor(Date.now() / 1000);
-    return true;
+      const result = await contract.methods.startGame().send({ from: account });
+      console.log('Game started successfully:', result);
+      // Set the game start time in seconds
+      window.gameStartTime = Math.floor(Date.now() / 1000);
+      console.log('Game start time set to:', window.gameStartTime);
+      return true;
   } catch (error) {
-    console.error('Error starting game:', error);
-    return false;
+      console.error('Error starting game:', error);
+      return false;
   }
 }
 
@@ -903,25 +905,25 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
 
       const currentTime = Math.floor(Date.now() / 1000);
       const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
+      console.log('Token validity period:', tokenValidityPeriod);
+      console.log('Time difference:', currentTime - gameStartTime);
+
       if (currentTime - gameStartTime > tokenValidityPeriod) {
           console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
           return false;
       }
 
+      // Convert gameStartTime to seconds if it's in milliseconds
+      const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
+
       const scoreStr = score.toString();
       const blocksClimbedStr = blocksClimbed.toString();
-      const gameStartTimeStr = gameStartTime.toString();
+      const gameStartTimeStr = gameStartTimeSeconds.toString();
 
-      const gasEstimate = await contract.methods.submitScore(name, scoreStr, blocksClimbedStr, gameStartTimeStr).estimateGas({ from: account });
-      console.log('Gas estimate:', gasEstimate);
-
-      const gasLimit = Math.floor(gasEstimate * 1.5);
-
-      console.log('Submitting transaction with gas limit:', gasLimit);
+      console.log('Submitting score with:', { name, scoreStr, blocksClimbedStr, gameStartTimeStr });
 
       const result = await contract.methods.submitScore(name, scoreStr, blocksClimbedStr, gameStartTimeStr).send({ 
           from: account,
-          gas: gasLimit
       });
 
       console.log('Score submitted successfully:', result);
