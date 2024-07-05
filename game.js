@@ -1104,21 +1104,6 @@ function showScoreSubmissionForm() {
       nameForm.style.borderRadius = '8px';
       nameForm.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
       nameForm.style.border = '5px solid white'; // White border for contrast
-  
-      // Check if submit event listener already exists
-      if (!nameForm.hasEventListener('submit')) {
-        nameForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          console.log('Score submission form submitted');
-          handleScoreSubmission(e);
-        });
-      } else {
-        console.log('Submit event listener already attached to nameForm');
-      }
-      
-      console.log('Score submission form should now be visible');
-    } else {
-      console.error('Score submission form not found in the DOM');
     }
   }
   
