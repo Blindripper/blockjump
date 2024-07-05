@@ -791,10 +791,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         };
 
         button.onclick = () => {
-            if (buttonText === 'Try Again') {
-                hideScoreSubmissionForm();
-                game.initializeGame();
-            }
+            hideOverlay();
             if (callback) callback();
         };
 
@@ -1126,9 +1123,9 @@ function showScoreSubmissionForm() {
         hideOverlay(submitOverlay);
         if (submitted) {
             await updateHighscoreTable();
-            showOverlay('Score submitted successfully!', () => {
+            showOverlay('Score submitted successfully!', async () => {
                 hideScoreSubmissionForm();
-                checkAndDisplayStartButton();
+                await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
             showOverlay('Failed to submit score. Please try again.');
@@ -1137,8 +1134,6 @@ function showScoreSubmissionForm() {
         console.error('Error during score submission:', error);
         showOverlay('An error occurred while submitting your score. Please try again.');
     }
-
-    hideScoreSubmissionForm();
 }
 
 
@@ -1305,9 +1300,9 @@ async function checkAndDisplayStartButton() {
         if (tries > 0) {
             showOverlay('Ready to play?', () => {
                 game.initializeGame();
-            }, true);
+            }, true, 'Start Game');
         } else {
-            showOverlay('No tries left. Please purchase more.');
+            showOverlay('No tries left. Please purchase more.', null, true, 'Buy Tries');
         }
     } catch (error) {
         console.error('Error checking Game tries:', error);
