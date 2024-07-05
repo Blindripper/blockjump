@@ -1104,8 +1104,6 @@ function showScoreSubmissionForm() {
     }
   }
   
-
-
   async function handleScoreSubmission(e) {
     e.preventDefault();
     if (!checkWalletConnection()) return;
@@ -1121,10 +1119,13 @@ function showScoreSubmissionForm() {
         const submitOverlay = showOverlay("Submitting score to Etherlink...");
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         hideOverlay(submitOverlay);
+        
+        // Hide the score submission form immediately after submitting
+        hideScoreSubmissionForm();
+        
         if (submitted) {
             await updateHighscoreTable();
             showOverlay('Score submitted successfully!', async () => {
-                hideScoreSubmissionForm();
                 await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
@@ -1136,6 +1137,14 @@ function showScoreSubmissionForm() {
     }
 }
 
+function hideScoreSubmissionForm() {
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.style.display = 'none';
+    }
+}
+
+  
 
 async function updateHighscoreTable() {
     if (!checkWalletConnection()) return;
