@@ -1,6 +1,18 @@
 import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
+let game;
+let isConnected = false;
+
+function checkWalletConnection() {
+    if (!isConnected) {
+        console.log('Wallet not connected');
+        showOverlay('Please connect your wallet first.');
+        return false;
+    }
+    return true;
+}
+
 // Define base URL for the GitHub repository
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
 const soundUrl = `${repoBaseUrl}sound/`;
@@ -47,6 +59,8 @@ class Game {
 
     
     async initializeGame() {
+        if (!checkWalletConnection()) return;
+
         try {
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
@@ -906,8 +920,7 @@ function displayCanvasMessage(message, type = 'info', yOffset = 0.3) {
     }, 3000);
 }
 
-let game;
-let isConnected = false;
+
 
 // Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
@@ -951,7 +964,7 @@ async function handleWalletConnection() {
                 if (connected) {
                     isConnected = true;
                     updateButtonState();
-                    await updateTryCount(); // Call updateTryCount here
+                    await updateTryCount();
                     await loadUserAchievements();
                     showBuyTriesButton();
                     await loadHighscores();
@@ -981,6 +994,8 @@ async function handleWalletConnection() {
 }
 
 async function handleClaimPrize() {
+    if (!checkWalletConnection()) return;
+
     try {
         const claimMessageOverlay = showBlockchainWaitMessage("Claiming prize on Etherlink...", 0.5, 0.5);
         const result = await claimPrize();
@@ -1001,7 +1016,34 @@ async function handleClaimPrize() {
     }
 }
 
+async function handleBuyTries() {
+    if (!checkWalletConnection()) return;
+
+    try {
+        const purchaseMessageOverlay = showOverlay("Getting Game tries from Etherlink...");
+        const purchased = await purchaseGameTries();
+        
+        hideOverlay(purchaseMessageOverlay);
+        
+        if (purchased) {
+            showOverlay('10 Game tries added successfully!', () => {
+                updateTryCount();
+                updateButtonState();
+                game.draw();
+            });
+        } else {
+            showOverlay('Failed to purchase Game tries. Please try again.');
+        }
+    } catch (error) {
+        console.error('Failed to purchase game tries:', error);
+        showOverlay('Error purchasing Game tries. Please try again.');
+    }
+}
+
+
 async function handleScoreSubmission(e) {
+    if (!checkWalletConnection()) return;
+
     e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
     
@@ -1029,6 +1071,8 @@ async function handleScoreSubmission(e) {
 }
 
 async function updateTryCount() {
+    if (!checkWalletConnection()) return;
+
     try {
         const tries = await getGameTries();
         const triesLeftSpan = document.getElementById('triesLeft');
@@ -1043,14 +1087,11 @@ async function updateTryCount() {
 }
 
 async function updateHighscoreTable() {
-    if (!isConnected) {
-        console.log('Not connected, skipping highscore update');
-        return;
-    }
+    if (!checkWalletConnection()) return;
+
     try {
         const highscores = await getHighscores();
         let currentAccount;
-
 
         if (!highscores || !Array.isArray(highscores)) {
             console.error('Invalid highscores data:', highscores);
@@ -1100,10 +1141,8 @@ async function updateHighscoreTable() {
 }
 
 async function loadHighscores() {
-    if (!isConnected) {
-        console.log('Not connected, skipping highscore loading');
-        return;
-    }
+    if (!checkWalletConnection()) return;
+
     try {
         const highscores = await getHighscores();
         updateHighscoreTable(highscores);
@@ -1113,6 +1152,8 @@ async function loadHighscores() {
 }
 
 async function getContractBalance() {
+    if (!checkWalletConnection()) return;
+
     const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4';
 
     try {
