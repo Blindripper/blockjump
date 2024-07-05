@@ -912,7 +912,7 @@ let isConnected = false;
 // Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
 
-    const requiredElements = ['gameCanvas', 'powerupBar', 'achievementPopup', 'windIndicator'];
+    const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
     
     if (missingElements.length > 0) {
@@ -938,21 +938,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
-    
-    try {
-        const web3Initialized = await initWeb3();
-        if (web3Initialized) {
-            await loadHighscores();
-            await updateHighscoreTable();
-            await getContractBalance();
-            updateButtonState();
-            await checkAndDisplayStartButton();
-        } else {
-            showOverlay('Please connect wallet');
-        }
-    } catch (error) {
-        showOverlay('An error occurred during initialization. Please refresh the page.');
-    }
+
+    showOverlay('Please connect wallet');
 });
 
 async function handleWalletConnection() {
@@ -967,11 +954,12 @@ async function handleWalletConnection() {
                     await updateTryCount();
                     await loadUserAchievements();
                     showBuyTriesButton();
-                    await loadHighscores(); // Move this here
+                    await loadHighscores(); // This will now only be called after connection
                     await updateHighscoreTable();
                     showAchievements();
                     await getContractBalance();
                     await checkAndDisplayStartButton();
+                    hideOverlay();
                 } else {
                     showOverlay('Failed to connect. Please try again.');
                 }
@@ -979,7 +967,12 @@ async function handleWalletConnection() {
                 showOverlay('Web3 initialization failed. Please check your connection.');
             }
         } else {
-            // Disconnect wallet logic (keep existing code)
+            // Disconnect wallet
+            isConnected = false;
+            updateButtonState();
+            hideBuyTriesButton();
+            hideAchievements();
+            showOverlay('Wallet disconnected. Please connect to play.');
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
@@ -1124,11 +1117,10 @@ async function updateHighscoreTable() {
 }
 
 async function loadHighscores() {
-    if (!isConnected || !isContractInitialized()) {
-        console.log('Not connected or contract not initialized, skipping highscore loading');
+    if (!isConnected) {
+        console.log('Not connected, skipping highscore loading');
         return;
     }
-
     try {
         const highscores = await getHighscores();
         updateHighscoreTable(highscores);
