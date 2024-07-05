@@ -158,7 +158,7 @@ class Game {
             width: width,
             height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05
+            isSpike: Math.random() < 0.05  // Keep spike platforms, but ensure they're rare
         };
     }
     
@@ -493,15 +493,23 @@ class Game {
     }
 
     drawPlatforms() {
-        this.ctx.fillStyle = '#1E293B';
         for (let platform of this.platforms) {
             if (platform.isSpike) {
-                this.drawSpikePlatform(platform);
+                // Draw spike platform
+                this.ctx.fillStyle = '#FF0000';  // Red color for spike platforms
+                this.ctx.beginPath();
+                this.ctx.moveTo(platform.x, platform.y + platform.height);
+                this.ctx.lineTo(platform.x + platform.width / 2, platform.y);
+                this.ctx.lineTo(platform.x + platform.width, platform.y + platform.height);
+                this.ctx.closePath();
+                this.ctx.fill();
             } else if (platform.isGolden) {
-                this.ctx.fillStyle = '#FFD700';
+                // Draw golden platform
+                this.ctx.fillStyle = '#FFD700';  // Gold color
                 this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-                this.ctx.fillStyle = '#1E293B';  // Reset fill style
             } else {
+                // Draw normal platform
+                this.ctx.fillStyle = '#1E293B';  // Dark blue-gray color for normal platforms
                 this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
             }
         }
@@ -568,11 +576,12 @@ class Game {
         const powerupSize = 20;
         const padding = 10;
         const barHeight = 5;
-        let xOffset = GAME_WIDTH - padding;  // Start from the right edge
+        const powerupSpacing = 35; // Increased spacing between powerups
+        let xOffset = GAME_WIDTH - padding;
     
         // Draw powerups from right to left
         Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
-            xOffset -= powerupSize;  // Move left by the size of the powerup
+            xOffset -= powerupSize;
     
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
@@ -594,7 +603,7 @@ class Game {
             this.ctx.fillStyle = '#00FF00';
             this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
     
-            xOffset -= padding;  // Add padding between powerups
+            xOffset -= powerupSpacing; // Use the new spacing value
         });
     }
 
@@ -604,7 +613,7 @@ class Game {
         this.gameOver = true;
         showOverlay('Game Over', () => {
             handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
-        });
+        }, true, 'Try Again');
     }
 
     gameLoop(currentTime) {
@@ -804,7 +813,7 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
     return overlay;
 }
 
-function showOverlay(message, callback = null, includeButton = false) {
+function showOverlay(message, callback = null, includeButton = false, buttonText = 'Start Game') {
     hideOverlay(); // Remove any existing overlay
 
     const canvas = document.getElementById('gameCanvas');
@@ -838,34 +847,37 @@ function showOverlay(message, callback = null, includeButton = false) {
     overlay.appendChild(messageElement);
 
     if (includeButton) {
-        const startButton = document.createElement('button');
-        startButton.textContent = 'Start Game';
-        startButton.className = 'start-button';
-        startButton.style.backgroundColor = '#3FE1B0';
-        startButton.style.color = '#0f1624';
-        startButton.style.border = 'none';
-        startButton.style.padding = '10px 20px';
-        startButton.style.fontSize = '18px';
-        startButton.style.fontFamily = 'Orbitron, sans-serif';
-        startButton.style.fontWeight = 'bold';
-        startButton.style.borderRadius = '5px';
-        startButton.style.cursor = 'pointer';
-        startButton.style.transition = 'all 0.3s ease';
+        const button = document.createElement('button');
+        button.textContent = buttonText;
+        button.className = 'start-button';
+        button.style.backgroundColor = '#3FE1B0';
+        button.style.color = '#0f1624';
+        button.style.border = 'none';
+        button.style.padding = '10px 20px';
+        button.style.fontSize = '18px';
+        button.style.fontFamily = 'Orbitron, sans-serif';
+        button.style.fontWeight = 'bold';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+        button.style.transition = 'all 0.3s ease';
 
-        startButton.onmouseover = () => {
-            startButton.style.backgroundColor = '#2dc898';
-            startButton.style.transform = 'scale(1.05)';
+        button.onmouseover = () => {
+            button.style.backgroundColor = '#2dc898';
+            button.style.transform = 'scale(1.05)';
         };
-        startButton.onmouseout = () => {
-            startButton.style.backgroundColor = '#3FE1B0';
-            startButton.style.transform = 'scale(1)';
+        button.onmouseout = () => {
+            button.style.backgroundColor = '#3FE1B0';
+            button.style.transform = 'scale(1)';
         };
 
-        startButton.onclick = () => {
+        button.onclick = () => {
             if (callback) callback();
+            if (buttonText === 'Try Again') {
+                game.initializeGame();
+            }
         };
 
-        overlay.appendChild(startButton);
+        overlay.appendChild(button);
     }
 
     document.body.appendChild(overlay);
@@ -1334,7 +1346,8 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
         window.finalScore = score;
         window.blocksClimbed = blocksClimbed;
         window.gameStartTime = gameStartTime;
-    });
+    }, true, 'Try Again');
 }
+
 
 export { updateTryCount };
