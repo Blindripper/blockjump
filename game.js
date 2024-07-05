@@ -864,10 +864,9 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         const button = document.createElement('button');
         button.textContent = buttonText;
         button.className = 'game-button';
-        button.onclick = () => {
-            hideOverlay();
+        button.onclick = async () => {
             if (callback && typeof callback === 'function') {
-                callback();
+                await callback();
             }
         };
         overlay.appendChild(button);
