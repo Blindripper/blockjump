@@ -734,12 +734,26 @@ const contractABI = [
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
       web3 = new Web3(window.ethereum);
-      return true;
+      try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          contract = new web3.eth.Contract(contractABI, contractAddress);
+          isInitialized = true;  // Set this to true when initialization is successful
+          return true;
+      } catch (error) {
+          console.error('Failed to initialize Web3:', error);
+          return false;
+      }
   } else {
       console.log('Please install MetaMask!');
       return false;
   }
 }
+
+function isContractInitialized() {
+  return isInitialized;
+}
+
+
 
 async function connectWallet() {
   if (!web3) {
@@ -951,5 +965,6 @@ export {
   claimPrize,
   getAchievements,
   mintAchievement, 
-  connectWallet
+  connectWallet,
+  isContractInitialized
 };
