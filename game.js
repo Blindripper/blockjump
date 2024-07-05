@@ -1132,15 +1132,7 @@ function showScoreSubmissionForm() {
     }
 }  
 
-function hideScoreSubmissionForm() {
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.style.display = 'none';
-    }
-}
-
   
-
 async function updateHighscoreTable() {
     if (!checkWalletConnection()) return;
 
@@ -1282,13 +1274,6 @@ function hideAchievements() {
     const achievementsSection = document.getElementById('achievementsSection');
     if (achievementsSection) {
         achievementsSection.style.display = 'none';
-    }
-}
-
-function hideScoreSubmissionForm() {
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.style.display = 'none';
     }
 }
 
