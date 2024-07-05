@@ -52,6 +52,7 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
         this.gameRunning = false;
+        this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
         this.gameOver = false;
         this.activePowerups = new Map();
@@ -100,7 +101,8 @@ class Game {
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
-    
+            this.hasPlayerJumped = false;
+            this.score = 0;
             this.gameRunning = true;
             this.gameOver = false;
             this.score = 0;
@@ -205,6 +207,11 @@ class Game {
             this.player.jumpCount++;
             this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
             playSound('jump');
+
+            if (!this.hasPlayerJumped) {
+                this.hasPlayerJumped = true;
+                this.score = 0; // Reset score to 0 when the game actually starts
+            }
         }
     }
 
@@ -481,7 +488,9 @@ class Game {
     }
 
     updateUI() {
-        this.score++;
+        if (this.hasPlayerJumped) {
+            this.score++;
+        }
     }
 
     draw() {
