@@ -737,58 +737,71 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     hideOverlay(); // Remove any existing overlay
 
     const canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+        console.error('Game canvas not found');
+        return;
+    }
     const canvasRect = canvas.getBoundingClientRect();
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
     overlay.className = 'game-overlay';
-    overlay.style.position = 'absolute';
-    overlay.style.left = `${canvasRect.left}px`;
-    overlay.style.top = `${canvasRect.top}px`;
-    overlay.style.width = `${canvasRect.width}px`;
-    overlay.style.height = `${canvasRect.height}px`;
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    overlay.style.display = 'flex';
-    overlay.style.flexDirection = 'column';
-    overlay.style.justifyContent = 'flex-start';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '2000';
-    overlay.style.padding = '20px';
+    Object.assign(overlay.style, {
+        position: 'absolute',
+        left: `${canvasRect.left}px`,
+        top: `${canvasRect.top}px`,
+        width: `${canvasRect.width}px`,
+        height: `${canvasRect.height}px`,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        zIndex: '2000',
+        padding: '20px'
+    });
 
     const messageElement = document.createElement('div');
+    Object.assign(messageElement.style, {
+        color: '#3FE1B0',
+        fontSize: '24px',
+        fontFamily: 'Orbitron, sans-serif',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        maxWidth: '80%',
+        marginBottom: '20px',
+        marginTop: '20%'
+    });
     messageElement.textContent = message;
-    messageElement.style.color = '#3FE1B0';
-    messageElement.style.fontSize = '24px';
-    messageElement.style.fontFamily = 'Orbitron, sans-serif';
-    messageElement.style.fontWeight = 'bold';
-    messageElement.style.textAlign = 'center';
-    messageElement.style.maxWidth = '80%';
-    messageElement.style.marginBottom = '20px';
-    messageElement.style.marginTop = '20%';
-
     overlay.appendChild(messageElement);
 
     if (includeNameForm) {
         const nameForm = document.createElement('form');
         nameForm.id = 'nameForm';
-        nameForm.style.display = 'flex';
-        nameForm.style.flexDirection = 'column';
-        nameForm.style.alignItems = 'center';
-        nameForm.style.gap = '10px';
-        nameForm.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        nameForm.style.padding = '20px';
-        nameForm.style.borderRadius = '10px';
-        nameForm.style.marginTop = '20px';
+        Object.assign(nameForm.style, {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            padding: '20px',
+            borderRadius: '10px',
+            marginTop: '20px'
+        });
 
         const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.id = 'nameInput';
-        nameInput.placeholder = 'Enter your name';
-        nameInput.required = true;
-        nameInput.maxLength = 10;
-        nameInput.style.marginBottom = '10px';
-        nameInput.style.padding = '5px';
-        nameInput.style.fontSize = '16px';
+        Object.assign(nameInput, {
+            type: 'text',
+            id: 'nameInput',
+            placeholder: 'Enter your name',
+            required: true,
+            maxLength: 10
+        });
+        Object.assign(nameInput.style, {
+            marginBottom: '10px',
+            padding: '5px',
+            fontSize: '16px'
+        });
 
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
@@ -806,7 +819,11 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         tryAgainButton.onclick = (e) => {
             e.preventDefault();
             hideOverlay();
-            game.initializeGame();
+            if (typeof game.initializeGame === 'function') {
+                game.initializeGame();
+            } else {
+                console.error('game.initializeGame is not a function');
+            }
         };
 
         buttonContainer.appendChild(submitButton);
@@ -819,7 +836,11 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
             e.preventDefault();
             const name = nameInput.value.trim();
             if (name) {
-                await handleScoreSubmission(name);
+                if (typeof handleScoreSubmission === 'function') {
+                    await handleScoreSubmission(name);
+                } else {
+                    console.error('handleScoreSubmission is not a function');
+                }
             }
         };
 
@@ -830,14 +851,14 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         button.className = 'game-button';
         button.onclick = () => {
             hideOverlay();
-            if (callback) callback();
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
         };
         overlay.appendChild(button);
     }
 
     document.body.appendChild(overlay);
-
-    return overlay;
 }
 
 
@@ -941,8 +962,8 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
 
 function hideOverlay() {
     const existingOverlay = document.getElementById('game-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
+    if (existingOverlay && existingOverlay.parentNode) {
+        existingOverlay.parentNode.removeChild(existingOverlay);
     }
 }
 
