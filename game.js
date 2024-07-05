@@ -871,10 +871,11 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         };
 
         button.onclick = () => {
-            if (callback) callback();
             if (buttonText === 'Try Again') {
+                hideScoreSubmissionForm();
                 game.initializeGame();
             }
+            if (callback) callback();
         };
 
         overlay.appendChild(button);
@@ -1054,9 +1055,9 @@ async function handleBuyTries() {
 
 
 async function handleScoreSubmission(e) {
+    e.preventDefault();
     if (!checkWalletConnection()) return;
 
-    e.preventDefault();
     const name = document.getElementById('nameInput').value.trim();
     
     if (!name) {
@@ -1066,7 +1067,7 @@ async function handleScoreSubmission(e) {
 
     try {
         const submitOverlay = showOverlay("Submitting score to Etherlink...");
-        const submitted = await submitScore(name, game.score, game.blocksClimbed, game.gameStartTime);
+        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         hideOverlay(submitOverlay);
         if (submitted) {
             await updateHighscoreTable();
@@ -1082,21 +1083,6 @@ async function handleScoreSubmission(e) {
     hideScoreSubmissionForm();
 }
 
-async function updateTryCount() {
-    if (!checkWalletConnection()) return;
-
-    try {
-        const tries = await getGameTries();
-        const triesLeftSpan = document.getElementById('triesLeft');
-        if (triesLeftSpan) {
-            triesLeftSpan.textContent = tries;
-        } else {
-            console.warn('Element with ID "triesLeft" not found in DOM.');
-        }
-    } catch (error) {
-        console.error('Failed to get Game tries:', error);
-    }
-}
 
 async function updateHighscoreTable() {
     if (!checkWalletConnection()) return;
@@ -1253,6 +1239,15 @@ function showScoreSubmissionForm() {
     const nameForm = document.getElementById('nameForm');
     if (nameForm) {
         nameForm.style.display = 'block';
+        
+        // Position the form over the game canvas
+        const canvas = document.getElementById('gameCanvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        nameForm.style.position = 'absolute';
+        nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`; // Adjust the 150 value as needed
+        nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`; // Adjust the 100 value as needed
+        nameForm.style.zIndex = '2000'; // Ensure it's above the game over overlay
     }
 }
 
