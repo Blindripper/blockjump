@@ -627,9 +627,8 @@ class Game {
     endGame() {
         this.gameRunning = false;
         this.gameOver = true;
-        showOverlay('Game Over', () => {
-            handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
-        }, true, 'Try Again');
+        console.log('Game ended, calling handleGameOver');
+        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
     }
 
     gameLoop(currentTime) {
@@ -902,6 +901,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Score submission form submitted');
+            handleScoreSubmission(e);
+        });
+    } else {
+        console.error('Name form not found in the DOM on page load');
+    }
+
     showOverlay('Please connect wallet');
 });
 
@@ -992,6 +1002,8 @@ async function handleBuyTries() {
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
+    console.log('handleGameOver called', { score, blocksClimbed, gameStartTime });
+
     // Store the game data for later use
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
@@ -999,7 +1011,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     // Show the game over overlay with Try Again button
     showOverlay('Game Over', () => {
-        // This callback will be executed when the "Try Again" button is clicked
+        console.log('Try Again button clicked');
         hideScoreSubmissionForm();
         game.initializeGame();
     }, true, 'Try Again');
@@ -1007,26 +1019,28 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     // Show the score submission form
     showScoreSubmissionForm();
 
-    console.log('Game Over. Score:', score, 'Blocks Climbed:', blocksClimbed);
+    console.log('Game Over process completed');
 }
 
 function showScoreSubmissionForm() {
+    console.log('showScoreSubmissionForm called');
     const nameForm = document.getElementById('nameForm');
     if (nameForm) {
         nameForm.style.display = 'block';
         
-        // Position the form over the game canvas and the overlay
-        const canvas = document.getElementById('gameCanvas');
-        const canvasRect = canvas.getBoundingClientRect();
-        
-        nameForm.style.position = 'absolute';
-        nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`;
-        nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`;
-        nameForm.style.zIndex = '2003'; // Ensure it's above the game over overlay
-        nameForm.style.backgroundColor = 'rgba(26, 35, 51, 0.9)';
+        // Position the form in the center of the screen
+        nameForm.style.position = 'fixed';
+        nameForm.style.left = '50%';
+        nameForm.style.top = '50%';
+        nameForm.style.transform = 'translate(-50%, -50%)';
+        nameForm.style.zIndex = '9999'; // Very high z-index
+        nameForm.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Bright red background for visibility
         nameForm.style.padding = '20px';
         nameForm.style.borderRadius = '8px';
-        nameForm.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        nameForm.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
+        nameForm.style.border = '5px solid white'; // White border for contrast
+
+        console.log('Score submission form should now be visible');
     } else {
         console.error('Score submission form not found in the DOM');
     }
