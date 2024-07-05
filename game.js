@@ -82,11 +82,12 @@ class Game {
         if (!checkWalletConnection()) return;
 
         try {
-            showEtherlinkWaitMessage()
+            showEtherlinkWaitMessage();
+
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
                 console.log('No tries left');
-                hideOverlay(); // Hide the waiting message
+                hideOverlay();
                 showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
                 return;
             }
@@ -94,7 +95,7 @@ class Game {
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
-                hideOverlay(); // Hide the waiting message
+                hideOverlay();
                 showOverlay('Failed to start game. Please try again.');
                 return;
             }
@@ -109,14 +110,10 @@ class Game {
             this.score = 0;
             this.gameRunning = true;
             this.gameOver = false;
-            this.score = 0;
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
-            this.player = this.createPlayer();
-            this.platforms = this.createInitialPlatforms();
             this.powerups = [];
-            this.gameStarted = false;
     
             await updateTryCount();
             
@@ -127,7 +124,6 @@ class Game {
                 console.log('- Bottom platform present:', this.platforms.some(p => p.isBottomPlatform));
                 this.logGameState('After initialization');
             }
-            hideOverlay();
 
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
@@ -770,7 +766,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
         zIndex: '2000',
         padding: '20px'
@@ -784,8 +780,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginBottom: '20px',
-        marginTop: '20%'
+        marginBottom: '20px'
     });
     messageElement.textContent = message;
     overlay.appendChild(messageElement);
@@ -1088,10 +1083,10 @@ async function handleBuyTries() {
     if (!checkWalletConnection()) return;
 
     try {
-        const purchaseMessageOverlay = showOverlay("Getting Game tries from Etherlink...");
+        showOverlay("Getting Game tries from Etherlink...");
         const purchased = await purchaseGameTries();
         
-        hideOverlay(purchaseMessageOverlay);
+        hideOverlay();
         
         if (purchased) {
             showOverlay('10 Game tries added successfully!', async () => {
@@ -1099,7 +1094,7 @@ async function handleBuyTries() {
                 updateButtonState();
                 game.draw();
                 hideOverlay();
-                checkAndDisplayStartButton(); 
+                showStartButton(); // New function to show the start button overlay
             }, true, 'OK');
         } else {
             showOverlay('Failed to purchase Game tries. Please try again.', null, true, 'OK');
@@ -1108,6 +1103,12 @@ async function handleBuyTries() {
         console.error('Failed to purchase game tries:', error);
         showOverlay('Error purchasing Game tries. Please try again.', null, true, 'OK');
     }
+}
+
+function showStartButton() {
+    showOverlay('Ready to play?', () => {
+        game.initializeGame();
+    }, true, 'Start Game');
 }
 
 
