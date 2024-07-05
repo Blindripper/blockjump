@@ -1102,25 +1102,37 @@ function showScoreSubmissionForm() {
     console.log('showScoreSubmissionForm called');
     const nameForm = document.getElementById('nameForm');
     if (nameForm) {
-        nameForm.style.display = 'block';
-        
-        // Position the form in the center of the screen
-        nameForm.style.position = 'fixed';
-        nameForm.style.left = '50%';
-        nameForm.style.top = '50%';
-        nameForm.style.transform = 'translate(-50%, -50%)';
-        nameForm.style.zIndex = '9999'; // Very high z-index
-        nameForm.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Bright red background for visibility
-        nameForm.style.padding = '20px';
-        nameForm.style.borderRadius = '8px';
-        nameForm.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
-        nameForm.style.border = '5px solid white'; // White border for contrast
-
-        console.log('Score submission form should now be visible');
+      nameForm.style.display = 'block';
+      
+      // Position the form in the center of the screen
+      nameForm.style.position = 'fixed';
+      nameForm.style.left = '50%';
+      nameForm.style.top = '50%';
+      nameForm.style.transform = 'translate(-50%, -50%)';
+      nameForm.style.zIndex = '9999'; // Very high z-index
+      nameForm.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Bright red background for visibility
+      nameForm.style.padding = '20px';
+      nameForm.style.borderRadius = '8px';
+      nameForm.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
+      nameForm.style.border = '5px solid white'; // White border for contrast
+  
+      // Check if submit event listener already exists
+      if (!nameForm.hasEventListener('submit')) {
+        nameForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          console.log('Score submission form submitted');
+          handleScoreSubmission(e);
+        });
+      } else {
+        console.log('Submit event listener already attached to nameForm');
+      }
+      
+      console.log('Score submission form should now be visible');
     } else {
-        console.error('Score submission form not found in the DOM');
+      console.error('Score submission form not found in the DOM');
     }
-}
+  }
+  
 
 
 async function handleScoreSubmission(e) {
