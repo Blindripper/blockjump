@@ -235,6 +235,31 @@ header {
   background-color: rgba(63, 225, 176, 0.2);
 }
 
+/* Highlight first place in highscore table */
+#highscoreTable .first-place {
+  background-color: rgba(255, 215, 0, 0.2); /* Semi-transparent gold */
+  font-weight: bold;
+}
+
+#highscoreTable .first-place td {
+  color: #FFD700; /* Gold color */
+}
+
+/* Style Jackpot message and Contract balance */
+.jackpot-info h3,
+#contract-balance {
+  color: #FFD700; /* Gold color */
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); /* Subtle glow effect */
+}
+
+.jackpot-info {
+  border: 2px solid #FFD700;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  background-color: rgba(255, 215, 0, 0.1); /* Semi-transparent gold background */
+}
+
 /* Powerup Bar */
 #powerupBar {
   display: flex;
