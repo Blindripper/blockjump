@@ -924,6 +924,7 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
 
       const result = await contract.methods.submitScore(name, scoreStr, blocksClimbedStr, gameStartTimeStr).send({ 
           from: account,
+          gas: 300000
       });
 
       console.log('Score submitted successfully:', result);
