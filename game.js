@@ -85,17 +85,21 @@ class Game {
             showEtherlinkWaitMessage()
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
-                console.error('No tries left');
-                displayCanvasMessage('No tries left. Please purchase more.', 'error');
+                console.log('No tries left');
+                hideOverlay(); // Hide the waiting message
+                showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
                 return;
             }
     
             const gameStarted = await startGameWeb3();
             if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
-                displayCanvasMessage('Failed to start game. Please try again.', 'error');
+                hideOverlay(); // Hide the waiting message
+                showOverlay('Failed to start game. Please try again.');
                 return;
             }
+
+            hideOverlay();
 
             this.bottomPlatform = this.createBottomPlatform();
             this.player = this.createPlayer();
@@ -129,7 +133,7 @@ class Game {
             requestAnimationFrame((time) => this.gameLoop(time));
         } catch (error) {
             console.error('Error initializing game:', error);
-            displayCanvasMessage('Error starting game. Please try again.', 'error');
+            showOverlay('Error starting game. Please try again.');
         }
     }
     
@@ -982,40 +986,6 @@ function hideOverlay() {
     }
 }
 
-function displayCanvasMessage(message, type = 'info', yOffset = 0.3) {
-    const canvas = document.getElementById('gameCanvas');
-    const overlay = document.createElement('div');
-    
-    overlay.style.position = 'absolute';
-    overlay.style.left = canvas.offsetLeft + 'px';
-    overlay.style.top = canvas.offsetTop + 'px';
-    overlay.style.width = GAME_WIDTH + 'px';
-    overlay.style.height = GAME_HEIGHT + 'px';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '1000';
-
-    const messageElement = document.createElement('div');
-    messageElement.textContent = message;
-    messageElement.style.color = type === 'error' ? '#F44336' : (type === 'success' ? '#4CAF50' : '#3FE1B0');
-    messageElement.style.fontSize = '24px';
-    messageElement.style.fontFamily = 'Orbitron, sans-serif';
-    messageElement.style.fontWeight = 'bold';
-    messageElement.style.textAlign = 'center';
-    messageElement.style.maxWidth = '80%';
-    messageElement.style.marginTop = `${GAME_HEIGHT * yOffset}px`;
-
-    overlay.appendChild(messageElement);
-    document.body.appendChild(overlay);
-
-    setTimeout(() => {
-        document.body.removeChild(overlay);
-    }, 3000);
-}
-
-
 
 // Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1104,14 +1074,14 @@ async function handleClaimPrize() {
         }
         
         if (result) {
-            displayCanvasMessage('Prize claimed successfully! Congratulations!', 'success', 0.3);
+            showOverlay('Prize claimed! Congratz!');
             await updateHighscoreTable();
         } else {
-            displayCanvasMessage('Failed to claim prize. Not eligible.', 'error', 0.3);
+            showOverlay('Failed to claim prize. Not eligible.', 'error', 0.3);
         }
     } catch (error) {
         console.error('Error claiming prize:', error);
-        displayCanvasMessage('An error occurred while claiming the prize. Please try again.', 'error', 0.3);
+        showOverlay('An error occurred while claiming the prize. Please try again.', 'error', 0.3);
     }
 }
 
