@@ -1281,24 +1281,6 @@ function hideScoreSubmissionForm() {
     }
 }
 
-function showScoreSubmissionForm() {
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.style.display = 'block';
-        
-        // Position the form over the game canvas
-        const canvas = document.getElementById('gameCanvas');
-        const canvasRect = canvas.getBoundingClientRect();
-        
-        nameForm.style.position = 'absolute';
-        nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`; // Adjust the 150 value as needed
-        nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`; // Adjust the 100 value as needed
-        nameForm.style.zIndex = '2001'; // Ensure it's above the game over overlay
-    } else {
-        console.error('Score submission form not found in the DOM');
-    }
-}
-
 async function checkAndDisplayStartButton() {
     if (!isConnected) {
         showOverlay('Please connect wallet');
