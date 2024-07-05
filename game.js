@@ -1198,6 +1198,9 @@ async function updateHighscoreTable() {
         highscores.forEach((entry, index) => {
             if (entry && typeof entry === 'object') {
                 const row = document.createElement('tr');
+                if (index === 0) {
+                    row.classList.add('first-place'); // Add this line to highlight first place
+                }
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${entry.name || 'Anonymous'}</td>
