@@ -1131,20 +1131,6 @@ async function getContractBalance() {
     }
 }
 
-async function updateTryCount() {
-    try {
-        const tries = await getGameTries();
-        const triesLeftSpan = document.getElementById('triesLeft');
-        if (triesLeftSpan) {
-            triesLeftSpan.textContent = tries;
-        } else {
-            console.warn('Element with ID "triesLeft" not found in DOM.');
-        }
-    } catch (error) {
-        console.error('Failed to get Game tries:', error);
-    }
-}
-
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
     const buyButton = document.getElementById('buyTriesBtn');
