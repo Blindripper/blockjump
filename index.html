@@ -7,6 +7,9 @@
     <link rel="shortcut icon" type="image/x-icon" href="favicon1.ico">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+    <script type="module" src="web3Integration.js"></script>
+    <script type="module" src="achievements.js"></script>
+    <script type="module" src="game.js"></script>
 </head>
 <body>
     <header>
@@ -34,7 +37,7 @@
                         <tbody id="highscoreBody"></tbody>
                     </table>
                     <div class="jackpot-info">
-                        <h3>1st can claim the Jackpot</h3>
+                        <h3>1st place can claim the Jackpot</h3>
                         <p id="contract-balance">Contract Balance: Loading...</p>
                     </div>
                     <button id="claimPrizeBtn" class="game-button" style="display: none;">Claim Prize</button>
@@ -74,10 +77,8 @@
     </div>
 
     <button id="soundToggle" class="sound-toggle">🔊</button>
-
-    <script type="module" src="achievements.js"></script>
-    <script type="module" src="game.js"></script>
-    <script type="module" src="web3Integration.js"></script>
+    
+    
     <script>
         // Modal functionality
         var modal = document.getElementById("infoModal");
