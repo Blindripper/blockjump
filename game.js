@@ -1038,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-    checkWalletConnectionOnLoad();
+    
 
     if (!isConnected) {
         showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
