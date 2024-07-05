@@ -1122,7 +1122,7 @@ async function handleBuyTries() {
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
-        showOverlay('Error purchasing Game tries. Please try again.');
+        hideOverlay()
     }
 }
 
