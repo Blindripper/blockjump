@@ -1093,16 +1093,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 function showScoreSubmissionForm() {
     const nameForm = document.getElementById('nameForm');
     if (nameForm) {
-        nameForm.style.display = 'block';
-        
-        // Position the form over the game canvas
-        const canvas = document.getElementById('gameCanvas');
-        const canvasRect = canvas.getBoundingClientRect();
-        
-        nameForm.style.position = 'absolute';
-        nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`;
-        nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`;
-        nameForm.style.zIndex = '2002'; // Ensure it's above the game over overlay
+        nameForm.classList.add('visible');
     } else {
         console.error('Score submission form not found in the DOM');
     }
