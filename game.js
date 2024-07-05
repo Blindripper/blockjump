@@ -74,6 +74,8 @@ class Game {
     }
 
     
+
+    
     async initializeGame() {
         if (!checkWalletConnection()) return;
 
@@ -730,6 +732,80 @@ function preloadSounds() {
         });
     }));
 }
+
+function showOverlay(message, callback = null, includeButton = false, buttonText = 'Start Game') {
+    hideOverlay(); // Remove any existing overlay
+
+    const canvas = document.getElementById('gameCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'game-overlay';
+    overlay.className = 'game-overlay';
+    overlay.style.position = 'absolute';
+    overlay.style.left = `${canvasRect.left}px`;
+    overlay.style.top = `${canvasRect.top}px`;
+    overlay.style.width = `${canvasRect.width}px`;
+    overlay.style.height = `${canvasRect.height}px`;
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '2000';
+
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.style.color = '#3FE1B0';
+    messageElement.style.fontSize = '24px';
+    messageElement.style.fontFamily = 'Orbitron, sans-serif';
+    messageElement.style.fontWeight = 'bold';
+    messageElement.style.textAlign = 'center';
+    messageElement.style.maxWidth = '80%';
+    messageElement.style.marginBottom = '20px';
+
+    overlay.appendChild(messageElement);
+
+    if (includeButton) {
+        const button = document.createElement('button');
+        button.textContent = buttonText;
+        button.className = 'start-button';
+        button.style.backgroundColor = '#3FE1B0';
+        button.style.color = '#0f1624';
+        button.style.border = 'none';
+        button.style.padding = '10px 20px';
+        button.style.fontSize = '18px';
+        button.style.fontFamily = 'Orbitron, sans-serif';
+        button.style.fontWeight = 'bold';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+        button.style.transition = 'all 0.3s ease';
+
+        button.onmouseover = () => {
+            button.style.backgroundColor = '#2dc898';
+            button.style.transform = 'scale(1.05)';
+        };
+        button.onmouseout = () => {
+            button.style.backgroundColor = '#3FE1B0';
+            button.style.transform = 'scale(1)';
+        };
+
+        button.onclick = () => {
+            if (buttonText === 'Try Again') {
+                hideScoreSubmissionForm();
+                game.initializeGame();
+            }
+            if (callback) callback();
+        };
+
+        overlay.appendChild(button);
+    }
+
+    document.body.appendChild(overlay);
+
+    return overlay;
+}
+
 
 // Sprite loading
 const sprites = new Map();
