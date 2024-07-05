@@ -750,10 +750,10 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     overlay.style.display = 'flex';
     overlay.style.flexDirection = 'column';
-    overlay.style.justifyContent = 'flex-start';  // Changed from 'center' to 'flex-start'
+    overlay.style.justifyContent = 'flex-start';
     overlay.style.alignItems = 'center';
     overlay.style.zIndex = '2000';
-    overlay.style.padding = '20px';  // Added padding to ensure content doesn't touch the edges
+    overlay.style.padding = '20px';
 
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
@@ -764,12 +764,13 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     messageElement.style.textAlign = 'center';
     messageElement.style.maxWidth = '80%';
     messageElement.style.marginBottom = '20px';
-    messageElement.style.marginTop = '20%';  // Added top margin to push content down
+    messageElement.style.marginTop = '20%';
 
     overlay.appendChild(messageElement);
 
     if (includeNameForm) {
-        const nameForm = document.getElementById('nameForm');
+        const nameForm = document.createElement('form');
+        nameForm.id = 'nameForm';
         nameForm.style.display = 'flex';
         nameForm.style.flexDirection = 'column';
         nameForm.style.alignItems = 'center';
@@ -777,10 +778,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         nameForm.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
         nameForm.style.padding = '20px';
         nameForm.style.borderRadius = '10px';
-        nameForm.style.marginTop = '20px';  // Added top margin to separate from message
-
-        // Clear existing content
-        nameForm.innerHTML = '';
+        nameForm.style.marginTop = '20px';
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -805,7 +803,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         tryAgainButton.type = 'button';
         tryAgainButton.textContent = 'Try Again';
         tryAgainButton.className = 'game-button';
-        tryAgainButton.onclick = () => {
+        tryAgainButton.onclick = (e) => {
+            e.preventDefault();
             hideOverlay();
             game.initializeGame();
         };
