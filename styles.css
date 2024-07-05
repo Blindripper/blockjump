@@ -260,6 +260,14 @@ header {
   background-color: rgba(255, 215, 0, 0.1); /* Semi-transparent gold background */
 }
 
+#claimPrizeBtn {
+  position: absolute; 
+  bottom: 20px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  width: calc(100% - 40px); 
+  max-width: 80px; }
+
 /* Powerup Bar */
 #powerupBar {
   display: flex;
@@ -327,7 +335,7 @@ header {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1001;
+  z-index: 5001;
   left: 0;
   top: 0;
   width: 100%;
