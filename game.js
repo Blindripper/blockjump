@@ -1081,19 +1081,31 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
         scoreDisplay.textContent = `Final Score: ${score}`;
     }
 
-    // Optionally, you can also display the blocks climbed
+    // Display the blocks climbed
     const blocksDisplay = document.getElementById('blocksClimbedDisplay');
     if (blocksDisplay) {
         blocksDisplay.textContent = `Blocks Climbed: ${blocksClimbed}`;
     }
 
-    // Disable game controls here if necessary
-    // For example: game.disableControls();
-
-    // If you have any animations or sound effects for game over, trigger them here
-    // For example: playGameOverSound();
-
     console.log('Game Over. Score:', score, 'Blocks Climbed:', blocksClimbed);
+}
+
+function showScoreSubmissionForm() {
+    const nameForm = document.getElementById('nameForm');
+    if (nameForm) {
+        nameForm.style.display = 'block';
+        
+        // Position the form over the game canvas
+        const canvas = document.getElementById('gameCanvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        nameForm.style.position = 'absolute';
+        nameForm.style.left = `${canvasRect.left + canvasRect.width / 2 - 150}px`;
+        nameForm.style.top = `${canvasRect.top + canvasRect.height / 2 - 100}px`;
+        nameForm.style.zIndex = '2002'; // Ensure it's above the game over overlay
+    } else {
+        console.error('Score submission form not found in the DOM');
+    }
 }
 
 
