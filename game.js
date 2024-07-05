@@ -1039,7 +1039,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
     checkWalletConnectionOnLoad();
-});
+
+    if (!isConnected) {
+        showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
+    }
+    });
 
 async function handleWalletConnection() {
     try {
