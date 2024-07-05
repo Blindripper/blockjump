@@ -767,12 +767,17 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.appendChild(messageElement);
 
     if (includeNameForm) {
-        const nameForm = document.createElement('form');
-        nameForm.id = 'nameForm';
+        const nameForm = document.getElementById('nameForm');
         nameForm.style.display = 'flex';
         nameForm.style.flexDirection = 'column';
         nameForm.style.alignItems = 'center';
         nameForm.style.gap = '10px';
+        nameForm.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        nameForm.style.padding = '20px';
+        nameForm.style.borderRadius = '10px';
+
+        // Clear existing content
+        nameForm.innerHTML = '';
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -780,9 +785,9 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         nameInput.placeholder = 'Enter your name';
         nameInput.required = true;
         nameInput.maxLength = 10;
+        nameInput.style.marginBottom = '10px';
         nameInput.style.padding = '5px';
         nameInput.style.fontSize = '16px';
-        nameInput.style.width = '200px';
 
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
@@ -794,7 +799,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         submitButton.className = 'game-button';
 
         const tryAgainButton = document.createElement('button');
-        tryAgainButton.type = 'button'; // Changed to 'button' to prevent form submission
+        tryAgainButton.type = 'button';
         tryAgainButton.textContent = 'Try Again';
         tryAgainButton.className = 'game-button';
         tryAgainButton.onclick = () => {
