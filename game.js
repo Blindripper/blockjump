@@ -6,6 +6,7 @@ let isConnected = false;
 
 function checkWalletConnection() {
     if (!isConnected) {
+        showOverlay('Please connect wallet', handleWalletConnection, true, 'Connect Wallet');
         console.log('Wallet not connected');
         showOverlay('Please connect your wallet first.');
         return false;
@@ -80,6 +81,7 @@ class Game {
         if (!checkWalletConnection()) return;
 
         try {
+            showEtherlinkWaitMessage()
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
                 console.error('No tries left');
@@ -959,6 +961,10 @@ function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset
     return overlay;
 }
 
+function showEtherlinkWaitMessage() {
+    showOverlay("Waiting for Etherlink...", null, false, '', false);
+}
+
 
 function hideOverlay() {
     const existingOverlay = document.getElementById('game-overlay');
@@ -1032,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-    
+    checkWalletConnectionOnLoad();
 });
 
 async function handleWalletConnection() {
