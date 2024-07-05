@@ -891,53 +891,61 @@ async function getHighscores() {
   }
 }
 
+let isSubmitting = false;
+
 async function submitScore(name, score, blocksClimbed, gameStartTime) {
   if (!isInitialized) {
-      console.error('Contract not initialized or account not available');
-      return false;
+    console.error('Contract not initialized or account not available');
+    return false;
   }
+
+  isSubmitting = true;
+
   console.log('Attempting to submit score with:', { name, score, blocksClimbed, gameStartTime });
+
   try {
-      const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
-      console.log('Last game start time from contract:', lastGameStartTime);
-      const currentTime = Math.floor(Date.now() / 1000);
-      const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
-      console.log('Token validity period:', tokenValidityPeriod);
-      console.log('Time difference:', currentTime - gameStartTime);
-      
-      if (currentTime - gameStartTime > tokenValidityPeriod) {
-          console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
-          return false;
-      }
-      
-      console.log('Submitting score with:', { name, score, blocksClimbed, gameStartTime });
-      
-      // Estimate gas before sending the transaction
-      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).estimateGas({from: account});
-      console.log('Estimated gas:', gasEstimate);
-      
-      const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({
-          from: account,
-          gas: Math.floor(gasEstimate * 1.2) // Add 20% buffer to the estimated gas
-      });
-      
-      console.log('Score submitted successfully:', result);
-      return true;
-  } catch (error) {
-      console.error('Error in submitScore:', error);
-      if (error.message) console.error('Error message:', error.message);
-      if (error.data) {
-          console.error('Error data:', error.data);
-          try {
-              const decodedError = web3.eth.abi.decodeParameter('string', error.data);
-              console.error('Decoded error:', decodedError);
-          } catch (decodeError) {
-              console.error('Failed to decode error data');
-          }
-      }
+    const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+    console.log('Last game start time from contract:', lastGameStartTime);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
+    console.log('Token validity period:', tokenValidityPeriod);
+    console.log('Time difference:', currentTime - gameStartTime);
+
+    if (currentTime - gameStartTime > tokenValidityPeriod) {
+      console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
       return false;
+    }
+
+    console.log('Submitting score with:', { name, score, blocksClimbed, gameStartTime });
+
+    // Estimate gas before sending the transaction
+    const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).estimateGas({ from: account });
+    console.log('Estimated gas:', gasEstimate);
+
+    const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTime).send({
+      from: account,
+      gas: Math.floor(gasEstimate * 1.2), // Add 20% buffer to the estimated gas
+    });
+
+    console.log('Score submitted successfully:', result);
+    return true;
+  } catch (error) {
+    console.error('Error in submitScore:', error);
+    if (error.message) console.error('Error message:', error.message);
+    if (error.data) {
+      console.error('Error data:', error.data);
+      try {
+        const decodedError = web3.eth.abi.decodeParameter('string', error.data);
+        console.error('Decoded error:', decodedError);
+      } catch (decodeError) {
+        console.error('Failed to decode error data');
+      }
+    }
+  } finally {
+    isSubmitting = false; // Set isSubmitting to false regardless of success or failure
   }
 }
+
 
 async function claimPrize() {
   if (!isInitialized) {
