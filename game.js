@@ -733,7 +733,7 @@ function preloadSounds() {
     }));
 }
 
-function showOverlay(message, callback = null, includeButton = false, buttonText = 'Start Game') {
+function showOverlay(message, callback = null, includeButton = false, buttonText = 'Start Game', includeNameForm = false) {
     hideOverlay(); // Remove any existing overlay
 
     const canvas = document.getElementById('gameCanvas');
@@ -766,35 +766,51 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
     overlay.appendChild(messageElement);
 
-    if (includeButton) {
+    if (includeNameForm) {
+        const nameForm = document.createElement('form');
+        nameForm.id = 'nameForm';
+        nameForm.style.display = 'flex';
+        nameForm.style.flexDirection = 'column';
+        nameForm.style.alignItems = 'center';
+        nameForm.style.marginBottom = '20px';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.id = 'nameInput';
+        nameInput.placeholder = 'Enter your name';
+        nameInput.required = true;
+        nameInput.maxLength = 10;
+        nameInput.style.marginBottom = '10px';
+        nameInput.style.padding = '5px';
+        nameInput.style.fontSize = '16px';
+
+        const submitButton = document.createElement('button');
+        submitButton.type = 'submit';
+        submitButton.textContent = 'Submit Score';
+        submitButton.className = 'game-button';
+
+        nameForm.appendChild(nameInput);
+        nameForm.appendChild(submitButton);
+
+        nameForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = nameInput.value.trim();
+            if (name) {
+                await handleScoreSubmission(name);
+            }
+        };
+
+        overlay.appendChild(nameForm);
+    }
+
+    if (includeButton && !includeNameForm) {
         const button = document.createElement('button');
         button.textContent = buttonText;
-        button.className = 'start-button';
-        button.style.backgroundColor = '#3FE1B0';
-        button.style.color = '#0f1624';
-        button.style.border = 'none';
-        button.style.padding = '10px 20px';
-        button.style.fontSize = '18px';
-        button.style.fontFamily = 'Orbitron, sans-serif';
-        button.style.fontWeight = 'bold';
-        button.style.borderRadius = '5px';
-        button.style.cursor = 'pointer';
-        button.style.transition = 'all 0.3s ease';
-
-        button.onmouseover = () => {
-            button.style.backgroundColor = '#2dc898';
-            button.style.transform = 'scale(1.05)';
-        };
-        button.onmouseout = () => {
-            button.style.backgroundColor = '#3FE1B0';
-            button.style.transform = 'scale(1)';
-        };
-
+        button.className = 'game-button';
         button.onclick = () => {
             hideOverlay();
             if (callback) callback();
         };
-
         overlay.appendChild(button);
     }
 
@@ -1071,17 +1087,8 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
 
-    // Show the game over overlay with Try Again button
-    showOverlay('Game Over', () => {
-        console.log('Try Again button clicked');
-        hideScoreSubmissionForm();
-        game.initializeGame();
-    }, true, 'Try Again');
-
-    // Show the score submission form
-    showScoreSubmissionForm();
-
-    console.log('Game Over process completed');
+    // Show the game over overlay with the name form
+    showOverlay('Game Over', null, false, '', true);
 }
 
 function showScoreSubmissionForm() {
@@ -1104,24 +1111,12 @@ function showScoreSubmissionForm() {
     }
   }
   
-  async function handleScoreSubmission(e) {
-    e.preventDefault();
+  async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
 
-    const name = document.getElementById('nameInput').value.trim();
-    
-    if (!name) {
-        showOverlay('Please enter a valid name');
-        return;
-    }
-
     try {
-        const submitOverlay = showOverlay("Submitting score to Etherlink...");
+        showOverlay("Submitting score to Etherlink...");
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
-        hideOverlay(submitOverlay);
-        
-        // Hide the score submission form immediately after submitting
-        hideScoreSubmissionForm();
         
         if (submitted) {
             await updateHighscoreTable();
@@ -1135,7 +1130,7 @@ function showScoreSubmissionForm() {
         console.error('Error during score submission:', error);
         showOverlay('An error occurred while submitting your score. Please try again.');
     }
-}
+}  
 
 function hideScoreSubmissionForm() {
     const nameForm = document.getElementById('nameForm');
