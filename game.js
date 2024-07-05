@@ -284,6 +284,8 @@ class Game {
         }
     }
 
+
+
     updatePlayer(dt) {
         if (!this.player) {
             console.warn('Player is null in updatePlayer');
@@ -324,6 +326,7 @@ class Game {
             this.endGame();
         }
     }
+
 
 
     drawBackground() {
@@ -919,6 +922,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
 
+
+
     await Promise.all([
         loadSprites(),
         loadBackgrounds(),
@@ -953,26 +958,28 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function handleWalletConnection() {
     try {
         if (!isConnected) {
-            const connected = await connectWallet();
-            if (connected) {
-                updateButtonState();
-                await updateTryCount();
-                await loadUserAchievements();
-                showBuyTriesButton();
-                await updateHighscoreTable();
-                showAchievements();
-                await checkAndDisplayStartButton(); 
+            const web3Initialized = await initWeb3();
+            if (web3Initialized) {
+                const connected = await connectWallet();
+                if (connected) {
+                    isConnected = true;
+                    updateButtonState();
+                    await updateTryCount();
+                    await loadUserAchievements();
+                    showBuyTriesButton();
+                    await loadHighscores(); // Move this here
+                    await updateHighscoreTable();
+                    showAchievements();
+                    await getContractBalance();
+                    await checkAndDisplayStartButton();
+                } else {
+                    showOverlay('Failed to connect. Please try again.');
+                }
             } else {
-                showOverlay('Failed to connect. Please try again.');
+                showOverlay('Web3 initialization failed. Please check your connection.');
             }
         } else {
-            // Disconnect wallet
-            isConnected = false;
-            account = null;
-            updateButtonState();
-            hideBuyTriesButton();
-            hideAchievements();
-            showOverlay('Wallet disconnected. Please connect to play.');
+            // Disconnect wallet logic (keep existing code)
         }
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
@@ -1060,6 +1067,10 @@ async function handleScoreSubmission(e) {
 }
 
 async function updateHighscoreTable() {
+    if (!isConnected) {
+        console.log('Not connected, skipping highscore update');
+        return;
+    }
     try {
         const highscores = await getHighscores();
         let currentAccount;
@@ -1072,8 +1083,12 @@ async function updateHighscoreTable() {
 
         if (window.ethereum) {
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            currentAccount = accounts[0];
-        } else {
+            const currentAccount = accounts[0];
+            if (currentAccount) {
+                updateClaimPrizeButton(highscores, currentAccount);
+            } else {
+                console.log('No account connected, not updating claim prize button');
+            }
         }
 
         const highscoreBody = document.getElementById('highscoreBody');
