@@ -977,18 +977,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-    const nameForm = document.getElementById('nameForm');
-    if (nameForm) {
-        nameForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Score submission form submitted');
-            handleScoreSubmission(e);
-        });
-    } else {
-        console.error('Name form not found in the DOM on page load');
-    }
-
-    showOverlay('Please connect wallet');
+    
 });
 
 async function handleWalletConnection() {
