@@ -818,6 +818,7 @@ async function startGame() {
   try {
     const result = await contract.methods.startGame().send({ from: account });
     console.log('Game started successfully:', result);
+    window.gameStartTime = Math.floor(Date.now() / 1000);
     return true;
   } catch (error) {
     console.error('Error starting game:', error);
