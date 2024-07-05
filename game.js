@@ -630,7 +630,7 @@ class Game {
         this.gameRunning = false;
         this.gameOver = true;
         console.log('Game ended, calling handleGameOver');
-        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+        handleGameOver(this.score, this.blocksClimbed, window.gameStartTime);
     }
 
     gameLoop(currentTime) {
