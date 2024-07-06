@@ -333,12 +333,12 @@ class Game {
 
       jump() {
         if (this.player.isOnGround || this.player.jumpCount < this.player.maxJumps) {
-          const isDiagonal = !!(e.code === 'ArrowUp' && (e.code === 'ArrowLeft' || e.code === 'ArrowRight'));
+          const isDiagonal = !!(this.isKeyPressed('ArrowUp') && (this.isKeyPressed('ArrowLeft') || this.isKeyPressed('ArrowRight')));
     
           if (isDiagonal) {
             // Adjust jump velocity for diagonal jumps (reduce vertical and increase horizontal)
             this.player.velocityY = JUMP_VELOCITY * Math.SQRT2 / 2; // Divide by sqrt(2) for balanced movement
-            this.player.velocityX = (e.code === 'ArrowLeft' ? -1 : 1) * this.player.speed * Math.SQRT2 / 2;
+            this.player.velocityX = (this.isKeyPressed('ArrowLeft') ? -1 : 1) * this.player.speed * Math.SQRT2 / 2;
           } else {
             this.player.velocityY = JUMP_VELOCITY;
           }
