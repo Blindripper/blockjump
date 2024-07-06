@@ -378,11 +378,11 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-    
+
         // Store the player's intended movement
         const intendedX = this.player.x + this.player.velocityX * this.deltaTime;
         const intendedY = this.player.y + this.player.velocityY * this.deltaTime;
-    
+
         // Check collision with bottom platform
         if (this.bottomPlatform) {
             if (this.checkCollision({...this.player, y: intendedY}, this.bottomPlatform)) {
@@ -394,7 +394,7 @@ class Game {
                 }
             }
         }
-    
+
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision({...this.player, x: intendedX, y: intendedY}, platform)) {
@@ -427,8 +427,9 @@ class Game {
                 break;
             }
         }
-    
+
         // Update player position
+        this.player.x = intendedX;
         if (!onPlatform) {
             this.player.y = intendedY;
             this.player.isJumping = true;
@@ -436,9 +437,7 @@ class Game {
             this.player.isJumping = false;
             this.player.jumpCount = 0; // Reset jump count when on a platform
         }
-        
-        this.player.x = intendedX;
-    
+
         // Ensure the player doesn't go through the floor
         if (this.player.y + this.player.height > GAME_HEIGHT) {
             this.player.y = GAME_HEIGHT - this.player.height;
