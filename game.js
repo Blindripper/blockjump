@@ -83,8 +83,8 @@ class Game {
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
-        this.jump
-        this.isKeyPressed
+        this.jump;
+        this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
         this.loadSprites();
