@@ -129,6 +129,7 @@ class Game {
             this.gameStarted = false;
             this.hasPlayerJumped = false;
             this.score = 0;
+            this.player = this.createPlayer();
             this.gameRunning = true;
             this.gameOver = false;
             this.blocksClimbed = 0;
@@ -867,21 +868,19 @@ class Game {
 
     gameLoop(currentTime) {
         if (!this.gameRunning) {
+            console.log("Game loop stopped.");
             return;
         }
 
         const dt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
+        console.log(`Game loop iteration. Delta time: ${dt}`);
         this.update(dt);
 
-        try {
-            this.draw();
-        } catch (error) {
-            this.gameRunning = false;
-            return;
-        }
-
+        console.log("Before draw - Player position:", this.player ? `(${this.player.x}, ${this.player.y})` : "Player is null");
+        this.draw();
+        console.log("After draw");
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
