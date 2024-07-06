@@ -43,6 +43,8 @@ const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
 const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
+const pressedKeys = {};
+
 
 
 // Game class
@@ -87,6 +89,7 @@ class Game {
         this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
+        setupKeyListeners();
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -332,29 +335,26 @@ class Game {
 
       jump() {
         if (this.player.isOnGround || this.player.jumpCount < this.player.maxJumps) {
-          const isDiagonal = !!(this.isKeyPressed('ArrowUp') && (this.isKeyPressed('ArrowLeft') || this.isKeyPressed('ArrowRight')));
+            const isDiagonal = isKeyPressed('ArrowUp') && (isKeyPressed('ArrowLeft') || isKeyPressed('ArrowRight'));
     
-          if (isDiagonal) {
-            // Adjust jump velocity for diagonal jumps (reduce vertical and increase horizontal)
-            this.player.velocityY = JUMP_VELOCITY * Math.SQRT2 / 2; // Divide by sqrt(2) for balanced movement
-            this.player.velocityX = (this.isKeyPressed('ArrowLeft') ? -1 : 1) * this.player.speed * Math.SQRT2 / 2;
-          } else {
-            this.player.velocityY = JUMP_VELOCITY;
-          }
+            if (isDiagonal) {
+                // Adjust jump velocity for diagonal jumps (reduce vertical and increase horizontal)
+                this.player.velocityY = JUMP_VELOCITY * Math.SQRT2 / 2;
+                this.player.velocityX = (isKeyPressed('ArrowLeft') ? -1 : 1) * this.player.speed * Math.SQRT2 / 2;
+            } else {
+                this.player.velocityY = JUMP_VELOCITY;
+            }
     
-          this.player.isOnGround = false;
-          this.player.jumpCount++;
-          this.createJumpEffect();
+            this.player.isOnGround = false;
+            this.player.jumpCount++;
+            this.createJumpEffect();
     
-          if (!this.hasPlayerJumped) {
-            this.hasPlayerJumped = true;
-            this.score = 0;
-          }
+            if (!this.hasPlayerJumped) {
+                this.hasPlayerJumped = true;
+                this.score = 0;
+            }
         }
-      }
-
-     
-    
+    }
 
 
     update(dt) {
@@ -990,6 +990,16 @@ function toggleSound() {
     isSoundOn ? enableSound() : disableSound();
 }
 
+function setupKeyListeners() {
+    document.addEventListener('keydown', (e) => {
+        pressedKeys[e.code] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+        pressedKeys[e.code] = false;
+    });
+}
+
 function enableSound() {
     Object.values(sounds).forEach(sound => {
         sound.muted = false;
@@ -997,23 +1007,8 @@ function enableSound() {
 }
 
 function isKeyPressed(key) {
-    // This approach uses event listeners
-    let isPressed = false;
-  
-    document.addEventListener('keydown', (e) => {
-      if (e.code === key) {
-        isPressed = true;
-      }
-    });
-  
-    document.addEventListener('keyup', (e) => {
-      if (e.code === key) {
-        isPressed = false;
-      }
-    });
-  
-    return isPressed;
-  }
+    return pressedKeys[key] === true;
+}
   
 
 function disableSound() {
