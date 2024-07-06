@@ -255,7 +255,8 @@ class Game {
 
 
     createPlayer() {
-        return {
+        console.log("Creating player...");
+        const player = {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
@@ -267,6 +268,8 @@ class Game {
             jumpCount: 0,
             maxJumps: 2
         };
+        console.log("Player created:", player);
+        return player;
     }
 
     createJumpEffect() {
@@ -786,23 +789,23 @@ class Game {
     }
 
     drawPlayer() {
-        if (!this.player) {
-            console.warn('Player is null in drawPlayer');
+        if (!this.player || typeof this.player.x === 'undefined' || typeof this.player.y === 'undefined') {
+            console.error("Invalid player object in drawPlayer:", this.player);
             return;
         }
         
-        const playerSprite = sprites.get('player');
-        if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
-            this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
-        } else {
-            // Fallback to a colored rectangle if sprite is not available
-            this.ctx.fillStyle = '#00FF00';  // Change to a more visible color
-            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
-        }
+        console.log(`Drawing player at (${this.player.x}, ${this.player.y})`);
         
-        // Debug: draw player bounding box
-        this.ctx.strokeStyle = '#FF0000';
+        // Draw a larger, more visible player rectangle
+        this.ctx.fillStyle = '#FF0000';  // Bright red color
+        this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        
+        // Draw an outline
+        this.ctx.strokeStyle = '#FFFFFF';  // White outline
+        this.ctx.lineWidth = 2;
         this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        
+        console.log("Player drawing complete");
     }
 
     drawPowerups() {
