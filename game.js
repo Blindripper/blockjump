@@ -41,8 +41,8 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
-const JUMP_VELOCITY = -800;
-const GRAVITY = 2000;
+const JUMP_VELOCITY = -500;
+const GRAVITY = 1000;
 
 // Game class
 class Game {
@@ -253,7 +253,7 @@ class Game {
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1, // Position above bottom platform
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
-            speed: 500,
+            speed: 300,
             velocityY: 0,
             velocityX: 0,
             isJumping: false,
@@ -517,48 +517,58 @@ class Game {
 
 
 
-    updatePlayer(dt) {
-        if (!this.player) {
-            console.warn('Player is null in updatePlayer');
-            return;
-        }
-    
-        this.deltaTime = dt; // Store dt for use in handleCollisions
-    
-        // Update velocities
-        this.player.velocityY += GRAVITY * dt;
-    
-        // Store intended position
-        const intendedX = this.player.x + this.player.velocityX * dt;
-        const intendedY = this.player.y + this.player.velocityY * dt;
-    
-        // Call handleCollisions before updating position
-        this.handleCollisions(intendedX, intendedY);
-    
-        // Handle left and right wraparound
-        if (this.player.x + this.player.width < 0) {
-            this.player.x = GAME_WIDTH; // Wrap to right side
-        } else if (this.player.x > GAME_WIDTH) {
-            this.player.x = -this.player.width; // Wrap to left side
-        }
-    
-        // Prevent player from going above the screen
-        if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.velocityY = 0; // Stop upward movement
-        }
-    
-        // Check if the game has started
-        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
-            this.gameStarted = true;
-            console.log('Game started');
-        }
-    
-        // Check for game over condition (falling below screen)
-        if (this.player.y > GAME_HEIGHT) {
-            this.handleGameOver();
-        }
+updatePlayer(dt) {
+    if (!this.player) {
+        console.warn('Player is null in updatePlayer');
+        return;
     }
+
+    this.deltaTime = dt; // Store dt for use in handleCollisions
+
+    // Apply gravity
+    this.player.velocityY += GRAVITY * dt;
+
+    // Cap the falling speed to prevent extremely fast falls
+    const MAX_FALL_SPEED = 800;
+    if (this.player.velocityY > MAX_FALL_SPEED) {
+        this.player.velocityY = MAX_FALL_SPEED;
+    }
+
+    // Store intended position
+    const intendedX = this.player.x + this.player.velocityX * dt;
+    const intendedY = this.player.y + this.player.velocityY * dt;
+
+    // Call handleCollisions before updating position
+    this.handleCollisions(intendedX, intendedY);
+
+    // Update position
+    this.player.x += this.player.velocityX * dt;
+    this.player.y += this.player.velocityY * dt;
+
+    // Handle left and right wraparound
+    if (this.player.x + this.player.width < 0) {
+        this.player.x = GAME_WIDTH; // Wrap to right side
+    } else if (this.player.x > GAME_WIDTH) {
+        this.player.x = -this.player.width; // Wrap to left side
+    }
+
+    // Prevent player from going above the screen
+    if (this.player.y < 0) {
+        this.player.y = 0;
+        this.player.velocityY = 0; // Stop upward movement
+    }
+
+    // Check if the game has started
+    if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
+        this.gameStarted = true;
+        console.log('Game started');
+    }
+
+    // Check for game over condition (falling below screen)
+    if (this.player.y > GAME_HEIGHT) {
+        this.handleGameOver();
+    }
+}
 
     handleGameOver() {
         this.gameRunning = false;
