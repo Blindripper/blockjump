@@ -393,42 +393,32 @@ class Game {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
     
         for (let platform of platforms) {
-            // Calculate overlap
-            const overlapLeft = this.player.x + this.player.width - platform.x;
-            const overlapRight = platform.x + platform.width - this.player.x;
-            const overlapTop = this.player.y + this.player.height - platform.y;
-            const overlapBottom = platform.y + platform.height - this.player.y;
+            if (this.checkCollision(this.player, platform)) {
+                const playerBottom = this.player.y + this.player.height;
+                const playerTop = this.player.y;
+                const platformBottom = platform.y + platform.height;
     
-            // Check if there's a collision
-            if (overlapLeft > 0 && overlapRight > 0 && overlapTop > 0 && overlapBottom > 0) {
-                // Determine the smallest overlap
-                const minOverlapX = Math.min(overlapLeft, overlapRight);
-                const minOverlapY = Math.min(overlapTop, overlapBottom);
-    
-                // Resolve collision based on the smallest overlap
-                if (minOverlapX < minOverlapY) {
-                    // Horizontal collision
-                    if (overlapLeft < overlapRight) {
+                // Coming from above
+                if (this.player.velocityY > 0 && playerBottom <= platform.y + this.player.velocityY) {
+                    this.player.y = platform.y - this.player.height;
+                    this.player.velocityY = 0;
+                    onPlatform = true;
+                }
+                // Coming from below
+                else if (this.player.velocityY < 0 && playerTop >= platformBottom + this.player.velocityY) {
+                    this.player.y = platformBottom;
+                    this.player.velocityY = 0;
+                }
+                // Side collision - only check if not colliding from above or below
+                else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x) {
+                    if (this.player.x < platform.x) {
                         this.player.x = platform.x - this.player.width;
                     } else {
                         this.player.x = platform.x + platform.width;
                     }
                     this.player.velocityX = 0;
-                } else {
-                    // Vertical collision
-                    if (overlapTop < overlapBottom) {
-                        // Collision from above
-                        this.player.y = platform.y - this.player.height;
-                        this.player.velocityY = 0;
-                        onPlatform = true;
-                    } else {
-                        // Collision from below
-                        this.player.y = platform.y + platform.height;
-                        this.player.velocityY = 0;
-                    }
                 }
     
-                // Handle special platform types
                 if (platform.isGolden) {
                     this.handleGoldenPlatform();
                 } else if (platform.isSpike) {
@@ -475,11 +465,10 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        const margin = 10;
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
-               obj1.y + obj1.height > obj2.y &&
-               obj1.y < obj2.y + obj2.height;
+               obj1.y < obj2.y + obj2.height &&
+               obj1.y + obj1.height > obj2.y;
     }
 
     landOnPlatform(platform) {
