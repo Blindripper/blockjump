@@ -41,7 +41,7 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
-const JUMP_VELOCITY = 600;
+const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
 
 
@@ -84,6 +84,7 @@ class Game {
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
         this.jump
+        this.isKeyPressed
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
         this.loadSprites();
