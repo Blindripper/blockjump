@@ -196,30 +196,23 @@ class Game {
     }
 
     updateEnemies(dt) {
-        let reachedEdge = false;
-
         this.enemies.forEach(enemy => {
             if (enemy.isDestroyed) {
                 enemy.destroyedTime += dt;
-                if (enemy.destroyedTime > 0.5) { // Remove destroyed enemy after 0.5 seconds
+                if (enemy.destroyedTime > 0.5) {
                     this.enemies = this.enemies.filter(e => e !== enemy);
                 }
                 return;
             }
 
+            // Move enemies horizontally only
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
 
+            // Reverse direction if reaching screen edges
             if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
-                reachedEdge = true;
+                this.enemyDirection *= -1;
             }
         });
-
-        if (reachedEdge) {
-            this.enemyDirection *= -1;
-            this.enemies.forEach(enemy => {
-                enemy.y += this.enemyDropDistance;
-            });
-        }
     }
 
     checkBulletEnemyCollisions() {
@@ -353,7 +346,6 @@ class Game {
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
         this.updateParticles(dt);
-        this.updateWind(dt);
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
@@ -386,7 +378,7 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-    
+
         // Check collision with bottom platform
         if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
             if (this.player.y + this.player.height <= this.bottomPlatform.y + this.player.velocityY && this.player.velocityY >= 0) {
@@ -394,11 +386,11 @@ class Game {
                 onPlatform = true;
             }
         }
-    
+
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
-                // Only handle collision if the player is above the platform and moving downward
+                // Handle vertical collisions
                 if (this.player.y + this.player.height <= platform.y + this.player.velocityY && this.player.velocityY >= 0) {
                     this.landOnPlatform(platform);
                     onPlatform = true;
@@ -408,25 +400,21 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
-                    break;  // Exit the loop once we've landed
+                } else if (this.player.y >= platform.y + platform.height) {
+                    // Collision from below
+                    this.player.y = platform.y + platform.height;
+                    this.player.velocityY = 0;
+                } else {
+                    // Handle horizontal collisions
+                    if (this.player.x + this.player.width > platform.x && this.player.x < platform.x) {
+                        this.player.x = platform.x - this.player.width;
+                    } else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x + platform.width) {
+                        this.player.x = platform.x + platform.width;
+                    }
                 }
             }
         }
         
-        // Handle horizontal collisions with platforms
-        for (let platform of this.platforms) {
-            if (this.checkCollision(this.player, platform)) {
-                // Collision from the left
-                if (this.player.x + this.player.width > platform.x && this.player.x < platform.x) {
-                    this.player.x = platform.x - this.player.width;
-                }
-                // Collision from the right
-                else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x + platform.width) {
-                    this.player.x = platform.x + platform.width;
-                }
-            }
-        }
-    
         if (!onPlatform) {
             this.player.isJumping = true;
         }
@@ -442,7 +430,7 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        const margin = 5;
+        const margin = 10;
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
                obj1.y + obj1.height > obj2.y &&
@@ -524,9 +512,7 @@ class Game {
             console.log('Game started');
         }
     
-        // Apply wind effect
-        this.player.x += this.wind.speed * this.wind.direction * dt;
-    
+
         // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
             this.handleGameOver();
@@ -639,12 +625,6 @@ class Game {
         }
     }
 
-    updateWind(dt) {
-        if (Math.random() < 0.01) {
-            this.wind.speed = Math.random() * 50;
-            this.wind.direction = Math.random() < 0.5 ? -1 : 1;
-        }
-    }
 
     updateDifficulty() {
         this.difficultyLevel = Math.floor(this.score / 5000) + 1;
