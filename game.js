@@ -75,9 +75,9 @@ class Game {
         this.bullets = [];
         this.enemies = [];
         this.lastEnemySpawn = 0;
-        this.enemySpawnInterval = 5000 + Math.random() * 5000; // 5-10 seconds
+        this.enemySpawnInterval = 7000 + Math.random() * 8000; 
         this.lastShotTime = 0;
-        this.shootingCooldown = 500; // 0.5 seconds
+        this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
@@ -183,15 +183,15 @@ class Game {
         const currentTime = Date.now();
         if (currentTime - this.lastEnemySpawn > this.enemySpawnInterval) {
             this.enemies.push({
-                x: Math.random() * (GAME_WIDTH - 50),
+                x: Math.random() * (GAME_WIDTH -80),
                 y: 50,
-                width: 50,
-                height: 50,
+                width: 80,
+                height: 80,
                 isDestroyed: false,
                 destroyedTime: 0
             });
             this.lastEnemySpawn = currentTime;
-            this.enemySpawnInterval = 5000 + Math.random() * 5000; // Reset spawn interval
+            this.enemySpawnInterval = 3000 + Math.random() * 2000;
         }
     }
 
@@ -243,6 +243,8 @@ class Game {
         this.enemies.forEach(enemy => {
             if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
                 this.gameOver = true;
+                // You can add additional effects here, like:
+                this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
             }
         });
     }
@@ -336,9 +338,18 @@ class Game {
 
 
     update(dt) {
-        if (!this.gameRunning || this.gameOver) return;
-
+        // Check for game over condition first
+        if (this.gameOver) {
+            this.handleGameOver();
+            return;
+        }
+    
+        // Check if the game is running
+        if (!this.gameRunning) return;
+    
+        // Update game elements
         this.updatePlayer(dt);
+        this.handleCollisions();
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
         this.updateParticles(dt);
@@ -346,13 +357,26 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
+    
+        // Update shooting and enemy related elements
         this.updateBullets(dt);
         this.updateEnemies(dt);
         this.checkBulletEnemyCollisions();
         this.checkPlayerEnemyCollisions();
         this.spawnEnemies();
+    
+        // Check if player has fallen off the screen
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
+        }
     }
-
+    
+    handleGameOver() {
+        this.gameRunning = false;
+        // Call the existing game over handling function
+        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+    }
+    
     updateBackground() {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
             this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
@@ -362,13 +386,13 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-
+    
         // Check collision with bottom platform
         if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
             this.landOnPlatform(this.bottomPlatform);
             onPlatform = true;
         }
-
+    
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
@@ -379,7 +403,7 @@ class Game {
                     if (platform.isGolden) {
                         this.handleGoldenPlatform();
                     } else if (platform.isSpike) {
-                        this.endGame();
+                        this.gameOver = true;
                         return;
                     }
                     break;  // Exit the loop once we've landed
@@ -397,6 +421,14 @@ class Game {
         if (!onPlatform) {
             this.player.isJumping = true;
         }
+    }
+    
+    checkPlayerEnemyCollisions() {
+        this.enemies.forEach(enemy => {
+            if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
+                this.gameOver = true;
+            }
+        });
     }
     
 
@@ -487,11 +519,23 @@ class Game {
     
         // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
-            this.endGame();
+            this.handleGameOver();
         }
     }
 
+    handleGameOver() {
+        this.gameRunning = false;
+        this.gameOver = true;
 
+        // Stop any ongoing sounds
+        Object.values(sounds).forEach(sound => {
+            sound.pause();
+            sound.currentTime = 0;
+        });
+        playSound('gameOver');
+
+        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+    }
 
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
@@ -785,13 +829,6 @@ class Game {
         });
     }
 
-
-    endGame() {
-        this.gameRunning = false;
-        this.gameOver = true;
-        console.log('Game ended, calling handleGameOver');
-        handleGameOver(this.score, this.blocksClimbed, window.gameStartTime);
-    }
 
     gameLoop(currentTime) {
         if (!this.gameRunning) {
