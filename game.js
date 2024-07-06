@@ -335,16 +335,7 @@ class Game {
 
       jump() {
         if (this.player.isOnGround || this.player.jumpCount < this.player.maxJumps) {
-            const isDiagonal = isKeyPressed('ArrowUp') && (isKeyPressed('ArrowLeft') || isKeyPressed('ArrowRight'));
-    
-            if (isDiagonal) {
-                // Adjust jump velocity for diagonal jumps (reduce vertical and increase horizontal)
-                this.player.velocityY = JUMP_VELOCITY * Math.SQRT2 / 2;
-                this.player.velocityX = (isKeyPressed('ArrowLeft') ? -1 : 1) * this.player.speed * Math.SQRT2 / 2;
-            } else {
-                this.player.velocityY = JUMP_VELOCITY;
-            }
-    
+            this.player.velocityY = JUMP_VELOCITY;
             this.player.isOnGround = false;
             this.player.jumpCount++;
             this.createJumpEffect();
@@ -528,18 +519,23 @@ class Game {
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
     
-        
+        // Check for horizontal movement
+        if (isKeyPressed('ArrowLeft')) {
+            this.player.velocityX = -this.player.speed;
+        } else if (isKeyPressed('ArrowRight')) {
+            this.player.velocityX = this.player.speed;
+        } else {
+            // Slow down if no key is pressed
+            this.player.velocityX *= 0.9;
+        }
     
-        // Update vertical position first
+        // Update vertical position
         const nextY = this.player.y + this.player.velocityY * dt;
-        const initialY = this.player.y; // Store initial Y position
         this.updatePlayerVertical(nextY);
     
-        // Only update horizontal position if vertical position didn't change
-        if (this.player.y === initialY) {
-            const nextX = this.player.x + this.player.velocityX * dt;
-            this.updatePlayerHorizontal(nextX);
-        }
+        // Update horizontal position
+        const nextX = this.player.x + this.player.velocityX * dt;
+        this.updatePlayerHorizontal(nextX);
     
         console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
     }
@@ -547,23 +543,30 @@ class Game {
     updatePlayerHorizontal(nextX) {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         
+        let collision = false;
         for (let platform of platforms) {
             if (nextX < platform.x + platform.width &&
                 nextX + this.player.width > platform.x &&
                 this.player.y < platform.y + platform.height &&
                 this.player.y + this.player.height > platform.y) {
                 
+                collision = true;
                 if (this.player.velocityX > 0) {
                     this.player.x = platform.x - this.player.width;
                 } else if (this.player.velocityX < 0) {
                     this.player.x = platform.x + platform.width;
                 }
                 this.player.velocityX = 0;
-                return;
+                break;
             }
         }
     
-        this.player.x = nextX;
+        if (!collision) {
+            this.player.x = nextX;
+        }
+    
+        // Keep player within game bounds
+        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
     }
 
     updatePlayerVertical(nextY) {
