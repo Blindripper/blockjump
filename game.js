@@ -75,7 +75,8 @@ class Game {
         this.bullets = [];
         this.enemies = [];
         this.lastEnemySpawn = 0;
-        this.enemySpawnInterval = 7000 + Math.random() * 8000; 
+        this.baseEnemySpawnInterval = 45000; // 45 seconds
+        this.enemySpawnInterval = this.baseEnemySpawnInterval;
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
@@ -191,7 +192,6 @@ class Game {
                 destroyedTime: 0
             });
             this.lastEnemySpawn = currentTime;
-            this.enemySpawnInterval = 3000 + Math.random() * 2000;
         }
     }
 
@@ -389,24 +389,17 @@ class Game {
     
         // Check collision with bottom platform
         if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
-            this.landOnPlatform(this.bottomPlatform);
-            onPlatform = true;
+            if (this.player.y + this.player.height <= this.bottomPlatform.y + this.player.velocityY && this.player.velocityY >= 0) {
+                this.landOnPlatform(this.bottomPlatform);
+                onPlatform = true;
+            }
         }
     
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
-                // Calculate the overlap on each side
-                const overlapTop = this.player.y + this.player.height - platform.y;
-                const overlapBottom = platform.y + platform.height - this.player.y;
-                const overlapLeft = this.player.x + this.player.width - platform.x;
-                const overlapRight = platform.x + platform.width - this.player.x;
-
-                // Find the smallest overlap
-                const minOverlap = Math.min(overlapTop, overlapBottom, overlapLeft, overlapRight);
-
-                if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                    // Landing on top of the platform
+                // Only handle collision if the player is above the platform and moving downward
+                if (this.player.y + this.player.height <= platform.y + this.player.velocityY && this.player.velocityY >= 0) {
                     this.landOnPlatform(platform);
                     onPlatform = true;
                     if (platform.isGolden) {
@@ -415,22 +408,25 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
-                } else if (minOverlap === overlapBottom) {
-                    // Hitting the bottom of the platform
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
-                } else if (minOverlap === overlapLeft) {
-                    // Hitting the left side of the platform
-                    this.player.x = platform.x - this.player.width;
-                    this.player.velocityX = 0;
-                } else if (minOverlap === overlapRight) {
-                    // Hitting the right side of the platform
-                    this.player.x = platform.x + platform.width;
-                    this.player.velocityX = 0;
+                    break;  // Exit the loop once we've landed
                 }
             }
         }
         
+        // Handle horizontal collisions with platforms
+        for (let platform of this.platforms) {
+            if (this.checkCollision(this.player, platform)) {
+                // Collision from the left
+                if (this.player.x + this.player.width > platform.x && this.player.x < platform.x) {
+                    this.player.x = platform.x - this.player.width;
+                }
+                // Collision from the right
+                else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x + platform.width) {
+                    this.player.x = platform.x + platform.width;
+                }
+            }
+        }
+    
         if (!onPlatform) {
             this.player.isJumping = true;
         }
@@ -653,6 +649,12 @@ class Game {
     updateDifficulty() {
         this.difficultyLevel = Math.floor(this.score / 5000) + 1;
         this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
+
+        // Update enemy spawn interval
+        this.enemySpawnInterval = Math.max(
+            5000, // Minimum spawn interval of 5 seconds
+            this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
+        );
         
         // Change background
         this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
