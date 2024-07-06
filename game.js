@@ -353,6 +353,8 @@ class Game {
           }
         }
       }
+
+     
     
 
 
@@ -994,6 +996,26 @@ function enableSound() {
         sound.muted = false;
     });
 }
+
+function isKeyPressed(key) {
+    // This approach uses event listeners
+    let isPressed = false;
+  
+    document.addEventListener('keydown', (e) => {
+      if (e.code === key) {
+        isPressed = true;
+      }
+    });
+  
+    document.addEventListener('keyup', (e) => {
+      if (e.code === key) {
+        isPressed = false;
+      }
+    });
+  
+    return isPressed;
+  }
+  
 
 function disableSound() {
     Object.values(sounds).forEach(sound => {
