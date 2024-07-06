@@ -72,6 +72,17 @@ class Game {
         this.bottomPlatform = null;
         this.player = null;
         this.gameStarted = false;
+        this.bullets = [];
+        this.enemies = [];
+        this.lastEnemySpawn = 0;
+        this.enemySpawnInterval = 5000 + Math.random() * 5000; // 5-10 seconds
+        this.lastShotTime = 0;
+        this.shootingCooldown = 500; // 0.5 seconds
+        this.enemySpeed = 50;
+        this.enemyDirection = 1;
+        this.enemyDropDistance = 20;
+        this.loadSprites();
+        this.loadSounds();
         this.setupEventListeners();
     }
 
@@ -133,6 +144,111 @@ class Game {
         }
     }
     
+    loadSprites() {
+        this.enemySprite = new Image();
+        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft.png';
+        this.enemyDestroyedSprite = new Image();
+        this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
+    }
+
+    loadSounds() {
+        this.shootSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/Lasershot.wav');
+        this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.wav');
+    }
+ 
+    shoot() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastShotTime > this.shootingCooldown) {
+            this.bullets.push({
+                x: this.player.x + this.player.width / 2 - 2.5,
+                y: this.player.y,
+                width: 5,
+                height: 10,
+                speed: 500
+            });
+            this.lastShotTime = currentTime;
+            this.shootSound.currentTime = 0;
+            this.shootSound.play();
+        }
+    }
+
+    updateBullets(dt) {
+        this.bullets = this.bullets.filter(bullet => {
+            bullet.y -= bullet.speed * dt;
+            return bullet.y + bullet.height > 0;
+        });
+    }
+
+    spawnEnemies() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastEnemySpawn > this.enemySpawnInterval) {
+            this.enemies.push({
+                x: Math.random() * (GAME_WIDTH - 50),
+                y: 50,
+                width: 50,
+                height: 50,
+                isDestroyed: false,
+                destroyedTime: 0
+            });
+            this.lastEnemySpawn = currentTime;
+            this.enemySpawnInterval = 5000 + Math.random() * 5000; // Reset spawn interval
+        }
+    }
+
+    updateEnemies(dt) {
+        let reachedEdge = false;
+
+        this.enemies.forEach(enemy => {
+            if (enemy.isDestroyed) {
+                enemy.destroyedTime += dt;
+                if (enemy.destroyedTime > 0.5) { // Remove destroyed enemy after 0.5 seconds
+                    this.enemies = this.enemies.filter(e => e !== enemy);
+                }
+                return;
+            }
+
+            enemy.x += this.enemySpeed * this.enemyDirection * dt;
+
+            if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
+                reachedEdge = true;
+            }
+        });
+
+        if (reachedEdge) {
+            this.enemyDirection *= -1;
+            this.enemies.forEach(enemy => {
+                enemy.y += this.enemyDropDistance;
+            });
+        }
+    }
+
+    checkBulletEnemyCollisions() {
+        this.bullets = this.bullets.filter(bullet => {
+            let bulletHit = false;
+            this.enemies.forEach(enemy => {
+                if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
+                    bulletHit = true;
+                    enemy.isDestroyed = true;
+                    enemy.destroyedTime = 0;
+                    this.score += 1000;
+                    this.enemyDestroyedSound.currentTime = 0;
+                    this.enemyDestroyedSound.play();
+                }
+            });
+            return !bulletHit;
+        });
+    }
+
+    checkPlayerEnemyCollisions() {
+        this.enemies.forEach(enemy => {
+            if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
+                this.gameOver = true;
+            }
+        });
+    }
+
+
+
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
@@ -194,6 +310,8 @@ class Game {
         if (e.code === 'ArrowLeft') this.player.velocityX = -this.player.speed;
         if (e.code === 'ArrowRight') this.player.velocityX = this.player.speed;
         if (e.code === 'ArrowUp' || e.code === 'Space') this.jump();
+        if (e.code === 'Space') this.shoot();
+
     }
 
     handleKeyUp(e) {
@@ -228,6 +346,11 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
+        this.updateBullets(dt);
+        this.updateEnemies(dt);
+        this.checkBulletEnemyCollisions();
+        this.checkPlayerEnemyCollisions();
+        this.spawnEnemies();
     }
 
     updateBackground() {
@@ -518,6 +641,8 @@ class Game {
         this.drawParticles();
         this.drawHUD();
         this.drawPowerupHUD();
+        this.drawBullets();
+        this.drawEnemies();
         this.ctx.restore();
     }
 
@@ -548,6 +673,30 @@ class Game {
             this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
             this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
         }
+    }
+
+    drawBullets() {
+        this.ctx.fillStyle = '#00FF00';
+        for (let bullet of this.bullets) {
+            this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        }
+    }
+
+    drawEnemies() {
+        for (let enemy of this.enemies) {
+            if (enemy.isDestroyed) {
+                this.ctx.drawImage(this.enemyDestroyedSprite, enemy.x, enemy.y, enemy.width, enemy.height);
+            } else {
+                this.ctx.drawImage(this.enemySprite, enemy.x, enemy.y, enemy.width, enemy.height);
+            }
+        }
+    }
+
+    checkCollision(obj1, obj2) {
+        return obj1.x < obj2.x + obj2.width &&
+               obj1.x + obj1.width > obj2.x &&
+               obj1.y < obj2.y + obj2.height &&
+               obj1.y + obj1.height > obj2.y;
     }
 
     drawSpikePlatform(platform) {
