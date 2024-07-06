@@ -43,6 +43,8 @@ const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
 const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
+const MAX_FALL_SPEED = 1000; 
+
 
 // Game class
 class Game {
