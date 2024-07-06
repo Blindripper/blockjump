@@ -399,7 +399,7 @@ class Game {
         for (let platform of this.platforms) {
             if (this.checkCollision({...this.player, x: intendedX, y: intendedY}, platform)) {
                 // Vertical collision
-                if (this.player.y + this.player.height <= platform.y) {
+                if (this.player.velocityY > 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * this.deltaTime) {
                     // Collision from above
                     this.landOnPlatform(platform);
                     onPlatform = true;
@@ -409,7 +409,7 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
-                } else if (this.player.y >= platform.y + platform.height) {
+                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height + this.player.velocityY * this.deltaTime) {
                     // Collision from below
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
@@ -424,23 +424,26 @@ class Game {
                     }
                     this.player.velocityX = 0;
                 }
-                // Exit the loop if a collision is found to prevent further checks
                 break;
             }
         }
     
-        // Update player position only if no collision occurred
-        if (!onPlatform && this.player.velocityY >= 0) {
-            this.player.y = intendedY;
-        }
-        if (this.player.velocityX !== 0) {
-            this.player.x = intendedX;
-        }
-    
+        // Update player position
         if (!onPlatform) {
+            this.player.y = intendedY;
             this.player.isJumping = true;
         } else {
+            this.player.isJumping = false;
             this.player.jumpCount = 0; // Reset jump count when on a platform
+        }
+        
+        this.player.x = intendedX;
+    
+        // Ensure the player doesn't go through the floor
+        if (this.player.y + this.player.height > GAME_HEIGHT) {
+            this.player.y = GAME_HEIGHT - this.player.height;
+            this.player.velocityY = 0;
+            onPlatform = true;
         }
     }
     
