@@ -256,9 +256,8 @@ class Game {
             speed: 300,
             velocityY: 0,
             velocityX: 0,
-            isOnGround: false,
-            canDoubleJump: false,
-            jumpCount: 0
+            isOnGround: true,
+            canJump: true
         };
     }
 
@@ -324,22 +323,16 @@ class Game {
         if (e.code === 'ArrowRight' && this.player.velocityX > 0) this.player.velocityX = 0;    }
 
         jump() {
-            if (this.player.isOnGround) {
-                // First jump
+            if (this.player.canJump) {
                 this.player.velocityY = JUMP_VELOCITY;
                 this.player.isOnGround = false;
-                this.player.canDoubleJump = true;
+                this.player.canJump = false;
                 this.createJumpEffect();
-            } else if (this.player.canDoubleJump) {
-                // Double jump
-                this.player.velocityY = JUMP_VELOCITY * 0.8; // Slightly lower second jump
-                this.player.canDoubleJump = false;
-                this.createJumpEffect();
-            }
     
-            if (!this.hasPlayerJumped) {
-                this.hasPlayerJumped = true;
-                this.score = 0; // Reset score to 0 when the game actually starts
+                if (!this.hasPlayerJumped) {
+                    this.hasPlayerJumped = true;
+                    this.score = 0; // Reset score to 0 when the game actually starts
+                }
             }
         }
 
@@ -436,7 +429,7 @@ class Game {
         // Update player state
         if (onPlatform) {
             this.player.isOnGround = true;
-            this.player.canDoubleJump = false; // Reset double jump when on platform
+            this.player.canJump = true;
         } else {
             this.player.isOnGround = false;
         }
@@ -446,8 +439,9 @@ class Game {
         this.player.y = platform.y - this.player.height;
         this.player.velocityY = 0;
         this.player.isOnGround = true;
-        this.player.canDoubleJump = false;
+        this.player.canJump = true;
     }
+
 
 
     
@@ -514,7 +508,9 @@ class Game {
         this.deltaTime = dt;
 
         // Apply gravity
-        this.player.velocityY += GRAVITY * dt;
+        if (!this.player.isOnGround) {
+            this.player.velocityY += GRAVITY * dt;
+        }
 
         // Cap the falling speed
         const MAX_FALL_SPEED = 800;
