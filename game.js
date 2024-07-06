@@ -378,20 +378,29 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-
+    
+        // Store the player's intended movement
+        const intendedX = this.player.x + this.player.velocityX * this.deltaTime;
+        const intendedY = this.player.y + this.player.velocityY * this.deltaTime;
+    
         // Check collision with bottom platform
-        if (this.bottomPlatform && this.checkCollision(this.player, this.bottomPlatform)) {
-            if (this.player.y + this.player.height <= this.bottomPlatform.y + this.player.velocityY && this.player.velocityY >= 0) {
-                this.landOnPlatform(this.bottomPlatform);
-                onPlatform = true;
+        if (this.bottomPlatform) {
+            if (this.checkCollision({...this.player, y: intendedY}, this.bottomPlatform)) {
+                if (this.player.velocityY >= 0) {
+                    this.landOnPlatform(this.bottomPlatform);
+                    onPlatform = true;
+                } else {
+                    this.player.velocityY = 0;
+                }
             }
         }
-
+    
         // Check collision with other platforms
         for (let platform of this.platforms) {
-            if (this.checkCollision(this.player, platform)) {
-                // Handle vertical collisions
-                if (this.player.y + this.player.height <= platform.y + this.player.velocityY && this.player.velocityY >= 0) {
+            if (this.checkCollision({...this.player, x: intendedX, y: intendedY}, platform)) {
+                // Vertical collision
+                if (this.player.y + this.player.height <= platform.y) {
+                    // Collision from above
                     this.landOnPlatform(platform);
                     onPlatform = true;
                     if (platform.isGolden) {
@@ -405,18 +414,33 @@ class Game {
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
                 } else {
-                    // Handle horizontal collisions
-                    if (this.player.x + this.player.width > platform.x && this.player.x < platform.x) {
+                    // Horizontal collision
+                    if (this.player.x < platform.x) {
+                        // Collision from left
                         this.player.x = platform.x - this.player.width;
-                    } else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x + platform.width) {
+                    } else {
+                        // Collision from right
                         this.player.x = platform.x + platform.width;
                     }
+                    this.player.velocityX = 0;
                 }
+                // Exit the loop if a collision is found to prevent further checks
+                break;
             }
         }
-        
+    
+        // Update player position only if no collision occurred
+        if (!onPlatform && this.player.velocityY >= 0) {
+            this.player.y = intendedY;
+        }
+        if (this.player.velocityX !== 0) {
+            this.player.x = intendedX;
+        }
+    
         if (!onPlatform) {
             this.player.isJumping = true;
+        } else {
+            this.player.jumpCount = 0; // Reset jump count when on a platform
         }
     }
     
@@ -486,10 +510,17 @@ class Game {
             return;
         }
     
-        // Update player position
-        this.player.x += this.player.velocityX * dt;
-        this.player.y += this.player.velocityY * dt;
+        this.deltaTime = dt; // Store dt for use in handleCollisions
+    
+        // Update velocities
         this.player.velocityY += GRAVITY * dt;
+    
+        // Store intended position
+        const intendedX = this.player.x + this.player.velocityX * dt;
+        const intendedY = this.player.y + this.player.velocityY * dt;
+    
+        // Call handleCollisions before updating position
+        this.handleCollisions(intendedX, intendedY);
     
         // Handle left and right wraparound
         if (this.player.x + this.player.width < 0) {
@@ -504,15 +535,12 @@ class Game {
             this.player.velocityY = 0; // Stop upward movement
         }
     
-        this.handleCollisions();
-    
         // Check if the game has started
         if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
             this.gameStarted = true;
             console.log('Game started');
         }
     
-
         // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
             this.handleGameOver();
