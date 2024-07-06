@@ -522,13 +522,16 @@ class Game {
             this.player.velocityY = MAX_FALL_SPEED;
         }
     
-        // Update horizontal position
-        const nextX = this.player.x + this.player.velocityX * dt;
-        this.updatePlayerHorizontal(nextX);
-    
-        // Update vertical position
+        // Update vertical position first
         const nextY = this.player.y + this.player.velocityY * dt;
+        const initialY = this.player.y; // Store initial Y position
         this.updatePlayerVertical(nextY);
+    
+        // Only update horizontal position if vertical position didn't change
+        if (this.player.y === initialY) {
+            const nextX = this.player.x + this.player.velocityX * dt;
+            this.updatePlayerHorizontal(nextX);
+        }
     
         console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
     }
@@ -560,36 +563,43 @@ class Game {
         let onPlatform = false;
         
         for (let platform of platforms) {
+            // Check if player is within the horizontal bounds of the platform
             if (this.player.x < platform.x + platform.width &&
-                this.player.x + this.player.width > platform.x &&
-                nextY < platform.y + platform.height &&
-                nextY + this.player.height > platform.y) {
+                this.player.x + this.player.width > platform.x) {
                 
                 const buffer = 0.1; // Small buffer to prevent floating point issues
                 
-                if (this.player.velocityY > 0 && this.player.y + this.player.height <= platform.y + buffer) {
+                if (this.player.velocityY > 0 && nextY + this.player.height > platform.y && this.player.y + this.player.height <= platform.y + buffer) {
                     // Landing on platform
                     this.player.y = platform.y - this.player.height;
                     this.player.velocityY = 0;
                     onPlatform = true;
-                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height - buffer) {
+                    break; // Exit the loop as we've landed
+                } else if (this.player.velocityY < 0 && nextY < platform.y + platform.height && this.player.y >= platform.y + platform.height - buffer) {
                     // Hitting platform from below
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
+                    // Importantly, we do not change the player's horizontal position here
+                    
+                    if (platform.isGolden) {
+                        this.handleGoldenPlatform();
+                    } else if (platform.isSpike) {
+                        this.gameOver = true;
+                    }
+                    
+                    return; // Exit the method entirely to prevent any further movement this frame
                 }
-    
-                if (platform.isGolden) {
-                    this.handleGoldenPlatform();
-                } else if (platform.isSpike) {
-                    this.gameOver = true;
-                }
-                
-                return;
             }
         }
     
-        this.player.y = nextY;
+        if (!onPlatform) {
+            this.player.y = nextY;
+        }
+        
         this.player.isOnGround = onPlatform;
+        if (onPlatform) {
+            this.player.jumpCount = 0; // Reset jump count when landing
+        }
     }
 
     handleGameOver() {
