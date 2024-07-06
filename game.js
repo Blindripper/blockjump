@@ -311,7 +311,7 @@ class Game {
     handleKeyDown(e) {
         if (e.code === 'ArrowLeft') this.player.velocityX = -this.player.speed;
         if (e.code === 'ArrowRight') this.player.velocityX = this.player.speed;
-        if (e.code === 'ArrowUp' || e.code === 'Space') this.jump();
+        if (e.code === 'ArrowUp') this.jump();
         if (e.code === 'Space') this.shoot();
 
     }
