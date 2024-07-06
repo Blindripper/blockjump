@@ -363,11 +363,6 @@ class Game {
         }
     }
     
-    handleGameOver() {
-        this.gameRunning = false;
-        // Call the existing game over handling function
-        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
-    }
     
     updateBackground() {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
@@ -424,9 +419,7 @@ class Game {
 
         // Update player position
         this.player.x = intendedX;
-        if (!onPlatform) {
-            this.player.y = intendedY;
-        }
+        this.player.y = intendedY;
 
         // Update player state
         if (onPlatform) {
@@ -436,13 +429,9 @@ class Game {
             this.player.isJumping = true;
         }
 
-        // Ensure the player doesn't go through the floor
-        if (this.player.y + this.player.height > GAME_HEIGHT) {
-            this.player.y = GAME_HEIGHT - this.player.height;
-            this.player.velocityY = 0;
-            onPlatform = true;
-            this.player.isJumping = false;
-            this.player.jumpCount = 0;
+        // Check for game over condition (falling below screen)
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
         }
     }
     
