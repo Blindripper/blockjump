@@ -54,6 +54,7 @@ class Game {
         this.isConnected = false;
         this.bottomPlatformTimer = 0;
         this.bottomPlatformDuration = 5
+        this.isKeyPressed
         this.gameRunning = false;
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
