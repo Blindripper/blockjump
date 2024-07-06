@@ -41,8 +41,8 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
-const JUMP_VELOCITY = -500;
-const GRAVITY = 1000;
+const JUMP_VELOCITY = -600;
+const GRAVITY = 1500;
 
 // Game class
 class Game {
@@ -313,13 +313,14 @@ class Game {
     }
 
     handleKeyUp(e) {
-        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') this.player.velocityX = 0;
-    }
+        if (e.code === 'ArrowLeft' && this.player.velocityX < 0) this.player.velocityX = 0;
+        if (e.code === 'ArrowRight' && this.player.velocityX > 0) this.player.velocityX = 0;    }
 
     jump() {
         if (this.player.jumpCount < this.player.maxJumps) {
             this.player.velocityY = JUMP_VELOCITY;
             this.player.isJumping = true;
+            this.player.isOnGround = false;
             this.player.jumpCount++;
             this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
             playSound('jump');
@@ -375,28 +376,26 @@ class Game {
     }
     
     handleCollisions() {
-        let onPlatform = false;
-    
+        this.player.isOnGround = false;
+
         // Check collision with bottom platform
         if (this.bottomPlatform) {
             if (this.checkCollision(this.player, this.bottomPlatform)) {
                 if (this.player.velocityY >= 0) {
                     this.landOnPlatform(this.bottomPlatform);
-                    onPlatform = true;
                 }
             }
         }
-    
+
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
                 const playerBottom = this.player.y + this.player.height;
                 const platformTop = platform.y;
-    
+
                 if (this.player.velocityY >= 0 && playerBottom <= platformTop + this.player.velocityY * this.deltaTime) {
                     // Collision from above
                     this.landOnPlatform(platform);
-                    onPlatform = true;
                     if (platform.isGolden) {
                         this.handleGoldenPlatform();
                     } else if (platform.isSpike) {
@@ -420,48 +419,15 @@ class Game {
                 }
             }
         }
-    
-        // Update player state
-        if (onPlatform) {
-            this.player.isJumping = false;
-            this.player.jumpCount = 0; // Reset jump count when on a platform
-        } else {
-            this.player.isJumping = true;
-            // Apply gravity only if not on a platform
-            this.player.velocityY += GRAVITY * this.deltaTime;
-        }
-    
-        // Apply vertical movement
-        this.player.y += this.player.velocityY * this.deltaTime;
-    
-        // Apply horizontal movement
-        this.player.x += this.player.velocityX * this.deltaTime;
-    
-        // Handle left and right wraparound
-        if (this.player.x + this.player.width < 0) {
-            this.player.x = GAME_WIDTH; // Wrap to right side
-        } else if (this.player.x > GAME_WIDTH) {
-            this.player.x = -this.player.width; // Wrap to left side
-        }
-    
-        // Prevent player from going above the screen
-        if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.velocityY = 0;
-        }
-    
-        // Check for game over condition (falling below screen)
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
-        }
     }
     
     landOnPlatform(platform) {
         this.player.y = platform.y - this.player.height;
         this.player.velocityY = 0;
-        this.player.isJumping = false;
+        this.player.isOnGround = true;
         this.player.jumpCount = 0;
     }
+
     
     checkPlayerEnemyCollisions() {
         this.enemies.forEach(enemy => {
@@ -502,18 +468,18 @@ class Game {
             }
         }
 
-       // Update existing platforms
-    this.platforms = this.platforms.filter(platform => {
-        platform.y += this.platformSpeed * dt;
-        return platform.y <= GAME_HEIGHT;
-    });
+        // Update existing platforms
+        this.platforms = this.platforms.filter(platform => {
+            platform.y += this.platformSpeed * dt;
+            return platform.y <= GAME_HEIGHT;
+        });
 
-    // Add new platforms if needed
-    while (this.platforms.length < 7) {
-        this.platforms.unshift(this.createPlatform(0));
-        this.blocksClimbed++;
+        // Add new platforms if needed
+        while (this.platforms.length < 7) {
+            this.platforms.unshift(this.createPlatform(0));
+            this.blocksClimbed++;
+        }
     }
-}
 
 
 
@@ -523,27 +489,23 @@ updatePlayer(dt) {
         return;
     }
 
-    this.deltaTime = dt; // Store dt for use in handleCollisions
+    this.deltaTime = dt;
 
     // Apply gravity
     this.player.velocityY += GRAVITY * dt;
 
-    // Cap the falling speed to prevent extremely fast falls
+    // Cap the falling speed
     const MAX_FALL_SPEED = 800;
     if (this.player.velocityY > MAX_FALL_SPEED) {
         this.player.velocityY = MAX_FALL_SPEED;
     }
 
-    // Store intended position
-    const intendedX = this.player.x + this.player.velocityX * dt;
-    const intendedY = this.player.y + this.player.velocityY * dt;
-
-    // Call handleCollisions before updating position
-    this.handleCollisions(intendedX, intendedY);
-
     // Update position
     this.player.x += this.player.velocityX * dt;
     this.player.y += this.player.velocityY * dt;
+
+    // Handle collisions
+    this.handleCollisions();
 
     // Handle left and right wraparound
     if (this.player.x + this.player.width < 0) {
@@ -555,7 +517,7 @@ updatePlayer(dt) {
     // Prevent player from going above the screen
     if (this.player.y < 0) {
         this.player.y = 0;
-        this.player.velocityY = 0; // Stop upward movement
+        this.player.velocityY = 0;
     }
 
     // Check if the game has started
