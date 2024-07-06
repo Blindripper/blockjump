@@ -331,13 +331,12 @@ class Game {
         if (e.code === 'ArrowRight' && this.player.velocityX > 0) this.player.velocityX = 0;    }
 
         jump() {
-            if (this.player.jumpCount < this.player.maxJumps) {
+            if (this.player.isOnGround || this.player.jumpCount < this.player.maxJumps) {
                 this.player.velocityY = JUMP_VELOCITY;
-                this.player.isJumping = true;
+                this.player.isOnGround = false;
                 this.player.jumpCount++;
-                this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
-                playSound('jump');
-    
+                this.createJumpEffect();
+        
                 if (!this.hasPlayerJumped) {
                     this.hasPlayerJumped = true;
                     this.score = 0; // Reset score to 0 when the game actually starts
@@ -391,57 +390,68 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-
-        // Check collision with bottom platform
-        if (this.bottomPlatform) {
-            if (this.checkCollision(this.player, this.bottomPlatform)) {
-                if (this.player.velocityY >= 0) {
-                    this.landOnPlatform(this.bottomPlatform);
-                    onPlatform = true;
-                }
-            }
-        }
-
-        // Check collision with other platforms
-        for (let platform of this.platforms) {
-            if (this.checkCollision(this.player, platform)) {
-                const playerBottom = this.player.y + this.player.height;
-                const platformTop = platform.y;
-
-                if (this.player.velocityY >= 0 && playerBottom <= platformTop + this.player.velocityY * this.deltaTime) {
-                    // Collision from above
-                    this.landOnPlatform(platform);
-                    onPlatform = true;
-                    if (platform.isGolden) {
-                        this.handleGoldenPlatform();
-                    } else if (platform.isSpike) {
-                        this.gameOver = true;
-                        return;
-                    }
-                } else if (this.player.y >= platform.y + platform.height) {
-                    // Collision from below
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
-                } else {
+        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+    
+        for (let platform of platforms) {
+            // Calculate overlap
+            const overlapLeft = this.player.x + this.player.width - platform.x;
+            const overlapRight = platform.x + platform.width - this.player.x;
+            const overlapTop = this.player.y + this.player.height - platform.y;
+            const overlapBottom = platform.y + platform.height - this.player.y;
+    
+            // Check if there's a collision
+            if (overlapLeft > 0 && overlapRight > 0 && overlapTop > 0 && overlapBottom > 0) {
+                // Determine the smallest overlap
+                const minOverlapX = Math.min(overlapLeft, overlapRight);
+                const minOverlapY = Math.min(overlapTop, overlapBottom);
+    
+                // Resolve collision based on the smallest overlap
+                if (minOverlapX < minOverlapY) {
                     // Horizontal collision
-                    if (this.player.x < platform.x) {
-                        // Collision from left
+                    if (overlapLeft < overlapRight) {
                         this.player.x = platform.x - this.player.width;
                     } else {
-                        // Collision from right
                         this.player.x = platform.x + platform.width;
                     }
                     this.player.velocityX = 0;
+                } else {
+                    // Vertical collision
+                    if (overlapTop < overlapBottom) {
+                        // Collision from above
+                        this.player.y = platform.y - this.player.height;
+                        this.player.velocityY = 0;
+                        onPlatform = true;
+                    } else {
+                        // Collision from below
+                        this.player.y = platform.y + platform.height;
+                        this.player.velocityY = 0;
+                    }
+                }
+    
+                // Handle special platform types
+                if (platform.isGolden) {
+                    this.handleGoldenPlatform();
+                } else if (platform.isSpike) {
+                    this.gameOver = true;
+                    return;
                 }
             }
         }
-
+    
         // Update player state
         if (onPlatform) {
-            this.player.isJumping = false;
-            this.player.jumpCount = 0; // Reset jump count when on a platform
+            this.player.isOnGround = true;
+            this.player.jumpCount = 0;
         } else {
-            this.player.isJumping = true;
+            this.player.isOnGround = false;
+        }
+    
+        // Handle screen boundaries
+        if (this.player.x < 0) this.player.x = 0;
+        if (this.player.x + this.player.width > GAME_WIDTH) this.player.x = GAME_WIDTH - this.player.width;
+        if (this.player.y < 0) {
+            this.player.y = 0;
+            this.player.velocityY = 0;
         }
     }
     
