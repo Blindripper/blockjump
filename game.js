@@ -794,10 +794,14 @@ class Game {
         if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
         } else {
-            this.ctx.fillStyle = '#FF0000';
+            // Fallback to a colored rectangle if sprite is not available
+            this.ctx.fillStyle = '#00FF00';  // Change to a more visible color
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
         
+        // Debug: draw player bounding box
+        this.ctx.strokeStyle = '#FF0000';
+        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
