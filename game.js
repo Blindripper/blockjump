@@ -339,7 +339,7 @@ class Game {
         
                 if (!this.hasPlayerJumped) {
                     this.hasPlayerJumped = true;
-                    this.score = 0; // Reset score to 0 when the game actually starts
+                    this.score = 0;
                 }
             }
         }
@@ -514,47 +514,82 @@ class Game {
             return;
         }
     
-        this.deltaTime = dt;
-    
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
     
-        // Cap the falling speed to prevent extremely fast falls
-        const MAX_FALL_SPEED = 800;
+        // Cap the falling speed
         if (this.player.velocityY > MAX_FALL_SPEED) {
             this.player.velocityY = MAX_FALL_SPEED;
         }
     
-        // Update position
-        this.player.x += this.player.velocityX * dt;
-        this.player.y += this.player.velocityY * dt;
+        // Update horizontal position
+        const nextX = this.player.x + this.player.velocityX * dt;
+        this.updatePlayerHorizontal(nextX);
     
-        // Handle collisions
-        this.handleCollisions();
+        // Update vertical position
+        const nextY = this.player.y + this.player.velocityY * dt;
+        this.updatePlayerVertical(nextY);
     
-        // Handle left and right wraparound
-        if (this.player.x + this.player.width < 0) {
-            this.player.x = GAME_WIDTH;
-        } else if (this.player.x > GAME_WIDTH) {
-            this.player.x = -this.player.width;
+        console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
+    }
+
+    updatePlayerHorizontal(nextX) {
+        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        
+        for (let platform of platforms) {
+            if (nextX < platform.x + platform.width &&
+                nextX + this.player.width > platform.x &&
+                this.player.y < platform.y + platform.height &&
+                this.player.y + this.player.height > platform.y) {
+                
+                if (this.player.velocityX > 0) {
+                    this.player.x = platform.x - this.player.width;
+                } else if (this.player.velocityX < 0) {
+                    this.player.x = platform.x + platform.width;
+                }
+                this.player.velocityX = 0;
+                return;
+            }
         }
     
-        // Prevent player from going above the screen
-        if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.velocityY = 0;
+        this.player.x = nextX;
+    }
+
+    updatePlayerVertical(nextY) {
+        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        let onPlatform = false;
+        
+        for (let platform of platforms) {
+            if (this.player.x < platform.x + platform.width &&
+                this.player.x + this.player.width > platform.x &&
+                nextY < platform.y + platform.height &&
+                nextY + this.player.height > platform.y) {
+                
+                const buffer = 0.1; // Small buffer to prevent floating point issues
+                
+                if (this.player.velocityY > 0 && this.player.y + this.player.height <= platform.y + buffer) {
+                    // Landing on platform
+                    this.player.y = platform.y - this.player.height;
+                    this.player.velocityY = 0;
+                    onPlatform = true;
+                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height - buffer) {
+                    // Hitting platform from below
+                    this.player.y = platform.y + platform.height;
+                    this.player.velocityY = 0;
+                }
+    
+                if (platform.isGolden) {
+                    this.handleGoldenPlatform();
+                } else if (platform.isSpike) {
+                    this.gameOver = true;
+                }
+                
+                return;
+            }
         }
     
-        // Check if the game has started
-        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
-            this.gameStarted = true;
-            console.log('Game started');
-        }
-    
-        // Check for game over condition (falling below screen)
-        if (this.player.y > GAME_HEIGHT) {
-            this.handleGameOver();
-        }
+        this.player.y = nextY;
+        this.player.isOnGround = onPlatform;
     }
 
     handleGameOver() {
