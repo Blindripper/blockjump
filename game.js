@@ -43,7 +43,6 @@ const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
 const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
-const MAX_FALL_SPEED = 1000; 
 
 
 // Game class
@@ -84,6 +83,7 @@ class Game {
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
+        this.MAX_FALL_SPEED = 1000;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
         this.loadSprites();
@@ -520,8 +520,8 @@ class Game {
         this.player.velocityY += GRAVITY * dt;
     
         // Cap the falling speed
-        if (this.player.velocityY > MAX_FALL_SPEED) {
-            this.player.velocityY = MAX_FALL_SPEED;
+        if (this.player.velocityY > this.MAX_FALL_SPEED) {
+            this.player.velocityY = this.MAX_FALL_SPEED;
         }
     
         // Update vertical position first
