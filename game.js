@@ -255,7 +255,7 @@ class Game {
 
 
     createPlayer() {
-        return {
+        const player = {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
@@ -267,6 +267,8 @@ class Game {
             jumpCount: 0,
             maxJumps: 2
         };
+        console.log('Player created:', player);
+        return player;
     }
 
     createJumpEffect() {
@@ -791,14 +793,22 @@ class Game {
             return;
         }
         
+        console.log(`Drawing player at (${this.player.x}, ${this.player.y})`);
+        
         const playerSprite = sprites.get('player');
-        if (playerSprite && playerSprite.complete && playerSprite.naturalHeight !== 0) {
+        if (playerSprite && playerSprite.complete) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
+            console.log('Player sprite drawn');
         } else {
-            // Fallback to a colored rectangle if sprite is not available
+            console.warn('Player sprite not loaded, using fallback');
             this.ctx.fillStyle = '#00FF00';  // Bright green color
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
+        
+        // Draw player bounding box for debugging
+        this.ctx.strokeStyle = '#FF0000';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
