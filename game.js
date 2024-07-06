@@ -51,6 +51,8 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
+        this.bottomPlatformTimer = 0;
+        this.bottomPlatformDuration = 10
         this.gameRunning = false;
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
@@ -374,13 +376,9 @@ class Game {
     handleCollisions() {
         let onPlatform = false;
 
-        // Store the player's intended movement
-        const intendedX = this.player.x + this.player.velocityX * this.deltaTime;
-        const intendedY = this.player.y + this.player.velocityY * this.deltaTime;
-
         // Check collision with bottom platform
         if (this.bottomPlatform) {
-            if (this.checkCollision({...this.player, y: intendedY}, this.bottomPlatform)) {
+            if (this.checkCollision(this.player, this.bottomPlatform)) {
                 if (this.player.velocityY >= 0) {
                     this.landOnPlatform(this.bottomPlatform);
                     onPlatform = true;
@@ -390,9 +388,9 @@ class Game {
 
         // Check collision with other platforms
         for (let platform of this.platforms) {
-            if (this.checkCollision({...this.player, x: intendedX, y: intendedY}, platform)) {
+            if (this.checkCollision(this.player, platform)) {
                 // Vertical collision
-                if (this.player.velocityY > 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * this.deltaTime) {
+                if (this.player.velocityY >= 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * this.deltaTime) {
                     // Collision from above
                     this.landOnPlatform(platform);
                     onPlatform = true;
@@ -402,6 +400,10 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
+                } else if (this.player.y >= platform.y + platform.height) {
+                    // Collision from below
+                    this.player.y = platform.y + platform.height;
+                    this.player.velocityY = 0;
                 } else {
                     // Horizontal collision
                     if (this.player.x < platform.x) {
@@ -417,17 +419,19 @@ class Game {
             }
         }
 
-        // Update player position
-        this.player.x = intendedX;
-        this.player.y = intendedY;
-
         // Update player state
         if (onPlatform) {
             this.player.isJumping = false;
             this.player.jumpCount = 0; // Reset jump count when on a platform
         } else {
             this.player.isJumping = true;
+            // Apply gravity only if not on a platform
+            this.player.y += this.player.velocityY * this.deltaTime;
+            this.player.velocityY += GRAVITY * this.deltaTime;
         }
+
+        // Apply horizontal movement
+        this.player.x += this.player.velocityX * this.deltaTime;
 
         // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
@@ -466,6 +470,14 @@ class Game {
     }
 
     updatePlatforms(dt) {
+        // Update bottom platform timer
+        if (this.gameStarted && this.bottomPlatform) {
+            this.bottomPlatformTimer += dt;
+            if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
+                this.bottomPlatform = null;
+            }
+        }
+
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
             platform.y += this.platformSpeed * dt;
@@ -476,17 +488,6 @@ class Game {
         while (this.platforms.length < 7) {
             this.platforms.unshift(this.createPlatform(0));
             this.blocksClimbed++;
-        }
-
-        // Update bottom platform
-        if (this.bottomPlatform && this.gameStarted) {
-            this.bottomPlatform.y += this.platformSpeed * dt;
-            if (this.bottomPlatform.y > GAME_HEIGHT) {
-                this.bottomPlatform = null;
-            }
-        }
-
-        if (this.debugMode) {
         }
     }
 
