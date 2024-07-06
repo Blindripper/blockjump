@@ -389,8 +389,6 @@ class Game {
                 if (this.player.velocityY >= 0) {
                     this.landOnPlatform(this.bottomPlatform);
                     onPlatform = true;
-                } else {
-                    this.player.velocityY = 0;
                 }
             }
         }
@@ -409,10 +407,6 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
-                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height + this.player.velocityY * this.deltaTime) {
-                    // Collision from below
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
                 } else {
                     // Horizontal collision
                     if (this.player.x < platform.x) {
@@ -432,10 +426,14 @@ class Game {
         this.player.x = intendedX;
         if (!onPlatform) {
             this.player.y = intendedY;
-            this.player.isJumping = true;
-        } else {
+        }
+
+        // Update player state
+        if (onPlatform) {
             this.player.isJumping = false;
             this.player.jumpCount = 0; // Reset jump count when on a platform
+        } else {
+            this.player.isJumping = true;
         }
 
         // Ensure the player doesn't go through the floor
@@ -443,6 +441,8 @@ class Game {
             this.player.y = GAME_HEIGHT - this.player.height;
             this.player.velocityY = 0;
             onPlatform = true;
+            this.player.isJumping = false;
+            this.player.jumpCount = 0;
         }
     }
     
@@ -466,9 +466,6 @@ class Game {
     landOnPlatform(platform) {
         this.player.y = platform.y - this.player.height;
         this.player.velocityY = 0;
-        this.player.isJumping = false;
-        this.player.jumpCount = 0;
-        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 5, '#3FE1B0');
     }
 
     handleGoldenPlatform() {
