@@ -316,7 +316,7 @@ class Game {
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+        
     }
 
     handleKeyDown(e) {
