@@ -41,7 +41,7 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
-const JUMP_VELOCITY = -600;
+const JUMP_VELOCITY = 600;
 const GRAVITY = 1500;
 
 
@@ -54,7 +54,6 @@ class Game {
         this.isConnected = false;
         this.bottomPlatformTimer = 0;
         this.bottomPlatformDuration = 5
-        this.isKeyPressed
         this.gameRunning = false;
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
@@ -92,9 +91,7 @@ class Game {
         this.setupEventListeners();
     }
 
-    
 
-    
     async initializeGame() {
         if (!checkWalletConnection()) return;
     
