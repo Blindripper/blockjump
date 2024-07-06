@@ -52,7 +52,7 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
         this.bottomPlatformTimer = 0;
-        this.bottomPlatformDuration = 10
+        this.bottomPlatformDuration = 5
         this.gameRunning = false;
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
@@ -117,6 +117,7 @@ class Game {
             hideOverlay();
 
             this.bottomPlatform = this.createBottomPlatform();
+            this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
@@ -375,7 +376,7 @@ class Game {
     
     handleCollisions() {
         let onPlatform = false;
-
+    
         // Check collision with bottom platform
         if (this.bottomPlatform) {
             if (this.checkCollision(this.player, this.bottomPlatform)) {
@@ -385,12 +386,14 @@ class Game {
                 }
             }
         }
-
+    
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
-                // Vertical collision
-                if (this.player.velocityY >= 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * this.deltaTime) {
+                const playerBottom = this.player.y + this.player.height;
+                const platformTop = platform.y;
+    
+                if (this.player.velocityY >= 0 && playerBottom <= platformTop + this.player.velocityY * this.deltaTime) {
                     // Collision from above
                     this.landOnPlatform(platform);
                     onPlatform = true;
@@ -415,10 +418,9 @@ class Game {
                     }
                     this.player.velocityX = 0;
                 }
-                break;
             }
         }
-
+    
         // Update player state
         if (onPlatform) {
             this.player.isJumping = false;
@@ -426,17 +428,39 @@ class Game {
         } else {
             this.player.isJumping = true;
             // Apply gravity only if not on a platform
-            this.player.y += this.player.velocityY * this.deltaTime;
             this.player.velocityY += GRAVITY * this.deltaTime;
         }
-
+    
+        // Apply vertical movement
+        this.player.y += this.player.velocityY * this.deltaTime;
+    
         // Apply horizontal movement
         this.player.x += this.player.velocityX * this.deltaTime;
-
+    
+        // Handle left and right wraparound
+        if (this.player.x + this.player.width < 0) {
+            this.player.x = GAME_WIDTH; // Wrap to right side
+        } else if (this.player.x > GAME_WIDTH) {
+            this.player.x = -this.player.width; // Wrap to left side
+        }
+    
+        // Prevent player from going above the screen
+        if (this.player.y < 0) {
+            this.player.y = 0;
+            this.player.velocityY = 0;
+        }
+    
         // Check for game over condition (falling below screen)
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
         }
+    }
+    
+    landOnPlatform(platform) {
+        this.player.y = platform.y - this.player.height;
+        this.player.velocityY = 0;
+        this.player.isJumping = false;
+        this.player.jumpCount = 0;
     }
     
     checkPlayerEnemyCollisions() {
@@ -478,18 +502,18 @@ class Game {
             }
         }
 
-        // Update existing platforms
-        this.platforms = this.platforms.filter(platform => {
-            platform.y += this.platformSpeed * dt;
-            return platform.y <= GAME_HEIGHT;
-        });
+       // Update existing platforms
+    this.platforms = this.platforms.filter(platform => {
+        platform.y += this.platformSpeed * dt;
+        return platform.y <= GAME_HEIGHT;
+    });
 
-        // Add new platforms if needed
-        while (this.platforms.length < 7) {
-            this.platforms.unshift(this.createPlatform(0));
-            this.blocksClimbed++;
-        }
+    // Add new platforms if needed
+    while (this.platforms.length < 7) {
+        this.platforms.unshift(this.createPlatform(0));
+        this.blocksClimbed++;
     }
+}
 
 
 
