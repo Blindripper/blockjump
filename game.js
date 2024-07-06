@@ -377,6 +377,7 @@ class Game {
         // Check if player has fallen off the screen
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
+            this.draw();
         }
     }
     
@@ -788,8 +789,8 @@ class Game {
     }
 
     drawPlayer() {
-        if (!this.player) {
-            console.warn('Player is null in drawPlayer');
+        if (!this.player || typeof this.player.x === 'undefined' || typeof this.player.y === 'undefined') {
+            console.warn('Player or its position is undefined in drawPlayer');
             return;
         }
         
