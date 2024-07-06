@@ -334,10 +334,8 @@ class Game {
       
 
       jump() {
-        if (this.player.isOnGround || this.player.jumpCount < this.player.maxJumps) {
-            this.player.velocityY = JUMP_VELOCITY;
+        if (this.player.isOnGround) {
             this.player.isOnGround = false;
-            this.player.jumpCount++;
             this.createJumpEffect();
     
             if (!this.hasPlayerJumped) {
@@ -516,28 +514,88 @@ class Game {
             return;
         }
     
-        // Apply gravity
-        this.player.velocityY += GRAVITY * dt;
+        const airControlSpeed = 300; // Adjust this value for air control sensitivity
     
-        // Check for horizontal movement
-        if (isKeyPressed('ArrowLeft')) {
-            this.player.velocityX = -this.player.speed;
-        } else if (isKeyPressed('ArrowRight')) {
-            this.player.velocityX = this.player.speed;
+        // Apply gravity only when not in the air
+        if (this.player.isOnGround) {
+            this.player.velocityY += GRAVITY * dt;
         } else {
-            // Slow down if no key is pressed
-            this.player.velocityX *= 0.9;
+            // Air control
+            if (isKeyPressed('ArrowUp')) {
+                this.player.velocityY = -airControlSpeed;
+            } else if (isKeyPressed('ArrowDown')) {
+                this.player.velocityY = airControlSpeed;
+            } else {
+                this.player.velocityY *= 0.95; // Slight deceleration if no key is pressed
+            }
         }
     
-        // Update vertical position
-        const nextY = this.player.y + this.player.velocityY * dt;
-        this.updatePlayerVertical(nextY);
+        // Horizontal movement (both on ground and in air)
+        if (isKeyPressed('ArrowLeft')) {
+            this.player.velocityX = -airControlSpeed;
+        } else if (isKeyPressed('ArrowRight')) {
+            this.player.velocityX = airControlSpeed;
+        } else {
+            this.player.velocityX *= 0.95; // Slight deceleration if no key is pressed
+        }
     
-        // Update horizontal position
+        // Update position
         const nextX = this.player.x + this.player.velocityX * dt;
-        this.updatePlayerHorizontal(nextX);
+        const nextY = this.player.y + this.player.velocityY * dt;
+    
+        this.updatePlayerPosition(nextX, nextY);
     
         console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
+    }
+
+    updatePlayerPosition(nextX, nextY) {
+        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        
+        let collision = false;
+        for (let platform of platforms) {
+            if (nextX < platform.x + platform.width &&
+                nextX + this.player.width > platform.x &&
+                nextY < platform.y + platform.height &&
+                nextY + this.player.height > platform.y) {
+                
+                collision = true;
+                
+                // Determine which side of the platform we collided with
+                const overlapLeft = (nextX + this.player.width) - platform.x;
+                const overlapRight = (platform.x + platform.width) - nextX;
+                const overlapTop = (nextY + this.player.height) - platform.y;
+                const overlapBottom = (platform.y + platform.height) - nextY;
+    
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+    
+                if (minOverlap === overlapTop && this.player.velocityY > 0) {
+                    this.player.y = platform.y - this.player.height;
+                    this.player.velocityY = 0;
+                    this.player.isOnGround = true;
+                } else if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                    this.player.y = platform.y + platform.height;
+                    this.player.velocityY = 0;
+                } else if (minOverlap === overlapLeft && this.player.velocityX > 0) {
+                    this.player.x = platform.x - this.player.width;
+                    this.player.velocityX = 0;
+                } else if (minOverlap === overlapRight && this.player.velocityX < 0) {
+                    this.player.x = platform.x + platform.width;
+                    this.player.velocityX = 0;
+                }
+    
+                break;
+            }
+        }
+    
+        if (!collision) {
+            this.player.x = nextX;
+            this.player.y = nextY;
+            this.player.isOnGround = false;
+        }
+    
+        // Keep player within game bounds
+        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+        this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
     }
 
     updatePlayerHorizontal(nextX) {
