@@ -396,8 +396,17 @@ class Game {
         // Check collision with other platforms
         for (let platform of this.platforms) {
             if (this.checkCollision(this.player, platform)) {
-                if (this.player.velocityY >= 0 && this.player.y + this.player.height <= platform.y + this.player.velocityY * 2) {
-                    // Only land if moving downwards and above the platform
+                // Calculate the overlap on each side
+                const overlapTop = this.player.y + this.player.height - platform.y;
+                const overlapBottom = platform.y + platform.height - this.player.y;
+                const overlapLeft = this.player.x + this.player.width - platform.x;
+                const overlapRight = platform.x + platform.width - this.player.x;
+
+                // Find the smallest overlap
+                const minOverlap = Math.min(overlapTop, overlapBottom, overlapLeft, overlapRight);
+
+                if (minOverlap === overlapTop && this.player.velocityY >= 0) {
+                    // Landing on top of the platform
                     this.landOnPlatform(platform);
                     onPlatform = true;
                     if (platform.isGolden) {
@@ -406,14 +415,18 @@ class Game {
                         this.gameOver = true;
                         return;
                     }
-                    break;  // Exit the loop once we've landed
-                } else {
-                    // If not landing from above, adjust player position
-                    if (this.player.x < platform.x) {
-                        this.player.x = platform.x - this.player.width;
-                    } else {
-                        this.player.x = platform.x + platform.width;
-                    }
+                } else if (minOverlap === overlapBottom) {
+                    // Hitting the bottom of the platform
+                    this.player.y = platform.y + platform.height;
+                    this.player.velocityY = 0;
+                } else if (minOverlap === overlapLeft) {
+                    // Hitting the left side of the platform
+                    this.player.x = platform.x - this.player.width;
+                    this.player.velocityX = 0;
+                } else if (minOverlap === overlapRight) {
+                    // Hitting the right side of the platform
+                    this.player.x = platform.x + platform.width;
+                    this.player.velocityX = 0;
                 }
             }
         }
@@ -433,6 +446,7 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
+        const margin = 5;
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
                obj1.y + obj1.height > obj2.y &&
