@@ -250,17 +250,24 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1, // Position above bottom platform
+            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 300,
             velocityY: 0,
             velocityX: 0,
-            isJumping: false,
-            jumpCount: 0,
-            maxJumps: 2
+            isOnGround: false,
+            canDoubleJump: false,
+            jumpCount: 0
         };
     }
+
+    createJumpEffect() {
+        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
+        playSound('jump');
+    }
+
+
 
     createBottomPlatform() {
         return {
@@ -316,21 +323,25 @@ class Game {
         if (e.code === 'ArrowLeft' && this.player.velocityX < 0) this.player.velocityX = 0;
         if (e.code === 'ArrowRight' && this.player.velocityX > 0) this.player.velocityX = 0;    }
 
-    jump() {
-        if (this.player.jumpCount < this.player.maxJumps) {
-            this.player.velocityY = JUMP_VELOCITY;
-            this.player.isJumping = true;
-            this.player.isOnGround = false;
-            this.player.jumpCount++;
-            this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
-            playSound('jump');
-
+        jump() {
+            if (this.player.isOnGround) {
+                // First jump
+                this.player.velocityY = JUMP_VELOCITY;
+                this.player.isOnGround = false;
+                this.player.canDoubleJump = true;
+                this.createJumpEffect();
+            } else if (this.player.canDoubleJump) {
+                // Double jump
+                this.player.velocityY = JUMP_VELOCITY * 0.8; // Slightly lower second jump
+                this.player.canDoubleJump = false;
+                this.createJumpEffect();
+            }
+    
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
                 this.score = 0; // Reset score to 0 when the game actually starts
             }
         }
-    }
 
 
 
@@ -376,13 +387,14 @@ class Game {
     }
     
     handleCollisions() {
-        this.player.isOnGround = false;
+        let onPlatform = false;
 
         // Check collision with bottom platform
         if (this.bottomPlatform) {
             if (this.checkCollision(this.player, this.bottomPlatform)) {
                 if (this.player.velocityY >= 0) {
                     this.landOnPlatform(this.bottomPlatform);
+                    onPlatform = true;
                 }
             }
         }
@@ -396,6 +408,7 @@ class Game {
                 if (this.player.velocityY >= 0 && playerBottom <= platformTop + this.player.velocityY * this.deltaTime) {
                     // Collision from above
                     this.landOnPlatform(platform);
+                    onPlatform = true;
                     if (platform.isGolden) {
                         this.handleGoldenPlatform();
                     } else if (platform.isSpike) {
@@ -419,14 +432,23 @@ class Game {
                 }
             }
         }
+
+        // Update player state
+        if (onPlatform) {
+            this.player.isOnGround = true;
+            this.player.canDoubleJump = false; // Reset double jump when on platform
+        } else {
+            this.player.isOnGround = false;
+        }
     }
     
     landOnPlatform(platform) {
         this.player.y = platform.y - this.player.height;
         this.player.velocityY = 0;
         this.player.isOnGround = true;
-        this.player.jumpCount = 0;
+        this.player.canDoubleJump = false;
     }
+
 
     
     checkPlayerEnemyCollisions() {
@@ -483,54 +505,54 @@ class Game {
 
 
 
-updatePlayer(dt) {
-    if (!this.player) {
-        console.warn('Player is null in updatePlayer');
-        return;
+    updatePlayer(dt) {
+        if (!this.player) {
+            console.warn('Player is null in updatePlayer');
+            return;
+        }
+
+        this.deltaTime = dt;
+
+        // Apply gravity
+        this.player.velocityY += GRAVITY * dt;
+
+        // Cap the falling speed
+        const MAX_FALL_SPEED = 800;
+        if (this.player.velocityY > MAX_FALL_SPEED) {
+            this.player.velocityY = MAX_FALL_SPEED;
+        }
+
+        // Update position
+        this.player.x += this.player.velocityX * dt;
+        this.player.y += this.player.velocityY * dt;
+
+        // Handle collisions
+        this.handleCollisions();
+
+        // Handle left and right wraparound
+        if (this.player.x + this.player.width < 0) {
+            this.player.x = GAME_WIDTH; // Wrap to right side
+        } else if (this.player.x > GAME_WIDTH) {
+            this.player.x = -this.player.width; // Wrap to left side
+        }
+
+        // Prevent player from going above the screen
+        if (this.player.y < 0) {
+            this.player.y = 0;
+            this.player.velocityY = 0;
+        }
+
+        // Check if the game has started
+        if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
+            this.gameStarted = true;
+            console.log('Game started');
+        }
+
+        // Check for game over condition (falling below screen)
+        if (this.player.y > GAME_HEIGHT) {
+            this.handleGameOver();
+        }
     }
-
-    this.deltaTime = dt;
-
-    // Apply gravity
-    this.player.velocityY += GRAVITY * dt;
-
-    // Cap the falling speed
-    const MAX_FALL_SPEED = 800;
-    if (this.player.velocityY > MAX_FALL_SPEED) {
-        this.player.velocityY = MAX_FALL_SPEED;
-    }
-
-    // Update position
-    this.player.x += this.player.velocityX * dt;
-    this.player.y += this.player.velocityY * dt;
-
-    // Handle collisions
-    this.handleCollisions();
-
-    // Handle left and right wraparound
-    if (this.player.x + this.player.width < 0) {
-        this.player.x = GAME_WIDTH; // Wrap to right side
-    } else if (this.player.x > GAME_WIDTH) {
-        this.player.x = -this.player.width; // Wrap to left side
-    }
-
-    // Prevent player from going above the screen
-    if (this.player.y < 0) {
-        this.player.y = 0;
-        this.player.velocityY = 0;
-    }
-
-    // Check if the game has started
-    if (!this.gameStarted && this.player.y < GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT * 3) {
-        this.gameStarted = true;
-        console.log('Game started');
-    }
-
-    // Check for game over condition (falling below screen)
-    if (this.player.y > GAME_HEIGHT) {
-        this.handleGameOver();
-    }
-}
 
     handleGameOver() {
         this.gameRunning = false;
