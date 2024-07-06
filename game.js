@@ -94,10 +94,10 @@ class Game {
     
     async initializeGame() {
         if (!checkWalletConnection()) return;
-
+    
         try {
             showEtherlinkWaitMessage();
-
+    
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
                 console.log('No tries left');
@@ -113,12 +113,18 @@ class Game {
                 showOverlay('Failed to start game. Please try again.');
                 return;
             }
-
+    
             hideOverlay();
-
+    
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
+            
+            // Explicitly set player position
+            this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
+            this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
+            console.log(`Initial player position: (${this.player.x}, ${this.player.y})`);
+    
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
             this.hasPlayerJumped = false;
@@ -139,7 +145,7 @@ class Game {
                 console.log('- Bottom platform present:', this.platforms.some(p => p.isBottomPlatform));
                 this.logGameState('After initialization');
             }
-
+    
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
         } catch (error) {
