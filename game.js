@@ -142,6 +142,10 @@ class Game {
             this.lastTime = performance.now();
             this.powerups = [];
             this.keys = {}
+
+            this.player.y = this.bottomPlatform.y - this.player.height;
+            this.player.isOnGround = true;
+
     
             await updateTryCount();
             
@@ -263,7 +267,7 @@ class Game {
     createPlayer() {
         return {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
+            y: 0,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             velocityX: 0,
@@ -400,13 +404,15 @@ class Game {
 
         for (let platform of platforms) {
             if (this.checkCollision(this.player, platform)) {
-                if (this.player.velocityY >= 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y) {
+                if (this.player.velocityY >= 0) {
                     // Landing on top of the platform
                     this.player.y = platform.y - this.player.height;
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
-                    this.player.jumpCount = 0;
-                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
+                    if (!wasOnGround) {
+                        this.player.jumpCount = 0;
+                    }
+                } else if (this.player.velocityY < 0) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
@@ -414,14 +420,12 @@ class Game {
             }
         }
 
-        // Reset jump count if player just landed
-        if (!wasOnGround && this.player.isOnGround) {
+        // Ensure player doesn't fall through the bottom of the screen
+        if (this.player.y + this.player.height > GAME_HEIGHT) {
+            this.player.y = GAME_HEIGHT - this.player.height;
+            this.player.velocityY = 0;
+            this.player.isOnGround = true;
             this.player.jumpCount = 0;
-        }
-
-        // Check if player has fallen off the screen
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
         }
     }
 
@@ -440,11 +444,10 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        const narrowFactor = 0.8; // Adjust this value to make collision area narrower or wider
-        return (obj1.x + obj1.width * (1 - narrowFactor) / 2) < (obj2.x + obj2.width) &&
-               (obj1.x + obj1.width * (1 + narrowFactor) / 2) > obj2.x &&
-               obj1.y < (obj2.y + obj2.height) &&
-               (obj1.y + obj1.height) > obj2.y;
+        return obj1.x < obj2.x + obj2.width &&
+               obj1.x + obj1.width > obj2.x &&
+               obj1.y < obj2.y + obj2.height &&
+               obj1.y + obj1.height > obj2.y;
     }
 
     
@@ -493,7 +496,7 @@ class Game {
             this.player.velocityX = 0;
         }
 
-        // Apply gravity only when not on ground
+        // Apply gravity
         if (!this.player.isOnGround) {
             this.player.velocityY += GRAVITY * dt;
         }
@@ -504,6 +507,11 @@ class Game {
 
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+
+        // Collision detection
+        this.handleCollisions();
+
+        console.log("Player position:", this.player.x, this.player.y, "isOnGround:", this.player.isOnGround);
     }
 
 
@@ -815,21 +823,14 @@ class Game {
 
 
     gameLoop(currentTime) {
-        if (!this.gameRunning) {
-            return;
-        }
-    
-        if (!this.lastTime) this.lastTime = currentTime;
-    
-        let deltaTime = currentTime - this.lastTime;
+        if (!this.gameRunning) return;
+
+        const dt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
-    
-        // Ensure deltaTime is not too large
-        deltaTime = Math.min(deltaTime, 50); // Cap at 50ms (20 fps)
-    
-        this.update(deltaTime / 1000);
+
+        this.updatePlayer(dt);
         this.draw();
-    
+
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
