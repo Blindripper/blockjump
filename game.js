@@ -324,17 +324,17 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         const playerHitbox = {
-            x: player.x + player.width * 0.2,
-            y: player.y + player.height * 0.2,
-            width: player.width * 0.01,
-            height: player.height * 0.01
+            x: player.x + player.width * 0.1,
+            y: player.y + player.height * 0.1,
+            width: player.width * 0.005,
+            height: player.height * 0.005
         };
 
         const enemyHitbox = {
-            x: enemy.x + enemy.width * 0.2,
-            y: enemy.y + enemy.height * 0.2,
-            width: enemy.width * 0.01,
-            height: enemy.height * 0.01
+            x: enemy.x + enemy.width * 0.1,
+            y: enemy.y + enemy.height * 0.1,
+            width: enemy.width * 0.005,
+            height: enemy.height * 0.005
         };
 
         return this.checkCollision(playerHitbox, enemyHitbox);
