@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Adjust these values based on the actual visible size of your sprites
-        const playerVisibleWidth = player.width * 0.6;  // Example: 60% of sprite width
-        const playerVisibleHeight = player.height * 0.8;  // Example: 80% of sprite height
-        const enemyVisibleWidth = enemy.width * 0.8;  // Example: 80% of sprite width
-        const enemyVisibleHeight = enemy.height * 0.6;  // Example: 60% of sprite height
+        const playerVisibleWidth = player.width * 0.3;  // Example: 60% of sprite width
+        const playerVisibleHeight = player.height * 0.4;  // Example: 80% of sprite height
+        const enemyVisibleWidth = enemy.width * 0.4;  // Example: 80% of sprite width
+        const enemyVisibleHeight = enemy.height * 0.3;  // Example: 60% of sprite height
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
