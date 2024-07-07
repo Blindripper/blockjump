@@ -53,7 +53,11 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
-        this.keys = {}; 
+        this.keys = {};
+        this.enemyShootInterval = 10000; // Start with 10 seconds
+        this.lastEnemyShot = 0;
+        this.enemyBullets = [];
+        this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
         this.fixedTimeStep = 1000 / 60; 
         this.bottomPlatformDuration = 5
@@ -74,14 +78,14 @@ class Game {
         this.lastBackgroundChange = 0;
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
-        this.platformSpeed = 60;
+        this.platformSpeed = 65;
         this.bottomPlatform = null;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
         this.enemies = [];
         this.lastEnemySpawn = 0;
-        this.baseEnemySpawnInterval = 30000; // 30 seconds
+        this.baseEnemySpawnInterval = 20000; // 20 seconds
         this.enemySpawnInterval = this.baseEnemySpawnInterval;
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
@@ -186,9 +190,16 @@ class Game {
     }
 
     updateBullets(dt) {
+        // Update player bullets
         this.bullets = this.bullets.filter(bullet => {
             bullet.y -= bullet.speed * dt;
             return bullet.y + bullet.height > 0;
+        });
+
+        // Update enemy bullets
+        this.enemyBullets = this.enemyBullets.filter(bullet => {
+            bullet.y += bullet.speed * dt;
+            return bullet.y < GAME_HEIGHT;
         });
     }
 
@@ -225,6 +236,27 @@ class Game {
                 this.enemyDirection *= -1;
             }
         });
+
+        // Handle enemy shooting
+        const currentTime = Date.now();
+        if (currentTime - this.lastEnemyShot > this.enemyShootInterval) {
+            this.enemyShoot();
+            this.lastEnemyShot = currentTime;
+        }
+    }
+
+    enemyShoot() {
+        const shootingEnemies = this.enemies.filter(enemy => !enemy.isDestroyed);
+        if (shootingEnemies.length > 0) {
+            const shooter = shootingEnemies[Math.floor(Math.random() * shootingEnemies.length)];
+            this.enemyBullets.push({
+                x: shooter.x + shooter.width / 2 - 2.5,
+                y: shooter.y + shooter.height,
+                width: 5,
+                height: 10,
+                speed: 300
+            });
+        }
     }
 
     checkBulletEnemyCollisions() {
@@ -243,6 +275,34 @@ class Game {
             return !bulletHit;
         });
     }
+
+    checkBulletCollisions() {
+        // Check player bullet - enemy collisions
+        this.bullets = this.bullets.filter(bullet => {
+            let bulletHit = false;
+            this.enemies.forEach(enemy => {
+                if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
+                    bulletHit = true;
+                    enemy.isDestroyed = true;
+                    enemy.destroyedTime = 0;
+                    this.score += 1000;
+                    this.enemyDestroyedSound.currentTime = 0;
+                    this.enemyDestroyedSound.play();
+                }
+            });
+            return !bulletHit;
+        });
+
+        // Check enemy bullet - player collisions
+        this.enemyBullets = this.enemyBullets.filter(bullet => {
+            if (this.checkCollision(bullet, this.player)) {
+                this.gameOver = true;
+                return false;
+            }
+            return true;
+        });
+    }
+
 
     checkPlayerEnemyCollisions() {
         this.enemies.forEach(enemy => {
@@ -644,9 +704,16 @@ class Game {
             this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
         );
         
+        // Update enemy shoot interval
+        this.enemyShootInterval = Math.max(
+            this.minEnemyShootInterval,
+            10000 - (this.difficultyLevel - 1) * 1000
+        );
+
         // Change background
         this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
     }
+
 
     createParticles(x, y, count, color) {
         for (let i = 0; i < count; i++) {
@@ -685,6 +752,7 @@ class Game {
         this.drawBackground();
         this.drawPlatforms();
         this.drawPlayer();
+        this.drawEnemyBullets();
         this.drawPowerups();
         this.drawParticles();
         this.drawHUD();
@@ -726,6 +794,13 @@ class Game {
     drawBullets() {
         this.ctx.fillStyle = '#00FF00';
         for (let bullet of this.bullets) {
+            this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        }
+    }
+
+    drawEnemyBullets() {
+        this.ctx.fillStyle = '#FF0000';
+        for (let bullet of this.enemyBullets) {
             this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
         }
     }
