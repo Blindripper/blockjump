@@ -126,7 +126,8 @@ class Game {
             // Explicitly set player position
             this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
             this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
-    
+            this.player.isOnGround = true;
+            this.player.velocityY = 0;
             this.platforms = this.createInitialPlatforms();
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
@@ -140,6 +141,7 @@ class Game {
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
             this.powerups = [];
+            this.keys = {}
     
             await updateTryCount();
             
@@ -269,7 +271,8 @@ class Game {
             velocityX: 0,
             jumpCount: 0,
             isOnGround: true,
-            lastGroundTime: Date.now()
+            lastGroundTime: Date.now(),
+            isJumping: false
         };
     }
 
@@ -356,17 +359,20 @@ class Game {
       
 
       jump() {
-        const jumpVelocity = -600;
-        this.player.velocityY = jumpVelocity;
-        this.player.jumpCount++;
-        this.player.isOnGround = false;
-        this.createJumpEffect();
+        if (this.player.isOnGround || this.player.jumpCount < 2) {
+            const jumpVelocity = -600;
+            this.player.velocityY = jumpVelocity;
+            this.player.jumpCount++;
+            this.player.isOnGround = false;
+            this.player.isJumping = true;
+            this.createJumpEffect();
     
-        console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
+            console.log(`Jump executed. Count: ${this.player.jumpCount}, Velocity: ${this.player.velocityY}`);
     
-        if (!this.hasPlayerJumped) {
-            this.hasPlayerJumped = true;
-            this.score = 0;
+            if (!this.hasPlayerJumped) {
+                this.hasPlayerJumped = true;
+                this.score = 0;
+            }
         }
     }
 
@@ -411,6 +417,7 @@ class Game {
     
     handleCollisions(nextX, nextY) {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        let wasOnGround = this.player.isOnGround;
         this.player.isOnGround = false;
     
         for (let platform of platforms) {
@@ -425,6 +432,7 @@ class Game {
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0;
+                    this.player.isJumping = false;
                 } else if (this.player.velocityY < 0) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
@@ -459,6 +467,10 @@ class Game {
             this.player.y = nextY;
         }
         this.player.x = nextX;
+    
+        if (!wasOnGround && this.player.isOnGround) {
+            console.log('Player landed on platform');
+        }
     }
 
     
@@ -528,6 +540,8 @@ class Game {
         // Apply gravity only when not on the ground
         if (!this.player.isOnGround) {
             this.player.velocityY += GRAVITY * dt;
+        } else {
+            this.player.velocityY = 0; // Reset vertical velocity when on ground
         }
     
         // Horizontal movement
@@ -559,6 +573,8 @@ class Game {
             this.gameOver = true;
             console.log('Game over: Player fell off screen');
         }
+    
+        console.log(`Player update: pos(${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)}), vel(${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)}), onGround: ${this.player.isOnGround}`);
     }
 
     
