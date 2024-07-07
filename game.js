@@ -218,10 +218,10 @@ class Game {
 
     createEnemy() {
         return {
-            x: Math.random() * (GAME_WIDTH - 80),
+            x: Math.random() * (GAME_WIDTH - 50),
             y: 50,
             width: 80,
-            height: 80,
+            height: 60,
             isDestroyed: false,
             destroyedTime: 0,
             lastShot: 0,
@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
-        const playerVisibleWidth = player.width * 0.5;
-        const playerVisibleHeight = player.height * 0.5;
-        const enemyVisibleWidth = enemy.width * 0.5;
-        const enemyVisibleHeight = enemy.height * 0.5;
+        const playerVisibleWidth = player.width * 0.85;
+        const playerVisibleHeight = player.height * 0.85;
+        const enemyVisibleWidth = enemy.width * 0.85;
+        const enemyVisibleHeight = enemy.height * 0.85;
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
@@ -391,10 +391,10 @@ class Game {
 
     createPlayer() {
         return {
-            x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-            y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
-            width: PLAYER_WIDTH,
-            height: PLAYER_HEIGHT,
+            x: GAME_WIDTH / 2 - 25, // Half of desiredWidth
+            y: GAME_HEIGHT - 50 - PLATFORM_HEIGHT - 1,
+            width: 40,
+            height: 40,
             speed: 300,
             velocityY: 0,
             velocityX: 0,
@@ -874,11 +874,14 @@ class Game {
     }
 
     drawEnemies() {
+        const desiredWidth = 80;  // Adjust as needed
+        const desiredHeight = 60; // Adjust as needed
+    
         for (let enemy of this.enemies) {
             if (enemy.isDestroyed) {
-                this.ctx.drawImage(this.enemyDestroyedSprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                this.ctx.drawImage(this.enemyDestroyedSprite, enemy.x, enemy.y, desiredWidth, desiredHeight);
             } else {
-                this.ctx.drawImage(this.enemySprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                this.ctx.drawImage(this.enemySprite, enemy.x, enemy.y, desiredWidth, desiredHeight);
             }
         }
     }
@@ -901,17 +904,21 @@ class Game {
     }
 
     drawPlayer() {
-        if (!this.player || typeof this.player.x === 'undefined' || typeof this.player.y === 'undefined') {
-            console.warn('Player or its position is undefined in drawPlayer');
-            return;
-        }
+        const desiredWidth = 40;  // Set this to your desired width
+        const desiredHeight = 40; // Set this to your desired height
         
-        const playerSprite = sprites.get('player');
-        if (playerSprite && playerSprite.complete) {
-            this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
+        if (this.playerSprite && this.playerSprite.complete) {
+            this.ctx.drawImage(
+                this.playerSprite,
+                this.player.x,
+                this.player.y,
+                desiredWidth,
+                desiredHeight
+            );
         } else {
-            this.ctx.fillStyle = '#00FF00';  // Bright green color
-            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+            // Fallback drawing if sprite is not loaded
+            this.ctx.fillStyle = '#00FF00';
+            this.ctx.fillRect(this.player.x, this.player.y, desiredWidth, desiredHeight);
         }
     }
 
