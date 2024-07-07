@@ -325,7 +325,7 @@ class Game {
         const playerCenterX = player.x + player.width / 2;
         const playerCenterY = player.y + player.height / 2;
         
-        const enemyHitboxMargin = 0.4; // 40% margin
+        const enemyHitboxMargin = 0.9; // 90% margin
         const enemyHitboxX = enemy.x + enemy.width * enemyHitboxMargin;
         const enemyHitboxY = enemy.y + enemy.height * enemyHitboxMargin;
         const enemyHitboxWidth = enemy.width * (1 - 2 * enemyHitboxMargin);
