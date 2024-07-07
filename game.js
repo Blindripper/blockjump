@@ -54,6 +54,7 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
+        this.keys = {}; 
         this.bottomPlatformTimer = 0;
         this.bottomPlatformDuration = 5
         this.gameRunning = false;
@@ -514,37 +515,27 @@ class Game {
             return;
         }
     
-        const airControlSpeed = 300; // Adjust this value for air control sensitivity
-        const jumpVelocity = -600; // Adjust this for jump height
+        const airControlSpeed = 300;
+        const jumpVelocity = -600;
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
     
         // Jumping
-        if (isKeyPressed('ArrowUp') && this.player.isOnGround) {
+        if (this.keys['ArrowUp'] && this.player.isOnGround) {
             this.player.velocityY = jumpVelocity;
             this.player.isOnGround = false;
             this.createJumpEffect();
         }
     
-        // Air control
-        if (!this.player.isOnGround) {
-            if (isKeyPressed('ArrowLeft')) {
-                this.player.velocityX = -airControlSpeed;
-            } else if (isKeyPressed('ArrowRight')) {
-                this.player.velocityX = airControlSpeed;
-            } else {
-                this.player.velocityX *= 0.95; // Slight deceleration if no key is pressed
-            }
+        // Horizontal movement (both on ground and in air)
+        if (this.keys['ArrowLeft']) {
+            this.player.velocityX = -this.player.speed;
+        } else if (this.keys['ArrowRight']) {
+            this.player.velocityX = this.player.speed;
         } else {
-            // Ground movement
-            if (isKeyPressed('ArrowLeft')) {
-                this.player.velocityX = -this.player.speed;
-            } else if (isKeyPressed('ArrowRight')) {
-                this.player.velocityX = this.player.speed;
-            } else {
-                this.player.velocityX = 0;
-            }
+            // Apply friction to gradually slow down
+            this.player.velocityX *= 0.9;
         }
     
         // Update position
@@ -554,6 +545,8 @@ class Game {
         this.updatePlayerPosition(nextX, nextY);
     
         console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
+        console.log(`Player velocity: (${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)})`);
+        console.log(`Is on ground: ${this.player.isOnGround}`);
     }
 
     updatePlayerPosition(nextX, nextY) {
