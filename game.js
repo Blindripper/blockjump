@@ -322,29 +322,23 @@ class Game {
     }
 
     checkPreciseCollision(player, enemy) {
-        const playerHitboxMargin = 0.001; // Adjust this value as needed
-        const playerHitboxX = player.x + player.width * playerHitboxMargin;
-        const playerHitboxY = player.y + player.height * playerHitboxMargin;
-        const playerHitboxWidth = player.width * (1 - 2 * playerHitboxMargin);
-        const playerHitboxHeight = player.height * (1 - 2 * playerHitboxMargin);
+        // Adjust these values based on the actual visible size of your sprites
+        const playerVisibleWidth = player.width * 0.6;  // Example: 60% of sprite width
+        const playerVisibleHeight = player.height * 0.8;  // Example: 80% of sprite height
+        const enemyVisibleWidth = enemy.width * 0.8;  // Example: 80% of sprite width
+        const enemyVisibleHeight = enemy.height * 0.6;  // Example: 60% of sprite height
     
-        const enemyHitboxMargin = 0.001; // Adjust this value as needed
-        const enemyHitboxX = enemy.x + enemy.width * enemyHitboxMargin;
-        const enemyHitboxY = enemy.y + enemy.height * enemyHitboxMargin;
-        const enemyHitboxWidth = enemy.width * (1 - 2 * enemyHitboxMargin);
-        const enemyHitboxHeight = enemy.height * (1 - 2 * enemyHitboxMargin);
+        // Calculate hitbox positions
+        const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
+        const playerHitboxY = player.y + (player.height - playerVisibleHeight) / 2;
+        const enemyHitboxX = enemy.x + (enemy.width - enemyVisibleWidth) / 2;
+        const enemyHitboxY = enemy.y + (enemy.height - enemyVisibleHeight) / 2;
     
-        return !(playerHitboxX + playerHitboxWidth <= enemyHitboxX ||
-                 playerHitboxX >= enemyHitboxX + enemyHitboxWidth ||
-                 playerHitboxY + playerHitboxHeight <= enemyHitboxY ||
-                 playerHitboxY >= enemyHitboxY + enemyHitboxHeight);
-    }
-
-    isPointInside(pointX, pointY, rectX, rectY, rectWidth, rectHeight) {
-        return pointX >= rectX &&
-               pointX <= rectX + rectWidth &&
-               pointY >= rectY &&
-               pointY <= rectY + rectHeight;
+        // Check for collision
+        return !(playerHitboxX + playerVisibleWidth <= enemyHitboxX ||
+                 playerHitboxX >= enemyHitboxX + enemyVisibleWidth ||
+                 playerHitboxY + playerVisibleHeight <= enemyHitboxY ||
+                 playerHitboxY >= enemyHitboxY + enemyVisibleHeight);
     }
 
 
