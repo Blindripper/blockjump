@@ -101,6 +101,7 @@ class Game {
         this.enemyType2DestroyedSprite = new Image();
         this.enemyType2DestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft2firesmall.png';
         this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
+        this.friendlyLaserSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/friendlylaser.mp3');
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -180,6 +181,8 @@ class Game {
         this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.wav');
         this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
         this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.mp3');
+        this.friendlyLaserSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/friendlylaser.mp3');
+
     }
  
     shoot() {
@@ -193,12 +196,15 @@ class Game {
                 speed: 500
             });
             this.lastShotTime = currentTime;
-            this.shootSound.currentTime = 0;
-            this.shootSound.play();
+            this.friendlyLaserSound.currentTime = 0;
+            this.friendlyLaserSound.play();
         }
     }
 
     updateBullets(dt) {
+
+        const currentTime = Date.now();
+
         // Update player bullets
         this.bullets = this.bullets.filter(bullet => {
             bullet.y -= bullet.speed * dt;
@@ -215,6 +221,9 @@ class Game {
     this.enemyBullets = this.enemyBullets.filter(bullet => {
         if (bullet.angle !== undefined) {
             // This is a tracking missile
+            if (currentTime - bullet.creationTime > 6000) {
+                return false; // Remove missile after 6 seconds
+            }
             bullet.x += Math.cos(bullet.angle) * bullet.speed * dt;
             bullet.y += Math.sin(bullet.angle) * bullet.speed * dt;
             // Recalculate angle to track player
@@ -238,7 +247,8 @@ class Game {
             width: 10,
             height: 20,
             speed: 200,
-            angle: angle
+            angle: angle,
+            creationTime: Date.now()
         };
     }
     
@@ -269,6 +279,8 @@ class Game {
             height: isType2 ? 100 : 80,
             isType2: isType2,
             health: isType2 ? 3 : 1,
+            lastMoveDown: Date.now(),
+            moveDownInterval: 10000,
             isDestroyed: false,
             destroyedTime: 0,
             lastShot: 0,
@@ -286,6 +298,12 @@ class Game {
                 }
                 return;
             }
+
+            // Move enemies down
+        if (currentTime - enemy.lastMoveDown > enemy.moveDownInterval) {
+            enemy.y += 50; // Move down by 50 pixels
+            enemy.lastMoveDown = currentTime;
+        }
     
             // Move enemies horizontally
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
@@ -345,19 +363,18 @@ class Game {
     }
 
     checkBulletCollisions() {
-        // Check player bullet - enemy collisions
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
             this.enemies.forEach(enemy => {
                 if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
                     bulletHit = true;
                     enemy.health--;
+                    this.enemyDestroyedSound.currentTime = 0;
+                    this.enemyDestroyedSound.play();
                     if (enemy.health <= 0) {
                         enemy.isDestroyed = true;
                         enemy.destroyedTime = 0;
                         this.score += enemy.isType2 ? 3000 : 1000;
-                        this.enemyDestroyedSound.currentTime = 0;
-                        this.enemyDestroyedSound.play();
                     }
                 }
             });
