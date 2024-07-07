@@ -263,12 +263,11 @@ class Game {
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
-            speed: 300, // Reduced from 500
+            speed: 300,
             velocityY: 0,
             velocityX: 0,
-            isJumping: false,
             jumpCount: 0,
-            maxJumps: 2
+            isOnGround: false
         };
     }
 
@@ -317,8 +316,12 @@ class Game {
     
 
     setupEventListeners() {
-        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        
+        document.addEventListener('keydown', (e) => {
+            this.keys[e.code] = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            this.keys[e.code] = false;
+        });
     }
 
     handleKeyDown(e) {
@@ -333,14 +336,15 @@ class Game {
       
 
       jump() {
-        if (this.player.isOnGround) {
-            this.player.isOnGround = false;
-            this.createJumpEffect();
+        const jumpVelocity = -600;
+        this.player.velocityY = jumpVelocity;
+        this.player.jumpCount++;
+        this.player.isOnGround = false;
+        this.createJumpEffect();
     
-            if (!this.hasPlayerJumped) {
-                this.hasPlayerJumped = true;
-                this.score = 0;
-            }
+        if (!this.hasPlayerJumped) {
+            this.hasPlayerJumped = true;
+            this.score = 0;
         }
     }
 
@@ -380,34 +384,21 @@ class Game {
     }
     
     handleCollisions() {
-        let onPlatform = false;
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        this.player.isOnGround = false;
     
         for (let platform of platforms) {
             if (this.checkCollision(this.player, platform)) {
-                const playerBottom = this.player.y + this.player.height;
-                const playerTop = this.player.y;
-                const platformBottom = platform.y + platform.height;
-    
-                // Coming from above
-                if (this.player.velocityY > 0 && playerBottom <= platform.y + this.player.velocityY) {
+                if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y) {
+                    // Landing on top of the platform
                     this.player.y = platform.y - this.player.height;
                     this.player.velocityY = 0;
-                    onPlatform = true;
-                }
-                // Coming from below
-                else if (this.player.velocityY < 0 && playerTop >= platformBottom + this.player.velocityY) {
-                    this.player.y = platformBottom;
+                    this.player.isOnGround = true;
+                    this.player.jumpCount = 0; // Reset jump count when landing
+                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
+                    // Hitting the bottom of the platform
+                    this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
-                }
-                // Side collision - only check if not colliding from above or below
-                else if (this.player.x < platform.x + platform.width && this.player.x + this.player.width > platform.x) {
-                    if (this.player.x < platform.x) {
-                        this.player.x = platform.x - this.player.width;
-                    } else {
-                        this.player.x = platform.x + platform.width;
-                    }
-                    this.player.velocityX = 0;
                 }
     
                 if (platform.isGolden) {
@@ -419,20 +410,9 @@ class Game {
             }
         }
     
-        // Update player state
-        if (onPlatform) {
-            this.player.isOnGround = true;
-            this.player.jumpCount = 0;
-        } else {
-            this.player.isOnGround = false;
-        }
-    
-        // Handle screen boundaries
-        if (this.player.x < 0) this.player.x = 0;
-        if (this.player.x + this.player.width > GAME_WIDTH) this.player.x = GAME_WIDTH - this.player.width;
-        if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.velocityY = 0;
+        // Check if player has fallen off the screen
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
         }
     }
     
@@ -462,10 +442,7 @@ class Game {
                obj1.y + obj1.height > obj2.y;
     }
 
-    landOnPlatform(platform) {
-        this.player.y = platform.y - this.player.height;
-        this.player.velocityY = 0;
-    }
+    
 
     handleGoldenPlatform() {
         this.player.velocityY = JUMP_VELOCITY * 1.5;
@@ -506,17 +483,9 @@ class Game {
         }
     
         const moveSpeed = 300;
-        const jumpVelocity = -600;
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
-    
-        // Jumping
-        if (this.keys['ArrowUp'] && this.player.isOnGround) {
-            this.player.velocityY = jumpVelocity;
-            this.player.isOnGround = false;
-            this.createJumpEffect();
-        }
     
         // Horizontal movement
         if (this.keys['ArrowLeft']) {
@@ -527,129 +496,25 @@ class Game {
             this.player.velocityX = 0;
         }
     
-        // Update position
-        const nextX = this.player.x + this.player.velocityX * dt;
-        const nextY = this.player.y + this.player.velocityY * dt;
-    
-        this.updatePlayerPosition(nextX, nextY);
-    }
-
-    updatePlayerPosition(nextX, nextY) {
-        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
-        
-        this.player.isOnGround = false; // Reset ground state
-        
-        for (let platform of platforms) {
-            if (nextX < platform.x + platform.width &&
-                nextX + this.player.width > platform.x &&
-                nextY < platform.y + platform.height &&
-                nextY + this.player.height > platform.y) {
-                
-                if (this.player.y + this.player.height <= platform.y) {
-                    // Landing on top of the platform
-                    this.player.y = platform.y - this.player.height;
-                    this.player.velocityY = 0;
-                    this.player.isOnGround = true;
-                } else if (this.player.y >= platform.y + platform.height) {
-                    // Hitting the bottom of the platform
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
-                } else if (this.player.x + this.player.width <= platform.x) {
-                    // Hitting the left side of the platform
-                    this.player.x = platform.x - this.player.width;
-                    this.player.velocityX = 0;
-                } else if (this.player.x >= platform.x + platform.width) {
-                    // Hitting the right side of the platform
-                    this.player.x = platform.x + platform.width;
-                    this.player.velocityX = 0;
-                }
-                
-                return; // Exit after handling collision
-            }
+        // Jumping
+        if (this.keys['ArrowUp'] && !this.keys['ArrowUpPrev'] && this.player.jumpCount < 2) {
+            this.jump();
         }
+        this.keys['ArrowUpPrev'] = this.keys['ArrowUp'];
     
-        // If no collision, update position
-        this.player.x = nextX;
-        this.player.y = nextY;
+        // Update position
+        this.player.x += this.player.velocityX * dt;
+        this.player.y += this.player.velocityY * dt;
     
         // Keep player within game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
         this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
+    
+        // Check for platform collisions
+        this.handleCollisions();
     }
 
-    updatePlayerHorizontal(nextX) {
-        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
-        
-        let collision = false;
-        for (let platform of platforms) {
-            if (nextX < platform.x + platform.width &&
-                nextX + this.player.width > platform.x &&
-                this.player.y < platform.y + platform.height &&
-                this.player.y + this.player.height > platform.y) {
-                
-                collision = true;
-                if (this.player.velocityX > 0) {
-                    this.player.x = platform.x - this.player.width;
-                } else if (this.player.velocityX < 0) {
-                    this.player.x = platform.x + platform.width;
-                }
-                this.player.velocityX = 0;
-                break;
-            }
-        }
     
-        if (!collision) {
-            this.player.x = nextX;
-        }
-    
-        // Keep player within game bounds
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-    }
-
-    updatePlayerVertical(nextY) {
-        const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
-        let onPlatform = false;
-        
-        for (let platform of platforms) {
-            // Check if player is within the horizontal bounds of the platform
-            if (this.player.x < platform.x + platform.width &&
-                this.player.x + this.player.width > platform.x) {
-                
-                const buffer = 0.1; // Small buffer to prevent floating point issues
-                
-                if (this.player.velocityY > 0 && nextY + this.player.height > platform.y && this.player.y + this.player.height <= platform.y + buffer) {
-                    // Landing on platform
-                    this.player.y = platform.y - this.player.height;
-                    this.player.velocityY = 0;
-                    onPlatform = true;
-                    break; // Exit the loop as we've landed
-                } else if (this.player.velocityY < 0 && nextY < platform.y + platform.height && this.player.y >= platform.y + platform.height - buffer) {
-                    // Hitting platform from below
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
-                    // Importantly, we do not change the player's horizontal position here
-                    
-                    if (platform.isGolden) {
-                        this.handleGoldenPlatform();
-                    } else if (platform.isSpike) {
-                        this.gameOver = true;
-                    }
-                    
-                    return; // Exit the method entirely to prevent any further movement this frame
-                }
-            }
-        }
-    
-        if (!onPlatform) {
-            this.player.y = nextY;
-        }
-        
-        this.player.isOnGround = onPlatform;
-        if (onPlatform) {
-            this.player.jumpCount = 0; // Reset jump count when landing
-        }
-    }
-
     handleGameOver() {
         this.gameRunning = false;
         this.gameOver = true;
