@@ -90,7 +90,6 @@ class Game {
         this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
-        setupKeyListeners();
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -318,6 +317,12 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
+            if (e.code === 'ArrowUp') {
+                this.jump();
+            }
+            if (e.code === 'Space') {
+                this.shoot();
+            }
         });
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
@@ -336,15 +341,19 @@ class Game {
       
 
       jump() {
-        const jumpVelocity = -600;
-        this.player.velocityY = jumpVelocity;
-        this.player.jumpCount++;
-        this.player.isOnGround = false;
-        this.createJumpEffect();
+        if (this.player.jumpCount < 2) {
+            const jumpVelocity = -600;
+            this.player.velocityY = jumpVelocity;
+            this.player.jumpCount++;
+            this.player.isOnGround = false;
+            this.createJumpEffect();
     
-        if (!this.hasPlayerJumped) {
-            this.hasPlayerJumped = true;
-            this.score = 0;
+            console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
+    
+            if (!this.hasPlayerJumped) {
+                this.hasPlayerJumped = true;
+                this.score = 0;
+            }
         }
     }
 
@@ -369,6 +378,11 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
+
+        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
+            this.bottomPlatform = null;
+            console.log('Bottom platform removed');
+        }
 
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
@@ -395,32 +409,25 @@ class Game {
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
+                    console.log('Player landed on platform');
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
+                    console.log('Player hit bottom of platform');
                 }
     
                 if (platform.isGolden) {
                     this.handleGoldenPlatform();
                 } else if (platform.isSpike) {
                     this.gameOver = true;
+                    console.log('Game over: Player hit spike platform');
                     return;
                 }
             }
         }
     
-        // Check if player has fallen off the screen
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
-        }
-    }
-    
-    landOnPlatform(platform) {
-        this.player.y = platform.y - this.player.height;
-        this.player.velocityY = 0;
-        this.player.isJumping = false;
-        this.player.jumpCount = 0;
+       
     }
 
 
@@ -436,10 +443,11 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        return obj1.x < obj2.x + obj2.width &&
-               obj1.x + obj1.width > obj2.x &&
-               obj1.y < obj2.y + obj2.height &&
-               obj1.y + obj1.height > obj2.y;
+        const narrowFactor = 0.8; // Adjust this value to make collision area narrower or wider
+        return (obj1.x + obj1.width * (1 - narrowFactor) / 2) < (obj2.x + obj2.width) &&
+               (obj1.x + obj1.width * (1 + narrowFactor) / 2) > obj2.x &&
+               obj1.y < (obj2.y + obj2.height) &&
+               (obj1.y + obj1.height) > obj2.y;
     }
 
     
@@ -482,7 +490,7 @@ class Game {
             return;
         }
     
-        const moveSpeed = 300;
+        const moveSpeed = 350;
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
@@ -496,22 +504,26 @@ class Game {
             this.player.velocityX = 0;
         }
     
-        // Jumping
-        if (this.keys['ArrowUp'] && !this.keys['ArrowUpPrev'] && this.player.jumpCount < 2) {
-            this.jump();
-        }
-        this.keys['ArrowUpPrev'] = this.keys['ArrowUp'];
-    
         // Update position
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
     
-        // Keep player within game bounds
+        // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-        this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
     
         // Check for platform collisions
         this.handleCollisions();
+    
+        // Reset jump count when on ground
+        if (this.player.isOnGround) {
+            this.player.jumpCount = 0;
+        }
+    
+        // Check if player has fallen off the screen
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
+            console.log('Game over: Player fell off screen');
+        }
     }
 
     
@@ -751,7 +763,6 @@ class Game {
             return;
         }
         
-        
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
@@ -759,11 +770,6 @@ class Game {
             this.ctx.fillStyle = '#00FF00';  // Bright green color
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
-        
-        // Draw player bounding box for debugging
-        this.ctx.strokeStyle = '#FF0000';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
@@ -831,21 +837,18 @@ class Game {
         if (!this.gameRunning) {
             return;
         }
-
+    
         if (!this.lastTime) this.lastTime = currentTime;
-
+    
         let deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
-
-        this.accumulator += deltaTime;
-
-        while (this.accumulator >= this.fixedTimeStep) {
-            this.update(this.fixedTimeStep / 1000);
-            this.accumulator -= this.fixedTimeStep;
-        }
-
+    
+        // Ensure deltaTime is not too large
+        deltaTime = Math.min(deltaTime, 50); // Cap at 50ms (20 fps)
+    
+        this.update(deltaTime / 1000);
         this.draw();
-
+    
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
@@ -896,15 +899,7 @@ function toggleSound() {
     isSoundOn ? enableSound() : disableSound();
 }
 
-function setupKeyListeners() {
-    document.addEventListener('keydown', (e) => {
-        pressedKeys[e.code] = true;
-    });
 
-    document.addEventListener('keyup', (e) => {
-        pressedKeys[e.code] = false;
-    });
-}
 
 function enableSound() {
     Object.values(sounds).forEach(sound => {
