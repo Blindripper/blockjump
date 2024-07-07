@@ -322,11 +322,13 @@ class Game {
     }
 
     checkPreciseCollision(player, enemy) {
-        // Check if there's any overlap between player and enemy
-        return !(player.x + player.width <= enemy.x ||
-                 player.x >= enemy.x + enemy.width ||
-                 player.y + player.height <= enemy.y ||
-                 player.y >= enemy.y + enemy.height);
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+
+        return (playerCenterX > enemy.x &&
+                playerCenterX < enemy.x + enemy.width &&
+                playerCenterY > enemy.y &&
+                playerCenterY < enemy.y + enemy.height);
     }
 
     isPointInside(pointX, pointY, rectX, rectY, rectWidth, rectHeight) {
