@@ -53,6 +53,8 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
+        this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
+        this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
@@ -201,24 +203,34 @@ class Game {
             bullet.y += bullet.speed * dt;
             return bullet.y < GAME_HEIGHT;
         });
+
+        // Check for collisions
+        this.checkBulletCollisions();
     }
 
     spawnEnemies() {
         const currentTime = Date.now();
         if (currentTime - this.lastEnemySpawn > this.enemySpawnInterval) {
-            this.enemies.push({
-                x: Math.random() * (GAME_WIDTH -80),
-                y: 50,
-                width: 80,
-                height: 80,
-                isDestroyed: false,
-                destroyedTime: 0
-            });
+            this.enemies.push(this.createEnemy());
             this.lastEnemySpawn = currentTime;
         }
     }
 
+    createEnemy() {
+        return {
+            x: Math.random() * (GAME_WIDTH - 80),
+            y: 50,
+            width: 80,
+            height: 80,
+            isDestroyed: false,
+            destroyedTime: 0,
+            lastShot: 0,
+            shootInterval: this.maxEnemyShootInterval
+        };
+    }
+
     updateEnemies(dt) {
+        const currentTime = Date.now();
         this.enemies.forEach(enemy => {
             if (enemy.isDestroyed) {
                 enemy.destroyedTime += dt;
@@ -228,22 +240,27 @@ class Game {
                 return;
             }
 
-            // Move enemies horizontally only
+            // Move enemies horizontally
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
 
             // Reverse direction if reaching screen edges
             if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
                 this.enemyDirection *= -1;
             }
-        });
 
-        // Handle enemy shooting
-        const currentTime = Date.now();
-        if (currentTime - this.lastEnemyShot > this.enemyShootInterval) {
-            this.enemyShoot();
-            this.lastEnemyShot = currentTime;
-        }
+            // Handle enemy shooting
+            if (currentTime - enemy.lastShot > enemy.shootInterval) {
+                this.enemyShoot(enemy);
+                enemy.lastShot = currentTime;
+                // Adjust shoot interval based on difficulty
+                enemy.shootInterval = Math.max(
+                    this.minEnemyShootInterval,
+                    this.maxEnemyShootInterval - (this.difficultyLevel - 1) * 1000
+                );
+            }
+        });
     }
+
 
     enemyShoot() {
         const shootingEnemies = this.enemies.filter(enemy => !enemy.isDestroyed);
@@ -297,6 +314,7 @@ class Game {
         this.enemyBullets = this.enemyBullets.filter(bullet => {
             if (this.checkCollision(bullet, this.player)) {
                 this.gameOver = true;
+                this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
                 return false;
             }
             return true;
@@ -432,7 +450,6 @@ class Game {
         this.updateParticles(dt);
         this.updateBullets(dt);
         this.updateEnemies(dt);
-        this.checkBulletEnemyCollisions();
         this.checkPlayerEnemyCollisions();
         this.spawnEnemies();
         this.updateDifficulty();
@@ -703,16 +720,13 @@ class Game {
             5000, // Minimum spawn interval of 5 seconds
             this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
         );
-        
-        // Update enemy shoot interval
-        this.enemyShootInterval = Math.max(
-            this.minEnemyShootInterval,
-            10000 - (this.difficultyLevel - 1) * 1000
-        );
+
+        // Enemy shoot interval is now handled individually for each enemy
 
         // Change background
         this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
     }
+
 
 
     createParticles(x, y, count, color) {
