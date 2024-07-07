@@ -515,28 +515,36 @@ class Game {
         }
     
         const airControlSpeed = 300; // Adjust this value for air control sensitivity
+        const jumpVelocity = -600; // Adjust this for jump height
     
-        // Apply gravity only when not in the air
-        if (this.player.isOnGround) {
-            this.player.velocityY += GRAVITY * dt;
-        } else {
-            // Air control
-            if (isKeyPressed('ArrowUp')) {
-                this.player.velocityY = -airControlSpeed;
-            } else if (isKeyPressed('ArrowDown')) {
-                this.player.velocityY = airControlSpeed;
-            } else {
-                this.player.velocityY *= 0.95; // Slight deceleration if no key is pressed
-            }
+        // Apply gravity
+        this.player.velocityY += GRAVITY * dt;
+    
+        // Jumping
+        if (isKeyPressed('ArrowUp') && this.player.isOnGround) {
+            this.player.velocityY = jumpVelocity;
+            this.player.isOnGround = false;
+            this.createJumpEffect();
         }
     
-        // Horizontal movement (both on ground and in air)
-        if (isKeyPressed('ArrowLeft')) {
-            this.player.velocityX = -airControlSpeed;
-        } else if (isKeyPressed('ArrowRight')) {
-            this.player.velocityX = airControlSpeed;
+        // Air control
+        if (!this.player.isOnGround) {
+            if (isKeyPressed('ArrowLeft')) {
+                this.player.velocityX = -airControlSpeed;
+            } else if (isKeyPressed('ArrowRight')) {
+                this.player.velocityX = airControlSpeed;
+            } else {
+                this.player.velocityX *= 0.95; // Slight deceleration if no key is pressed
+            }
         } else {
-            this.player.velocityX *= 0.95; // Slight deceleration if no key is pressed
+            // Ground movement
+            if (isKeyPressed('ArrowLeft')) {
+                this.player.velocityX = -this.player.speed;
+            } else if (isKeyPressed('ArrowRight')) {
+                this.player.velocityX = this.player.speed;
+            } else {
+                this.player.velocityX = 0;
+            }
         }
     
         // Update position
@@ -552,6 +560,8 @@ class Game {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         
         let collision = false;
+        this.player.isOnGround = false; // Reset ground state
+        
         for (let platform of platforms) {
             if (nextX < platform.x + platform.width &&
                 nextX + this.player.width > platform.x &&
@@ -590,7 +600,6 @@ class Game {
         if (!collision) {
             this.player.x = nextX;
             this.player.y = nextY;
-            this.player.isOnGround = false;
         }
     
         // Keep player within game bounds
