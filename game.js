@@ -266,13 +266,10 @@ class Game {
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
-            speed: 350,
-            velocityY: 0,
             velocityX: 0,
+            velocityY: 0,
             jumpCount: 0,
-            isOnGround: true,
-            lastGroundTime: Date.now(),
-            isJumping: false
+            isOnGround: true
         };
     }
 
@@ -326,9 +323,6 @@ class Game {
             if (e.code === 'ArrowUp') {
                 this.tryJump();
             }
-            if (e.code === 'Space') {
-                this.shoot();
-            }
         });
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
@@ -336,13 +330,7 @@ class Game {
     }
 
     tryJump() {
-        const coyoteTime = 100; // milliseconds
-        const currentTime = Date.now();
-    
-        if (this.player.isOnGround || 
-            (currentTime - this.player.lastGroundTime < coyoteTime && this.player.jumpCount === 0) ||
-            this.player.jumpCount < 2) {
-            
+        if (this.player.isOnGround || this.player.jumpCount < 2) {
             this.jump();
         }
     }
@@ -359,21 +347,11 @@ class Game {
       
 
       jump() {
-        if (this.player.isOnGround || this.player.jumpCount < 2) {
-            const jumpVelocity = -600;
-            this.player.velocityY = jumpVelocity;
-            this.player.jumpCount++;
-            this.player.isOnGround = false;
-            this.player.isJumping = true;
-            this.createJumpEffect();
-    
-            console.log(`Jump executed. Count: ${this.player.jumpCount}, Velocity: ${this.player.velocityY}`);
-    
-            if (!this.hasPlayerJumped) {
-                this.hasPlayerJumped = true;
-                this.score = 0;
-            }
-        }
+        const jumpVelocity = -600;
+        this.player.velocityY = jumpVelocity;
+        this.player.jumpCount++;
+        this.player.isOnGround = false;
+        // Add jump effect or sound here if needed
     }
 
 
@@ -415,61 +393,29 @@ class Game {
         }
     }
     
-    handleCollisions(nextX, nextY) {
+    handleCollisions() {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
-        let wasOnGround = this.player.isOnGround;
         this.player.isOnGround = false;
-    
+
         for (let platform of platforms) {
-            if (this.checkCollision(
-                {x: this.player.x, y: nextY, width: this.player.width, height: this.player.height},
-                platform
-            )) {
-                // Vertical collision
+            if (this.checkCollision(this.player, platform)) {
                 if (this.player.velocityY > 0) {
                     // Landing on top of the platform
                     this.player.y = platform.y - this.player.height;
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0;
-                    this.player.isJumping = false;
                 } else if (this.player.velocityY < 0) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
                 }
             }
-    
-            if (this.checkCollision(
-                {x: nextX, y: this.player.y, width: this.player.width, height: this.player.height},
-                platform
-            )) {
-                // Horizontal collision
-                if (this.player.velocityX > 0) {
-                    this.player.x = platform.x - this.player.width;
-                } else if (this.player.velocityX < 0) {
-                    this.player.x = platform.x + platform.width;
-                }
-                this.player.velocityX = 0;
-            }
-    
-            if (platform.isGolden) {
-                this.handleGoldenPlatform();
-            } else if (platform.isSpike) {
-                this.gameOver = true;
-                console.log('Game over: Player hit spike platform');
-                return;
-            }
         }
-    
-        // Update position if no collision
-        if (!this.player.isOnGround) {
-            this.player.y = nextY;
-        }
-        this.player.x = nextX;
-    
-        if (!wasOnGround && this.player.isOnGround) {
-            console.log('Player landed on platform');
+
+        // Check if player has fallen off the screen
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
         }
     }
 
@@ -530,20 +476,8 @@ class Game {
 
 
     updatePlayer(dt) {
-        if (!this.player) {
-            console.warn('Player is null in updatePlayer');
-            return;
-        }
-    
-        const moveSpeed = 350;
-    
-        // Apply gravity only when not on the ground
-        if (!this.player.isOnGround) {
-            this.player.velocityY += GRAVITY * dt;
-        } else {
-            this.player.velocityY = 0; // Reset vertical velocity when on ground
-        }
-    
+        const moveSpeed = 300;
+
         // Horizontal movement
         if (this.keys['ArrowLeft']) {
             this.player.velocityX = -moveSpeed;
@@ -552,30 +486,18 @@ class Game {
         } else {
             this.player.velocityX = 0;
         }
-    
-        // Calculate next position
-        let nextX = this.player.x + this.player.velocityX * dt;
-        let nextY = this.player.y + this.player.velocityY * dt;
-    
-        // Handle collisions
-        this.handleCollisions(nextX, nextY);
-    
+
+        // Apply gravity
+        this.player.velocityY += GRAVITY * dt;
+
+        // Update position
+        this.player.x += this.player.velocityX * dt;
+        this.player.y += this.player.velocityY * dt;
+
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-    
-        // Update last ground time for coyote time
-        if (this.player.isOnGround) {
-            this.player.lastGroundTime = Date.now();
-        }
-    
-        // Check if player has fallen off the screen
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
-            console.log('Game over: Player fell off screen');
-        }
-    
-        console.log(`Player update: pos(${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)}), vel(${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)}), onGround: ${this.player.isOnGround}`);
     }
+
 
     
     handleGameOver() {
