@@ -1213,7 +1213,7 @@ function loadSprite(name, fileName) {
 
 function loadSprites() {
     const spritesToLoad = [
-        { name: 'player', file: 'TezosLogo_Icon_Blue1.png' },
+        { name: 'player', file: 'TezosLogo_Icon_Blue.png' },
         { name: 'bitcoin', file: 'bitcoin.png' },
         { name: 'solana', file: 'solana.png' },
         { name: 'ethereum', file: 'ethereum1.png' },
