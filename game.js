@@ -350,10 +350,29 @@ class Game {
 
     checkPlayerEnemyCollisions() {
         for (let enemy of this.enemies) {
-            if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
-                this.gameOver = true;
-                this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
-                return;
+            if (!enemy.isDestroyed) {
+                // Use precise collision detection
+                if (this.checkPreciseCollision(this.player, enemy)) {
+                    this.gameOver = true;
+                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    return;
+                }
+                
+                // Check if any corner of the player is inside the enemy
+                const playerCorners = [
+                    { x: this.player.x, y: this.player.y },
+                    { x: this.player.x + this.player.width, y: this.player.y },
+                    { x: this.player.x, y: this.player.y + this.player.height },
+                    { x: this.player.x + this.player.width, y: this.player.y + this.player.height }
+                ];
+                
+                for (let corner of playerCorners) {
+                    if (this.isPointInside(corner.x, corner.y, enemy.x, enemy.y, enemy.width, enemy.height)) {
+                        this.gameOver = true;
+                        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                        return;
+                    }
+                }
             }
         }
     }
