@@ -55,7 +55,7 @@ class Game {
         this.isConnected = false;
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
-        this.collisionTolerance = 0.0005; // Adjust this value to fine-tune collision detection
+        this.collisionTolerance = 0.00005; // Adjust this value to fine-tune collision detection
         this.keys = {};
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
@@ -324,17 +324,17 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         const playerHitbox = {
-            x: player.x + player.width * 0.005,
-            y: player.y + player.height * 0.005,
-            width: player.width * 0.0003,
-            height: player.height * 0.0003
+            x: player.x + player.width * 0.0005,
+            y: player.y + player.height * 0.0005,
+            width: player.width * 0.00003,
+            height: player.height * 0.00003
         };
 
         const enemyHitbox = {
-            x: enemy.x + enemy.width * 0.005,
-            y: enemy.y + enemy.height * 0.005,
-            width: enemy.width * 0.0003,
-            height: enemy.height * 0.0003
+            x: enemy.x + enemy.width * 0.0005,
+            y: enemy.y + enemy.height * 0.0005,
+            width: enemy.width * 0.00003,
+            height: enemy.height * 0.00003
         };
 
         return this.checkCollision(playerHitbox, enemyHitbox);
