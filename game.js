@@ -401,49 +401,60 @@ class Game {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         this.player.isOnGround = false;
     
-        for (let platform of platforms) {
-            if (this.checkCollision(
-                {x: nextX, y: nextY, width: this.player.width, height: this.player.height},
-                platform
-            )) {
-                // Vertical collision
-                if (this.player.velocityY > 0 && this.player.y + this.player.height <= platform.y) {
-                    // Landing on top of the platform
-                    this.player.y = platform.y - this.player.height;
-                    this.player.velocityY = 0;
-                    this.player.isOnGround = true;
-                    this.player.jumpCount = 0;
-                    // Allow horizontal movement when on platform
-                    this.player.x = nextX;
-                } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
-                    // Hitting the bottom of the platform
-                    this.player.y = platform.y + platform.height;
-                    this.player.velocityY = 0;
-                } else {
-                    // Horizontal collision
-                    if (this.player.x + this.player.width <= platform.x) {
-                        this.player.x = platform.x - this.player.width;
-                    } else if (this.player.x >= platform.x + platform.width) {
-                        this.player.x = platform.x + platform.width;
-                    }
-                    // Don't set velocityX to 0, to allow movement along platforms
-                }
+        // Calculate the movement vector
+        const moveX = nextX - this.player.x;
+        const moveY = nextY - this.player.y;
     
-                if (platform.isGolden) {
-                    this.handleGoldenPlatform();
-                } else if (platform.isSpike) {
-                    this.gameOver = true;
-                    console.log('Game over: Player hit spike platform');
+        // Number of steps to check (increase for more precision, decrease for better performance)
+        const steps = 5;
+    
+        for (let i = 0; i <= steps; i++) {
+            const stepX = this.player.x + (moveX * i) / steps;
+            const stepY = this.player.y + (moveY * i) / steps;
+    
+            for (let platform of platforms) {
+                if (this.checkCollision(
+                    {x: stepX, y: stepY, width: this.player.width, height: this.player.height},
+                    platform
+                )) {
+                    // Vertical collision
+                    if (moveY > 0 && this.player.y + this.player.height <= platform.y) {
+                        // Landing on top of the platform
+                        this.player.y = platform.y - this.player.height;
+                        this.player.velocityY = 0;
+                        this.player.isOnGround = true;
+                        this.player.jumpCount = 0;
+                    } else if (moveY < 0 && this.player.y >= platform.y + platform.height) {
+                        // Hitting the bottom of the platform
+                        this.player.y = platform.y + platform.height;
+                        this.player.velocityY = 0;
+                    } else if (moveX !== 0) {
+                        // Horizontal collision
+                        if (moveX > 0) {
+                            this.player.x = platform.x - this.player.width;
+                        } else {
+                            this.player.x = platform.x + platform.width;
+                        }
+                        this.player.velocityX = 0;
+                    }
+    
+                    if (platform.isGolden) {
+                        this.handleGoldenPlatform();
+                    } else if (platform.isSpike) {
+                        this.gameOver = true;
+                        console.log('Game over: Player hit spike platform');
+                        return;
+                    }
+    
+                    // Exit the loop if a collision is found
                     return;
                 }
             }
         }
     
-        // If no collision or on ground, update position
-        if (!this.player.isOnGround) {
-            this.player.x = nextX;
-            this.player.y = nextY;
-        }
+        // If no collision, update position
+        this.player.x = nextX;
+        this.player.y = nextY;
     }
 
 
@@ -527,16 +538,12 @@ class Game {
         // Handle collisions
         this.handleCollisions(nextX, nextY);
     
-        // Update horizontal position regardless of collision
-        this.player.x += this.player.velocityX * dt;
-    
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
     
         // Check if player has fallen off the screen
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
-            console.log('Game over: Player fell off screen');
         }
     }
 
