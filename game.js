@@ -90,7 +90,6 @@ class Game {
         this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
-        setupKeyListeners();
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -318,8 +317,11 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
-            if (e.code === 'ArrowUp' && this.player.jumpCount < 2) {
+            if (e.code === 'ArrowUp') {
                 this.jump();
+            }
+            if (e.code === 'Space') {
+                this.shoot();
             }
         });
         document.addEventListener('keyup', (e) => {
@@ -345,6 +347,8 @@ class Game {
             this.player.jumpCount++;
             this.player.isOnGround = false;
             this.createJumpEffect();
+    
+            console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
     
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
@@ -516,6 +520,10 @@ class Game {
         if (this.player.isOnGround) {
             this.player.jumpCount = 0;
         }
+    
+        // Debug logging
+        console.log(`Player position: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
+        console.log(`Player velocity: (${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)})`);
     }
 
     
@@ -835,21 +843,18 @@ class Game {
         if (!this.gameRunning) {
             return;
         }
-
+    
         if (!this.lastTime) this.lastTime = currentTime;
-
+    
         let deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
-
-        this.accumulator += deltaTime;
-
-        while (this.accumulator >= this.fixedTimeStep) {
-            this.update(this.fixedTimeStep / 1000);
-            this.accumulator -= this.fixedTimeStep;
-        }
-
+    
+        // Ensure deltaTime is not too large
+        deltaTime = Math.min(deltaTime, 50); // Cap at 50ms (20 fps)
+    
+        this.update(deltaTime / 1000);
         this.draw();
-
+    
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
@@ -900,15 +905,7 @@ function toggleSound() {
     isSoundOn ? enableSound() : disableSound();
 }
 
-function setupKeyListeners() {
-    document.addEventListener('keydown', (e) => {
-        pressedKeys[e.code] = true;
-    });
 
-    document.addEventListener('keyup', (e) => {
-        pressedKeys[e.code] = false;
-    });
-}
 
 function enableSound() {
     Object.values(sounds).forEach(sound => {
