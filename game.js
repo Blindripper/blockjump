@@ -38,8 +38,8 @@ const picsUrl = `${repoBaseUrl}pics/`;
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
-const PLAYER_WIDTH = 40;
-const PLAYER_HEIGHT = 50;
+const PLAYER_WIDTH = 35;
+const PLAYER_HEIGHT = 45;
 const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
 const pressedKeys = {};
@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
-        const playerVisibleWidth = player.width * 0.7;
-        const playerVisibleHeight = player.height * 0.7;
-        const enemyVisibleWidth = enemy.width * 0.7;
-        const enemyVisibleHeight = enemy.height * 0.7;
+        const playerVisibleWidth = player.width * 0.6;
+        const playerVisibleHeight = player.height * 0.6;
+        const enemyVisibleWidth = enemy.width * 0.6;
+        const enemyVisibleHeight = enemy.height * 0.6;
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
@@ -343,8 +343,8 @@ class Game {
     
     // Alternative: Circular hitbox collision
     checkCircularCollision(player, enemy) {
-        const playerRadius = player.width * 0.4; // Adjust as needed
-        const enemyRadius = enemy.width * 0.4; // Adjust as needed
+        const playerRadius = player.width * 0.2; // Adjust as needed
+        const enemyRadius = enemy.width * 0.2; // Adjust as needed
         const playerCenterX = player.x + player.width / 2;
         const playerCenterY = player.y + player.height / 2;
         const enemyCenterX = enemy.x + enemy.width / 2;
