@@ -56,6 +56,7 @@ class Game {
         this.isConnected = false;
         this.keys = {}; 
         this.bottomPlatformTimer = 0;
+        this.fixedTimeStep = 1000 / 60; 
         this.bottomPlatformDuration = 5
         this.gameRunning = false;
         this.hasPlayerJumped = false;
@@ -348,36 +349,28 @@ class Game {
 
 
     update(dt) {
-        // Check for game over condition first
         if (this.gameOver) {
             this.handleGameOver();
             return;
         }
-    
-        // Check if the game is running
+
         if (!this.gameRunning) return;
-    
-        // Update game elements
+
         this.updatePlayer(dt);
-        this.handleCollisions();
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
         this.updateParticles(dt);
-        this.updateDifficulty();
-        this.updateUI();
-        this.updateBackground();
-    
-        // Update shooting and enemy related elements
         this.updateBullets(dt);
         this.updateEnemies(dt);
         this.checkBulletEnemyCollisions();
         this.checkPlayerEnemyCollisions();
         this.spawnEnemies();
-    
-        // Check if player has fallen off the screen
+        this.updateDifficulty();
+        this.updateUI();
+        this.updateBackground();
+
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
-            this.draw();
         }
     }
     
@@ -515,7 +508,7 @@ class Game {
             return;
         }
     
-        const airControlSpeed = 300;
+        const moveSpeed = 300;
         const jumpVelocity = -600;
     
         // Apply gravity
@@ -528,14 +521,13 @@ class Game {
             this.createJumpEffect();
         }
     
-        // Horizontal movement (both on ground and in air)
+        // Horizontal movement
         if (this.keys['ArrowLeft']) {
-            this.player.velocityX = -this.player.speed;
+            this.player.velocityX = -moveSpeed;
         } else if (this.keys['ArrowRight']) {
-            this.player.velocityX = this.player.speed;
+            this.player.velocityX = moveSpeed;
         } else {
-            // Apply friction to gradually slow down
-            this.player.velocityX *= 0.9;
+            this.player.velocityX = 0;
         }
     
         // Update position
@@ -543,16 +535,11 @@ class Game {
         const nextY = this.player.y + this.player.velocityY * dt;
     
         this.updatePlayerPosition(nextX, nextY);
-    
-        console.log(`Player position updated: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
-        console.log(`Player velocity: (${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)})`);
-        console.log(`Is on ground: ${this.player.isOnGround}`);
     }
 
     updatePlayerPosition(nextX, nextY) {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         
-        let collision = false;
         this.player.isOnGround = false; // Reset ground state
         
         for (let platform of platforms) {
@@ -561,39 +548,32 @@ class Game {
                 nextY < platform.y + platform.height &&
                 nextY + this.player.height > platform.y) {
                 
-                collision = true;
-                
-                // Determine which side of the platform we collided with
-                const overlapLeft = (nextX + this.player.width) - platform.x;
-                const overlapRight = (platform.x + platform.width) - nextX;
-                const overlapTop = (nextY + this.player.height) - platform.y;
-                const overlapBottom = (platform.y + platform.height) - nextY;
-    
-                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-    
-                if (minOverlap === overlapTop && this.player.velocityY > 0) {
+                if (this.player.y + this.player.height <= platform.y) {
+                    // Landing on top of the platform
                     this.player.y = platform.y - this.player.height;
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
-                } else if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                } else if (this.player.y >= platform.y + platform.height) {
+                    // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
-                } else if (minOverlap === overlapLeft && this.player.velocityX > 0) {
+                } else if (this.player.x + this.player.width <= platform.x) {
+                    // Hitting the left side of the platform
                     this.player.x = platform.x - this.player.width;
                     this.player.velocityX = 0;
-                } else if (minOverlap === overlapRight && this.player.velocityX < 0) {
+                } else if (this.player.x >= platform.x + platform.width) {
+                    // Hitting the right side of the platform
                     this.player.x = platform.x + platform.width;
                     this.player.velocityX = 0;
                 }
-    
-                break;
+                
+                return; // Exit after handling collision
             }
         }
     
-        if (!collision) {
-            this.player.x = nextX;
-            this.player.y = nextY;
-        }
+        // If no collision, update position
+        this.player.x = nextX;
+        this.player.y = nextY;
     
         // Keep player within game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -994,18 +974,23 @@ class Game {
             return;
         }
 
-        const dt = (currentTime - this.lastTime) / 1000;
+        if (!this.lastTime) this.lastTime = currentTime;
+
+        let deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
 
-        console.log(`Game loop iteration. Delta time: ${dt}`);
-        this.update(dt);
+        this.accumulator += deltaTime;
 
-        console.log("Before draw - Player position:", this.player ? `(${this.player.x}, ${this.player.y})` : "Player is null");
+        while (this.accumulator >= this.fixedTimeStep) {
+            this.update(this.fixedTimeStep / 1000);
+            this.accumulator -= this.fixedTimeStep;
+        }
+
         this.draw();
-        console.log("After draw");
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
+
 
 }
 
