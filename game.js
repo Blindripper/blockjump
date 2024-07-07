@@ -277,7 +277,6 @@ class Game {
     
     enemyShootMissile(enemy) {
         this.enemyBullets.push(this.createMissile(enemy));
-        this.missileSound.currentTime = 0;
         this.playSound('missile');
     }
 
@@ -1109,11 +1108,9 @@ let isSoundOn = false;
 function toggleSound() {
     isSoundOn = !isSoundOn;
     const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
-    }
+    soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
     isSoundOn ? enableSound() : disableSound();
-}
+  }
 
 
 
