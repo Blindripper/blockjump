@@ -381,8 +381,7 @@ class Game {
                 if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
                     bulletHit = true;
                     enemy.health--;
-                    this.enemyDestroyedSound.currentTime = 0;
-                    this.enemyDestroyedSound.play();
+                    this.playSound('destroyed');
                     if (enemy.health <= 0) {
                         enemy.isDestroyed = true;
                         enemy.destroyedTime = 0;
@@ -392,12 +391,13 @@ class Game {
             });
             return !bulletHit;
         });
-
+    
         // Check enemy bullet - player collisions
         this.enemyBullets = this.enemyBullets.filter(bullet => {
             if (this.checkCollision(bullet, this.player)) {
                 this.gameOver = true;
                 this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                this.playSound('gameOver');
                 return false;
             }
             return true;
