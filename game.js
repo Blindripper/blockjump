@@ -378,15 +378,6 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
-
-        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
-            this.bottomPlatform = null;
-            console.log('Bottom platform removed');
-        }
-
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
-        }
     }
     
     
@@ -409,32 +400,25 @@ class Game {
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
+                    console.log('Player landed on platform');
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
+                    console.log('Player hit bottom of platform');
                 }
     
                 if (platform.isGolden) {
                     this.handleGoldenPlatform();
                 } else if (platform.isSpike) {
                     this.gameOver = true;
+                    console.log('Game over: Player hit spike platform');
                     return;
                 }
             }
         }
     
-        // Check if player has fallen off the screen
-        if (this.player.y > GAME_HEIGHT) {
-            this.gameOver = true;
-        }
-    }
-    
-    landOnPlatform(platform) {
-        this.player.y = platform.y - this.player.height;
-        this.player.velocityY = 0;
-        this.player.isJumping = false;
-        this.player.jumpCount = 0;
+       
     }
 
 
@@ -497,7 +481,7 @@ class Game {
             return;
         }
     
-        const moveSpeed = 400;
+        const moveSpeed = 350;
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
@@ -515,9 +499,8 @@ class Game {
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
     
-        // Keep player within game bounds
+        // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
-        this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
     
         // Check for platform collisions
         this.handleCollisions();
@@ -527,9 +510,11 @@ class Game {
             this.player.jumpCount = 0;
         }
     
-        // Debug logging
-        console.log(`Player position: (${this.player.x.toFixed(2)}, ${this.player.y.toFixed(2)})`);
-        console.log(`Player velocity: (${this.player.velocityX.toFixed(2)}, ${this.player.velocityY.toFixed(2)})`);
+        // Check if player has fallen off the screen
+        if (this.player.y > GAME_HEIGHT) {
+            this.gameOver = true;
+            console.log('Game over: Player fell off screen');
+        }
     }
 
     
