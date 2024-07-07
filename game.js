@@ -55,7 +55,7 @@ class Game {
         this.isConnected = false;
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
-        this.collisionTolerance = 0.7; // Adjust this value to fine-tune collision detection
+        this.collisionTolerance = 0.3; // Adjust this value to fine-tune collision detection
         this.keys = {};
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
@@ -324,17 +324,17 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         const playerHitbox = {
-            x: player.x + player.width * 0.2,
-            y: player.y + player.height * 0.2,
-            width: player.width * 0.6,
-            height: player.height * 0.6
+            x: player.x + player.width * 0.4,
+            y: player.y + player.height * 0.4,
+            width: player.width * 0.2,
+            height: player.height * 0.2
         };
 
         const enemyHitbox = {
-            x: enemy.x + enemy.width * 0.2,
-            y: enemy.y + enemy.height * 0.2,
-            width: enemy.width * 0.6,
-            height: enemy.height * 0.6
+            x: enemy.x + enemy.width * 0.4,
+            y: enemy.y + enemy.height * 0.4,
+            width: enemy.width * 0.2,
+            height: enemy.height * 0.2
         };
 
         return this.checkCollision(playerHitbox, enemyHitbox);
@@ -539,11 +539,10 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        const narrowFactor = this.collisionTolerance;
-        return (obj1.x + obj1.width * (1 - narrowFactor) / 2) < (obj2.x + obj2.width * narrowFactor) &&
-               (obj1.x + obj1.width * (1 + narrowFactor) / 2) > (obj2.x + obj2.width * (1 - narrowFactor)) &&
-               (obj1.y + obj1.height * (1 - narrowFactor) / 2) < (obj2.y + obj2.height * narrowFactor) &&
-               (obj1.y + obj1.height * (1 + narrowFactor) / 2) > (obj2.y + obj2.height * (1 - narrowFactor));
+        return obj1.x < obj2.x + obj2.width &&
+               obj1.x + obj1.width > obj2.x &&
+               obj1.y < obj2.y + obj2.height &&
+               obj1.y + obj1.height > obj2.y;
     }
 
     
