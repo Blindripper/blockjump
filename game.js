@@ -38,7 +38,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
-const PLAYER_WIDTH = 50;
+const PLAYER_WIDTH = 40;
 const PLAYER_HEIGHT = 50;
 const JUMP_VELOCITY = -600;
 const GRAVITY = 1500;
@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
-        const playerVisibleWidth = player.width * 0.1;
-        const playerVisibleHeight = player.height * 0.1;
-        const enemyVisibleWidth = enemy.width * 0.1;
-        const enemyVisibleHeight = enemy.height * 0.;
+        const playerVisibleWidth = player.width * 0.7;
+        const playerVisibleHeight = player.height * 0.7;
+        const enemyVisibleWidth = enemy.width * 0.7;
+        const enemyVisibleHeight = enemy.height * 0.7;
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
