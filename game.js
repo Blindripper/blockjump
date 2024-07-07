@@ -318,6 +318,9 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
+            if (e.code === 'ArrowUp' && this.player.jumpCount < 2) {
+                this.jump();
+            }
         });
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
@@ -336,15 +339,17 @@ class Game {
       
 
       jump() {
-        const jumpVelocity = -600;
-        this.player.velocityY = jumpVelocity;
-        this.player.jumpCount++;
-        this.player.isOnGround = false;
-        this.createJumpEffect();
+        if (this.player.jumpCount < 2) {
+            const jumpVelocity = -600;
+            this.player.velocityY = jumpVelocity;
+            this.player.jumpCount++;
+            this.player.isOnGround = false;
+            this.createJumpEffect();
     
-        if (!this.hasPlayerJumped) {
-            this.hasPlayerJumped = true;
-            this.score = 0;
+            if (!this.hasPlayerJumped) {
+                this.hasPlayerJumped = true;
+                this.score = 0;
+            }
         }
     }
 
@@ -496,12 +501,6 @@ class Game {
             this.player.velocityX = 0;
         }
     
-        // Jumping
-        if (this.keys['ArrowUp'] && !this.keys['ArrowUpPrev'] && this.player.jumpCount < 2) {
-            this.jump();
-        }
-        this.keys['ArrowUpPrev'] = this.keys['ArrowUp'];
-    
         // Update position
         this.player.x += this.player.velocityX * dt;
         this.player.y += this.player.velocityY * dt;
@@ -512,6 +511,11 @@ class Game {
     
         // Check for platform collisions
         this.handleCollisions();
+    
+        // Reset jump count when on ground
+        if (this.player.isOnGround) {
+            this.player.jumpCount = 0;
+        }
     }
 
     
