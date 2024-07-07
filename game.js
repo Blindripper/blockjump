@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
-        const playerVisibleWidth = player.width * 0.95;
-        const playerVisibleHeight = player.height * 0.95;
-        const enemyVisibleWidth = enemy.width * 0.95;
-        const enemyVisibleHeight = enemy.height * 0.95;
+        const playerVisibleWidth = player.width * 0.5;
+        const playerVisibleHeight = player.height * 0.5;
+        const enemyVisibleWidth = enemy.width * 0.5;
+        const enemyVisibleHeight = enemy.height * 0.5;
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
