@@ -323,10 +323,10 @@ class Game {
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
-        const playerVisibleWidth = player.width * 0.6;
-        const playerVisibleHeight = player.height * 0.6;
-        const enemyVisibleWidth = enemy.width * 0.6;
-        const enemyVisibleHeight = enemy.height * 0.6;
+        const playerVisibleWidth = player.width * 0.4;
+        const playerVisibleHeight = player.height * 0.4;
+        const enemyVisibleWidth = enemy.width * 0.4;
+        const enemyVisibleHeight = enemy.height * 0.4;
     
         // Calculate hitbox positions
         const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
@@ -341,28 +341,12 @@ class Game {
                  playerHitboxY >= enemyHitboxY + enemyVisibleHeight);
     }
     
-    // Alternative: Circular hitbox collision
-    checkCircularCollision(player, enemy) {
-        const playerRadius = player.width * 0.2; // Adjust as needed
-        const enemyRadius = enemy.width * 0.2; // Adjust as needed
-        const playerCenterX = player.x + player.width / 2;
-        const playerCenterY = player.y + player.height / 2;
-        const enemyCenterX = enemy.x + enemy.width / 2;
-        const enemyCenterY = enemy.y + enemy.height / 2;
-    
-        const dx = playerCenterX - enemyCenterX;
-        const dy = playerCenterY - enemyCenterY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-    
-        return distance < (playerRadius + enemyRadius);
-    }
-
 
     checkPlayerEnemyCollisions() {
         for (let enemy of this.enemies) {
             if (!enemy.isDestroyed) {
                 // Use precise collision detection
-                if (this.checkPreciseCollision(this.player, enemy) || this.checkCircularCollision(this.player, enemy)) {
+                if (this.checkPreciseCollision(this.player, enemy) ) {
                     this.gameOver = true;
                     this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
                     return;
