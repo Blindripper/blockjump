@@ -100,8 +100,16 @@ class Game {
         this.enemyType2Sprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft2small.png';
         this.enemyType2DestroyedSprite = new Image();
         this.enemyType2DestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft2firesmall.png';
-        this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
-        this.friendlyLaserSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/friendlylaser.mp3');
+        this.sounds = {
+            friendlyLaser: new Audio(`${soundUrl}friendlylaser.mp3`),
+            enemyLaser: new Audio(`${soundUrl}Lasershot.mp3`),
+            missile: new Audio(`${soundUrl}missile.mp3`),
+            destroyed: new Audio(`${soundUrl}destroyed.mp3`),
+            background: new Audio(`${soundUrl}main.mp3`),
+            jump: new Audio(`${soundUrl}jump.wav`),
+            powerup: new Audio(`${soundUrl}powerup.mp3`),
+            gameOver: new Audio(`${soundUrl}gameover.mp3`)
+        };
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -134,6 +142,8 @@ class Game {
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
+            this.sounds.background.loop = true;
+            this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
             
             // Explicitly set player position
             this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
@@ -177,12 +187,14 @@ class Game {
     }
 
     loadSounds() {
-        this.shootSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/Lasershot.wav');
-        this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.wav');
-        this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
-        this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.mp3');
-        this.friendlyLaserSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/friendlylaser.mp3');
+        Object.values(this.sounds).forEach(sound => sound.load());
+    }
 
+    playSound(soundName) {
+        if (this.sounds[soundName]) {
+            this.sounds[soundName].currentTime = 0;
+            this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
+        }
     }
  
     shoot() {
@@ -197,8 +209,19 @@ class Game {
             });
             this.lastShotTime = currentTime;
             this.friendlyLaserSound.currentTime = 0;
-            this.friendlyLaserSound.play();
+            this.playSound('friendlyLaser');
         }
+    }
+
+    enemyShoot(enemy) {
+        this.enemyBullets.push({
+            x: enemy.x + enemy.width / 2 - 2.5,
+            y: enemy.y + enemy.height,
+            width: 5,
+            height: 10,
+            speed: 300
+        });
+        this.playSound('enemyLaser');
     }
 
     updateBullets(dt) {
@@ -255,7 +278,7 @@ class Game {
     enemyShootMissile(enemy) {
         this.enemyBullets.push(this.createMissile(enemy));
         this.missileSound.currentTime = 0;
-        this.missileSound.play();
+        this.playSound('missile');
     }
 
     spawnEnemies() {
@@ -298,21 +321,21 @@ class Game {
                 }
                 return;
             }
-
-            // Move enemies down
-        if (currentTime - enemy.lastMoveDown > enemy.moveDownInterval) {
-            enemy.y += 50; // Move down by 50 pixels
-            enemy.lastMoveDown = currentTime;
-        }
     
+            // Move enemies down
+            if (currentTime - enemy.lastMoveDown > enemy.moveDownInterval) {
+                enemy.y += 50; // Move down by 50 pixels
+                enemy.lastMoveDown = currentTime;
+            }
+        
             // Move enemies horizontally
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
-    
+        
             // Reverse direction if reaching screen edges
             if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
                 this.enemyDirection *= -1;
             }
-    
+        
             // Handle enemy shooting
             if (currentTime - enemy.lastShot > enemy.shootInterval) {
                 if (enemy.isType2) {
@@ -331,19 +354,7 @@ class Game {
     }
 
 
-    enemyShoot() {
-        const shootingEnemies = this.enemies.filter(enemy => !enemy.isDestroyed);
-        if (shootingEnemies.length > 0) {
-            const shooter = shootingEnemies[Math.floor(Math.random() * shootingEnemies.length)];
-            this.enemyBullets.push({
-                x: shooter.x + shooter.width / 2 - 2.5,
-                y: shooter.y + shooter.height,
-                width: 5,
-                height: 10,
-                speed: 300
-            });
-        }
-    }
+    
 
     checkBulletEnemyCollisions() {
         this.bullets = this.bullets.filter(bullet => {
@@ -722,7 +733,7 @@ class Game {
             sound.pause();
             sound.currentTime = 0;
         });
-        playSound('gameOver');
+        this.playSound('gameOver');
 
         handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
     }
@@ -790,6 +801,7 @@ class Game {
             'etherLink': { duration: 1, effect: () => this.score += 1000 },
             'blast': { duration: 10, effect: () => { /* Implement blast effect */ } },
             'tezosX': { duration: 15, effect: () => { /* Implement tezosX effect */ } },
+            
         };
     
         if (powerupConfig[type]) {
@@ -807,7 +819,7 @@ class Game {
             }
         }
     
-        playSound('powerup');
+        this.playSound('powerup');
     }
 
     updateParticles(dt) {
