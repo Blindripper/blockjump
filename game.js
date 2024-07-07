@@ -321,21 +321,7 @@ class Game {
         });
     }
 
-    checkPreciseCollision(player, enemy) {
-        const playerCenterX = player.x + player.width / 2;
-        const playerCenterY = player.y + player.height / 2;
-        
-        const enemyHitboxMargin = 10; // 90% margin
-        const enemyHitboxX = enemy.x + enemy.width * enemyHitboxMargin;
-        const enemyHitboxY = enemy.y + enemy.height * enemyHitboxMargin;
-        const enemyHitboxWidth = enemy.width * (1 - 2 * enemyHitboxMargin);
-        const enemyHitboxHeight = enemy.height * (1 - 2 * enemyHitboxMargin);
-        
-        return (playerCenterX > enemyHitboxX &&
-                playerCenterX < enemyHitboxX + enemyHitboxWidth &&
-                playerCenterY > enemyHitboxY &&
-                playerCenterY < enemyHitboxY + enemyHitboxHeight);
-    }
+    
 
     isPointInside(pointX, pointY, rectX, rectY, rectWidth, rectHeight) {
         return pointX >= rectX &&
