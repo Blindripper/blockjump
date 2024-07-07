@@ -56,7 +56,7 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
-        this.collisionThreshold = 0.99; // Require 99% overlap for collision
+        this.collisionThreshold = 1.1; // Require 99% overlap for collision
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
         this.enemyBullets = [];
