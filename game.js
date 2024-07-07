@@ -268,8 +268,8 @@ class Game {
             velocityY: 0,
             velocityX: 0,
             jumpCount: 0,
-            isOnGround: false,
-            lastGroundTime: 0
+            isOnGround: true,
+            lastGroundTime: Date.now()
         };
     }
 
@@ -413,8 +413,6 @@ class Game {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         this.player.isOnGround = false;
     
-        let collisionY = false;
-    
         for (let platform of platforms) {
             if (this.checkCollision(
                 {x: this.player.x, y: nextY, width: this.player.width, height: this.player.height},
@@ -432,7 +430,6 @@ class Game {
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
                 }
-                collisionY = true;
             }
     
             if (this.checkCollision(
@@ -457,13 +454,11 @@ class Game {
             }
         }
     
-        // Update position
-        if (!collisionY) {
+        // Update position if no collision
+        if (!this.player.isOnGround) {
             this.player.y = nextY;
         }
-        if (this.player.velocityX !== 0) {
-            this.player.x = nextX;
-        }
+        this.player.x = nextX;
     }
 
     
@@ -530,8 +525,10 @@ class Game {
     
         const moveSpeed = 350;
     
-        // Apply gravity
-        this.player.velocityY += GRAVITY * dt;
+        // Apply gravity only when not on the ground
+        if (!this.player.isOnGround) {
+            this.player.velocityY += GRAVITY * dt;
+        }
     
         // Horizontal movement
         if (this.keys['ArrowLeft']) {
@@ -541,8 +538,6 @@ class Game {
         } else {
             this.player.velocityX = 0;
         }
-    
-        // Jumping is now handled in setupEventListeners and tryJump methods
     
         // Calculate next position
         let nextX = this.player.x + this.player.velocityX * dt;
