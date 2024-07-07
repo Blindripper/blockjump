@@ -144,7 +144,9 @@ class Game {
             this.player = this.createPlayer();
             this.sounds.background.loop = true;
             this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
-            
+            this.enemies = [];
+            this.enemyBullets = [];
+
             // Explicitly set player position
             this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
             this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
@@ -191,6 +193,15 @@ class Game {
             sound.load();
             sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
         });
+    }
+
+    getBackgroundName(index) {
+        const backgroundNames = [
+            'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
+            'Florence', 'Granada', 'Hangzhou', 'Ithaca', 'Jakarta',
+            'Kathmandu', 'Lima', 'Mumbai', 'Nairobi', 'Oxford', 'Paris'
+        ];
+        return backgroundNames[index] || 'Unknown';
     }
 
     playSound(soundName) {
@@ -591,7 +602,7 @@ class Game {
     
     updateBackground() {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
-            this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
+            this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
             this.lastBackgroundChange = this.score;
         }
     }
@@ -895,6 +906,12 @@ class Game {
         this.drawPowerupHUD();
         this.drawBullets();
         this.drawEnemies();
+        // Draw background name
+    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    this.ctx.font = '20px Orbitron, sans-serif';
+    this.ctx.textAlign = 'right';
+    const bgName = this.getBackgroundName(this.currentBackgroundIndex);
+    this.ctx.fillText(bgName, GAME_WIDTH - 10, 30)
         this.ctx.restore();
     }
 
