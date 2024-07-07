@@ -187,7 +187,10 @@ class Game {
     }
 
     loadSounds() {
-        Object.values(this.sounds).forEach(sound => sound.load());
+        Object.values(this.sounds).forEach(sound => {
+            sound.load();
+            sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
+        });
     }
 
     playSound(soundName) {
@@ -208,7 +211,6 @@ class Game {
                 speed: 500
             });
             this.lastShotTime = currentTime;
-            this.friendlyLaserSound.currentTime = 0;
             this.playSound('friendlyLaser');
         }
     }
@@ -1108,9 +1110,15 @@ let isSoundOn = false;
 function toggleSound() {
     isSoundOn = !isSoundOn;
     const soundToggle = document.getElementById('soundToggle');
-    soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
-    isSoundOn ? enableSound() : disableSound();
-  }
+    if (soundToggle) {
+        soundToggle.textContent = `Sound: ${isSoundOn ? 'On' : 'Off'}`;
+    }
+    if (game && game.sounds) {
+        Object.values(game.sounds).forEach(sound => {
+            sound.muted = !isSoundOn;
+        });
+    }
+}
 
 
 
