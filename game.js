@@ -46,6 +46,7 @@ const pressedKeys = {};
 
 
 
+
 // Game class
 class Game {
     constructor() {
