@@ -532,6 +532,7 @@ class Game {
                 this.jump();
             }
             if (e.code === 'Space') {
+                e.preventDefault(); // Prevent space from triggering button clicks
                 this.shoot();
             }
         });
