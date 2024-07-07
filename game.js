@@ -367,10 +367,11 @@ class Game {
 
         if (!this.gameRunning) return;
 
-        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
+        const currentTime = Date.now();
+        if (this.bottomPlatform && currentTime - this.gameStartTime > 5000) {
             this.bottomPlatform = null;
-            console.log('Bottom platform removed');
         }
+    
 
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
@@ -506,33 +507,28 @@ class Game {
         }
     
         const moveSpeed = 350;
-        const airControlFactor = 0.7; // Reduced air control
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
     
         // Horizontal movement
-        let targetVelocityX = 0;
         if (this.keys['ArrowLeft']) {
-            targetVelocityX = -moveSpeed;
+            this.player.velocityX = -moveSpeed;
         } else if (this.keys['ArrowRight']) {
-            targetVelocityX = moveSpeed;
-        }
-    
-        // Apply smoother acceleration
-        if (this.player.isOnGround) {
-            this.player.velocityX = targetVelocityX;
+            this.player.velocityX = moveSpeed;
         } else {
-            // Reduced air control
-            this.player.velocityX += (targetVelocityX - this.player.velocityX) * airControlFactor * dt;
+            this.player.velocityX = 0;
         }
     
-        // Update position
-        const nextX = this.player.x + this.player.velocityX * dt;
-        const nextY = this.player.y + this.player.velocityY * dt;
+        // Calculate next position
+        let nextX = this.player.x + this.player.velocityX * dt;
+        let nextY = this.player.y + this.player.velocityY * dt;
     
         // Handle collisions
         this.handleCollisions(nextX, nextY);
+    
+        // Update horizontal position regardless of collision
+        this.player.x += this.player.velocityX * dt;
     
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -540,6 +536,7 @@ class Game {
         // Check if player has fallen off the screen
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
+            console.log('Game over: Player fell off screen');
         }
     }
 
