@@ -74,14 +74,14 @@ class Game {
         this.lastBackgroundChange = 0;
         this.currentBackgroundIndex = 0;
         this.difficultyLevel = 1;
-        this.platformSpeed = 50;
+        this.platformSpeed = 60;
         this.bottomPlatform = null;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
         this.enemies = [];
         this.lastEnemySpawn = 0;
-        this.baseEnemySpawnInterval = 45000; // 45 seconds
+        this.baseEnemySpawnInterval = 30000; // 30 seconds
         this.enemySpawnInterval = this.baseEnemySpawnInterval;
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
