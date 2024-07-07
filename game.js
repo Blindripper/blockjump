@@ -1273,6 +1273,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         button.onclick = async () => {
             if (callback && typeof callback === 'function') {
                 await callback();
+            } else if (buttonText === 'Buy Tries') {
+                await handleBuyTries();
             }
         };
         overlay.appendChild(button);
