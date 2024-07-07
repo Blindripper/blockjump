@@ -220,8 +220,8 @@ class Game {
         return {
             x: Math.random() * (GAME_WIDTH - 80),
             y: 50,
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             isDestroyed: false,
             destroyedTime: 0,
             lastShot: 0,
