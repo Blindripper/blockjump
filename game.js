@@ -56,7 +56,6 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
-        this.collisionThreshold = 1.1; // Require 99% overlap for collision
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
         this.enemyBullets = [];
@@ -323,18 +322,19 @@ class Game {
     }
 
     checkPreciseCollision(player, enemy) {
-        // Calculate the overlapping area
-        const overlapX = Math.max(0, Math.min(player.x + player.width, enemy.x + enemy.width) - Math.max(player.x, enemy.x));
-        const overlapY = Math.max(0, Math.min(player.y + player.height, enemy.y + enemy.height) - Math.max(player.y, enemy.y));
-        const overlapArea = overlapX * overlapY;
-
-        // Calculate the area of the smaller object (usually the player)
-        const playerArea = player.width * player.height;
-        const enemyArea = enemy.width * enemy.height;
-        const smallerArea = Math.min(playerArea, enemyArea);
-
-        // Check if the overlap is greater than the threshold
-        return (overlapArea / smallerArea) > this.collisionThreshold;
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+        
+        const enemyHitboxMargin = 0.4; // 40% margin
+        const enemyHitboxX = enemy.x + enemy.width * enemyHitboxMargin;
+        const enemyHitboxY = enemy.y + enemy.height * enemyHitboxMargin;
+        const enemyHitboxWidth = enemy.width * (1 - 2 * enemyHitboxMargin);
+        const enemyHitboxHeight = enemy.height * (1 - 2 * enemyHitboxMargin);
+        
+        return (playerCenterX > enemyHitboxX &&
+                playerCenterX < enemyHitboxX + enemyHitboxWidth &&
+                playerCenterY > enemyHitboxY &&
+                playerCenterY < enemyHitboxY + enemyHitboxHeight);
     }
 
     isPointInside(pointX, pointY, rectX, rectY, rectWidth, rectHeight) {
