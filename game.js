@@ -165,7 +165,7 @@ class Game {
     
     loadSprites() {
         this.enemySprite = new Image();
-        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1.png';
+        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftsmall.png';
         this.enemyDestroyedSprite = new Image();
         this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
     }
@@ -1223,7 +1223,7 @@ function loadSprite(name, fileName) {
 
 function loadSprites() {
     const spritesToLoad = [
-        { name: 'player', file: 'TezosLogo_Icon_Blue.png' },
+        { name: 'player', file: 'TezosLogo_Icon_Bluesmall.png' },
         { name: 'bitcoin', file: 'bitcoin.png' },
         { name: 'solana', file: 'solana.png' },
         { name: 'ethereum', file: 'ethereum1.png' },
