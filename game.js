@@ -379,6 +379,11 @@ class Game {
         this.updateUI();
         this.updateBackground();
 
+        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
+            this.bottomPlatform = null;
+            console.log('Bottom platform removed');
+        }
+
         if (this.player.y > GAME_HEIGHT) {
             this.gameOver = true;
         }
@@ -445,10 +450,11 @@ class Game {
     
 
     checkCollision(obj1, obj2) {
-        return obj1.x < obj2.x + obj2.width &&
-               obj1.x + obj1.width > obj2.x &&
-               obj1.y < obj2.y + obj2.height &&
-               obj1.y + obj1.height > obj2.y;
+        const narrowFactor = 0.8; // Adjust this value to make collision area narrower or wider
+        return (obj1.x + obj1.width * (1 - narrowFactor) / 2) < (obj2.x + obj2.width) &&
+               (obj1.x + obj1.width * (1 + narrowFactor) / 2) > obj2.x &&
+               obj1.y < (obj2.y + obj2.height) &&
+               (obj1.y + obj1.height) > obj2.y;
     }
 
     
@@ -491,7 +497,7 @@ class Game {
             return;
         }
     
-        const moveSpeed = 300;
+        const moveSpeed = 400;
     
         // Apply gravity
         this.player.velocityY += GRAVITY * dt;
@@ -763,7 +769,6 @@ class Game {
             return;
         }
         
-        
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
@@ -771,11 +776,6 @@ class Game {
             this.ctx.fillStyle = '#00FF00';  // Bright green color
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
-        
-        // Draw player bounding box for debugging
-        this.ctx.strokeStyle = '#FF0000';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
     }
 
     drawPowerups() {
