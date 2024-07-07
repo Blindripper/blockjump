@@ -405,109 +405,57 @@ class Game {
         const moveX = nextX - this.player.x;
         const moveY = nextY - this.player.y;
     
-        // Implement Continuous Collision Detection (CCD)
-        let collisionTime = 1;
-        let collidingPlatform = null;
+        // Number of steps to check (increase for more precision)
+        const steps = Math.max(1, Math.ceil(Math.abs(moveY) / (this.player.height / 2)));
     
-        for (let platform of platforms) {
-            const collisionResult = this.sweptAABB(
-                {x: this.player.x, y: this.player.y, width: this.player.width, height: this.player.height, vx: moveX, vy: moveY},
-                platform
-            );
+        for (let i = 1; i <= steps; i++) {
+            const stepX = this.player.x + (moveX * i) / steps;
+            const stepY = this.player.y + (moveY * i) / steps;
     
-            if (collisionResult.collisionTime < collisionTime) {
-                collisionTime = collisionResult.collisionTime;
-                collidingPlatform = platform;
-            }
-        }
+            for (let platform of platforms) {
+                if (this.checkCollision(
+                    {x: stepX, y: stepY, width: this.player.width, height: this.player.height},
+                    platform
+                )) {
+                    // Vertical collision
+                    if (moveY > 0) {
+                        // Landing on top of the platform
+                        this.player.y = platform.y - this.player.height;
+                        this.player.velocityY = 0;
+                        this.player.isOnGround = true;
+                        this.player.jumpCount = 0;
+                    } else if (moveY < 0) {
+                        // Hitting the bottom of the platform
+                        this.player.y = platform.y + platform.height;
+                        this.player.velocityY = 0;
+                    } else {
+                        // Horizontal collision
+                        if (moveX > 0) {
+                            this.player.x = platform.x - this.player.width;
+                        } else if (moveX < 0) {
+                            this.player.x = platform.x + platform.width;
+                        }
+                        this.player.velocityX = 0;
+                    }
     
-        if (collidingPlatform) {
-            // Move the player to the point of collision
-            this.player.x += moveX * collisionTime;
-            this.player.y += moveY * collisionTime;
+                    if (platform.isGolden) {
+                        this.handleGoldenPlatform();
+                    } else if (platform.isSpike) {
+                        this.gameOver = true;
+                        console.log('Game over: Player hit spike platform');
+                    }
     
-            // Handle the collision response
-            if (moveY > 0) {
-                // Landing on top of the platform
-                this.player.y = collidingPlatform.y - this.player.height;
-                this.player.velocityY = 0;
-                this.player.isOnGround = true;
-                this.player.jumpCount = 0;
-            } else if (moveY < 0) {
-                // Hitting the bottom of the platform
-                this.player.y = collidingPlatform.y + collidingPlatform.height;
-                this.player.velocityY = 0;
-            } else if (moveX !== 0) {
-                // Horizontal collision
-                if (moveX > 0) {
-                    this.player.x = collidingPlatform.x - this.player.width;
-                } else {
-                    this.player.x = collidingPlatform.x + collidingPlatform.width;
+                    return; // Exit after handling a collision
                 }
-                this.player.velocityX = 0;
             }
-    
-            if (collidingPlatform.isGolden) {
-                this.handleGoldenPlatform();
-            } else if (collidingPlatform.isSpike) {
-                this.gameOver = true;
-                console.log('Game over: Player hit spike platform');
-            }
-        } else {
-            // If no collision, update position
-            this.player.x = nextX;
-            this.player.y = nextY;
         }
+    
+        // If no collision, update position
+        this.player.x = nextX;
+        this.player.y = nextY;
     }
 
-    sweptAABB(player, platform) {
-        let xInvEntry, yInvEntry;
-        let xInvExit, yInvExit;
     
-        // Find the distance between the objects on the near and far sides for both x and y
-        if (player.vx > 0) {
-            xInvEntry = platform.x - (player.x + player.width);
-            xInvExit = (platform.x + platform.width) - player.x;
-        } else {
-            xInvEntry = (platform.x + platform.width) - player.x;
-            xInvExit = platform.x - (player.x + player.width);
-        }
-    
-        if (player.vy > 0) {
-            yInvEntry = platform.y - (player.y + player.height);
-            yInvExit = (platform.y + platform.height) - player.y;
-        } else {
-            yInvEntry = (platform.y + platform.height) - player.y;
-            yInvExit = platform.y - (player.y + player.height);
-        }
-    
-        // Find time of collision and time of leaving for each axis
-        let xEntry, yEntry;
-        let xExit, yExit;
-    
-        xEntry = (player.vx !== 0) ? xInvEntry / player.vx : Number.NEGATIVE_INFINITY;
-        xExit = (player.vx !== 0) ? xInvExit / player.vx : Number.POSITIVE_INFINITY;
-        yEntry = (player.vy !== 0) ? yInvEntry / player.vy : Number.NEGATIVE_INFINITY;
-        yExit = (player.vy !== 0) ? yInvExit / player.vy : Number.POSITIVE_INFINITY;
-    
-        // Find the earliest/latest times of collision
-        const entryTime = Math.max(xEntry, yEntry);
-        const exitTime = Math.min(xExit, yExit);
-    
-        // No collision
-        if (entryTime > exitTime || xEntry < 0 && yEntry < 0 || xEntry > 1 || yEntry > 1) {
-            return { collisionTime: 1, normal: { x: 0, y: 0 } };
-        } else {
-            // Calculate normal of collided surface
-            let normal = { x: 0, y: 0 };
-            if (xEntry > yEntry) {
-                normal.x = (xInvEntry < 0) ? 1 : -1;
-            } else {
-                normal.y = (yInvEntry < 0) ? 1 : -1;
-            }
-            return { collisionTime: entryTime, normal: normal };
-        }
-    }
 
 
 
