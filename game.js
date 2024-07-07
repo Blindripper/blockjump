@@ -40,8 +40,8 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 50;
-const JUMP_VELOCITY = -600;
-const GRAVITY = 1000;
+const JUMP_VELOCITY = -700;
+const GRAVITY = 1500;
 const pressedKeys = {};
 
 
@@ -128,6 +128,8 @@ class Game {
             this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
     
             this.platforms = this.createInitialPlatforms();
+            this.bottomPlatform = this.createBottomPlatform();
+            this.bottomPlatformTimer = 0;
             this.gameStarted = false;
             this.hasPlayerJumped = false;
             this.score = 0;
@@ -342,8 +344,7 @@ class Game {
 
       jump() {
         if (this.player.jumpCount < 2) {
-            const jumpVelocity = -550; 
-            this.player.velocityY = jumpVelocity;
+            this.player.velocityY = JUMP_VELOCITY;
             this.player.jumpCount++;
             this.player.isOnGround = false;
             this.createJumpEffect();
@@ -366,6 +367,11 @@ class Game {
 
         if (!this.gameRunning) return;
 
+        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
+            this.bottomPlatform = null;
+            console.log('Bottom platform removed');
+        }
+
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
@@ -379,6 +385,8 @@ class Game {
         this.updateUI();
         this.updateBackground();
     }
+
+
     
     
     updateBackground() {
@@ -404,6 +412,8 @@ class Game {
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0;
+                    // Allow horizontal movement when on platform
+                    this.player.x = nextX;
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
                     // Hitting the bottom of the platform
                     this.player.y = platform.y + platform.height;
@@ -415,7 +425,7 @@ class Game {
                     } else if (this.player.x >= platform.x + platform.width) {
                         this.player.x = platform.x + platform.width;
                     }
-                    this.player.velocityX = 0;
+                    // Don't set velocityX to 0, to allow movement along platforms
                 }
     
                 if (platform.isGolden) {
@@ -428,7 +438,7 @@ class Game {
             }
         }
     
-        // If no collision, update position
+        // If no collision or on ground, update position
         if (!this.player.isOnGround) {
             this.player.x = nextX;
             this.player.y = nextY;
