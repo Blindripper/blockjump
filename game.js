@@ -7,7 +7,6 @@ let isConnected = false;
 function checkWalletConnection() {
     if (!isConnected) {
         showOverlay('Please connect wallet', handleWalletConnection, true, 'Connect Wallet');
-        console.log('Wallet not connected');
         showOverlay('Please connect your wallet first.');
         return false;
     }
@@ -106,7 +105,6 @@ class Game {
     
             const currentTries = await getGameTries();
             if (currentTries <= 0) {
-                console.log('No tries left');
                 hideOverlay();
                 showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
                 return;
@@ -129,7 +127,6 @@ class Game {
             // Explicitly set player position
             this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
             this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
-            console.log(`Initial player position: (${this.player.x}, ${this.player.y})`);
     
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
@@ -889,14 +886,11 @@ class Game {
             return;
         }
         
-        console.log(`Drawing player at (${this.player.x}, ${this.player.y})`);
         
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
             this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
-            console.log('Player sprite drawn');
         } else {
-            console.warn('Player sprite not loaded, using fallback');
             this.ctx.fillStyle = '#00FF00';  // Bright green color
             this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
@@ -970,7 +964,6 @@ class Game {
 
     gameLoop(currentTime) {
         if (!this.gameRunning) {
-            console.log("Game loop stopped.");
             return;
         }
 
@@ -1455,7 +1448,6 @@ function showStartButton() {
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
-    console.log('handleGameOver called', { score, blocksClimbed, gameStartTime });
 
     // Store the game data for later use
     window.finalScore = score;
@@ -1507,7 +1499,6 @@ async function updateHighscoreTable() {
             if (currentAccount) {
                 updateClaimPrizeButton(highscores, currentAccount);
             } else {
-                console.log('No account connected, not updating claim prize button');
             }
         }
 
@@ -1538,11 +1529,9 @@ async function updateHighscoreTable() {
         if (currentAccount) {
             updateClaimPrizeButton(highscores, currentAccount);
         } else {
-            console.log('No account connected, not updating claim prize button');
         }
 
     } catch (error) {
-        console.error('Error updating highscore table:', error);
     }
 }
 
@@ -1644,7 +1633,6 @@ async function checkAndDisplayStartButton() {
 
     try {
         const tries = await getGameTries();
-        console.log('Current game tries:', tries);
         if (tries > 0) {
             showOverlay('Ready to play?', () => {
                 game.initializeGame();
