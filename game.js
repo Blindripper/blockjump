@@ -321,7 +321,7 @@ class Game {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             if (e.code === 'ArrowUp') {
-                this.jump();
+                this.tryJump();
             }
             if (e.code === 'Space') {
                 this.shoot();
@@ -330,6 +330,18 @@ class Game {
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
         });
+    }
+
+    tryJump() {
+        const coyoteTime = 100; // milliseconds
+        const currentTime = Date.now();
+    
+        if (this.player.isOnGround || 
+            (currentTime - this.player.lastGroundTime < coyoteTime && this.player.jumpCount === 0) ||
+            this.player.jumpCount < 2) {
+            
+            this.jump();
+        }
     }
 
     handleKeyDown(e) {
@@ -344,25 +356,17 @@ class Game {
       
 
       jump() {
-        const coyoteTime = 100; // milliseconds
-        const currentTime = Date.now();
+        const jumpVelocity = -600;
+        this.player.velocityY = jumpVelocity;
+        this.player.jumpCount++;
+        this.player.isOnGround = false;
+        this.createJumpEffect();
     
-        if (this.player.isOnGround || 
-            (currentTime - this.player.lastGroundTime < coyoteTime && this.player.jumpCount === 0) ||
-            this.player.jumpCount < 2) {
-            
-            const jumpVelocity = -600;
-            this.player.velocityY = jumpVelocity;
-            this.player.jumpCount++;
-            this.player.isOnGround = false;
-            this.createJumpEffect();
+        console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
     
-            console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
-    
-            if (!this.hasPlayerJumped) {
-                this.hasPlayerJumped = true;
-                this.score = 0;
-            }
+        if (!this.hasPlayerJumped) {
+            this.hasPlayerJumped = true;
+            this.score = 0;
         }
     }
 
@@ -537,6 +541,8 @@ class Game {
         } else {
             this.player.velocityX = 0;
         }
+    
+        // Jumping is now handled in setupEventListeners and tryJump methods
     
         // Calculate next position
         let nextX = this.player.x + this.player.velocityX * dt;
