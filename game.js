@@ -96,6 +96,11 @@ class Game {
         this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
+        this.enemyType2Sprite = new Image();
+        this.enemyType2Sprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft2small.png';
+        this.enemyType2DestroyedSprite = new Image();
+        this.enemyType2DestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft2firesmall.png';
+        this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
@@ -173,6 +178,8 @@ class Game {
     loadSounds() {
         this.shootSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/Lasershot.wav');
         this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.wav');
+        this.missileSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/missile.mp3');
+        this.enemyDestroyedSound = new Audio('https://raw.githubusercontent.com/Blindripper/blockjump/main/sound/destroyed.mp3');
     }
  
     shoot() {
@@ -204,28 +211,68 @@ class Game {
             return bullet.y < GAME_HEIGHT;
         });
 
+        // Update enemy bullets and missiles
+    this.enemyBullets = this.enemyBullets.filter(bullet => {
+        if (bullet.angle !== undefined) {
+            // This is a tracking missile
+            bullet.x += Math.cos(bullet.angle) * bullet.speed * dt;
+            bullet.y += Math.sin(bullet.angle) * bullet.speed * dt;
+            // Recalculate angle to track player
+            bullet.angle = Math.atan2(this.player.y - bullet.y, this.player.x - bullet.x);
+        } else {
+            // Regular bullet
+            bullet.y += bullet.speed * dt;
+        }
+        return bullet.y < GAME_HEIGHT && bullet.x > 0 && bullet.x < GAME_WIDTH;
+    });
+
         // Check for collisions
         this.checkBulletCollisions();
+    }
+
+    createMissile(enemy) {
+        const angle = Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x);
+        return {
+            x: enemy.x + enemy.width / 2,
+            y: enemy.y + enemy.height,
+            width: 10,
+            height: 20,
+            speed: 200,
+            angle: angle
+        };
+    }
+    
+    enemyShootMissile(enemy) {
+        this.enemyBullets.push(this.createMissile(enemy));
+        this.missileSound.currentTime = 0;
+        this.missileSound.play();
     }
 
     spawnEnemies() {
         const currentTime = Date.now();
         if (currentTime - this.lastEnemySpawn > this.enemySpawnInterval) {
-            this.enemies.push(this.createEnemy());
+            if (Math.random() < 0.2) {  // 20% chance to spawn the new enemy type
+                this.enemies.push(this.createEnemy(true));
+            } else {
+                this.enemies.push(this.createEnemy(false));
+            }
             this.lastEnemySpawn = currentTime;
         }
     }
 
     createEnemy() {
+        const isType2 = Math.random() < 0.3; // 30% chance for the new enemy type
         return {
-            x: Math.random() * (GAME_WIDTH - 80),
+            x: Math.random() * (GAME_WIDTH - (isType2 ? 100 : 80)),
             y: 50,
-            width: 80,
-            height: 60,
+            width: isType2 ? 100 : 80,
+            height: isType2 ? 100 : 80,
+            isType2: isType2,
+            health: isType2 ? 3 : 1,
             isDestroyed: false,
             destroyedTime: 0,
             lastShot: 0,
-            shootInterval: this.maxEnemyShootInterval
+            shootInterval: isType2 ? this.maxEnemyShootInterval * 1.5 : this.maxEnemyShootInterval
         };
     }
 
@@ -239,23 +286,27 @@ class Game {
                 }
                 return;
             }
-
+    
             // Move enemies horizontally
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
-
+    
             // Reverse direction if reaching screen edges
             if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
                 this.enemyDirection *= -1;
             }
-
+    
             // Handle enemy shooting
             if (currentTime - enemy.lastShot > enemy.shootInterval) {
-                this.enemyShoot(enemy);
+                if (enemy.isType2) {
+                    this.enemyShootMissile(enemy);
+                } else {
+                    this.enemyShoot(enemy);
+                }
                 enemy.lastShot = currentTime;
                 // Adjust shoot interval based on difficulty
                 enemy.shootInterval = Math.max(
                     this.minEnemyShootInterval,
-                    this.maxEnemyShootInterval - (this.difficultyLevel - 1) * 1000
+                    enemy.isType2 ? this.maxEnemyShootInterval * 1.5 : this.maxEnemyShootInterval - (this.difficultyLevel - 1) * 1000
                 );
             }
         });
@@ -300,11 +351,14 @@ class Game {
             this.enemies.forEach(enemy => {
                 if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
                     bulletHit = true;
-                    enemy.isDestroyed = true;
-                    enemy.destroyedTime = 0;
-                    this.score += 1000;
-                    this.enemyDestroyedSound.currentTime = 0;
-                    this.enemyDestroyedSound.play();
+                    enemy.health--;
+                    if (enemy.health <= 0) {
+                        enemy.isDestroyed = true;
+                        enemy.destroyedTime = 0;
+                        this.score += enemy.isType2 ? 3000 : 1000;
+                        this.enemyDestroyedSound.currentTime = 0;
+                        this.enemyDestroyedSound.play();
+                    }
                 }
             });
             return !bulletHit;
@@ -860,9 +914,15 @@ class Game {
     drawEnemies() {
         for (let enemy of this.enemies) {
             if (enemy.isDestroyed) {
-                this.ctx.drawImage(this.enemyDestroyedSprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                this.ctx.drawImage(
+                    enemy.isType2 ? this.enemyType2DestroyedSprite : this.enemyDestroyedSprite, 
+                    enemy.x, enemy.y, enemy.width, enemy.height
+                );
             } else {
-                this.ctx.drawImage(this.enemySprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                this.ctx.drawImage(
+                    enemy.isType2 ? this.enemyType2Sprite : this.enemySprite, 
+                    enemy.x, enemy.y, enemy.width, enemy.height
+                );
             }
         }
     }
