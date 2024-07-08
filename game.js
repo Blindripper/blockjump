@@ -59,7 +59,7 @@ class Game {
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
         this.enemyBullets = [];
-        this.JUMP_VELOCITY = -450;
+        this.JUMP_VELOCITY = -500;
         this.GRAVITY = 1200;
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
@@ -817,7 +817,7 @@ class Game {
         this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
         
         if (this.highGravity && this.player.velocityY > 0) {
-            this.player.velocityY *= 1.2; // Increase downward velocity by 20%
+            this.player.velocityY *= 1.1; // Increase downward velocity by 10%
         }
         // Horizontal movement (adjusted for slow movement debuff)
         let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
@@ -1002,11 +1002,11 @@ class Game {
                 break;
             case 'blast':
                 this.highGravity = true;
-                this.currentGravity = this.normalGravity * 3;
+                this.currentGravity = this.normalGravity * 1.5;
                 setTimeout(() => { 
                     this.highGravity = false; 
                     this.currentGravity = this.normalGravity;
-                }, 20000);
+                }, 10000);
                 break;
             case 'ethereum':
                 this.slowMovement = true;
