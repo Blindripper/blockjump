@@ -836,17 +836,6 @@ class Game {
     }
 
 
-
-    
-    checkPlayerEnemyCollisions() {
-        this.enemies.forEach(enemy => {
-            if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
-                this.gameOver = true;
-            }
-        });
-    }
-    
-
     checkCollision(obj1, obj2) {
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
