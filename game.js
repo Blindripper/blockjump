@@ -114,6 +114,7 @@ class Game {
         this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
         this.playerShield = false;
+        this.shieldTimer = null;
         this.rapidFire = false;
         this.constantBeam = null;
         this.lowGravity = false;
@@ -446,6 +447,10 @@ class Game {
 
     resetPowerupEffects() {
         this.playerShield = false;
+        if (this.shieldTimer) {
+            clearTimeout(this.shieldTimer);
+            this.shieldTimer = null;
+        }
         this.rapidFire = false;
         this.constantBeam = null;
         this.lowGravity = false;
@@ -570,16 +575,13 @@ class Game {
                 if (this.checkPreciseCollision(this.player, enemy)) {
                     if (this.playerShield) {
                         // If the player has a shield, destroy the enemy instead of ending the game
-                        enemy.isDestroyed = true;
-                        enemy.destroyedTime = 0;
-                        this.score += enemy.isType2 ? 3000 : 1000;
-                        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
-                        this.playSound('destroyed');
+                        this.destroyEnemy(enemy);
                     } else {
                         this.gameOver = true;
                         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                        this.playSound('gameOver');
                     }
-                    return;
+                    return; // Exit the function after handling the collision
                 }
                 
                 // Check if any corner of the player is inside the enemy
@@ -610,6 +612,13 @@ class Game {
         }
     }
 
+    destroyEnemy(enemy) {
+        enemy.isDestroyed = true;
+        enemy.destroyedTime = 0;
+        this.score += enemy.isType2 ? 3000 : 1000;
+        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
+        this.playSound('destroyed');
+    }
 
 
     createPlayer() {
@@ -1017,8 +1026,12 @@ class Game {
         switch(type) {
             case 'bitcoin':
                 this.playerShield = true;
-                setTimeout(() => { 
+                if (this.shieldTimer) {
+                    clearTimeout(this.shieldTimer);
+                }
+                this.shieldTimer = setTimeout(() => { 
                     this.playerShield = false;
+                    this.shieldTimer = null;
                 }, 30000);
                 break;
             case 'greenTezos':
@@ -1515,7 +1528,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         zIndex: '2000',
         padding: '20px'
@@ -1529,10 +1542,11 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        top: '33%',
+        marginTop: '50px',
         marginBottom: '20px'
     });
-    messageElement.textContent = message;
+
+    messageElement.innerHTML = message.replace(/\n/g, '<br>'); // Replace newlines with <br> tags
     overlay.appendChild(messageElement);
 
     if (includeNameForm) {
@@ -1872,7 +1886,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.gameStartTime = gameStartTime;
 
     // Show the game over overlay with the name form and Try Again button
-    showOverlay(`Game Over\nScore: ${score}\nBlocks Climbed: ${blocksClimbed}`, null, false, '', true);
+    showOverlay(`<h2>Game Over</h2>Score: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
 
   
