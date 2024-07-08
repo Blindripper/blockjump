@@ -397,7 +397,7 @@ class Game {
         const isType2 = Math.random() < 0.3; // 30% chance for the new enemy type
         return {
             x: Math.random() * (GAME_WIDTH - (isType2 ? 100 : 80)),
-            y: 50,
+            y: 30,
             width: isType2 ? 100 : 80,
             height: isType2 ? 100 : 80,
             isType2: isType2,
