@@ -591,9 +591,11 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        // Create other initial platforms
+        let lastY = GAME_HEIGHT - PLATFORM_HEIGHT;
         for (let i = 1; i < 7; i++) {
-            platforms.push(this.createPlatform(GAME_HEIGHT - (i + 1) * 100));
+            const y = lastY - this.getRandomPlatformSpacing();
+            platforms.push(this.createPlatform(y));
+            lastY = y;
         }
         return platforms;
     }
@@ -608,8 +610,15 @@ class Game {
             width: width,
             height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05  // Keep spike platforms, but ensure they're rare
+            isSpike: Math.random() < 0.05
         };
+    }
+
+    getRandomPlatformSpacing() {
+        // Adjust these values to control the vertical spacing between platforms
+        const minSpacing = PLAYER_HEIGHT * 1.5;
+        const maxSpacing = PLAYER_HEIGHT * 2.5;
+        return Math.random() * (maxSpacing - minSpacing) + minSpacing;
     }
     
 
@@ -777,7 +786,9 @@ class Game {
 
         // Add new platforms if needed
         while (this.platforms.length < 7) {
-            this.platforms.unshift(this.createPlatform(0));
+            const highestPlatform = this.platforms[0];
+            const newY = highestPlatform.y - this.getRandomPlatformSpacing();
+            this.platforms.unshift(this.createPlatform(newY));
             this.blocksClimbed++;
         }
     }
