@@ -764,6 +764,7 @@ class Game {
             this.gameOver = true;
         }
     }
+
     
     
     updateBackground() {
@@ -877,13 +878,15 @@ class Game {
             return;
         }
 
-    
+        const currentTime = Date.now();
+
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
         this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
         
         if (this.highGravity && this.player.velocityY > 0) {
             this.player.velocityY *= 1.1; // Increase downward velocity by 10%
         }
+        
         // Horizontal movement (adjusted for slow movement debuff)
         let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
         
@@ -910,7 +913,7 @@ class Game {
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
     
         // Check for platform collisions
-        this.handleCollisions();
+        this.handleCollisions(currentTime);
     
         // Reset jump count when on ground
         if (this.player.isOnGround) {
