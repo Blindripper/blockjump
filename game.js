@@ -572,7 +572,7 @@ class Game {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];
             if (!enemy.isDestroyed) {
-                if (this.checkCollision(this.player, enemy)) {
+                if (this.checkPreciseCollision(this.player, enemy)) {
                     if (this.playerShield) {
                         // If the player has a shield, destroy the enemy
                         this.destroyEnemy(enemy);
