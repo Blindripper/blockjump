@@ -194,6 +194,7 @@ class Game {
             this.blocksClimbed = 0;
             this.gameStartTime = Date.now();
             this.lastTime = performance.now();
+            this.constantBeamActive = false;
             this.powerups = [];
     
             await updateTryCount();
@@ -449,6 +450,7 @@ class Game {
         this.constantBeam = null;
         this.lowGravity = false;
         this.highGravity = false;
+        this.constantBeamActive = false; 
         this.slowMovement = false;
         this.fastGameSpeed = false;
         this.gameSpeed = 1;
@@ -1013,13 +1015,29 @@ class Game {
                             this.currentGravity = this.normalGravity;
                         }, 30000);
                         break;
-            case 'tezosX':
-                this.enemies.forEach(enemy => {
-                    enemy.isDestroyed = true;
-                    enemy.destroyedTime = 0;
-                    this.score += enemy.isType2 ? 3000 : 1000;
-                });
-                break;
+                        case 'tezosX':
+                            // Clear all enemies
+                            this.enemies.forEach(enemy => {
+                                enemy.isDestroyed = true;
+                                enemy.destroyedTime = 0;
+                                this.score += enemy.isType2 ? 3000 : 1000;
+                            });
+                            
+                            // Clear all debuff powerups
+                            this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
+                            
+                            // Reset negative effects
+                            this.highGravity = false;
+                            this.currentGravity = this.normalGravity;
+                            this.slowMovement = false;
+                            if (this.player) {
+                                this.player.speed = this.normalMoveSpeed;
+                            }
+                            this.fastGameSpeed = false;
+                            this.gameSpeed = 1;
+                            this.platformSpeed = this.basePlatformSpeed;
+                            
+                            break;
                 case 'solana':
                 this.fastGameSpeed = true;
                 this.gameSpeed = 1.5; // 1.5x normal speed
