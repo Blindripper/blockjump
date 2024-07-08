@@ -1064,19 +1064,11 @@ class Game {
                     this.score += enemy.isType2 ? 3000 : 1000;
                 });
                 
-                // Clear all debuff powerups safely
+                // Clear all debuff powerups from the screen
                 this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
                 
-                // Reset negative effects
-                this.highGravity = false;
-                this.currentGravity = this.normalGravity;
-                this.slowMovement = false;
-                if (this.player) {
-                    this.player.speed = this.normalMoveSpeed;
-                }
-                this.fastGameSpeed = false;
-                this.gameSpeed = 1;
-                this.platformSpeed = this.basePlatformSpeed;
+                // Clear all active debuffs
+                this.clearActiveDebuffs();
                 
                 break;
                 case 'solana':
@@ -1119,6 +1111,40 @@ class Game {
             }
         }
     }
+
+    clearActiveDebuffs() {
+        // Reset high gravity
+        this.highGravity = false;
+        this.currentGravity = this.normalGravity;
+
+        // Reset slow movement
+        this.slowMovement = false;
+        if (this.player) {
+            this.player.speed = this.normalMoveSpeed;
+        }
+
+        // Reset fast game speed (Solana debuff)
+        this.fastGameSpeed = false;
+        this.gameSpeed = 1;
+        this.platformSpeed = this.basePlatformSpeed;
+
+        // Clear any active debuff timers
+        if (this.activePowerups.has('solana')) {
+            clearTimeout(this.activePowerups.get('solana').timer);
+            this.activePowerups.delete('solana');
+        }
+        if (this.activePowerups.has('blast')) {
+            clearTimeout(this.activePowerups.get('blast').timer);
+            this.activePowerups.delete('blast');
+        }
+        if (this.activePowerups.has('ethereum')) {
+            clearTimeout(this.activePowerups.get('ethereum').timer);
+            this.activePowerups.delete('ethereum');
+        }
+
+        // Add visual feedback for clearing debuffs
+        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 30, '#00FF00');
+    } 
 
 
     updateDifficulty() {
