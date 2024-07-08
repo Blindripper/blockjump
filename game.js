@@ -54,7 +54,7 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
-        this.normalGravity = 1500; // The default gravity value
+        this.normalGravity = 1200; // The default gravity value
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
@@ -763,11 +763,11 @@ class Game {
     
 
     handleGoldenPlatform() {
-        this.player.velocityY = JUMP_VELOCITY * 1.5;
+        this.player.velocityY = this.JUMP_VELOCITY * 1.5;
         this.score += 15;
         this.triggerScreenShake(5, 0.3);
         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 15, '#3FE1B0');
-        playSound('powerup');
+        this.playSound('powerup');
     }
 
     updatePlatforms(dt) {
