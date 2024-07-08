@@ -69,6 +69,7 @@ class Game {
         this.fastGameSpeed = false; // Add this to track if fast game speed is active
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
+        this.constantBeam = null;
         this.gameOver = false;
         this.lastRandomSpawn = 0;
         this.randomSpawnInterval = 3000;
@@ -273,13 +274,8 @@ class Game {
 
          // Handle constant beam
          if (this.constantBeam) {
-            this.bullets.push({
-                x: this.player.x + this.player.width / 2 - 2.5,
-                y: 0,
-                width: 5,
-                height: this.player.y,
-                speed: 0
-            });
+            this.constantBeam.x = this.player.x + this.player.width / 2;
+            this.constantBeam.height = this.player.y;
         }
 
         // Update enemy bullets and missiles
@@ -425,22 +421,29 @@ class Game {
     }
 
     checkBulletCollisions() {
+        // Check regular bullet collisions
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
             this.enemies.forEach(enemy => {
                 if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
                     bulletHit = true;
-                    enemy.health--;
-                    this.playSound('destroyed');
-                    if (enemy.health <= 0) {
-                        enemy.isDestroyed = true;
-                        enemy.destroyedTime = 0;
-                        this.score += enemy.isType2 ? 3000 : 1000;
-                    }
+                    this.damageEnemy(enemy);
                 }
             });
             return !bulletHit;
         });
+    
+        // Check constant beam collisions
+        if (this.constantBeam) {
+            this.enemies.forEach(enemy => {
+                if (!enemy.isDestroyed && 
+                    enemy.x < this.constantBeam.x && 
+                    enemy.x + enemy.width > this.constantBeam.x &&
+                    enemy.y < this.player.y) {
+                    this.damageEnemy(enemy);
+                }
+            });
+        }
     
         // Check enemy bullet - player collisions
         this.enemyBullets = this.enemyBullets.filter(bullet => {
@@ -457,6 +460,16 @@ class Game {
             }
             return true;
         });
+    }
+
+    damageEnemy(enemy) {
+        enemy.health--;
+        this.playSound('destroyed');
+        if (enemy.health <= 0) {
+            enemy.isDestroyed = true;
+            enemy.destroyedTime = 0;
+            this.score += enemy.isType2 ? 3000 : 1000;
+        }
     }
 
 
@@ -868,10 +881,15 @@ class Game {
                     this.shootingCooldown = this.normalShootCooldown;
                 }, 30000);
                 break;
-            case 'etherLink':
-                this.constantBeam = true;
-                setTimeout(() => { this.constantBeam = false; }, 30000);
-                break;
+                case 'etherLink':
+                    this.constantBeam = {
+                        x: this.player.x + this.player.width / 2,
+                        y: 0,
+                        width: 5,
+                        height: this.player.y
+                    };
+                    setTimeout(() => { this.constantBeam = null; }, 30000);
+                    break;
             case 'mintTezos':
                 this.lowGravity = true;
                 GRAVITY = this.normalGravity * 0.5;
@@ -1037,6 +1055,16 @@ class Game {
         this.ctx.fillStyle = '#FF0000';
         for (let bullet of this.enemyBullets) {
             this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+
+            // Draw constant beam
+        if (this.constantBeam) {
+            this.ctx.strokeStyle = '#00FFFF';
+            this.ctx.lineWidth = this.constantBeam.width;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.constantBeam.x, this.player.y);
+            this.ctx.lineTo(this.constantBeam.x, 0);
+            this.ctx.stroke();
+        }
         }
     }
 
