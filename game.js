@@ -54,7 +54,7 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
-        this.fallThroughDelay = 200; // Milliseconds to ignore platform collision after pressing down
+        this.fallThroughDelay = 400; // Milliseconds to ignore platform collision after pressing down
         this.lastFallThroughTime = 0
         this.normalGravity = 1200; // The default gravity value
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
