@@ -959,7 +959,7 @@ class Game {
                 break;
             case 'greenTezos':
                 this.rapidFire = true;
-                this.shootingCooldown = this.normalShootCooldown * 0.5;
+                this.shootingCooldown = this.normalShootCooldown * 0.3;
                 setTimeout(() => { 
                     this.rapidFire = false; 
                     this.shootingCooldown = this.normalShootCooldown;
