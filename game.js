@@ -64,6 +64,9 @@ class Game {
         this.fixedTimeStep = 1000 / 60; 
         this.bottomPlatformDuration = 5
         this.gameRunning = false;
+        this.gameSpeed = 1; // Add this line to set the default game speed
+        this.normalGameSpeed = 1; // Add this line to store the normal game speed
+        this.fastGameSpeed = false; // Add this to track if fast game speed is active
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
         this.gameOver = false;
@@ -613,6 +616,8 @@ class Game {
 
         if (!this.gameRunning) return;
 
+        dt *= this.gameSpeed;
+
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
@@ -735,7 +740,7 @@ class Game {
             return;
         }
     
-        // Apply gravity (adjusted for game speed)
+        // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
         this.player.velocityY += GRAVITY * dt * this.gameSpeed;
     
         // Horizontal movement (adjusted for slow movement debuff)
@@ -749,7 +754,7 @@ class Game {
             this.player.velocityX = 0;
         }
     
-        // Update position (adjusted for game speed)
+        // Update position (use this.gameSpeed)
         this.player.x += this.player.velocityX * dt * this.gameSpeed;
         this.player.y += this.player.velocityY * dt * this.gameSpeed;
     
@@ -876,15 +881,13 @@ class Game {
                 });
                 break;
                 case 'solana':
-                    this.fastGameSpeed = true;
-                    this.gameSpeed = 3; // Increased from 2 to 3 (3x normal speed)
-                    this.platformSpeed *= 3; // Increase platform speed as well
-                    setTimeout(() => { 
-                        this.fastGameSpeed = false;
-                        this.gameSpeed = this.normalGameSpeed; 
-                        this.platformSpeed /= 3; // Reset platform speed
-                    }, 20000);
-                    break;
+                this.fastGameSpeed = true;
+                this.gameSpeed = 3; // Set to 3x speed
+                setTimeout(() => { 
+                    this.fastGameSpeed = false;
+                    this.gameSpeed = this.normalGameSpeed; 
+                }, 20000);
+                break;
             case 'blast':
                 this.highGravity = true;
                 GRAVITY = this.normalGravity * 2;
