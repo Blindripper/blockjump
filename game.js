@@ -90,6 +90,7 @@ class Game {
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
+        this.missileShootDelay = 2000; // 2 seconds delay for missile shot after spawning
         this.enemies = [];
         this.lastEnemySpawn = 0;
         this.baseEnemySpawnInterval = 20000; // 20 seconds
@@ -347,7 +348,8 @@ class Game {
             isDestroyed: false,
             destroyedTime: 0,
             lastShot: 0,
-            shootInterval: isType2 ? this.maxEnemyShootInterval * 1.5 : this.maxEnemyShootInterval
+            shootInterval: isType2 ? this.maxEnemyShootInterval * 1.5 : this.maxEnemyShootInterval,
+            spawnTime: Date.now() // Add spawn time to track when the enemy was created
         };
     }
 
@@ -382,12 +384,17 @@ class Game {
         
             // Handle enemy shooting
             if (currentTime - enemy.lastShot > enemy.shootInterval) {
+                // Check if it's a Type 2 enemy and if the missile shoot delay has passed
                 if (enemy.isType2) {
-                    this.enemyShootMissile(enemy);
+                    if (currentTime - enemy.spawnTime > this.missileShootDelay) {
+                        this.enemyShootMissile(enemy);
+                        enemy.lastShot = currentTime;
+                    }
                 } else {
                     this.enemyShoot(enemy);
+                    enemy.lastShot = currentTime;
                 }
-                enemy.lastShot = currentTime;
+                
                 // Adjust shoot interval based on difficulty
                 enemy.shootInterval = Math.max(
                     this.minEnemyShootInterval,
