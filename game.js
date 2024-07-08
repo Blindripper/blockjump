@@ -1568,7 +1568,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginTop: '50px',
+        marginTop: '150px',
         marginBottom: '20px'
     });
 
