@@ -1050,13 +1050,13 @@ class Game {
                 break;
                 case 'solana':
                 this.fastGameSpeed = true;
-                this.gameSpeed = 1.5; // 1.5x normal speed
+                this.gameSpeed = 1.3; // 1.5x normal speed
                 this.platformSpeed = this.basePlatformSpeed * 1.3;
                 const solanaTimer = setTimeout(() => { 
                     this.fastGameSpeed = false;
                     this.gameSpeed = 1; // Reset to normal speed
                     this.platformSpeed = this.basePlatformSpeed; // Reset to base speed
-                }, 12000); // 12 seconds duration
+                }, 5000); // 5 seconds duration
                 this.activePowerups.set('solana', { timer: solanaTimer, duration: 12000 });
                 break;
             case 'blast':
