@@ -97,7 +97,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 16;
+        this.platformCount = 25;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -1099,7 +1099,7 @@ class Game {
                 break;
                 case 'solana':
                 this.fastGameSpeed = true;
-                this.gameSpeed = 1.2; // 1.5x normal speed
+                this.gameSpeed = 1.2; // 1.2x normal speed
                 this.platformSpeed = this.basePlatformSpeed * 1.2;
                 const solanaTimer = setTimeout(() => { 
                     this.fastGameSpeed = false;
