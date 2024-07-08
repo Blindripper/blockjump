@@ -72,6 +72,9 @@ class Game {
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
         this.constantBeam = null;
+        this.constantBeamActive = false;
+        this.constantBeamDamageInterval = 100; // Damage interval in milliseconds
+        this.lastConstantBeamDamageTime = 0;
         this.gameOver = false;
         this.lastRandomSpawn = 0;
         this.randomSpawnInterval = 3000;
@@ -243,17 +246,38 @@ class Game {
  
     shoot() {
         const currentTime = Date.now();
-        if (currentTime - this.lastShotTime > this.shootingCooldown) {
-            this.bullets.push({
-                x: this.player.x + this.player.width / 2 - 2.5,
-                y: this.player.y,
-                width: 5,
-                height: 10,
-                speed: 500
-            });
-            this.lastShotTime = currentTime;
-            this.playSound('friendlyLaser');
+        if (this.constantBeamActive) {
+            // Constant beam logic
+            if (currentTime - this.lastConstantBeamDamageTime > this.constantBeamDamageInterval) {
+                this.damageEnemiesInBeamPath();
+                this.lastConstantBeamDamageTime = currentTime;
+            }
+        } else {
+            // Normal shooting logic
+            if (currentTime - this.lastShotTime > this.shootingCooldown) {
+                this.bullets.push({
+                    x: this.player.x + this.player.width / 2 - 2.5,
+                    y: this.player.y,
+                    width: 5,
+                    height: 10,
+                    speed: 500
+                });
+                this.lastShotTime = currentTime;
+                this.playSound('friendlyLaser');
+            }
         }
+    }
+
+    damageEnemiesInBeamPath() {
+        const beamX = this.player.x + this.player.width / 2;
+        this.enemies.forEach(enemy => {
+            if (!enemy.isDestroyed && 
+                enemy.x < beamX && 
+                enemy.x + enemy.width > beamX &&
+                enemy.y < this.player.y) {
+                this.damageEnemy(enemy);
+            }
+        });
     }
 
     enemyShoot(enemy) {
@@ -283,9 +307,13 @@ class Game {
             return bullet.y < GAME_HEIGHT;
         });
 
-          // Handle constant beam
-        if (this.constantBeam) {
-            this.checkConstantBeamCollisions();
+          // Handle constant beam damage
+        if (this.constantBeamActive) {
+            const currentTime = Date.now();
+            if (currentTime - this.lastConstantBeamDamageTime > this.constantBeamDamageInterval) {
+                this.damageEnemiesInBeamPath();
+                this.lastConstantBeamDamageTime = currentTime;
+            }
         }
 
         // Update enemy bullets and missiles
@@ -979,12 +1007,9 @@ class Game {
                 }, 30000);
                 break;
                 case 'etherLink':
-                this.constantBeam = {
-                    width: 5,
-                    color: '#00FFFF' // Cyan color for the beam
-                };
+                this.constantBeamActive = true;
                 setTimeout(() => { 
-                    this.constantBeam = null;
+                    this.constantBeamActive = false;
                 }, 30000);
                 break;
                     case 'mintTezos':
@@ -1106,6 +1131,9 @@ class Game {
         this.drawHUD();
         this.drawPowerupHUD();
         this.drawBullets();
+        if (this.constantBeamActive) {
+            this.drawConstantBeam();
+        }
         this.drawEnemies();
         // Draw background name
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
@@ -1153,15 +1181,13 @@ class Game {
     }
 
     drawConstantBeam() {
-        if (this.constantBeam) {
-            const beamX = this.player.x + this.player.width / 2;
-            this.ctx.strokeStyle = this.constantBeam.color;
-            this.ctx.lineWidth = this.constantBeam.width;
-            this.ctx.beginPath();
-            this.ctx.moveTo(beamX, this.player.y);
-            this.ctx.lineTo(beamX, 0);
-            this.ctx.stroke();
-        }
+        const beamX = this.player.x + this.player.width / 2;
+        this.ctx.strokeStyle = '#00FFFF'; // Cyan color for the beam
+        this.ctx.lineWidth = 5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(beamX, this.player.y);
+        this.ctx.lineTo(beamX, 0);
+        this.ctx.stroke();
     }
 
     drawEnemyBullets() {
