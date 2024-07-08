@@ -395,11 +395,13 @@ class Game {
 
     createEnemy() {
         const isType2 = Math.random() < 0.3; // 30% chance for the new enemy type
+        const width = isType2 ? 100 : 80;
+        const height = isType2 ? 75 : 60; // Reduced heights for both enemy types
         return {
-            x: Math.random() * (GAME_WIDTH - (isType2 ? 100 : 80)),
-            y: 30,
-            width: isType2 ? 100 : 80,
-            height: isType2 ? 100 : 80,
+            x: Math.random() * (GAME_WIDTH - width),
+            y: 50,
+            width: width,
+            height: height, // Use the new height
             isType2: isType2,
             health: isType2 ? 3 : 1,
             lastMoveDown: Date.now(),
@@ -1307,17 +1309,17 @@ class Game {
 
     drawEnemies() {
         for (let enemy of this.enemies) {
-            if (enemy.isDestroyed) {
-                this.ctx.drawImage(
-                    enemy.isType2 ? this.enemyType2DestroyedSprite : this.enemyDestroyedSprite, 
-                    enemy.x, enemy.y, enemy.width, enemy.height
-                );
-            } else {
-                this.ctx.drawImage(
-                    enemy.isType2 ? this.enemyType2Sprite : this.enemySprite, 
-                    enemy.x, enemy.y, enemy.width, enemy.height
-                );
-            }
+            const sprite = enemy.isDestroyed ? 
+                (enemy.isType2 ? this.enemyType2DestroyedSprite : this.enemyDestroyedSprite) : 
+                (enemy.isType2 ? this.enemyType2Sprite : this.enemySprite);
+            
+            this.ctx.drawImage(
+                sprite, 
+                enemy.x, 
+                enemy.y, 
+                enemy.width, 
+                enemy.height // Use the enemy's height property
+            );
         }
     }
 
