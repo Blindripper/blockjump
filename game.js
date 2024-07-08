@@ -567,7 +567,7 @@ class Game {
         for (let enemy of this.enemies) {
             if (!enemy.isDestroyed) {
                 // Use precise collision detection
-                if (this.checkPreciseCollision(this.player, enemy) ) {
+                if (this.checkPreciseCollision(this.player, enemy)) {
                     if (this.playerShield) {
                         // If the player has a shield, destroy the enemy instead of ending the game
                         enemy.isDestroyed = true;
@@ -580,7 +580,6 @@ class Game {
                         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
                     }
                     return;
-                   
                 }
                 
                 // Check if any corner of the player is inside the enemy
@@ -593,8 +592,17 @@ class Game {
                 
                 for (let corner of playerCorners) {
                     if (this.isPointInside(corner.x, corner.y, enemy.x, enemy.y, enemy.width, enemy.height)) {
-                        this.gameOver = true;
-                        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                        if (this.playerShield) {
+                            // If the player has a shield, destroy the enemy instead of ending the game
+                            enemy.isDestroyed = true;
+                            enemy.destroyedTime = 0;
+                            this.score += enemy.isType2 ? 3000 : 1000;
+                            this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
+                            this.playSound('destroyed');
+                        } else {
+                            this.gameOver = true;
+                            this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                        }
                         return;
                     }
                 }
