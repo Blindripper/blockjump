@@ -1262,11 +1262,9 @@ class Game {
     
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
-
-         // Apply camera translation
-         translateY += this.camera.y;
-
-        this.ctx.translate(translateX, translateY);
+        
+        // Apply camera translation
+        this.ctx.translate(translateX, translateY - this.camera.y);
     
         this.drawBackground();
         this.drawPlatforms();
@@ -1275,27 +1273,24 @@ class Game {
         this.drawEnemyBullets();
         this.drawPowerups();
         this.drawParticles();
-        this.drawHUD();
-        this.drawPowerupHUD();
         this.drawBullets();
         if (this.constantBeamActive) {
             this.drawConstantBeam();
         }
         this.drawEnemies();
-        // Draw background name
-    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    this.ctx.font = '20px Orbitron, sans-serif';
-    this.ctx.textAlign = 'right';
-    
+        
         // Draw background name (adjust Y position for camera)
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         this.ctx.font = '20px Orbitron, sans-serif';
         this.ctx.textAlign = 'right';
         const bgName = this.getBackgroundName(this.currentBackgroundIndex);
-        this.ctx.fillText(bgName, GAME_WIDTH - 10, 30 + this.camera.y);
+        this.ctx.fillText(bgName, GAME_WIDTH - 10, 30);
         
         this.ctx.restore();
-    
+
+        // Draw HUD after restoring context
+        this.drawHUD();
+        this.drawPowerupHUD();
     }
 
     drawPlatforms() {
