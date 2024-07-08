@@ -1868,8 +1868,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
 
-
-
     await Promise.all([
         loadSprites(),
         loadBackgrounds(),
@@ -2246,6 +2244,5 @@ function drawCanvasMessage(text) {
     message.className = 'canvas-message';
     document.body.appendChild(message);
 }
-
 
 export { updateTryCount };
