@@ -234,7 +234,7 @@ class Game {
     
     loadSprites() {
         this.enemySprite = new Image();
-        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1.png';
+        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
         this.enemyDestroyedSprite = new Image();
         this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
     }
