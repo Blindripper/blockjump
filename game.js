@@ -127,6 +127,12 @@ class Game {
         this.normalMoveSpeed = 350;
         this.normalShootCooldown = 900;
         this.isKeyPressed;
+        this.platformSprites = {
+            normal: [new Image(), new Image()],
+            spike: new Image(),
+            golden: new Image()
+        };
+        this.loadPlatformSprites();
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
         this.enemyType2Sprite = new Image();
@@ -146,6 +152,13 @@ class Game {
         this.loadSprites();
         this.loadSounds();
         this.setupEventListeners();
+    }
+
+    loadPlatformSprites() {
+        this.platformSprites.normal[0].src = `${picsUrl}normalplat0.png`;
+        this.platformSprites.normal[1].src = `${picsUrl}normalplat1.png`;
+        this.platformSprites.spike.src = `${picsUrl}spikeplat.png`;
+        this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
 
 
@@ -674,7 +687,8 @@ class Game {
             width: width,
             height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05
+            isSpike: Math.random() < 0.05,
+            spriteIndex: Math.floor(Math.random() * 2) // Randomly choose between the two normal platform sprites
         };
     }
 
@@ -1236,30 +1250,22 @@ class Game {
 
     drawPlatforms() {
         for (let platform of this.platforms) {
+            let sprite;
             if (platform.isSpike) {
-                // Draw spike platform
-                this.ctx.fillStyle = '#FF0000';  // Red color for spike platforms
-                this.ctx.beginPath();
-                this.ctx.moveTo(platform.x, platform.y + platform.height);
-                this.ctx.lineTo(platform.x + platform.width / 2, platform.y);
-                this.ctx.lineTo(platform.x + platform.width, platform.y + platform.height);
-                this.ctx.closePath();
-                this.ctx.fill();
+                sprite = this.platformSprites.spike;
             } else if (platform.isGolden) {
-                // Draw golden platform
-                this.ctx.fillStyle = '#FFD700';  // Gold color
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                sprite = this.platformSprites.golden;
             } else {
-                // Draw normal platform
-                this.ctx.fillStyle = '#1E293B';  // Dark blue-gray color for normal platforms
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                sprite = this.platformSprites.normal[platform.spriteIndex];
             }
+
+            // Draw the sprite stretched to fit the platform width
+            this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
         }
         
         // Draw bottom platform
         if (this.bottomPlatform) {
-            this.ctx.fillStyle = '#4CAF50';  // Green color for bottom platform
-            this.ctx.fillRect(this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, this.bottomPlatform.height);
+            this.ctx.drawImage(this.platformSprites.normal[0], this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, PLATFORM_HEIGHT);
         }
     }
 
