@@ -37,7 +37,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 // Game constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
-const PLATFORM_HEIGHT = 50;
+const PLATFORM_HEIGHT = 45;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
@@ -799,9 +799,9 @@ class Game {
                     continue;
                 }
 
-                if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y) {
+                if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y + 5) { // Added small tolerance
                     // Landing on top of the platform
-                    this.player.y = platform.y - this.player.height;
+                    this.player.y = platform.y - this.player.height + 1; // Adjust this value as needed
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
@@ -1353,16 +1353,17 @@ class Game {
             this.ctx.stroke();
         }
 
-        
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
-            this.ctx.drawImage(playerSprite, this.player.x, this.player.y, this.player.width, this.player.height);
+            this.ctx.drawImage(playerSprite, 
+                               Math.round(this.player.x), Math.round(this.player.y), 
+                               this.player.width, this.player.height);
         } else {
             this.ctx.fillStyle = '#00FF00';  // Bright green color
-            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+            this.ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), 
+                              this.player.width, this.player.height);
         }
     }
-
     drawPowerups() {
         for (let powerup of this.powerups) {
             const powerupSprite = sprites.get(powerup.type);
