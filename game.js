@@ -82,6 +82,7 @@ class Game {
         this.lastTime = 0;
         this.platforms = [];
         this.powerups = [];
+        this.debuffDriftSpeed = 30; // pixels per second
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
         this.backgroundChangeThreshold = 5000;
@@ -878,19 +879,36 @@ class Game {
 
         // Update existing powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
-            this.powerups[i].y += this.platformSpeed * dt * this.gameSpeed;
-            if (this.checkCollision(this.player, this.powerups[i])) {
-                this.applyPowerUpEffect(this.powerups[i].type);
+            const powerup = this.powerups[i];
+            
+            // Move powerup down
+            powerup.y += this.platformSpeed * dt * this.gameSpeed;
+
+            // If it's a debuff, make it drift towards the player
+            if (powerup.isDebuff && this.player) {
+                const dx = this.player.x - powerup.x;
+                const dy = this.player.y - powerup.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 0) {
+                    const directionX = dx / distance;
+                    const directionY = dy / distance;
+                    powerup.x += directionX * this.debuffDriftSpeed * dt;
+                    powerup.y += directionY * this.debuffDriftSpeed * dt;
+                }
+            }
+
+            if (this.checkCollision(this.player, powerup)) {
+                this.applyPowerUpEffect(powerup.type);
                 this.powerups.splice(i, 1);
-            } else if (this.powerups[i].y > GAME_HEIGHT) {
+            } else if (powerup.y > GAME_HEIGHT) {
                 this.powerups.splice(i, 1);
             }
         }
     
-        // Random spawn logic
+        // Random spawn logic (unchanged)
         if (currentTime - this.lastRandomSpawn > this.randomSpawnInterval) {
             if (Math.random() < this.randomSpawnRate) {
-                const x = Math.random() * (GAME_WIDTH - 30); // 30 is the width of the powerup
+                const x = Math.random() * (GAME_WIDTH - 30);
                 this.powerups.push(this.createPowerup(x, 0));
                 this.lastRandomSpawn = currentTime;
             }
@@ -910,7 +928,8 @@ class Game {
             y: y,
             width: 30,
             height: 30,
-            type: type
+            type: type,
+            isDebuff: isDebuff
         };
     }
 
