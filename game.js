@@ -1265,7 +1265,7 @@ class Game {
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
         
-        // Apply initial translation
+        // Apply initial translation and camera offset
         this.ctx.translate(translateX, translateY);
     
         // Draw background (fixed to camera)
