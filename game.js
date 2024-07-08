@@ -941,6 +941,9 @@ class Game {
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             const powerup = this.powerups[i];
             
+            // If powerup has been removed (e.g., by tezosX), skip processing
+            if (!powerup) continue;
+            
             // Move powerup down
             powerup.y += this.platformSpeed * dt * this.gameSpeed;
 
@@ -1041,28 +1044,28 @@ class Game {
                         }, 30000);
                         break;
                         case 'tezosX':
-                            // Clear all enemies
-                            this.enemies.forEach(enemy => {
-                                enemy.isDestroyed = true;
-                                enemy.destroyedTime = 0;
-                                this.score += enemy.isType2 ? 3000 : 1000;
-                            });
-                            
-                            // Clear all debuff powerups
-                            this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
-                            
-                            // Reset negative effects
-                            this.highGravity = false;
-                            this.currentGravity = this.normalGravity;
-                            this.slowMovement = false;
-                            if (this.player) {
-                                this.player.speed = this.normalMoveSpeed;
-                            }
-                            this.fastGameSpeed = false;
-                            this.gameSpeed = 1;
-                            this.platformSpeed = this.basePlatformSpeed;
-                            
-                            break;
+                // Clear all enemies
+                this.enemies.forEach(enemy => {
+                    enemy.isDestroyed = true;
+                    enemy.destroyedTime = 0;
+                    this.score += enemy.isType2 ? 3000 : 1000;
+                });
+                
+                // Clear all debuff powerups safely
+                this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
+                
+                // Reset negative effects
+                this.highGravity = false;
+                this.currentGravity = this.normalGravity;
+                this.slowMovement = false;
+                if (this.player) {
+                    this.player.speed = this.normalMoveSpeed;
+                }
+                this.fastGameSpeed = false;
+                this.gameSpeed = 1;
+                this.platformSpeed = this.basePlatformSpeed;
+                
+                break;
                 case 'solana':
                 this.fastGameSpeed = true;
                 this.gameSpeed = 1.5; // 1.5x normal speed
