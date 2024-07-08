@@ -569,43 +569,22 @@ class Game {
     
 
     checkPlayerEnemyCollisions() {
-        for (let enemy of this.enemies) {
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.enemies[i];
             if (!enemy.isDestroyed) {
-                // Use precise collision detection
-                if (this.checkPreciseCollision(this.player, enemy)) {
+                if (this.checkCollision(this.player, enemy)) {
                     if (this.playerShield) {
-                        // If the player has a shield, destroy the enemy instead of ending the game
+                        // If the player has a shield, destroy the enemy
                         this.destroyEnemy(enemy);
+                        this.enemies.splice(i, 1); // Remove the enemy from the array
+                        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
+                        this.playSound('destroyed');
                     } else {
+                        // If no shield, end the game
                         this.gameOver = true;
                         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
                         this.playSound('gameOver');
-                    }
-                    return; // Exit the function after handling the collision
-                }
-                
-                // Check if any corner of the player is inside the enemy
-                const playerCorners = [
-                    { x: this.player.x, y: this.player.y },
-                    { x: this.player.x + this.player.width, y: this.player.y },
-                    { x: this.player.x, y: this.player.y + this.player.height },
-                    { x: this.player.x + this.player.width, y: this.player.y + this.player.height }
-                ];
-                
-                for (let corner of playerCorners) {
-                    if (this.isPointInside(corner.x, corner.y, enemy.x, enemy.y, enemy.width, enemy.height)) {
-                        if (this.playerShield) {
-                            // If the player has a shield, destroy the enemy instead of ending the game
-                            enemy.isDestroyed = true;
-                            enemy.destroyedTime = 0;
-                            this.score += enemy.isType2 ? 3000 : 1000;
-                            this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
-                            this.playSound('destroyed');
-                        } else {
-                            this.gameOver = true;
-                            this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
-                        }
-                        return;
+                        return; // Exit the function after handling the collision
                     }
                 }
             }
@@ -616,8 +595,6 @@ class Game {
         enemy.isDestroyed = true;
         enemy.destroyedTime = 0;
         this.score += enemy.isType2 ? 3000 : 1000;
-        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
-        this.playSound('destroyed');
     }
 
 
