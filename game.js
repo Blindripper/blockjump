@@ -60,7 +60,6 @@ class Game {
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
-        this.resetPowerupEffects(); // Call this in the constructor to set initial values
         this.enemyBullets = [];
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
@@ -161,13 +160,13 @@ class Game {
     
             hideOverlay();
 
-            this.resetPowerupEffects();
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
     
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
+            this.resetPowerupEffects();
             this.sounds.background.loop = true;
             this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
             this.enemies = [];
@@ -418,8 +417,12 @@ class Game {
         this.gameSpeed = 1;
         this.currentGravity = this.normalGravity;
         this.shootingCooldown = this.normalShootCooldown;
-        this.player.speed = this.normalMoveSpeed;
-        this.platformSpeed = 65; // Reset to initial value
+        this.platformSpeed = this.basePlatformSpeed;
+        
+        // Only reset player speed if player exists
+        if (this.player) {
+            this.player.speed = this.normalMoveSpeed;
+        }
         
         // Clear any active powerup timers
         this.activePowerups.forEach((powerup, key) => {
@@ -427,6 +430,7 @@ class Game {
         });
         this.activePowerups.clear();
     }
+
     
 
     checkBulletEnemyCollisions() {
