@@ -51,7 +51,7 @@ class Game {
         this.debugMode = false;
         this.camera = {
             y: 0,
-            followThreshold: 200}; 
+            followThreshold: GAME_HEIGHT / 2}; 
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -369,7 +369,7 @@ class Game {
     }
 
     checkConstantBeamCollisions() {
-        if (!this.constantBeam) return;
+        if (!this.constantBeamActive) return;
 
         const beamX = this.player.x + this.player.width / 2;
         
@@ -802,7 +802,6 @@ class Game {
 
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
-        this.updateCamera();
         this.updatePowerups(dt);
         this.updateParticles(dt);
         this.updateBullets(dt);
@@ -1266,7 +1265,7 @@ class Game {
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
         
-        // Apply camera translation
+        // Apply initial translation
         this.ctx.translate(translateX, translateY);
     
         // Draw background (fixed to camera)
@@ -1868,6 +1867,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
 
+
+
     await Promise.all([
         loadSprites(),
         loadBackgrounds(),
@@ -2244,5 +2245,6 @@ function drawCanvasMessage(text) {
     message.className = 'canvas-message';
     document.body.appendChild(message);
 }
+
 
 export { updateTryCount };
