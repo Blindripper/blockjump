@@ -1085,8 +1085,8 @@ class Game {
                 break;
                 case 'solana':
                 this.fastGameSpeed = true;
-                this.gameSpeed = 1.3; // 1.5x normal speed
-                this.platformSpeed = this.basePlatformSpeed * 1.3;
+                this.gameSpeed = 1.2; // 1.5x normal speed
+                this.platformSpeed = this.basePlatformSpeed * 1.2;
                 const solanaTimer = setTimeout(() => { 
                     this.fastGameSpeed = false;
                     this.gameSpeed = 1; // Reset to normal speed
