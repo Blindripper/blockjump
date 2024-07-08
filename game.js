@@ -162,6 +162,8 @@ class Game {
             hideOverlay();
 
             this.resetPowerupEffects();
+            this.gameSpeed = 1;
+            this.platformSpeed = this.basePlatformSpeed;
     
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
@@ -929,15 +931,16 @@ class Game {
                 });
                 break;
                 case 'solana':
-            this.fastGameSpeed = true;
-            this.gameSpeed = 2; // Reduced from 3 to 2 (2x normal speed instead of 3x)
-            this.platformSpeed *= 2; // Adjust platform speed accordingly
-            setTimeout(() => { 
-                this.fastGameSpeed = false;
-                this.gameSpeed = this.normalGameSpeed; 
-                this.platformSpeed /= 2; // Reset platform speed
-            }, 15000); // Reduced duration from 20000 to 15000 (15 seconds)
-            break;
+                this.fastGameSpeed = true;
+                this.gameSpeed = 1.5; // 1.5x normal speed
+                this.platformSpeed = this.basePlatformSpeed * 1.5;
+                const solanaTimer = setTimeout(() => { 
+                    this.fastGameSpeed = false;
+                    this.gameSpeed = 1; // Reset to normal speed
+                    this.platformSpeed = this.basePlatformSpeed; // Reset to base speed
+                }, 12000); // 12 seconds duration
+                this.activePowerups.set('solana', { timer: solanaTimer, duration: 12000 });
+                break;
             case 'blast':
                 this.highGravity = true;
                 this.currentGravity = this.normalGravity * 2;
