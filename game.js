@@ -202,6 +202,8 @@ class Game {
             }
     
             hideOverlay();
+            this.gameStartTime = Math.floor(Date.now() / 1000); // Store as Unix timestamp (seconds)
+            console.log('Game started at:', this.gameStartTime);
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
@@ -228,7 +230,6 @@ class Game {
             this.gameRunning = true;
             this.gameOver = false;
             this.blocksClimbed = 0;
-            this.gameStartTime = Date.now();
             this.lastTime = performance.now();
             this.constantBeamActive = false;
             this.powerups = [];
@@ -988,8 +989,10 @@ class Game {
             sound.pause();
             sound.currentTime = 0;
         });
+        
+    
         this.playSound('gameOver');
-
+        window.gameStartTime = this.gameStartTime; // Ensure this is set correctly
         handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
     }
 
@@ -1997,26 +2000,33 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 }
 
   
-  async function handleScoreSubmission(name) {
+async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
 
     try {
         showOverlay("Submitting score to Etherlink...");
-        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
+        console.log('Submitting score with:', {
+            name,
+            score: window.finalScore,
+            blocksClimbed: window.blocksClimbed,
+            gameStartTime: window.gameStartTime
+        });
+
+        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, Math.floor(window.gameStartTime / 1000));
         
-        if (submitted) {
+        if (submitted.success) {
             await updateHighscoreTable();
             showOverlay('Score submitted successfully!', async () => {
                 await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
-            showOverlay('Failed to submit score. Please try again.');
+            showOverlay(`Failed to submit score: ${submitted.error}`, null, true, 'Try Again');
         }
     } catch (error) {
         console.error('Error during score submission:', error);
-        showOverlay('An error occurred while submitting your score. Please try again.');
+        showOverlay('An error occurred while submitting your score. Please try again.', null, true, 'Try Again');
     }
-}  
+}
 
   
 async function updateHighscoreTable() {
