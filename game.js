@@ -97,7 +97,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 12;
+        this.platformCount = 16;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
