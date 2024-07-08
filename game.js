@@ -104,7 +104,11 @@ class Game {
         this.enemySpeed = 50;
         this.jump;
         this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
-        this.debuffDropRate = 0.7; // 70% chance for an enemy to drop a debuff when killed
+        this.debuffDropRate = 0.1; // 10% chance for a random debuff to spawn
+        this.lastDebuffSpawn = 0;
+        this.debuffSpawnInterval = 5000; // Spawn a debuff every 5 seconds on average
+        this.spacecraftDropRate = 0.75; // 75% drop rate for normal spacecraft
+        this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
         this.playerShield = false;
         this.rapidFire = false;
@@ -363,8 +367,9 @@ class Game {
                 enemy.destroyedTime += dt;
                 if (enemy.destroyedTime > 0.5) {
                     // Check for powerup drop
-                    if (Math.random() < this.powerupDropRate) {
-                        this.powerups.push(this.createPowerup(enemy.x, enemy.y));
+                    const dropRate = enemy.isType2 ? this.spacecraft2DropRate : this.spacecraftDropRate;
+                    if (Math.random() < dropRate) {
+                        this.powerups.push(this.createPowerup(enemy.x, enemy.y, false));
                     }
                     this.enemies.splice(index, 1);
                 }
@@ -906,23 +911,25 @@ class Game {
             }
         }
     
-        // Random spawn logic (unchanged)
-        if (currentTime - this.lastRandomSpawn > this.randomSpawnInterval) {
-            if (Math.random() < this.randomSpawnRate) {
+        // Random debuff spawn logic
+        if (currentTime - this.lastDebuffSpawn > this.debuffSpawnInterval) {
+            if (Math.random() < this.debuffDropRate) {
                 const x = Math.random() * (GAME_WIDTH - 30);
-                this.powerups.push(this.createPowerup(x, 0));
-                this.lastRandomSpawn = currentTime;
+                this.powerups.push(this.createPowerup(x, 0, true));
+                this.lastDebuffSpawn = currentTime;
             }
         }
     }
 
-    createPowerup(x, y) {
-        const isDebuff = Math.random() < this.debuffDropRate;
+    createPowerup(x, y, isDebuff = false) {
         let powerupPool = isDebuff 
             ? ['solana', 'blast', 'ethereum']
             : ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX'];
         
-        const type = powerupPool[Math.floor(Math.random() * powerupPool.length)];
+        // Shuffle the powerup pool for better randomness
+        powerupPool = this.shuffleArray(powerupPool);
+        
+        const type = powerupPool[0]; // Take the first item from the shuffled array
         
         return {
             x: x,
@@ -932,6 +939,14 @@ class Game {
             type: type,
             isDebuff: isDebuff
         };
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
 
     applyPowerUpEffect(type) {
