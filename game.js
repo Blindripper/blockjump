@@ -1441,7 +1441,7 @@ class Game {
         let yOffset = 90;
         if (this.playerShield) this.drawPowerupIndicator('Shield', yOffset += 30);
         if (this.rapidFire) this.drawPowerupIndicator('Rapid Fire', yOffset += 30);
-        if (this.constantBeam) this.drawPowerupIndicator('Constant Beam', yOffset += 30);
+        if (this.constantBeamActive) this.drawPowerupIndicator('Constant Beam', yOffset += 30);
         if (this.lowGravity) this.drawPowerupIndicator('Low Gravity', yOffset += 30);
         if (this.highGravity) this.drawPowerupIndicator('High Gravity', yOffset += 30);
         if (this.slowMovement) this.drawPowerupIndicator('Slow Movement', yOffset += 30);
@@ -1457,11 +1457,14 @@ class Game {
     }
 
     drawPowerupHUD() {
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
+
         const powerupSize = 20;
         const padding = 10;
         const barHeight = 5;
         const powerupSpacing = 35; // Increased spacing between powerups
-        let xOffset = GAME_WIDTH - padding;
+        let xOffset = this.canvas.width - padding;
     
         // Draw powerups from right to left
         Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
@@ -1489,6 +1492,8 @@ class Game {
     
             xOffset -= powerupSpacing; // Use the new spacing value
         });
+
+        this.ctx.restore();
     }
 
 
