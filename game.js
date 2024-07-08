@@ -54,7 +54,8 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
-        this.climbDownSpeed = 200; // Speed for climbing down, adjust as needed
+        this.fallThroughDelay = 200; // Milliseconds to ignore platform collision after pressing down
+        this.lastFallThroughTime = 0
         this.normalGravity = 1200; // The default gravity value
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
@@ -695,6 +696,9 @@ class Game {
                 e.preventDefault(); // Prevent space from triggering button clicks
                 this.shoot();
             }
+            if (e.code === 'ArrowDown' && this.player.isOnGround) {
+                this.lastFallThroughTime = Date.now();
+            }
         });
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
@@ -769,12 +773,17 @@ class Game {
         }
     }
     
-    handleCollisions() {
+    handleCollisions(currentTime) {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         this.player.isOnGround = false;
     
         for (let platform of platforms) {
             if (this.checkCollision(this.player, platform)) {
+                // Ignore collision if we're in the fall-through delay period
+                if (currentTime - this.lastFallThroughTime < this.fallThroughDelay) {
+                    continue;
+                }
+
                 if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y) {
                     // Landing on top of the platform
                     this.player.y = platform.y - this.player.height;
@@ -885,9 +894,12 @@ class Game {
         } else {
             this.player.velocityX = 0;
         }
-         // Climbing down
-         if (this.keys['ArrowDown']) {
-            this.player.velocityY = this.climbDownSpeed;
+
+        // Falling through platforms
+        if (this.keys['ArrowDown'] && this.player.isOnGround) {
+            this.lastFallThroughTime = currentTime;
+            this.player.isOnGround = false;
+            this.player.y += 1; // Move the player down slightly to trigger the fall
         }
     
         // Update position (use this.gameSpeed)
