@@ -56,6 +56,8 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
+        this.normalGravity = 1500; // The default gravity value
+        this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
         this.enemyBullets = [];
@@ -761,8 +763,7 @@ class Game {
         }
     
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
-        this.player.velocityY += GRAVITY * dt * this.gameSpeed;
-    
+        this.player.velocityY += this.currentGravity * dt * this.gameSpeed;    
         // Horizontal movement (adjusted for slow movement debuff)
         let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
         
@@ -890,14 +891,14 @@ class Game {
                     };
                     setTimeout(() => { this.constantBeam = null; }, 30000);
                     break;
-            case 'mintTezos':
-                this.lowGravity = true;
-                GRAVITY = this.normalGravity * 0.5;
-                setTimeout(() => { 
-                    this.lowGravity = false; 
-                    GRAVITY = this.normalGravity;
-                }, 30000);
-                break;
+                    case 'mintTezos':
+                        this.lowGravity = true;
+                        this.currentGravity = this.normalGravity * 0.5;
+                        setTimeout(() => { 
+                            this.lowGravity = false; 
+                            this.currentGravity = this.normalGravity;
+                        }, 30000);
+                        break;
             case 'tezosX':
                 this.enemies.forEach(enemy => {
                     enemy.isDestroyed = true;
@@ -917,10 +918,10 @@ class Game {
             break;
             case 'blast':
                 this.highGravity = true;
-                GRAVITY = this.normalGravity * 2;
+                this.currentGravity = this.normalGravity * 2;
                 setTimeout(() => { 
                     this.highGravity = false; 
-                    GRAVITY = this.normalGravity;
+                    this.currentGravity = this.normalGravity;
                 }, 20000);
                 break;
             case 'ethereum':
