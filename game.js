@@ -112,7 +112,7 @@ class Game {
         this.activePowerups = new Map();
         this.playerShield = false;
         this.rapidFire = false;
-        this.constantBeam = false;
+        this.constantBeam = null;
         this.lowGravity = false;
         this.highGravity = false;
         this.slowMovement = false;
@@ -283,10 +283,9 @@ class Game {
             return bullet.y < GAME_HEIGHT;
         });
 
-         // Handle constant beam
-         if (this.constantBeam) {
-            this.constantBeam.x = this.player.x + this.player.width / 2;
-            this.constantBeam.height = this.player.y;
+          // Handle constant beam
+        if (this.constantBeam) {
+            this.checkConstantBeamCollisions();
         }
 
         // Update enemy bullets and missiles
@@ -309,6 +308,20 @@ class Game {
 
         // Check for collisions
         this.checkBulletCollisions();
+    }
+
+    checkConstantBeamCollisions() {
+        if (!this.constantBeam) return;
+
+        const beamX = this.player.x + this.player.width / 2;
+        this.enemies.forEach(enemy => {
+            if (!enemy.isDestroyed && 
+                enemy.x < beamX && 
+                enemy.x + enemy.width > beamX &&
+                enemy.y < this.player.y) {
+                this.damageEnemy(enemy);
+            }
+        });
     }
 
     createMissile(enemy) {
@@ -966,14 +979,14 @@ class Game {
                 }, 30000);
                 break;
                 case 'etherLink':
-                    this.constantBeam = {
-                        x: this.player.x + this.player.width / 2,
-                        y: 0,
-                        width: 5,
-                        height: this.player.y
-                    };
-                    setTimeout(() => { this.constantBeam = null; }, 30000);
-                    break;
+                this.constantBeam = {
+                    width: 5,
+                    color: '#00FFFF' // Cyan color for the beam
+                };
+                setTimeout(() => { 
+                    this.constantBeam = null;
+                }, 30000);
+                break;
                     case 'mintTezos':
                         this.lowGravity = true;
                         this.currentGravity = this.normalGravity * 0.5;
@@ -1085,6 +1098,7 @@ class Game {
     
         this.drawBackground();
         this.drawPlatforms();
+        this.drawConstantBeam();
         this.drawPlayer();
         this.drawEnemyBullets();
         this.drawPowerups();
@@ -1135,6 +1149,18 @@ class Game {
         this.ctx.fillStyle = '#00FF00';
         for (let bullet of this.bullets) {
             this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        }
+    }
+
+    drawConstantBeam() {
+        if (this.constantBeam) {
+            const beamX = this.player.x + this.player.width / 2;
+            this.ctx.strokeStyle = this.constantBeam.color;
+            this.ctx.lineWidth = this.constantBeam.width;
+            this.ctx.beginPath();
+            this.ctx.moveTo(beamX, this.player.y);
+            this.ctx.lineTo(beamX, 0);
+            this.ctx.stroke();
         }
     }
 
