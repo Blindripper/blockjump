@@ -906,13 +906,15 @@ class Game {
                 });
                 break;
                 case 'solana':
-                this.fastGameSpeed = true;
-                this.gameSpeed = 3; // Set to 3x speed
-                setTimeout(() => { 
-                    this.fastGameSpeed = false;
-                    this.gameSpeed = this.normalGameSpeed; 
-                }, 20000);
-                break;
+            this.fastGameSpeed = true;
+            this.gameSpeed = 2; // Reduced from 3 to 2 (2x normal speed instead of 3x)
+            this.platformSpeed *= 2; // Adjust platform speed accordingly
+            setTimeout(() => { 
+                this.fastGameSpeed = false;
+                this.gameSpeed = this.normalGameSpeed; 
+                this.platformSpeed /= 2; // Reset platform speed
+            }, 15000); // Reduced duration from 20000 to 15000 (15 seconds)
+            break;
             case 'blast':
                 this.highGravity = true;
                 GRAVITY = this.normalGravity * 2;
