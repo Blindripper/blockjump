@@ -1343,7 +1343,7 @@ class Game {
     drawHUD() {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '12px Orbitron, sans-serif';
-        this.ctx.fillText(`Score: ${this.score}`, 10, 30);
+        this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
         this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
 
         // Draw active powerups/debuffs
@@ -1545,7 +1545,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginTop: '250px',
+        marginTop: '220px',
         marginBottom: '20px'
     });
 
@@ -1889,7 +1889,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.gameStartTime = gameStartTime;
 
     // Show the game over overlay with the name form and Try Again button
-    showOverlay(`<h2>Game Over</h2>Score: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
+    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
 
   
