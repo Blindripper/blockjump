@@ -49,6 +49,9 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 class Game {
     constructor() {
         this.debugMode = false;
+        this.camera = {
+            y: 0,
+            deadzone: 200}; 
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -161,6 +164,17 @@ class Game {
         this.platformSprites.spike.src = `${picsUrl}spikeplat1.png`;
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
+
+    updateCamera() {
+        // Calculate the top of the screen in world coordinates
+        const topOfScreen = this.camera.y;
+
+        // If player is above the deadzone, move the camera up
+        if (this.player.y < topOfScreen + this.camera.deadzone) {
+            this.camera.y = this.player.y - this.camera.deadzone;
+        }
+    }
+
 
 
     async initializeGame() {
@@ -355,6 +369,8 @@ class Game {
         if (!this.constantBeam) return;
 
         const beamX = this.player.x + this.player.width / 2;
+        
+        // Check collisions with enemies
         this.enemies.forEach(enemy => {
             if (!enemy.isDestroyed && 
                 enemy.x < beamX && 
@@ -362,6 +378,19 @@ class Game {
                 enemy.y < this.player.y) {
                 this.damageEnemy(enemy);
             }
+        });
+
+        // Check collisions with debuffs
+        this.powerups = this.powerups.filter(powerup => {
+            if (powerup.isDebuff &&
+                powerup.x < beamX && 
+                powerup.x + powerup.width > beamX &&
+                powerup.y < this.player.y) {
+                this.createParticles(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2, 10, '#FF0000');
+                this.playSound('destroyed');
+                return false; // Remove the debuff
+            }
+            return true;
         });
     }
 
@@ -698,7 +727,7 @@ class Game {
             width: width,
             height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05,
+            isSpike: Math.random() < 0.03,
             spriteIndex: Math.floor(Math.random() * 2) // Randomly choose between the two normal platform sprites
         };
     }
@@ -770,6 +799,7 @@ class Game {
 
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
+        this.updateCamera();
         this.updatePowerups(dt);
         this.updateParticles(dt);
         this.updateBullets(dt);
@@ -779,13 +809,18 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
+        this.updateCamera();
+
+        if (this.constantBeamActive) {
+            this.checkConstantBeamCollisions();
+        }
 
         if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
             this.bottomPlatform = null;
             console.log('Bottom platform removed');
         }
 
-        if (this.player.y > GAME_HEIGHT) {
+        if (this.player.y > GAME_HEIGHT + this.camera.y) {
             this.gameOver = true;
         }
     }
@@ -959,13 +994,17 @@ class Game {
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
         if (bg.image) {
-            this.ctx.drawImage(bg.image, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+            // Draw the background image repeatedly to cover the visible area
+            const pattern = this.ctx.createPattern(bg.image, 'repeat');
+            this.ctx.fillStyle = pattern;
+            this.ctx.fillRect(0, this.camera.y, GAME_WIDTH, GAME_HEIGHT);
         } else {
             // Fallback to color if image is not loaded
             this.ctx.fillStyle = bg.color;
-            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            this.ctx.fillRect(0, this.camera.y, GAME_WIDTH, GAME_HEIGHT);
         }
     }
+
 
     
 
@@ -1223,6 +1262,10 @@ class Game {
     
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
+
+         // Apply camera translation
+         translateY += this.camera.y;
+
         this.ctx.translate(translateX, translateY);
     
         this.drawBackground();
@@ -1243,9 +1286,16 @@ class Game {
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     this.ctx.font = '20px Orbitron, sans-serif';
     this.ctx.textAlign = 'right';
-    const bgName = this.getBackgroundName(this.currentBackgroundIndex);
-    this.ctx.fillText(bgName, GAME_WIDTH - 10, 30)
+    
+        // Draw background name (adjust Y position for camera)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        this.ctx.font = '20px Orbitron, sans-serif';
+        this.ctx.textAlign = 'right';
+        const bgName = this.getBackgroundName(this.currentBackgroundIndex);
+        this.ctx.fillText(bgName, GAME_WIDTH - 10, 30 + this.camera.y);
+        
         this.ctx.restore();
+    
     }
 
     drawPlatforms() {
@@ -1259,20 +1309,20 @@ class Game {
                 sprite = this.platformSprites.normal[platform.spriteIndex];
             }
 
-            // Draw the sprite stretched to fit the platform width
-            this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
+            // Draw the sprite stretched to fit the platform width, adjusted for camera
+            this.ctx.drawImage(sprite, platform.x, platform.y - this.camera.y, platform.width, PLATFORM_HEIGHT);
         }
         
-        // Draw bottom platform
+        // Draw bottom platform, if it exists
         if (this.bottomPlatform) {
-            this.ctx.drawImage(this.platformSprites.normal[0], this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, PLATFORM_HEIGHT);
+            this.ctx.drawImage(this.platformSprites.normal[0], this.bottomPlatform.x, this.bottomPlatform.y - this.camera.y, this.bottomPlatform.width, PLATFORM_HEIGHT);
         }
     }
 
     drawBullets() {
         this.ctx.fillStyle = '#00FF00';
         for (let bullet of this.bullets) {
-            this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            this.ctx.fillRect(bullet.x, bullet.y - this.camera.y, bullet.width, bullet.height);
         }
     }
 
@@ -1282,8 +1332,8 @@ class Game {
             this.ctx.strokeStyle = '#00FFFF'; // Cyan color for the beam
             this.ctx.lineWidth = 5;
             this.ctx.beginPath();
-            this.ctx.moveTo(beamX, this.player.y);
-            this.ctx.lineTo(beamX, 0);
+            this.ctx.moveTo(beamX, this.player.y - this.camera.y);
+            this.ctx.lineTo(beamX, 0 - this.camera.y);
             this.ctx.stroke();
         }
     }
@@ -1291,17 +1341,17 @@ class Game {
     drawEnemyBullets() {
         this.ctx.fillStyle = '#FF0000';
         for (let bullet of this.enemyBullets) {
-            this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            this.ctx.fillRect(bullet.x, bullet.y - this.camera.y, bullet.width, bullet.height);
+        }
 
-            // Draw constant beam
+        // Draw constant beam
         if (this.constantBeam) {
             this.ctx.strokeStyle = '#00FFFF';
             this.ctx.lineWidth = this.constantBeam.width;
             this.ctx.beginPath();
-            this.ctx.moveTo(this.constantBeam.x, this.player.y);
-            this.ctx.lineTo(this.constantBeam.x, 0);
+            this.ctx.moveTo(this.constantBeam.x, this.player.y - this.camera.y);
+            this.ctx.lineTo(this.constantBeam.x, 0 - this.camera.y);
             this.ctx.stroke();
-        }
         }
     }
 
@@ -1314,9 +1364,9 @@ class Game {
             this.ctx.drawImage(
                 sprite, 
                 enemy.x, 
-                enemy.y, 
+                enemy.y - this.camera.y, // Adjust for camera
                 enemy.width, 
-                enemy.height // Use the enemy's height property
+                enemy.height
             );
         }
     }
@@ -1356,8 +1406,8 @@ class Game {
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
             this.ctx.drawImage(playerSprite, 
-                               Math.round(this.player.x), Math.round(this.player.y), 
-                               this.player.width, this.player.height);
+                Math.round(this.player.x), Math.round(this.player.y - this.camera.y), 
+                this.player.width, this.player.height);
         } else {
             this.ctx.fillStyle = '#00FF00';  // Bright green color
             this.ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), 
@@ -1368,21 +1418,25 @@ class Game {
         for (let powerup of this.powerups) {
             const powerupSprite = sprites.get(powerup.type);
             if (powerupSprite && powerupSprite.complete && powerupSprite.naturalHeight !== 0) {
-                this.ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
+                this.ctx.drawImage(powerupSprite, powerup.x, powerup.y - this.camera.y, powerup.width, powerup.height);
             } else {
                 this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+                this.ctx.fillRect(powerup.x, powerup.y - this.camera.y, powerup.width, powerup.height);
             }
         }
     }
 
     drawParticles() {
         for (let particle of this.particles) {
-            particle.draw(this.ctx);
+            particle.draw(this.ctx, this.camera.y);
         }
     }
 
     drawHUD() {
+        // HUD elements should be drawn relative to the canvas, not the game world
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
+
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '12px Orbitron, sans-serif';
         this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
@@ -1397,8 +1451,10 @@ class Game {
         if (this.highGravity) this.drawPowerupIndicator('High Gravity', yOffset += 30);
         if (this.slowMovement) this.drawPowerupIndicator('Slow Movement', yOffset += 30);
         if (this.gameSpeed > 1) this.drawPowerupIndicator('Fast Game', yOffset += 30);
+
+        this.ctx.restore();
     }
-    
+
     drawPowerupIndicator(text, y) {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '16px Orbitron, sans-serif';
@@ -1471,7 +1527,9 @@ class Particle {
         this.vy = Math.random() * -2 - 1;
         this.alpha = 1;
         this.color = color;
-        this.debug = true; 
+        this.debug = true;
+        
+        
     }
 
     update(dt) {
@@ -1480,10 +1538,10 @@ class Particle {
         this.alpha -= dt * 2;
     }
 
-    draw(ctx) {
+    draw(ctx, cameraY) {
         ctx.globalAlpha = this.alpha;
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, 2, 2);
+        ctx.fillRect(this.x, this.y - cameraY, 2, 2);
         ctx.globalAlpha = 1;
     }
 }
