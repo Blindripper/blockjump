@@ -51,7 +51,9 @@ class Game {
         this.debugMode = false;
         this.camera = {
             y: 0,
-            followThreshold: GAME_HEIGHT / 2}; 
+            followThreshold: GAME_HEIGHT / 2,
+            startFollowingY: GAME_HEIGHT * 0.3 // Start following when player reaches 30% of screen height
+        }; 
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -166,6 +168,11 @@ class Game {
     }
 
     updateCamera() {
+
+        if (this.player.y > GAME_HEIGHT - this.camera.startFollowingY) {
+            this.camera.y = 0;
+            return;
+        }
         // Calculate the top of the screen in world coordinates
         const topOfScreen = this.camera.y;
 
@@ -173,6 +180,15 @@ class Game {
         if (this.player.y < topOfScreen + this.camera.followThreshold) {
             this.camera.y = this.player.y - this.camera.followThreshold;
         }
+
+        // Ensure camera doesn't go below 0
+        this.camera.y = Math.max(0, this.camera.y);
+
+        // Calculate the desired camera position
+        const desiredCameraY = this.player.y - (GAME_HEIGHT - this.camera.followThreshold);
+
+        // Smoothly interpolate to the desired position
+        this.camera.y += (desiredCameraY - this.camera.y) * 0.1;
 
         // Ensure camera doesn't go below 0
         this.camera.y = Math.max(0, this.camera.y);
@@ -211,6 +227,7 @@ class Game {
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
+            this.player.y = this.bottomPlatform.y - this.player.height;
             this.resetPowerupEffects();
             this.sounds.background.loop = true;
             this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
