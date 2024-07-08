@@ -591,7 +591,7 @@ class Game {
         const platforms = [];
         let lastY = GAME_HEIGHT - PLATFORM_HEIGHT - 50; // Start a bit above the bottom of the screen
     
-        while (platforms.length < 7) {
+        while (platforms.length < 10) {
             const y = lastY - this.getRandomPlatformSpacing();
             platforms.push(this.createPlatform(y));
             lastY = y;
@@ -616,8 +616,8 @@ class Game {
 
     getRandomPlatformSpacing() {
         // Adjust these values to control the vertical spacing between platforms
-        const minSpacing = PLAYER_HEIGHT * 1.5;
-        const maxSpacing = PLAYER_HEIGHT * 2.5;
+        const minSpacing = PLAYER_HEIGHT * 1.2;
+        const maxSpacing = PLAYER_HEIGHT * 2.2;
         return Math.random() * (maxSpacing - minSpacing) + minSpacing;
     }
     
@@ -786,7 +786,7 @@ class Game {
     // Add new platforms if needed
     let referenceY = this.platforms.length > 0 ? this.platforms[0].y : GAME_HEIGHT;
     
-    while (this.platforms.length < 7) {
+    while (this.platforms.length < 10) {
         // If there are no platforms, start a bit above the bottom of the screen
         if (this.platforms.length === 0) {
             referenceY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
@@ -809,7 +809,11 @@ class Game {
 
     
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
-        this.player.velocityY += this.GRAVITY * dt * this.gameSpeed;        
+        this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
+        
+        if (this.highGravity && this.player.velocityY > 0) {
+            this.player.velocityY *= 1.2; // Increase downward velocity by 20%
+        }
         // Horizontal movement (adjusted for slow movement debuff)
         let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
         
@@ -973,7 +977,7 @@ class Game {
                 case 'solana':
                 this.fastGameSpeed = true;
                 this.gameSpeed = 1.5; // 1.5x normal speed
-                this.platformSpeed = this.basePlatformSpeed * 1.5;
+                this.platformSpeed = this.basePlatformSpeed * 1.3;
                 const solanaTimer = setTimeout(() => { 
                     this.fastGameSpeed = false;
                     this.gameSpeed = 1; // Reset to normal speed
@@ -983,7 +987,7 @@ class Game {
                 break;
             case 'blast':
                 this.highGravity = true;
-                this.currentGravity = this.normalGravity * 2;
+                this.currentGravity = this.normalGravity * 3;
                 setTimeout(() => { 
                     this.highGravity = false; 
                     this.currentGravity = this.normalGravity;
@@ -1417,6 +1421,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
+        top: '33%',
         marginBottom: '20px'
     });
     messageElement.textContent = message;
