@@ -307,10 +307,10 @@ class Game {
         return {
             x: enemy.x + enemy.width / 2,
             y: enemy.y + enemy.height,
-            width: 10,
-            height: 20,
-            speed: 200,
-            angle: angle,
+            width: 15,
+            height: 25,
+            speed: 100, 
+            angle: angle + (Math.random() - 0.5) * 0.2, 
             creationTime: Date.now()
         };
     }
