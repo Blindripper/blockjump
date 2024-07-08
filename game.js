@@ -396,7 +396,7 @@ class Game {
     createEnemy() {
         const isType2 = Math.random() < 0.3; // 30% chance for the new enemy type
         const width = isType2 ? 100 : 80;
-        const height = isType2 ? 75 : 60; // Reduced heights for both enemy types
+        const height = isType2 ? 75 : 40; // Reduced heights for both enemy types
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: 50,
