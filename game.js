@@ -94,6 +94,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
+        this.platformCount = 12;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -495,15 +496,29 @@ class Game {
     }
 
     checkBulletCollisions() {
-        // Check regular bullet collisions
+        // Check regular bullet collisions with enemies and debuffs
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
+            
+            // Check collisions with enemies
             this.enemies.forEach(enemy => {
                 if (!enemy.isDestroyed && this.checkCollision(bullet, enemy)) {
                     bulletHit = true;
                     this.damageEnemy(enemy);
                 }
             });
+
+            // Check collisions with debuffs
+            this.powerups = this.powerups.filter(powerup => {
+                if (powerup.isDebuff && this.checkCollision(bullet, powerup)) {
+                    bulletHit = true;
+                    this.createParticles(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2, 10, '#FF0000');
+                    this.playSound('destroyed');
+                    return false; // Remove the debuff
+                }
+                return true;
+            });
+
             return !bulletHit;
         });
     
@@ -635,9 +650,9 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        let lastY = GAME_HEIGHT - PLATFORM_HEIGHT - 50; // Start a bit above the bottom of the screen
+        let lastY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
     
-        while (platforms.length < 10) {
+        while (platforms.length < this.platformCount) {
             const y = lastY - this.getRandomPlatformSpacing();
             platforms.push(this.createPlatform(y));
             lastY = y;
@@ -646,6 +661,7 @@ class Game {
         return platforms;
     }
 
+    
     createPlatform(y) {
         const minWidth = 60;
         const maxWidth = 180;
@@ -824,26 +840,26 @@ class Game {
         }
 
         // Update existing platforms
-    this.platforms = this.platforms.filter(platform => {
-        platform.y += this.platformSpeed * dt * this.gameSpeed;
-        return platform.y <= GAME_HEIGHT;
-    });
+        this.platforms = this.platforms.filter(platform => {
+            platform.y += this.platformSpeed * dt * this.gameSpeed;
+            return platform.y <= GAME_HEIGHT;
+        });
 
-    // Add new platforms if needed
-    let referenceY = this.platforms.length > 0 ? this.platforms[0].y : GAME_HEIGHT;
-    
-    while (this.platforms.length < 10) {
-        // If there are no platforms, start a bit above the bottom of the screen
-        if (this.platforms.length === 0) {
-            referenceY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
-        }
+        // Add new platforms if needed
+        let referenceY = this.platforms.length > 0 ? this.platforms[0].y : GAME_HEIGHT;
         
-        const newY = referenceY - this.getRandomPlatformSpacing();
-        this.platforms.unshift(this.createPlatform(newY));
-        referenceY = newY;
-        this.blocksClimbed++;
+        while (this.platforms.length < this.platformCount) {
+            // If there are no platforms, start a bit above the bottom of the screen
+            if (this.platforms.length === 0) {
+                referenceY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
+            }
+            
+            const newY = referenceY - this.getRandomPlatformSpacing();
+            this.platforms.unshift(this.createPlatform(newY));
+            referenceY = newY;
+            this.blocksClimbed++;
+        }
     }
-}
 
 
 
