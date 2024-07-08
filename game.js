@@ -37,7 +37,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 // Game constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
-const PLATFORM_HEIGHT = 15;
+const PLATFORM_HEIGHT = 50;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
@@ -157,7 +157,7 @@ class Game {
     loadPlatformSprites() {
         this.platformSprites.normal[0].src = `${picsUrl}normalplat0.png`;
         this.platformSprites.normal[1].src = `${picsUrl}normalplat1.png`;
-        this.platformSprites.spike.src = `${picsUrl}spikeplat.png`;
+        this.platformSprites.spike.src = `${picsUrl}spikeplat1.png`;
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
 
