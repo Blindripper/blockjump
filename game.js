@@ -568,9 +568,19 @@ class Game {
             if (!enemy.isDestroyed) {
                 // Use precise collision detection
                 if (this.checkPreciseCollision(this.player, enemy) ) {
-                    this.gameOver = true;
-                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    if (this.playerShield) {
+                        // If the player has a shield, destroy the enemy instead of ending the game
+                        enemy.isDestroyed = true;
+                        enemy.destroyedTime = 0;
+                        this.score += enemy.isType2 ? 3000 : 1000;
+                        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
+                        this.playSound('destroyed');
+                    } else {
+                        this.gameOver = true;
+                        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    }
                     return;
+                   
                 }
                 
                 // Check if any corner of the player is inside the enemy
@@ -940,7 +950,12 @@ class Game {
             }
 
             if (this.checkCollision(this.player, powerup)) {
-                this.applyPowerUpEffect(powerup.type);
+                if (powerup.isDebuff && this.playerShield) {
+                    // If it's a debuff and the player has a shield, destroy the powerup without applying it
+                    this.createParticles(powerup.x, powerup.y, 10, '#FFD700');
+                } else {
+                    this.applyPowerUpEffect(powerup.type);
+                }
                 this.powerups.splice(i, 1);
             } else if (powerup.y > GAME_HEIGHT) {
                 this.powerups.splice(i, 1);
@@ -991,7 +1006,9 @@ class Game {
         switch(type) {
             case 'bitcoin':
                 this.playerShield = true;
-                setTimeout(() => { this.playerShield = false; }, 30000);
+                setTimeout(() => { 
+                    this.playerShield = false;
+                }, 30000);
                 break;
             case 'greenTezos':
                 this.rapidFire = true;
@@ -1263,7 +1280,7 @@ class Game {
             this.ctx.beginPath();
             this.ctx.arc(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 
                          Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
-            this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+            this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Golden color for the shield
             this.ctx.lineWidth = 3;
             this.ctx.stroke();
         }
