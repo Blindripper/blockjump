@@ -37,7 +37,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 // Game constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
-const PLATFORM_HEIGHT = 45;
+const PLATFORM_HEIGHT = 40;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
@@ -801,7 +801,7 @@ class Game {
 
                 if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y + 5) { // Added small tolerance
                     // Landing on top of the platform
-                    this.player.y = platform.y - this.player.height + 3; // Adjust this value as needed
+                    this.player.y = platform.y - this.player.height + 10; // Adjust this value as needed
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
