@@ -59,7 +59,7 @@ class Game {
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
         this.enemyBullets = [];
-        this.JUMP_VELOCITY = -500;
+        this.JUMP_VELOCITY = -550;
         this.GRAVITY = 1200;
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
