@@ -40,8 +40,8 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
-const JUMP_VELOCITY = -600;
-const GRAVITY = 1500;
+const JUMP_VELOCITY = -450;
+const GRAVITY = 1200;
 const pressedKeys = {};
 
 
@@ -653,8 +653,7 @@ class Game {
 
       jump() {
         if (this.player.jumpCount < 2) {
-            const jumpVelocity = -600;
-            this.player.velocityY = jumpVelocity;
+            this.player.velocityY = this.JUMP_VELOCITY;
             this.player.jumpCount++;
             this.player.isOnGround = false;
             this.createJumpEffect();
@@ -809,9 +808,10 @@ class Game {
             console.warn('Player is null in updatePlayer');
             return;
         }
+
     
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
-        this.player.velocityY += this.currentGravity * dt * this.gameSpeed;    
+        this.player.velocityY += this.GRAVITY * dt * this.gameSpeed;        
         // Horizontal movement (adjusted for slow movement debuff)
         let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
         
