@@ -579,31 +579,40 @@ class Game {
     }
 
 
-    checkPreciseCollision(player, enemy) {
+        checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
         const playerVisibleWidth = player.width * 0.2;
         const playerVisibleHeight = player.height * 0.2;
         const enemyVisibleWidth = enemy.width * 0.2;
         const enemyVisibleHeight = enemy.height * 0.2;
-    
-        // Calculate hitbox positions
-        const playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
-        const playerHitboxY = player.y + (player.height - playerVisibleHeight) / 2;
+      
+        // Player hitbox with shield consideration (if shield active)
+        let playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
+        let playerHitboxY = player.y + (player.height - playerVisibleHeight) / 2;
+        if (player.isShieldActive) {
+          playerHitboxX += player.shieldOffsetX || 0; // Use default offset of 0 if not defined
+          playerHitboxY += player.shieldOffsetY || 0; // Use default offset of 0 if not defined
+        }
+        const playerVisibleWidthAdjusted = player.isShieldActive ? (player.shieldWidth || playerVisibleWidth) : playerVisibleWidth;
+        const playerVisibleHeightAdjusted = player.isShieldActive ? (player.shieldHeight || playerVisibleHeight) : playerVisibleHeight;
+      
+        // Enemy hitbox calculations remain the same
         const enemyHitboxX = enemy.x + (enemy.width - enemyVisibleWidth) / 2;
         const enemyHitboxY = enemy.y + (enemy.height - enemyVisibleHeight) / 2;
-    
+      
         // Check for collision
-        return !(playerHitboxX + playerVisibleWidth <= enemyHitboxX ||
+        return !(playerHitboxX + playerVisibleWidthAdjusted <= enemyHitboxX ||
                  playerHitboxX >= enemyHitboxX + enemyVisibleWidth ||
-                 playerHitboxY + playerVisibleHeight <= enemyHitboxY ||
+                 playerHitboxY + playerVisibleHeightAdjusted <= enemyHitboxY ||
                  playerHitboxY >= enemyHitboxY + enemyVisibleHeight);
-    }
+      }
+      
     
 
-    checkPlayerEnemyCollisions() {
+      checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
           const enemy = this.enemies[i];
-          if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
+          if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
             if (this.playerShield) {
               // Destroy enemy and update score (same logic from previous response)
               this.destroyEnemy(enemy);
@@ -618,6 +627,7 @@ class Game {
           }
         }
       }
+      
       
 
     destroyEnemy(enemy) {
