@@ -93,6 +93,18 @@ class Game {
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
         this.jump;
+        this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
+        this.debuffDropRate = 0.7; // 70% chance for an enemy to drop a debuff when killed
+        this.activePowerups = new Map();
+        this.playerShield = false;
+        this.rapidFire = false;
+        this.constantBeam = false;
+        this.lowGravity = false;
+        this.highGravity = false;
+        this.slowMovement = false;
+        this.normalGravity = 1500;
+        this.normalMoveSpeed = 350;
+        this.normalShootCooldown = 900;
         this.isKeyPressed;
         this.enemyDirection = 1;
         this.enemyDropDistance = 20;
@@ -253,6 +265,17 @@ class Game {
             return bullet.y < GAME_HEIGHT;
         });
 
+         // Handle constant beam
+         if (this.constantBeam) {
+            this.bullets.push({
+                x: this.player.x + this.player.width / 2 - 2.5,
+                y: 0,
+                width: 5,
+                height: this.player.y,
+                speed: 0
+            });
+        }
+
         // Update enemy bullets and missiles
     this.enemyBullets = this.enemyBullets.filter(bullet => {
         if (bullet.angle !== undefined) {
@@ -325,11 +348,15 @@ class Game {
 
     updateEnemies(dt) {
         const currentTime = Date.now();
-        this.enemies.forEach(enemy => {
+        this.enemies.forEach((enemy, index) => {
             if (enemy.isDestroyed) {
                 enemy.destroyedTime += dt;
                 if (enemy.destroyedTime > 0.5) {
-                    this.enemies = this.enemies.filter(e => e !== enemy);
+                    // Check for powerup drop
+                    if (Math.random() < this.powerupDropRate) {
+                        this.powerups.push(this.createPowerup(enemy.x, enemy.y));
+                    }
+                    this.enemies.splice(index, 1);
                 }
                 return;
             }
@@ -406,14 +433,20 @@ class Game {
         // Check enemy bullet - player collisions
         this.enemyBullets = this.enemyBullets.filter(bullet => {
             if (this.checkCollision(bullet, this.player)) {
-                this.gameOver = true;
-                this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
-                this.playSound('gameOver');
-                return false;
+                if (this.playerShield) {
+                    // Destroy the bullet without ending the game
+                    return false;
+                } else {
+                    this.gameOver = true;
+                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    this.playSound('gameOver');
+                    return false;
+                }
             }
             return true;
         });
     }
+
 
     checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
@@ -793,11 +826,21 @@ class Game {
         }
     }
 
-    createPowerup(y) {
-        const types = ['bitcoin', 'solana', 'ethereum', 'etherLink', 'greenTezos', 'blast', 'mintTezos', 'tezosX'];
-        const type = types[Math.floor(Math.random() * types.length)];
+    createPowerup(x, y) {
+        const allPowerups = ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX', 'solana', 'blast', 'ethereum'];
+        const isDebuff = Math.random() < this.debuffDropRate;
+        let powerupPool;
+        
+        if (isDebuff) {
+            powerupPool = ['solana', 'blast', 'ethereum'];
+        } else {
+            powerupPool = ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX'];
+        }
+        
+        const type = powerupPool[Math.floor(Math.random() * powerupPool.length)];
+        
         return {
-            x: Math.random() * (GAME_WIDTH - 30),
+            x: x,
             y: y,
             width: 30,
             height: 30,
@@ -806,32 +849,62 @@ class Game {
     }
 
     applyPowerUpEffect(type) {
-        const powerupConfig = {
-            'bitcoin': { duration: 10, effect: () => this.player.velocityY = JUMP_VELOCITY * 1.5 },
-            'ethereum': { duration: 5, effect: () => this.platformSpeed *= 0.5 },
-            'greenTezos': { duration: 30, effect: () => this.player.maxJumps = 3 },
-            'mintTezos': { duration: 30, effect: () => this.platformSpeed *= 0.5 },
-            'etherLink': { duration: 1, effect: () => this.score += 1000 },
-            'blast': { duration: 10, effect: () => { /* Implement blast effect */ } },
-            'tezosX': { duration: 15, effect: () => { /* Implement tezosX effect */ } },
-            
-        };
-    
-        if (powerupConfig[type]) {
-            if (this.activePowerups.has(type)) {
-                // If powerup is already active, extend its duration
-                this.activePowerups.get(type).duration += powerupConfig[type].duration;
-            } else {
-                // Apply the powerup effect
-                powerupConfig[type].effect();
-                // Add to active powerups
-                this.activePowerups.set(type, {
-                    duration: powerupConfig[type].duration,
-                    maxDuration: powerupConfig[type].duration
+        const currentTime = Date.now();
+        
+        switch(type) {
+            case 'bitcoin':
+                this.playerShield = true;
+                setTimeout(() => { this.playerShield = false; }, 30000);
+                break;
+            case 'greenTezos':
+                this.rapidFire = true;
+                this.shootingCooldown = this.normalShootCooldown * 0.5;
+                setTimeout(() => { 
+                    this.rapidFire = false; 
+                    this.shootingCooldown = this.normalShootCooldown;
+                }, 30000);
+                break;
+            case 'etherLink':
+                this.constantBeam = true;
+                setTimeout(() => { this.constantBeam = false; }, 30000);
+                break;
+            case 'mintTezos':
+                this.lowGravity = true;
+                GRAVITY = this.normalGravity * 0.5;
+                setTimeout(() => { 
+                    this.lowGravity = false; 
+                    GRAVITY = this.normalGravity;
+                }, 30000);
+                break;
+            case 'tezosX':
+                this.enemies.forEach(enemy => {
+                    enemy.isDestroyed = true;
+                    enemy.destroyedTime = 0;
+                    this.score += enemy.isType2 ? 3000 : 1000;
                 });
-            }
+                break;
+            case 'solana':
+                this.gameSpeed = 2;
+                setTimeout(() => { this.gameSpeed = 1; }, 20000);
+                break;
+            case 'blast':
+                this.highGravity = true;
+                GRAVITY = this.normalGravity * 2;
+                setTimeout(() => { 
+                    this.highGravity = false; 
+                    GRAVITY = this.normalGravity;
+                }, 20000);
+                break;
+            case 'ethereum':
+                this.slowMovement = true;
+                this.player.speed = this.normalMoveSpeed * 0.5;
+                setTimeout(() => { 
+                    this.slowMovement = false; 
+                    this.player.speed = this.normalMoveSpeed;
+                }, 20000);
+                break;
         }
-    
+        
         this.playSound('powerup');
     }
 
@@ -997,6 +1070,16 @@ class Game {
             console.warn('Player or its position is undefined in drawPlayer');
             return;
         }
+
+        if (this.playerShield) {
+            this.ctx.beginPath();
+            this.ctx.arc(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 
+                         Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
+            this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+            this.ctx.lineWidth = 3;
+            this.ctx.stroke();
+        }
+
         
         const playerSprite = sprites.get('player');
         if (playerSprite && playerSprite.complete) {
@@ -1030,6 +1113,22 @@ class Game {
         this.ctx.font = '12px Orbitron, sans-serif';
         this.ctx.fillText(`Score: ${this.score}`, 10, 30);
         this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
+
+        // Draw active powerups/debuffs
+        let yOffset = 90;
+        if (this.playerShield) this.drawPowerupIndicator('Shield', yOffset += 30);
+        if (this.rapidFire) this.drawPowerupIndicator('Rapid Fire', yOffset += 30);
+        if (this.constantBeam) this.drawPowerupIndicator('Constant Beam', yOffset += 30);
+        if (this.lowGravity) this.drawPowerupIndicator('Low Gravity', yOffset += 30);
+        if (this.highGravity) this.drawPowerupIndicator('High Gravity', yOffset += 30);
+        if (this.slowMovement) this.drawPowerupIndicator('Slow Movement', yOffset += 30);
+        if (this.gameSpeed > 1) this.drawPowerupIndicator('Fast Game', yOffset += 30);
+    }
+    
+    drawPowerupIndicator(text, y) {
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = '16px Orbitron, sans-serif';
+        this.ctx.fillText(text, 10, y);
     }
 
     drawPowerupHUD() {
