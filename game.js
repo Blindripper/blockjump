@@ -54,6 +54,7 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
+        this.climbDownSpeed = 200; // Speed for climbing down, adjust as needed
         this.normalGravity = 1200; // The default gravity value
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
@@ -782,7 +783,7 @@ class Game {
                     this.player.jumpCount = 0; // Reset jump count when landing
                     console.log('Player landed on platform');
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
-                    // Hitting the bottom of the platform
+                    // Hitting the bottom of the platform when jumping up
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
                     console.log('Player hit bottom of platform');
@@ -797,8 +798,6 @@ class Game {
                 }
             }
         }
-    
-       
     }
 
 
@@ -885,6 +884,10 @@ class Game {
             this.player.velocityX = moveSpeed;
         } else {
             this.player.velocityX = 0;
+        }
+         // Climbing down
+         if (this.keys['ArrowDown']) {
+            this.player.velocityY = this.climbDownSpeed;
         }
     
         // Update position (use this.gameSpeed)
@@ -1880,14 +1883,14 @@ async function handleBuyTries() {
                 updateButtonState();
                 game.draw();
                 hideOverlay();
-                showStartButton(); // New function to show the start button overlay
+                showStartButton();
             }, true, 'OK');
         } else {
-            showOverlay('Failed to purchase Game tries. Please try again.', null, true, 'OK');
+            showOverlay('Failed to purchase Game tries. Please try again.', checkAndDisplayStartButton, true, 'OK');
         }
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
-        showOverlay('Error purchasing Game tries. Please try again.', null, true, 'OK');
+        showOverlay('Error purchasing Game tries. Please try again.', checkAndDisplayStartButton, true, 'OK');
     }
 }
 
