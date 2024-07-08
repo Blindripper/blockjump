@@ -571,21 +571,22 @@ class Game {
     checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];
-            if (!enemy.isDestroyed) {
-                if (this.checkPreciseCollision(this.player, enemy)) {
-                    if (this.playerShield) {
-                        // If the player has a shield, destroy the enemy
-                        this.destroyEnemy(enemy);
-                        this.enemies.splice(i, 1); // Remove the enemy from the array
-                        this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
-                        this.playSound('destroyed');
-                    } else {
-                        // If no shield, end the game
-                        this.gameOver = true;
-                        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
-                        this.playSound('gameOver');
-                        return; // Exit the function after handling the collision
-                    }
+            if (!enemy.isDestroyed && this.checkCollision(this.player, enemy)) {
+                if (this.playerShield) {
+                    // If the player has a shield, destroy the enemy without ending the game
+                    console.log('Shield destroyed enemy');
+                    this.destroyEnemy(enemy);
+                    this.enemies.splice(i, 1); // Remove the enemy from the array
+                    this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#FFD700');
+                    this.playSound('destroyed');
+                    // Optionally, increase score or add other effects here
+                    this.score += enemy.isType2 ? 3000 : 1000;
+                } else {
+                    // If no shield, end the game
+                    this.gameOver = true;
+                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    this.playSound('gameOver');
+                    return; // Exit the function after handling the collision
                 }
             }
         }
@@ -594,7 +595,7 @@ class Game {
     destroyEnemy(enemy) {
         enemy.isDestroyed = true;
         enemy.destroyedTime = 0;
-        this.score += enemy.isType2 ? 3000 : 1000;
+        // Score increase is now handled in checkPlayerEnemyCollisions
     }
 
 
