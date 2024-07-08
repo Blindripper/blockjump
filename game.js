@@ -41,7 +41,8 @@ const PLATFORM_HEIGHT = 35;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
-
+const SHIELD_WIDTH = PLAYER_WIDTH * 1.1; 
+const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 
 
 // Game class
@@ -200,6 +201,7 @@ class Game {
             // Explicitly set player position
             this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
             this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
+
     
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
@@ -585,6 +587,7 @@ class Game {
         const playerVisibleHeight = player.height * 0.2;
         const enemyVisibleWidth = enemy.width * 0.2;
         const enemyVisibleHeight = enemy.height * 0.2;
+        
       
         // Player hitbox with shield consideration (if shield active)
         let playerHitboxX = player.x + (player.width - playerVisibleWidth) / 2;
@@ -593,8 +596,8 @@ class Game {
           playerHitboxX += player.shieldOffsetX || 0; // Use default offset of 0 if not defined
           playerHitboxY += player.shieldOffsetY || 0; // Use default offset of 0 if not defined
         }
-        const playerVisibleWidthAdjusted = player.isShieldActive ? (player.shieldWidth || playerVisibleWidth) : playerVisibleWidth;
-        const playerVisibleHeightAdjusted = player.isShieldActive ? (player.shieldHeight || playerVisibleHeight) : playerVisibleHeight;
+        const playerVisibleWidthAdjusted = player.isShieldActive ? (SHIELD_WIDTH || playerVisibleWidth) : playerVisibleWidth;
+        const playerVisibleHeightAdjusted = player.isShieldActive ? (SHIELD_HEIGHT || playerVisibleHeight) : playerVisibleHeight;
       
         // Enemy hitbox calculations remain the same
         const enemyHitboxX = enemy.x + (enemy.width - enemyVisibleWidth) / 2;
