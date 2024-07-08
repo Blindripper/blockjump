@@ -60,6 +60,7 @@ class Game {
         this.currentGravity = this.normalGravity; // Current gravity that can be modified
         this.enemyShootInterval = 10000; // Start with 10 seconds
         this.lastEnemyShot = 0;
+        this.resetPowerupEffects(); // Call this in the constructor to set initial values
         this.enemyBullets = [];
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
@@ -159,6 +160,8 @@ class Game {
             }
     
             hideOverlay();
+
+            this.resetPowerupEffects();
     
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
@@ -402,7 +405,26 @@ class Game {
         });
     }
 
-
+    resetPowerupEffects() {
+        this.playerShield = false;
+        this.rapidFire = false;
+        this.constantBeam = null;
+        this.lowGravity = false;
+        this.highGravity = false;
+        this.slowMovement = false;
+        this.fastGameSpeed = false;
+        this.gameSpeed = 1;
+        this.currentGravity = this.normalGravity;
+        this.shootingCooldown = this.normalShootCooldown;
+        this.player.speed = this.normalMoveSpeed;
+        this.platformSpeed = 65; // Reset to initial value
+        
+        // Clear any active powerup timers
+        this.activePowerups.forEach((powerup, key) => {
+            clearTimeout(powerup.timer);
+        });
+        this.activePowerups.clear();
+    }
     
 
     checkBulletEnemyCollisions() {
