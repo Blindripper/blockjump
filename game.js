@@ -40,8 +40,6 @@ const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
-const JUMP_VELOCITY = -450;
-const GRAVITY = 1200;
 const pressedKeys = {};
 
 
