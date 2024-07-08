@@ -67,6 +67,8 @@ class Game {
         this.hasPlayerJumped = false;
         this.bottomPlatformRemoved = false;
         this.gameOver = false;
+        this.lastRandomSpawn = 0;
+        this.randomSpawnInterval = 3000;
         this.activePowerups = new Map();
         this.score = 0;
         this.blocksClimbed = 0;
@@ -706,7 +708,7 @@ class Game {
     updatePlatforms(dt) {
         // Update bottom platform timer
         if (this.gameStarted && this.bottomPlatform) {
-            this.bottomPlatformTimer += dt;
+            this.bottomPlatformTimer += dt * this.gameSpeed;
             if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
                 this.bottomPlatform = null;
             }
@@ -714,7 +716,7 @@ class Game {
 
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
-            platform.y += this.platformSpeed * dt;
+            platform.y += this.platformSpeed * dt * this.gameSpeed;
             return platform.y <= GAME_HEIGHT;
         });
 
@@ -733,12 +735,12 @@ class Game {
             return;
         }
     
-        const moveSpeed = 350;
+        // Apply gravity (adjusted for game speed)
+        this.player.velocityY += GRAVITY * dt * this.gameSpeed;
     
-        // Apply gravity
-        this.player.velocityY += GRAVITY * dt;
-    
-        // Horizontal movement
+        // Horizontal movement (adjusted for slow movement debuff)
+        let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
+        
         if (this.keys['ArrowLeft']) {
             this.player.velocityX = -moveSpeed;
         } else if (this.keys['ArrowRight']) {
@@ -747,9 +749,9 @@ class Game {
             this.player.velocityX = 0;
         }
     
-        // Update position
-        this.player.x += this.player.velocityX * dt;
-        this.player.y += this.player.velocityY * dt;
+        // Update position (adjusted for game speed)
+        this.player.x += this.player.velocityX * dt * this.gameSpeed;
+        this.player.y += this.player.velocityY * dt * this.gameSpeed;
     
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -798,20 +800,11 @@ class Game {
     
 
     updatePowerups(dt) {
-        // Update active powerups
-        for (const [type, powerup] of this.activePowerups.entries()) {
-            powerup.duration -= dt;
-            if (powerup.duration <= 0) {
-                // Remove expired powerup
-                this.activePowerups.delete(type);
-                // Revert the powerup effect if necessary
-                // You might need to implement revert logic for each powerup type
-            }
-        }
-    
-        // Update powerup items in the game world
+        const currentTime = Date.now();
+
+        // Update existing powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
-            this.powerups[i].y += this.platformSpeed * dt;
+            this.powerups[i].y += this.platformSpeed * dt * this.gameSpeed;
             if (this.checkCollision(this.player, this.powerups[i])) {
                 this.applyPowerUpEffect(this.powerups[i].type);
                 this.powerups.splice(i, 1);
@@ -820,22 +813,21 @@ class Game {
             }
         }
     
-        // Spawn new powerups
-        if (Math.random() < 0.01) {
-            this.powerups.push(this.createPowerup(0));
+        // Random spawn logic
+        if (currentTime - this.lastRandomSpawn > this.randomSpawnInterval) {
+            if (Math.random() < this.randomSpawnRate) {
+                const x = Math.random() * (GAME_WIDTH - 30); // 30 is the width of the powerup
+                this.powerups.push(this.createPowerup(x, 0));
+                this.lastRandomSpawn = currentTime;
+            }
         }
     }
 
     createPowerup(x, y) {
-        const allPowerups = ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX', 'solana', 'blast', 'ethereum'];
         const isDebuff = Math.random() < this.debuffDropRate;
-        let powerupPool;
-        
-        if (isDebuff) {
-            powerupPool = ['solana', 'blast', 'ethereum'];
-        } else {
-            powerupPool = ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX'];
-        }
+        let powerupPool = isDebuff 
+            ? ['solana', 'blast', 'ethereum']
+            : ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX'];
         
         const type = powerupPool[Math.floor(Math.random() * powerupPool.length)];
         
@@ -883,10 +875,16 @@ class Game {
                     this.score += enemy.isType2 ? 3000 : 1000;
                 });
                 break;
-            case 'solana':
-                this.gameSpeed = 2;
-                setTimeout(() => { this.gameSpeed = 1; }, 20000);
-                break;
+                case 'solana':
+                    this.fastGameSpeed = true;
+                    this.gameSpeed = 3; // Increased from 2 to 3 (3x normal speed)
+                    this.platformSpeed *= 3; // Increase platform speed as well
+                    setTimeout(() => { 
+                        this.fastGameSpeed = false;
+                        this.gameSpeed = this.normalGameSpeed; 
+                        this.platformSpeed /= 3; // Reset platform speed
+                    }, 20000);
+                    break;
             case 'blast':
                 this.highGravity = true;
                 GRAVITY = this.normalGravity * 2;
@@ -897,7 +895,7 @@ class Game {
                 break;
             case 'ethereum':
                 this.slowMovement = true;
-                this.player.speed = this.normalMoveSpeed * 0.5;
+                this.player.speed = this.normalMoveSpeed * 0.25;
                 setTimeout(() => { 
                     this.slowMovement = false; 
                     this.player.speed = this.normalMoveSpeed;
