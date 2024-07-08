@@ -376,27 +376,24 @@ class Game {
                 enemy.y += 50; // Move down by 50 pixels
                 enemy.lastMoveDown = currentTime;
             }
-        
+    
             // Move enemies horizontally
             enemy.x += this.enemySpeed * this.enemyDirection * dt;
-        
+    
             // Reverse direction if reaching screen edges
             if (enemy.x <= 0 || enemy.x + enemy.width >= GAME_WIDTH) {
                 this.enemyDirection *= -1;
             }
-        
+    
             // Handle enemy shooting
-            if (currentTime - enemy.lastShot > enemy.shootInterval) {
-                // Check if it's a Type 2 enemy and if the missile shoot delay has passed
+            if (currentTime - enemy.spawnTime > this.missileShootDelay &&  // Apply delay to all enemy types
+                currentTime - enemy.lastShot > enemy.shootInterval) {
                 if (enemy.isType2) {
-                    if (currentTime - enemy.spawnTime > this.missileShootDelay) {
-                        this.enemyShootMissile(enemy);
-                        enemy.lastShot = currentTime;
-                    }
+                    this.enemyShootMissile(enemy);
                 } else {
                     this.enemyShoot(enemy);
-                    enemy.lastShot = currentTime;
                 }
+                enemy.lastShot = currentTime;
                 
                 // Adjust shoot interval based on difficulty
                 enemy.shootInterval = Math.max(
