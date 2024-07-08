@@ -801,7 +801,7 @@ class Game {
 
                 if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y + 5) { // Added small tolerance
                     // Landing on top of the platform
-                    this.player.y = platform.y - this.player.height + 12; // Adjust this value as needed
+                    this.player.y = platform.y - this.player.height + 14; // Adjust this value as needed
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
