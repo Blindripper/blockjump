@@ -248,10 +248,7 @@ class Game {
         const currentTime = Date.now();
         if (this.constantBeamActive) {
             // Constant beam logic
-            if (currentTime - this.lastConstantBeamDamageTime > this.constantBeamDamageInterval) {
-                this.damageEnemiesInBeamPath();
-                this.lastConstantBeamDamageTime = currentTime;
-            }
+            this.damageEnemiesInBeamPath();
         } else {
             // Normal shooting logic
             if (currentTime - this.lastShotTime > this.shootingCooldown) {
@@ -308,13 +305,9 @@ class Game {
         });
 
           // Handle constant beam damage
-        if (this.constantBeamActive) {
-            const currentTime = Date.now();
-            if (currentTime - this.lastConstantBeamDamageTime > this.constantBeamDamageInterval) {
-                this.damageEnemiesInBeamPath();
-                this.lastConstantBeamDamageTime = currentTime;
-            }
-        }
+          if (this.constantBeamActive) {
+            this.damageEnemiesInBeamPath();
+          }
 
         // Update enemy bullets and missiles
     this.enemyBullets = this.enemyBullets.filter(bullet => {
@@ -1181,13 +1174,15 @@ class Game {
     }
 
     drawConstantBeam() {
-        const beamX = this.player.x + this.player.width / 2;
-        this.ctx.strokeStyle = '#00FFFF'; // Cyan color for the beam
-        this.ctx.lineWidth = 5;
-        this.ctx.beginPath();
-        this.ctx.moveTo(beamX, this.player.y);
-        this.ctx.lineTo(beamX, 0);
-        this.ctx.stroke();
+        if (this.constantBeamActive) {
+            const beamX = this.player.x + this.player.width / 2;
+            this.ctx.strokeStyle = '#00FFFF'; // Cyan color for the beam
+            this.ctx.lineWidth = 5;
+            this.ctx.beginPath();
+            this.ctx.moveTo(beamX, this.player.y);
+            this.ctx.lineTo(beamX, 0);
+            this.ctx.stroke();
+        }
     }
 
     drawEnemyBullets() {
