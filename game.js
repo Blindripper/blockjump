@@ -48,12 +48,19 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 // Game class
 class Game {
     constructor() {
+        this.lastFrameTime = 0;
+        this.accumulatedTime = 0;
+        this.fixedTimeStep = 1000 / 60; // 60 FPS
         this.baseScrollSpeed = 65; // Base scrolling speed
+        this.nextBackgroundIndex = 0;
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
         this.debugMode = false;
+        this.currentDifficulty = 1;
+        this.targetDifficulty = 1;
+        this.difficultyTransitionRate = 0.1;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -893,6 +900,7 @@ class Game {
         dt *= this.gameSpeed;
     
         this.updateScrollSpeed();
+        this.updateDifficulty(dt)
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
@@ -913,10 +921,19 @@ class Game {
     
     
     updateBackground() {
-        if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
-            this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
-            this.lastBackgroundChange = this.score;
-            
+        const targetBackgroundIndex = Math.floor(this.score / this.backgroundChangeThreshold) % backgrounds.length;
+        
+        if (targetBackgroundIndex !== this.currentBackgroundIndex) {
+            // If we've reached the prepared next background, switch to it
+            if (targetBackgroundIndex === this.nextBackgroundIndex) {
+                this.currentBackgroundIndex = this.nextBackgroundIndex;
+                // Prepare the next background
+                this.nextBackgroundIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
+            } else {
+                // If we've skipped backgrounds, catch up
+                this.currentBackgroundIndex = targetBackgroundIndex;
+                this.nextBackgroundIndex = (targetBackgroundIndex + 1) % backgrounds.length;
+            }
         }
     }
 
@@ -1095,18 +1112,18 @@ class Game {
     }
 
     drawBackground() {
-        const bg = backgrounds[this.currentBackgroundIndex];
-        if (bg.image && bg.image.complete) {
-            // Draw the background image
-            const pattern = this.ctx.createPattern(bg.image, 'repeat');
+        const currentBg = backgrounds[this.currentBackgroundIndex];
+        if (currentBg.image && currentBg.image.complete) {
+            const pattern = this.ctx.createPattern(currentBg.image, 'repeat');
             this.ctx.fillStyle = pattern;
             this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         } else {
             // Fallback to color if image is not loaded
-            this.ctx.fillStyle = bg.color;
+            this.ctx.fillStyle = currentBg.color;
             this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         }
     }
+
 
 
     
@@ -1364,21 +1381,25 @@ class Game {
     } 
 
 
-    updateDifficulty() {
-        this.difficultyLevel = Math.floor(this.score / 5000) + 1;
-        this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
-    
-        // Update enemy spawn rate
-        this.enemySpawnRate = Math.min(5, Math.floor(this.score / 5000) + 1);
-    
-        // Update enemy spawn interval
+    updateDifficulty(dt) {
+        this.targetDifficulty = Math.floor(this.score / 5000) + 1;
+        
+        // Smoothly transition to the target difficulty
+        this.currentDifficulty += (this.targetDifficulty - this.currentDifficulty) * this.difficultyTransitionRate * dt;
+
+        // Update game parameters based on current difficulty
+        this.enemySpawnRate = Math.min(5, 1 + (this.currentDifficulty - 1) * 0.5);
         this.enemySpawnInterval = Math.max(
-            5000, // Minimum spawn interval of 5 seconds
-            this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
+            5000,
+            this.baseEnemySpawnInterval - (this.currentDifficulty - 1) * 2000
         );
-    
-        // Change background
-        this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
+        this.platformSpeed = 50 + (this.currentDifficulty - 1) * 2;
+
+        // Smoothly update enemy shoot interval
+        this.enemyShootInterval = Math.max(
+            this.minEnemyShootInterval,
+            this.maxEnemyShootInterval - (this.currentDifficulty - 1) * 1000
+        );
     }
 
 
@@ -1429,6 +1450,7 @@ class Game {
         this.drawBackground();
         
         // Draw game elements
+
         this.drawPlatforms();
         this.drawConstantBeam();
         this.drawPlayer();
@@ -1696,15 +1718,28 @@ class Game {
 
     gameLoop(currentTime) {
         if (!this.gameRunning) return;
-        
-        if (!this.lastTime) this.lastTime = currentTime;
-        let deltaTime = (currentTime - this.lastTime) / 1000;
-        this.lastTime = currentTime;
-        
-        
-        this.update(deltaTime);
+
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+        }
+
+        let deltaTime = currentTime - this.lastFrameTime;
+        this.lastFrameTime = currentTime;
+
+        // Cap deltaTime to prevent large jumps
+        if (deltaTime > 200) {
+            deltaTime = 200;
+        }
+
+        this.accumulatedTime += deltaTime;
+
+        while (this.accumulatedTime >= this.fixedTimeStep) {
+            this.update(this.fixedTimeStep / 1000);
+            this.accumulatedTime -= this.fixedTimeStep;
+        }
+
         this.draw();
-        
+
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
@@ -1975,18 +2010,19 @@ const backgrounds = Array.from({ length: 16 }, (_, i) => ({
 
 function loadBackgrounds() {
     return Promise.all(backgrounds.map((bg, index) => 
-        loadImage(`${picsUrl}bg${index + 1}.jpg`)
-            .then(img => {
+        new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
                 bg.image = img;
-            })
-            .catch(error => { 
-                console.error(`Failed to load background ${index + 1}:`, error);
-                // Keep the fallback color
-            })
-    )).then(() => {
-    }).catch(error => {
-        console.error('Error loading backgrounds:', error);
-    });
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`Failed to load background ${index + 1}`);
+                reject();
+            };
+            img.src = `${picsUrl}bg${index + 1}.jpg`;
+        })
+    ));
 }
 
 function loadImage(src) {
@@ -2048,7 +2084,6 @@ function hideOverlay() {
 
 // Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
-
     const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
     
@@ -2058,30 +2093,40 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
+    try {
+        // Show loading message
+        showOverlay('Loading game assets...');
 
+        // Load all assets concurrently
+        await Promise.all([
+            loadSprites(),
+            loadBackgrounds(),
+            preloadSounds()
+        ]);
 
+        console.log('All assets loaded successfully');
 
-    await Promise.all([
-        loadSprites(),
-        loadBackgrounds(),
-        preloadSounds()
-    ]);
+        // Hide loading message
+        hideOverlay();
 
-    game = new Game();
+        // Initialize the game
+        game = new Game();
     
-    // Setup event listeners
-    document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
-    document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
-    document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
-    document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
-    document.getElementById('soundToggle').addEventListener('click', toggleSound);
+        // Setup event listeners
+        document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
+        document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
+        document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
+        document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
+        document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-    
-
-    if (!isConnected) {
-        showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
+        if (!isConnected) {
+            showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
+        }
+    } catch (error) {
+        console.error('Error loading game assets:', error);
+        showOverlay('Failed to load game assets. Please refresh and try again.');
     }
-    });
+});
 
 async function handleWalletConnection() {
     try {
