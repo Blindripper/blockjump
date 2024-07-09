@@ -113,6 +113,7 @@ class Game {
         this.lastEnemySpawn = 0;
         this.baseEnemySpawnInterval = 20000; // 20 seconds
         this.enemySpawnInterval = this.baseEnemySpawnInterval;
+        this.enemySpawnRate = 1; // Start with 1 enemy per spawn
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
@@ -120,7 +121,7 @@ class Game {
         this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
         this.debuffDropRate = 0.50; // 10% chance for a random debuff to spawn
         this.lastDebuffSpawn = 0;
-        this.debuffSpawnInterval = 5000; 
+        this.debuffSpawnInterval = 10000; 
         this.spacecraftDropRate = 0.75; // 75% drop rate for normal spacecraft
         this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
@@ -491,10 +492,12 @@ class Game {
     spawnEnemies() {
         const currentTime = Date.now();
         if (currentTime - this.lastEnemySpawn > this.enemySpawnInterval) {
-            if (Math.random() < 0.2) {  // 20% chance to spawn the new enemy type
-                this.enemies.push(this.createEnemy(true));
-            } else {
-                this.enemies.push(this.createEnemy(false));
+            for (let i = 0; i < this.enemySpawnRate; i++) {
+                if (Math.random() < 0.2) {  // 20% chance to spawn the new enemy type
+                    this.enemies.push(this.createEnemy(true));
+                } else {
+                    this.enemies.push(this.createEnemy(false));
+                }
             }
             this.lastEnemySpawn = currentTime;
         }
@@ -1337,15 +1340,16 @@ class Game {
     updateDifficulty() {
         this.difficultyLevel = Math.floor(this.score / 5000) + 1;
         this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
-
+    
+        // Update enemy spawn rate
+        this.enemySpawnRate = Math.min(5, Math.floor(this.score / 5000) + 1);
+    
         // Update enemy spawn interval
         this.enemySpawnInterval = Math.max(
             5000, // Minimum spawn interval of 5 seconds
             this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
         );
-
-        // Enemy shoot interval is now handled individually for each enemy
-
+    
         // Change background
         this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
     }
