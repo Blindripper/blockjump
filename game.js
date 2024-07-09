@@ -167,8 +167,6 @@ class Game {
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
 
-    
-
     async initializeGame() {
         if (!checkWalletConnection()) return;
     
@@ -613,7 +611,6 @@ class Game {
         }
     }
 
-
         checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
         const playerVisibleWidth = player.width * 0.7;
@@ -643,9 +640,7 @@ class Game {
                  playerHitboxY >= enemyHitboxY + enemyVisibleHeight);
       }
       
-    
-
-      checkPlayerEnemyCollisions() {
+    checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
           const enemy = this.enemies[i];
           if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
