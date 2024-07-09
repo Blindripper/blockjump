@@ -1002,11 +1002,9 @@ class Game {
             // Draw the background image repeatedly to cover the visible area
             const pattern = this.ctx.createPattern(bg.image, 'repeat');
             this.ctx.fillStyle = pattern;
-            this.ctx.fillRect(0, this.camera.y, GAME_WIDTH, GAME_HEIGHT);
         } else {
             // Fallback to color if image is not loaded
             this.ctx.fillStyle = bg.color;
-            this.ctx.fillRect(0, this.camera.y, GAME_WIDTH, GAME_HEIGHT);
         }
     }
 
