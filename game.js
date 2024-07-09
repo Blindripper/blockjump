@@ -48,6 +48,12 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 // Game class
 class Game {
     constructor() {
+        this.backgroundTransitionProgress = 0;
+        this.isTransitioningBackground = false;
+        this.offscreenCanvas = document.createElement('canvas');
+        this.offscreenCanvas.width = GAME_WIDTH;
+        this.offscreenCanvas.height = GAME_HEIGHT;
+        this.offscreenCtx = this.offscreenCanvas.getContext('2d');
         this.prepareNextBackground();
         this.nextBackgroundIndex = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
