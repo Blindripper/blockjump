@@ -60,7 +60,7 @@ class Game {
         this.offscreenCanvas.height = GAME_HEIGHT;
         this.offscreenCtx = this.offscreenCanvas.getContext('2d');
         this.prepareNextBackground();
-        this.nextBackgroundIndex = 0;
+        this.nextBackgroundIndex = 1;
         this.baseScrollSpeed = 65; // Base scrolling speed
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
@@ -193,28 +193,19 @@ class Game {
     }
 
     prepareNextBackground() {
-        const nextIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
-        if (!backgrounds[nextIndex].image) {
-            const img = new Image();
-            img.onload = () => {
-                backgrounds[nextIndex].image = img;
-                this.drawBackgroundToOffscreen(nextIndex);
-            };
-            img.src = `${picsUrl}bg${nextIndex + 1}.jpg`;
-        } else {
-            this.drawBackgroundToOffscreen(nextIndex);
-        }
-        this.nextBackgroundIndex = nextIndex;
+        this.nextBackgroundIndex = (this.currentBackgroundIndex + 1) % this.backgrounds.length;
+        this.drawBackgroundToOffscreen(this.nextBackgroundIndex);
     }
 
     drawBackgroundToOffscreen(index) {
-        const bg = backgrounds[index];
-        if (bg.image && bg.image.complete) {
+        const bg = this.backgrounds[index];
+        if (bg && bg.image) {
             const pattern = this.offscreenCtx.createPattern(bg.image, 'repeat');
             this.offscreenCtx.fillStyle = pattern;
             this.offscreenCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         } else {
-            this.offscreenCtx.fillStyle = bg.color;
+            console.error('Background or image not found for index:', index);
+            this.offscreenCtx.fillStyle = bg ? bg.color : 'black';
             this.offscreenCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         }
     }
@@ -952,11 +943,12 @@ class Game {
     
     
     updateBackground(dt) {
-        const targetBackgroundIndex = Math.floor(this.score / this.backgroundChangeThreshold) % backgrounds.length;
+        const targetBackgroundIndex = Math.floor(this.score / this.backgroundChangeThreshold) % this.backgrounds.length;
         
         if (targetBackgroundIndex !== this.currentBackgroundIndex && !this.isTransitioningBackground) {
             this.isTransitioningBackground = true;
             this.backgroundTransitionProgress = 0;
+            this.nextBackgroundIndex = targetBackgroundIndex;
         }
 
         if (this.isTransitioningBackground) {
@@ -968,6 +960,7 @@ class Game {
             }
         }
     }
+
 
     
     handleCollisions(currentTime) {
@@ -2018,18 +2011,21 @@ function loadSprites() {
 
 
 function loadBackgrounds() {
-    return Promise.all(backgrounds.map((bg, index) => 
+    return Promise.all(Array.from({ length: 16 }, (_, i) => 
         new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
-                bg.image = img;
-                resolve();
+                resolve({
+                    image: img,
+                    floorStart: i * 100,
+                    color: `hsl(${i * 20}, 70%, 20%)`
+                });
             };
             img.onerror = () => {
-                console.error(`Failed to load background ${index + 1}`);
+                console.error(`Failed to load background ${i + 1}`);
                 reject();
             };
-            img.src = `${picsUrl}bg${index + 1}.jpg`;
+            img.src = `${picsUrl}bg${i + 1}.jpg`;
         })
     ));
 }
@@ -2106,8 +2102,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Show loading message
         showOverlay('Loading game assets...');
 
-        // Load all assets concurrently
-        await Promise.all([
+        const [loadedSprites, loadedBackgrounds] = await Promise.all([
             loadSprites(),
             loadBackgrounds(),
             preloadSounds()
