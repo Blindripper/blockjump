@@ -210,7 +210,7 @@ class Game {
                 return;
             }
     
-            const { success, gameStartTime } = await startGame();
+            const { success, gameStartTime } = await startGameWeb3();
             if (!success) {
                 console.error('Failed to start game on blockchain');
                 hideOverlay();
