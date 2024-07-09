@@ -4,9 +4,9 @@ const achievements = [
     {
         id: 1,
         name: "666 Climber",
-        description: "Game over exactly at 666 Blocks climbed",
+        description: "Game over exactly at 66 Blocks climbed",
         image: "666.jpg",
-        requirement: (stats) => stats.blocksClimbed === 666
+        requirement: (stats) => stats.blocksClimbed === 66
     },
     {
         id: 2,
@@ -18,23 +18,23 @@ const achievements = [
     {
         id: 3,
         name: "High Climber",
-        description: "1000 or more Blocks climbed",
+        description: "100 or more Blocks climbed",
         image: "highfall.jpg",
-        requirement: (stats) => stats.blocksClimbed >= 1000
+        requirement: (stats) => stats.blocksClimbed >= 100
     },
     {
         id: 4,
         name: "Paris Explorer",
         description: "Reach the Paris background",
         image: "paris.jpg",
-        requirement: (stats) => stats.score >= 15000
+        requirement: (stats) => stats.score >= 80000
     },
     {
         id: 5,
         name: "Pro Gamer",
-        description: "Score 100k",
+        description: "Score 200k",
         image: "progamer.jpg",
-        requirement: (stats) => stats.score >= 100000
+        requirement: (stats) => stats.score >= 200000
     }
 ];
 
