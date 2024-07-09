@@ -195,6 +195,8 @@ class Game {
         this.camera.y = Math.max(0, this.camera.y);
     }
 
+
+
     async initializeGame() {
         if (!checkWalletConnection()) return;
     
@@ -543,6 +545,8 @@ class Game {
         this.activePowerups.clear();
     }
 
+    
+
     checkBulletEnemyCollisions() {
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
@@ -657,7 +661,8 @@ class Game {
       }
       
     
-    checkPlayerEnemyCollisions() {
+
+      checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
           const enemy = this.enemies[i];
           if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
@@ -785,7 +790,8 @@ class Game {
         if (e.code === 'Space') this.shoot();
       }
       
-    jump() {
+
+      jump() {
         if (this.player.jumpCount < 2) {
             this.player.velocityY = this.JUMP_VELOCITY;
             this.player.jumpCount++;
@@ -834,6 +840,8 @@ class Game {
         }
     }
 
+    
+    
     updateBackground() {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
             this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
@@ -886,6 +894,7 @@ class Game {
     }
 
     
+
     handleGoldenPlatform() {
         this.player.velocityY = this.JUMP_VELOCITY * 1.5;
         this.score += 15;
@@ -2008,6 +2017,13 @@ async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
 
     try {
+        showOverlay("Checking game state...");
+        const stateValid = await checkContractState();
+        if (!stateValid) {
+            showOverlay('Error checking game state. Please try again.', null, true, 'Try Again');
+            return;
+        }
+
         showOverlay("Submitting score to Etherlink...");
         console.log('Submitting score with:', {
             name,
@@ -2029,6 +2045,23 @@ async function handleScoreSubmission(name) {
     } catch (error) {
         console.error('Error during score submission:', error);
         showOverlay('An error occurred while submitting your score. Please try again.', null, true, 'Try Again');
+    }
+}
+
+async function checkContractState() {
+    try {
+        const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+        console.log('Last game start time from contract:', lastGameStartTime);
+        
+        const gameTries = await contract.methods.getGameTries(account).call();
+        console.log('Remaining game tries:', gameTries);
+        
+        // Add any other relevant contract state checks here
+        
+        return true;
+    } catch (error) {
+        console.error('Error checking contract state:', error);
+        return false;
     }
 }
 
