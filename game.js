@@ -37,7 +37,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 // Game constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
-const PLATFORM_HEIGHT = 35;
+const PLATFORM_HEIGHT = 38;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
@@ -113,14 +113,14 @@ class Game {
         this.missileShootDelay = 2000; // 2 seconds delay for missile shot after spawning
         this.enemies = [];
         this.lastEnemySpawn = 0;
-        this.baseEnemySpawnInterval = 20000; // 20 seconds
+        this.baseEnemySpawnInterval = 30000; // 30 seconds
         this.enemySpawnInterval = this.baseEnemySpawnInterval;
         this.enemySpawnRate = 1; // Start with 1 enemy per spawn
         this.lastShotTime = 0;
         this.shootingCooldown = 900; // 0.9 seconds
         this.enemySpeed = 50;
         this.jump;
-        this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
+        this.powerupDropRate = 0.25; // 50% chance for an enemy to drop a powerup when killed
         this.debuffDropRate = 0.50; // 10% chance for a random debuff to spawn
         this.lastDebuffSpawn = 0;
         this.debuffSpawnInterval = 8000; 
@@ -619,7 +619,7 @@ class Game {
                     bulletHit = true;
                     enemy.isDestroyed = true;
                     enemy.destroyedTime = 0;
-                    this.score += 1000;
+                    this.score += 200;
                     this.enemyDestroyedSound.currentTime = 0;
                     this.enemyDestroyedSound.play();
                 }
@@ -690,7 +690,7 @@ class Game {
         if (enemy.health <= 0) {
             enemy.isDestroyed = true;
             enemy.destroyedTime = 0;
-            this.score += enemy.isType2 ? 3000 : 1000;
+            this.score += enemy.isType2 ? 300 : 100;
         }
     }
 
@@ -1261,7 +1261,7 @@ class Game {
                 this.enemies.forEach(enemy => {
                     enemy.isDestroyed = true;
                     enemy.destroyedTime = 0;
-                    this.score += enemy.isType2 ? 3000 : 1000;
+                    this.score += enemy.isType2 ? 300 : 100;
                 });
                 
                 // Clear all debuff powerups from the screen
