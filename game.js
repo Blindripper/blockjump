@@ -272,14 +272,18 @@ class Game {
     }
 
     updateScrollSpeed() {
-        if (this.player.y < 0) {
-            // Player is above the screen, increase scroll speed
+        const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
+    
+        if (this.player.y < topThreshold) {
+            // Player is near or above the top of the screen, increase scroll speed
+            const distanceAboveThreshold = Math.max(0, topThreshold - this.player.y);
+            const speedIncreaseFactor = 1 + (distanceAboveThreshold / topThreshold) * (this.scrollSpeedIncreaseFactor - 1);
             this.currentScrollSpeed = Math.min(
                 this.maxScrollSpeed,
-                this.baseScrollSpeed * this.scrollSpeedIncreaseFactor
+                this.baseScrollSpeed * speedIncreaseFactor
             );
         } else {
-            // Player is within the screen, return to base speed
+            // Player is within the normal play area, use base speed
             this.currentScrollSpeed = this.baseScrollSpeed;
         }
     }
@@ -798,11 +802,12 @@ class Game {
             this.handleGameOver();
             return;
         }
-
+    
         if (!this.gameRunning) return;
-
+    
         dt *= this.gameSpeed;
-
+    
+        this.updateScrollSpeed();
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
@@ -814,12 +819,10 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
-
+    
         if (this.constantBeamActive) {
             this.checkConstantBeamCollisions();
         }
-
-    
     }
 
     
@@ -896,8 +899,8 @@ class Game {
 
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
-            platform.y += this.currentScrollSpeed * dt;
-            return platform.y <= GAME_HEIGHT;
+        platform.y += this.currentScrollSpeed * dt;
+        return platform.y <= GAME_HEIGHT;
         });
 
         // Add new platforms if needed
@@ -929,6 +932,7 @@ class Game {
         // Adjust player's y position based on scroll speed
         this.player.y += this.currentScrollSpeed * dt;
 
+    
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
         this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
         
