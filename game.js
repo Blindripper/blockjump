@@ -118,9 +118,9 @@ class Game {
         this.enemySpeed = 50;
         this.jump;
         this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
-        this.debuffDropRate = 0.10; // 10% chance for a random debuff to spawn
+        this.debuffDropRate = 0.50; // 10% chance for a random debuff to spawn
         this.lastDebuffSpawn = 0;
-        this.debuffSpawnInterval = 7000; 
+        this.debuffSpawnInterval = 5000; 
         this.spacecraftDropRate = 0.75; // 75% drop rate for normal spacecraft
         this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
