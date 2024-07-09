@@ -72,7 +72,8 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.bottomPlatformTimer = 0;
         this.fixedTimeStep = 1000 / 60; 
-        this.bottomPlatformDuration = 5
+        this.bottomPlatformDuration = 5000
+        this.bottomPlatform = null;
         this.gameRunning = false;
         this.gameSpeed = 1; // Add this line to set the default game speed
         this.normalGameSpeed = 1; // Add this line to store the normal game speed
@@ -218,7 +219,7 @@ class Game {
             }
     
             hideOverlay();
-            this.gameStartTime = Math.floor(Date.now() / 1000); // Store as Unix timestamp (seconds)
+            this.gameStartTime = Math.floor(Date.now() / 1000000); // Store as Unix timestamp (seconds)
             console.log('Game started at:', this.gameStartTime);
 
             this.gameSpeed = 1;
@@ -233,12 +234,7 @@ class Game {
             this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
             this.enemies = [];
             this.enemyBullets = [];
-
-            // Explicitly set player position
-            this.player.x = GAME_WIDTH / 2 - PLAYER_WIDTH / 2;
-            this.player.y = GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1;
-
-    
+            this.gameStarted = true;
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
             this.hasPlayerJumped = false;
@@ -833,11 +829,6 @@ class Game {
 
         if (this.constantBeamActive) {
             this.checkConstantBeamCollisions();
-        }
-
-        if (this.bottomPlatform && Date.now() - this.gameStartTime > 5000) {
-            this.bottomPlatform = null;
-            console.log('Bottom platform removed');
         }
 
         if (this.player.y > GAME_HEIGHT + this.camera.y) {
