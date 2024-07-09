@@ -167,6 +167,8 @@ class Game {
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
 
+    
+
     async initializeGame() {
         if (!checkWalletConnection()) return;
     
@@ -528,6 +530,8 @@ class Game {
         this.activePowerups.clear();
     }
 
+    
+
     checkBulletEnemyCollisions() {
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
@@ -611,6 +615,7 @@ class Game {
         }
     }
 
+
         checkPreciseCollision(player, enemy) {
         // Increase these values to make hitboxes larger
         const playerVisibleWidth = player.width * 0.7;
@@ -640,7 +645,9 @@ class Game {
                  playerHitboxY >= enemyHitboxY + enemyVisibleHeight);
       }
       
-    checkPlayerEnemyCollisions() {
+    
+
+      checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
           const enemy = this.enemies[i];
           if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
@@ -991,13 +998,15 @@ class Game {
 
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
-        if (bg.image) {
-            // Draw the background image repeatedly to cover the visible area
+        if (bg.image && bg.image.complete) {
+            // Draw the background image
             const pattern = this.ctx.createPattern(bg.image, 'repeat');
             this.ctx.fillStyle = pattern;
+            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         } else {
             // Fallback to color if image is not loaded
             this.ctx.fillStyle = bg.color;
+            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         }
     }
 
@@ -1247,19 +1256,22 @@ class Game {
             console.error('Canvas context is not initialized');
             return;
         }
-
+    
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Save the current context state
+        this.ctx.save();
+        
+        // Apply scaling
         const scaleX = this.canvas.width / GAME_WIDTH;
         const scaleY = this.canvas.height / GAME_HEIGHT;
         const scale = Math.min(scaleX, scaleY);
         this.ctx.scale(scale, scale);
-    
-        const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
-        const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
         
+        // Draw background
+        this.drawBackground();
         
         // Draw game elements
-        this.drawBackground();
         this.drawPlatforms();
         this.drawConstantBeam();
         this.drawPlayer();
@@ -1271,13 +1283,13 @@ class Game {
             this.drawConstantBeam();
         }
         this.drawEnemies();
-
-        this.ctx.restore(); // Restore after drawing game world
-
+    
+        // Restore the context state
+        this.ctx.restore();
+    
         // Draw HUD elements (fixed to screen)
         this.drawHUD();
         this.drawPowerupHUD();
-        
     }
 
     drawPlatforms() {
@@ -1770,13 +1782,18 @@ const backgrounds = Array.from({ length: 16 }, (_, i) => ({
 function loadBackgrounds() {
     return Promise.all(backgrounds.map((bg, index) => 
         loadImage(`${picsUrl}bg${index + 1}.jpg`)
-            .then(img => { bg.image = img; })
+            .then(img => {
+                bg.image = img;
+                console.log(`Background ${index + 1} loaded successfully`);
+            })
             .catch(error => { 
-                console.error(error);
+                console.error(`Failed to load background ${index + 1}:`, error);
                 // Keep the fallback color
             })
     )).then(() => {
+        console.log('All backgrounds loaded');
     }).catch(error => {
+        console.error('Error loading backgrounds:', error);
     });
 }
 
