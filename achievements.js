@@ -1,4 +1,4 @@
-import { getAchievements, mintAchievementNFT, initWeb3 } from './web3Integration.js';
+import { getAchievements, mintAchievement, initWeb3 } from './web3Integration.js';
 
 const achievements = [
     {
@@ -72,7 +72,7 @@ function renderAchievements() {
         if (!isAlreadyMinted) {
             const mintButton = achievementElement.querySelector('.mint-button');
             mintButton.style.display = isUnlocked ? 'block' : 'none';
-            mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
+            mintButton.addEventListener('click', () => mintAchievement(achievement.id));
         }
     });
 
