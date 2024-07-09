@@ -1621,6 +1621,10 @@ class Game {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
 
+         // Display current background name
+        const backgroundName = this.getBackgroundName(this.currentBackgroundIndex);
+        this.ctx.fillText(`Location: ${backgroundName}`, 10, 90);
+
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '12px Orbitron, sans-serif';
         this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
