@@ -297,7 +297,7 @@ class Game {
         console.log('Creating nomadic platform');
         const platform = {
             x: Math.random() * (GAME_WIDTH - 180),
-            y: -PLATFORM_HEIGHT,
+            y: -PLATFORM_HEIGHT, // Start just above the screen
             width: Math.random() * (180 - 100) + 100,
             height: PLATFORM_HEIGHT,
             isGolden: false,
@@ -312,14 +312,21 @@ class Game {
             height: 30,
             type: 'nomadic'
         };
-        console.log('Nomadic platform created:', platform);
+        console.log('Nomadic platform created:', JSON.stringify(platform));
         return platform;
     }
 
     updateNomadicPlatform(dt) {
         if (this.nomadicPlatform) {
-            this.nomadicPlatform.y += this.currentScrollSpeed * dt;
-            console.log('Updating nomadic platform, y:', this.nomadicPlatform.y);
+            console.log('Before update - Nomadic platform y:', this.nomadicPlatform.y);
+            console.log('Current scroll speed:', this.currentScrollSpeed);
+            console.log('Delta time:', dt);
+    
+            const newY = this.nomadicPlatform.y + this.currentScrollSpeed * dt;
+            console.log('Calculated new y:', newY);
+    
+            this.nomadicPlatform.y = newY;
+            console.log('After update - Nomadic platform y:', this.nomadicPlatform.y);
             
             // Update powerup position
             if (this.nomadicPlatform.powerup) {
