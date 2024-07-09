@@ -122,7 +122,7 @@ class Game {
         this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
         this.debuffDropRate = 0.50; // 10% chance for a random debuff to spawn
         this.lastDebuffSpawn = 0;
-        this.debuffSpawnInterval = 10000; 
+        this.debuffSpawnInterval = 8000; 
         this.spacecraftDropRate = 0.75; // 75% drop rate for normal spacecraft
         this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
@@ -174,13 +174,7 @@ class Game {
     dropNomadicPowerup() {
         const x = Math.random() * (GAME_WIDTH - 30);
         const y = 0; // Drop from the top of the screen
-        this.powerups.push({
-            x: x,
-            y: y,
-            width: 30,
-            height: 30,
-            type: 'nomadic'
-        });
+        this.powerups.push(this.createPowerup(x, y, false, true)); // Force nomadic powerup
     }
 
     
@@ -479,7 +473,7 @@ class Game {
             y: enemy.y + enemy.height,
             width: 15,
             height: 25,
-            speed: 100, 
+            speed: 60, 
             angle: angle + (Math.random() - 0.5) * 0.2, 
             creationTime: Date.now()
         };
@@ -1053,9 +1047,7 @@ class Game {
 
         // Keep player within vertical game bounds
         this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
-    
-        // Keep player within horizontal game bounds
-        this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
+
     
         // Check for platform collisions
         this.handleCollisions(currentTime);
@@ -1151,10 +1143,8 @@ class Game {
             const x = Math.random() * (GAME_WIDTH - 30);
             this.powerups.push(this.createPowerup(x, 0, true));
             this.lastDebuffSpawn = currentTime;
-            console.log('Debuff spawned'); // Optional: for debugging
         } else {
             // Even if we don't spawn a debuff, update the last spawn time
-            // This prevents clustering of spawn attempts
             this.lastDebuffSpawn = currentTime;
         }
     }
