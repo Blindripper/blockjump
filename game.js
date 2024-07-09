@@ -96,6 +96,7 @@ class Game {
         this.lastTime = 0;
         this.platforms = [];
         this.powerups = [];
+        this.powerupsCollected = 0;
         this.debuffDriftSpeed = 30; // pixels per second
         this.particles = [];
         this.wind = { speed: 0, direction: 1 };
@@ -1244,6 +1245,9 @@ class Game {
                         }, 30000);
                         break;
                         case 'tezosX':
+
+                        this.powerupsCollected++;
+
                 // Clear all enemies
                 this.enemies.forEach(enemy => {
                     enemy.isDestroyed = true;
@@ -2145,6 +2149,9 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
+
+    updateGameStats(stats);
+
 
     console.log('Game over. Start time:', gameStartTime, 'Score:', score, 'Blocks climbed:', blocksClimbed);
 
