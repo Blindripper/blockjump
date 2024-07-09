@@ -1268,6 +1268,7 @@ class Game {
         
         
         // Draw game elements
+        this.drawBackground();
         this.drawPlatforms();
         this.drawConstantBeam();
         this.drawPlayer();
