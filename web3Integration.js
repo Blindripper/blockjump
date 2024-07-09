@@ -743,7 +743,6 @@ async function initWeb3() {
           return false;
       }
   } else {
-      console.log('Please install MetaMask!');
       return false;
   }
 }
@@ -772,7 +771,6 @@ async function connectWallet() {
           console.error('Contract methods not available');
           return false;
       }
-      console.log('Wallet connected:', account);
       isInitialized = true;
       return true;
   } catch (error) {
@@ -817,10 +815,8 @@ async function startGame() {
   }
   try {
       const result = await contract.methods.startGame().send({ from: account });
-      console.log('Game started successfully:', result);
       // Store the full Unix timestamp
       window.gameStartTime = Math.floor(Date.now() / 1000);
-      console.log('Game start time set to:', window.gameStartTime);
       return true;
   } catch (error) {
       console.error('Error starting game:', error);
@@ -854,13 +850,11 @@ async function purchaseGameTries() {
       from: account,
       value: web3.utils.toWei('0.01', 'ether')
     });
-    console.log('Transaction sent:', txHash.transactionHash);
     const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
     const gameTryPurchasedEvent = receipt.logs.find(log =>
       log.topics[0] === web3.utils.sha3('GameTryPurchased(address,uint256)')
     );
     if (gameTryPurchasedEvent) {
-      console.log('Game tries purchased successfully');
       return true;
     } else {
       console.error('GameTryPurchased event not found in transaction receipt');
@@ -899,15 +893,10 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       return false;
   }
 
-  console.log('Attempting to submit score with:', { name, score, blocksClimbed, gameStartTime });
 
   try {
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
       const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
-      console.log('Token validity period:', tokenValidityPeriod);
-      console.log('Current time:', currentTime);
-      console.log('Game start time:', Math.floor(gameStartTime / 1000));
-      console.log('Time difference (seconds):', currentTime - Math.floor(gameStartTime / 1000));
 
       if (currentTime - Math.floor(gameStartTime / 1000) > parseInt(tokenValidityPeriod)) {
           console.error('Game session expired. Current time:', currentTime, 'Game start time:', Math.floor(gameStartTime / 1000));
@@ -919,21 +908,17 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       
       // Check contract state before submission
       const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
-      console.log('Last game start time from contract:', lastGameStartTime);
       
       const gameTries = await contract.methods.getGameTries(account).call();
-      console.log('Remaining game tries:', gameTries);
 
       // Estimate gas before sending the transaction
       const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
-      console.log('Estimated gas:', gasEstimate);
 
       const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).send({
           from: account,
           gas: Math.floor(gasEstimate * 1.2), // Increase gas limit by 20%
       });
 
-      console.log('Score submitted successfully:', result);
       return true;
   } catch (error) {
       console.error('Error in submitScore:', error);
@@ -977,7 +962,6 @@ async function claimPrize() {
     const result = await contract.methods.claimPrize().call({ from: account });
     if (result) {
       const tx = await contract.methods.claimPrize().send({ from: account });
-      console.log('Prize claimed successfully:', tx);
       return true;
     } else {
       console.error('Prize claim failed in call');
