@@ -295,35 +295,65 @@ class Game {
 
     createNomadicPlatform() {
         console.log('Creating nomadic platform');
-        const platform = this.createPlatform(0, false);
-        platform.isNomadic = true;
+        const minWidth = 100;  // Minimum width of the platform
+        const maxWidth = 200;  // Maximum width of the platform
+        const width = Math.random() * (maxWidth - minWidth) + minWidth;
+        
+        const platform = {
+            x: Math.random() * (GAME_WIDTH - width),  // Random x position
+            y: 0,  // Start at the top of the screen
+            width: width,
+            height: PLATFORM_HEIGHT,
+            isNomadic: true
+        };
+    
         platform.powerup = {
-            x: platform.x + platform.width / 2 - 15,
-            y: platform.y - 30,
+            x: platform.x + platform.width / 2 - 15,  // Center the powerup on the platform
+            y: platform.y - 30,  // Place powerup above the platform
             width: 30,
             height: 30,
             type: 'nomadic'
         };
+    
         console.log('Nomadic platform created:', platform);
         return platform;
     }
 
     updateNomadicPlatform(dt) {
         if (this.nomadicPlatform) {
+            console.log('Updating nomadic platform');
+            // Update nomadic platform position
+            this.nomadicPlatform.y += this.currentScrollSpeed * dt;
+    
+            // Check if player is on the nomadic platform
             if (this.player.isOnGround && this.checkCollision(this.player, this.nomadicPlatform)) {
-                // Player is on nomadic platform, don't move
-                this.currentScrollSpeed = 0;
+                this.currentScrollSpeed = 0; // Stop scrolling when player is on the platform
             } else {
-                // Move platform and check for expiration
-                this.nomadicPlatform.y += this.currentScrollSpeed * dt;
-                this.nomadicPlatformDuration -= dt * 1000;
-                if (this.nomadicPlatformDuration <= 0 || this.nomadicPlatform.y > GAME_HEIGHT) {
-                    this.nomadicPlatform = null;
+                this.currentScrollSpeed = this.baseScrollSpeed; // Resume normal scrolling
+            }
+    
+            // Update nomadic powerup if it exists
+            if (this.nomadicPlatform.powerup) {
+                this.nomadicPlatform.powerup.y = this.nomadicPlatform.y - 30; // Keep powerup above platform
+    
+                if (this.checkCollision(this.player, this.nomadicPlatform.powerup)) {
+                    this.collectNomadicPowerup();
+                    this.nomadicPlatform.powerup = null;
                 }
+            }
+    
+            // Check if nomadic platform should be removed
+            this.nomadicPlatformDuration -= dt * 1000;
+            if (this.nomadicPlatformDuration <= 0 || this.nomadicPlatform.y > GAME_HEIGHT) {
+                console.log('Removing nomadic platform');
+                this.nomadicPlatform = null;
+                this.currentScrollSpeed = this.baseScrollSpeed; // Ensure scrolling resumes
             }
         }
     }
- 
+
+
+
     shoot() {
         const currentTime = Date.now();
         if (currentTime - this.lastShotTime > this.shootingCooldown) {
@@ -916,6 +946,16 @@ class Game {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
             this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
             this.lastBackgroundChange = this.score;
+            this.spawnNomadicPlatform();
+        }
+    }
+
+    spawnNomadicPlatform() {
+        if (!this.nomadicPlatform) {
+            console.log('Spawning nomadic platform due to background change');
+            this.nomadicPlatform = this.createNomadicPlatform();
+            this.nomadicPlatformDuration = 20000; // 20 seconds duration
+            this.lastNomadicPlatformSpawn = Date.now();
         }
     }
     
