@@ -48,11 +48,11 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 // Game class
 class Game {
     constructor() {
+        this.baseScrollSpeed = 65; // Base scrolling speed
+        this.currentScrollSpeed = this.baseScrollSpeed;
+        this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
+        this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
         this.debugMode = false;
-        this.camera = {
-            y: 0,
-            topThreshold: GAME_HEIGHT * 0.2
-        }; 
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -167,20 +167,7 @@ class Game {
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
 
-    updateCamera() {
-        // Calculate the top of the screen in world coordinates
-        const topOfScreen = this.camera.y;
-
-        // If player is above the top threshold, move the camera up
-        if (this.player.y < topOfScreen + this.camera.topThreshold) {
-            this.camera.y = this.player.y - this.camera.topThreshold;
-        }
-
-        // Ensure camera doesn't go below 0
-        this.camera.y = Math.max(0, this.camera.y);
-    }
-
-
+    
 
     async initializeGame() {
         if (!checkWalletConnection()) return;
@@ -281,6 +268,19 @@ class Game {
         if (this.sounds[soundName]) {
             this.sounds[soundName].currentTime = 0;
             this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
+        }
+    }
+
+    updateScrollSpeed() {
+        if (this.player.y < 0) {
+            // Player is above the screen, increase scroll speed
+            this.currentScrollSpeed = Math.min(
+                this.maxScrollSpeed,
+                this.baseScrollSpeed * this.scrollSpeedIncreaseFactor
+            );
+        } else {
+            // Player is within the screen, return to base speed
+            this.currentScrollSpeed = this.baseScrollSpeed;
         }
     }
  
@@ -814,15 +814,12 @@ class Game {
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
-        this.updateCamera();
 
         if (this.constantBeamActive) {
             this.checkConstantBeamCollisions();
         }
 
-        if (this.player.velocityY < 0) {
-            this.updateCamera();
-        }
+    
     }
 
     
@@ -899,7 +896,7 @@ class Game {
 
         // Update existing platforms
         this.platforms = this.platforms.filter(platform => {
-            platform.y += this.platformSpeed * dt * this.gameSpeed;
+            platform.y += this.currentScrollSpeed * dt;
             return platform.y <= GAME_HEIGHT;
         });
 
@@ -929,6 +926,9 @@ class Game {
 
         const currentTime = Date.now();
 
+        // Adjust player's y position based on scroll speed
+        this.player.y += this.currentScrollSpeed * dt;
+
         // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
         this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
         
@@ -957,6 +957,9 @@ class Game {
         // Update position (use this.gameSpeed)
         this.player.x += this.player.velocityX * dt * this.gameSpeed;
         this.player.y += this.player.velocityY * dt * this.gameSpeed;
+
+        // Keep player within vertical game bounds
+        this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
     
         // Keep player within horizontal game bounds
         this.player.x = Math.max(0, Math.min(this.player.x, GAME_WIDTH - this.player.width));
@@ -970,7 +973,7 @@ class Game {
         }
     
         // Check if player has fallen off the screen
-        if (this.player.y > GAME_HEIGHT) {
+        if (this.player.y >= GAME_HEIGHT - this.player.height) {
             this.gameOver = true;
             console.log('Game over: Player fell off screen');
         }
@@ -1255,8 +1258,6 @@ class Game {
         }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.save();
-        this.ctx.translate(0, -this.camera.y);
         const scaleX = this.canvas.width / GAME_WIDTH;
         const scaleY = this.canvas.height / GAME_HEIGHT;
         const scale = Math.min(scaleX, scaleY);
@@ -1264,9 +1265,6 @@ class Game {
     
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
-        
-        
-        
         
         
         // Draw game elements
@@ -1288,7 +1286,6 @@ class Game {
         this.drawHUD();
         this.drawPowerupHUD();
         
-        this.ctx.restore(); // Restore original canvas state
     }
 
     drawPlatforms() {
