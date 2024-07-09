@@ -43,7 +43,12 @@ const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
 const SHIELD_WIDTH = PLAYER_WIDTH * 1.1; 
 const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
-
+// Background loading
+const backgrounds = Array.from({ length: 16 }, (_, i) => ({
+    image: null,
+    floorStart: i * 100,
+    color: `hsl(${i * 20}, 70%, 20%)`
+}));
 
 // Game class
 class Game {
@@ -2010,12 +2015,7 @@ function loadSprites() {
         });
 }
 
-// Background loading
-const backgrounds = Array.from({ length: 16 }, (_, i) => ({
-    image: null,
-    floorStart: i * 100,
-    color: `hsl(${i * 20}, 70%, 20%)`
-}));
+
 
 function loadBackgrounds() {
     return Promise.all(backgrounds.map((bg, index) => 
