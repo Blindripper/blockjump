@@ -2025,15 +2025,15 @@ async function handleScoreSubmission(name) {
             gameStartTime: window.gameStartTime
         });
 
-        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, Math.floor(window.gameStartTime / 1000));
+        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         
-        if (submitted.success) {
+        if (submitted) {
             await updateHighscoreTable();
             showOverlay('Score submitted successfully!', async () => {
                 await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
-            showOverlay(`Failed to submit score: ${submitted.error}`, null, true, 'Try Again');
+            showOverlay('Failed to submit score. Please try again.', null, true, 'Try Again');
         }
     } catch (error) {
         console.error('Error during score submission:', error);
