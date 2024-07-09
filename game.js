@@ -195,8 +195,6 @@ class Game {
         this.camera.y = Math.max(0, this.camera.y);
     }
 
-
-
     async initializeGame() {
         if (!checkWalletConnection()) return;
     
