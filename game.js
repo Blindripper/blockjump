@@ -530,8 +530,6 @@ class Game {
         this.activePowerups.clear();
     }
 
-    
-
     checkBulletEnemyCollisions() {
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
