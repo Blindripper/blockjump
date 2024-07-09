@@ -752,8 +752,6 @@ function isContractInitialized() {
   return isInitialized;
 }
 
-
-
 async function connectWallet() {
   if (!web3) {
       showOverlay('Web3 not initialized. Please refresh the page.');
