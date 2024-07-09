@@ -906,6 +906,10 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
       console.log('Token validity period:', tokenValidityPeriod);
       console.log('Time difference:', currentTime - gameStartTime);
+      console.log('Token validity period:', tokenValidityPeriod);
+        console.log('Current time:', currentTime);
+        console.log('Game start time:', gameStartTime);
+        console.log('Time difference:', currentTime - gameStartTime)
 
       if (currentTime - gameStartTime > parseInt(tokenValidityPeriod)) {
           console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
