@@ -715,12 +715,11 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        let lastY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
+        let lastY = GAME_HEIGHT; // Start from the bottom of the screen
     
-        while (platforms.length < this.platformCount) {
-            const y = lastY - this.getRandomPlatformSpacing();
-            platforms.push(this.createPlatform(y));
-            lastY = y;
+        while (lastY > -GAME_HEIGHT) { // Generate platforms up to one screen height above the visible area
+            lastY -= this.getRandomPlatformSpacing();
+            platforms.push(this.createPlatform(lastY));
         }
     
         return platforms;
@@ -907,16 +906,14 @@ class Game {
         let referenceY = this.platforms.length > 0 ? this.platforms[0].y : GAME_HEIGHT;
         
         while (this.platforms.length < this.platformCount) {
-            // If there are no platforms, start a bit above the bottom of the screen
-            if (this.platforms.length === 0) {
-                referenceY = GAME_HEIGHT - PLATFORM_HEIGHT - 50;
-            }
+            const highestPlatform = this.platforms.reduce((highest, platform) => 
+                platform.y < highest.y ? platform : highest, 
+                {y: GAME_HEIGHT} // Default to screen height if no platforms exist
+            );
             
-            const newY = referenceY - this.getRandomPlatformSpacing();
-            this.platforms.unshift(this.createPlatform(newY));
-            referenceY = newY;
-            this.blocksClimbed++;
-        }
+            const newY = highestPlatform.y - this.getRandomPlatformSpacing();
+            this.platforms.push(this.createPlatform(newY))
+            this.blocksClimbed = Math.max(this.blocksClimbed, Math.floor(-highestPlatform.y / PLATFORM_HEIGHT));        }
     }
 
 
@@ -1298,16 +1295,19 @@ class Game {
 
     drawPlatforms() {
         for (let platform of this.platforms) {
-            let sprite;
-            if (platform.isSpike) {
-                sprite = this.platformSprites.spike;
-            } else if (platform.isGolden) {
-                sprite = this.platformSprites.golden;
-            } else {
-                sprite = this.platformSprites.normal[platform.spriteIndex];
+            // Only draw platforms that are within or partially within the screen
+            if (platform.y + platform.height > 0 && platform.y < GAME_HEIGHT) {
+                let sprite;
+                if (platform.isSpike) {
+                    sprite = this.platformSprites.spike;
+                } else if (platform.isGolden) {
+                    sprite = this.platformSprites.golden;
+                } else {
+                    sprite = this.platformSprites.normal[platform.spriteIndex];
+                }
+    
+                this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
             }
-
-            this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
         }
         
         if (this.bottomPlatform) {
