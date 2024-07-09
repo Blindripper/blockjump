@@ -59,6 +59,10 @@ class Game {
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
+        this.nomadicPlatform = null;
+        this.nomadicPlatformDuration = 20000; // 20 seconds
+        this.nomadicPowerupLevel = 0;
+        this.lastNomadicPlatformSpawn = 0;
         this.fallThroughDelay = 400; // Milliseconds to ignore platform collision after pressing down
         this.lastFallThroughTime = 0
         this.normalGravity = 1200; // The default gravity value
@@ -287,26 +291,89 @@ class Game {
             this.currentScrollSpeed = this.baseScrollSpeed;
         }
     }
+
+    createNomadicPlatform() {
+        const platform = this.createPlatform(0, false); // Create platform at top of screen, no spikes
+        platform.isNomadic = true;
+        platform.powerup = {
+            x: platform.x + platform.width / 2 - 15, // Center the powerup on the platform
+            y: platform.y - 30, // Place powerup above the platform
+            width: 30,
+            height: 30,
+            type: 'nomadic'
+        };
+        return platform;
+    }
+
+    updateNomadicPlatform(dt) {
+        if (this.nomadicPlatform) {
+            if (this.player.isOnGround && this.checkCollision(this.player, this.nomadicPlatform)) {
+                // Player is on nomadic platform, don't move
+                this.currentScrollSpeed = 0;
+            } else {
+                // Move platform and check for expiration
+                this.nomadicPlatform.y += this.currentScrollSpeed * dt;
+                this.nomadicPlatformDuration -= dt * 1000;
+                if (this.nomadicPlatformDuration <= 0 || this.nomadicPlatform.y > GAME_HEIGHT) {
+                    this.nomadicPlatform = null;
+                }
+            }
+        }
+    }
  
     shoot() {
         const currentTime = Date.now();
-        if (this.constantBeamActive) {
-            // Constant beam logic
-            this.damageEnemiesInBeamPath();
-        } else {
-            // Normal shooting logic
-            if (currentTime - this.lastShotTime > this.shootingCooldown) {
-                this.bullets.push({
-                    x: this.player.x + this.player.width / 2 - 2.5,
-                    y: this.player.y,
-                    width: 5,
-                    height: 10,
-                    speed: 500
-                });
-                this.lastShotTime = currentTime;
-                this.playSound('friendlyLaser');
+        if (currentTime - this.lastShotTime > this.shootingCooldown) {
+            switch (this.nomadicPowerupLevel) {
+                case 0:
+                    this.createBullet(this.player.x + this.player.width / 2, this.player.y, 0, -1);
+                    break;
+                case 1:
+                    this.createBullet(this.player.x, this.player.y, 0, -1);
+                    this.createBullet(this.player.x + this.player.width, this.player.y, 0, -1);
+                    break;
+                case 2:
+                    this.createBullet(this.player.x, this.player.y, -1, -1);
+                    this.createBullet(this.player.x + this.player.width, this.player.y, 1, -1);
+                    this.createBullet(this.player.x, this.player.y + this.player.height, -1, 1);
+                    this.createBullet(this.player.x + this.player.width, this.player.y + this.player.height, 1, 1);
+                    break;
+                case 3:
+                    this.createBullet(this.player.x, this.player.y, -1, -1);
+                    this.createBullet(this.player.x + this.player.width, this.player.y, 1, -1);
+                    this.createBullet(this.player.x, this.player.y + this.player.height, -1, 1);
+                    this.createBullet(this.player.x + this.player.width, this.player.y + this.player.height, 1, 1);
+                    this.createBullet(this.player.x + this.player.width / 2, this.player.y, 0, -1);
+                    this.createBullet(this.player.x + this.player.width / 2, this.player.y + this.player.height, 0, 1);
+                    break;
+                case 4:
+                    for (let i = 0; i < 8; i++) {
+                        const angle = i * Math.PI / 4;
+                        this.createBullet(
+                            this.player.x + this.player.width / 2,
+                            this.player.y + this.player.height / 2,
+                            Math.cos(angle),
+                            Math.sin(angle)
+                        );
+                    }
+                    break;
             }
+            this.lastShotTime = currentTime;
+            this.playSound('friendlyLaser');
         }
+    }
+
+
+    createBullet(x, y, dirX, dirY) {
+        this.bullets.push({
+            x: x,
+            y: y,
+            width: 5,
+            height: 10,
+            speed: 500,
+            dirX: dirX,
+            dirY: dirY
+        });
     }
 
     damageEnemiesInBeamPath() {
@@ -333,72 +400,87 @@ class Game {
     }
 
     updateBullets(dt) {
-
         const currentTime = Date.now();
-
+    
         // Update player bullets
         this.bullets = this.bullets.filter(bullet => {
-            bullet.y -= bullet.speed * dt;
-            return bullet.y + bullet.height > 0;
+            bullet.x += bullet.dirX * bullet.speed * dt;
+            bullet.y += bullet.dirY * bullet.speed * dt;
+            return bullet.x >= 0 && bullet.x <= GAME_WIDTH && bullet.y >= 0 && bullet.y <= GAME_HEIGHT;
         });
-
-        // Update enemy bullets
-        this.enemyBullets = this.enemyBullets.filter(bullet => {
-            bullet.y += bullet.speed * dt;
-            return bullet.y < GAME_HEIGHT;
-        });
-
-          // Handle constant beam damage
-          if (this.constantBeamActive) {
-            this.damageEnemiesInBeamPath();
-          }
-
+    
         // Update enemy bullets and missiles
-    this.enemyBullets = this.enemyBullets.filter(bullet => {
-        if (bullet.angle !== undefined) {
-            // This is a tracking missile
-            if (currentTime - bullet.creationTime > 6000) {
-                return false; // Remove missile after 6 seconds
+        this.enemyBullets = this.enemyBullets.filter(bullet => {
+            if (bullet.angle !== undefined) {
+                // This is a tracking missile
+                if (currentTime - bullet.creationTime > 6000) {
+                    return false; // Remove missile after 6 seconds
+                }
+                bullet.x += Math.cos(bullet.angle) * bullet.speed * dt;
+                bullet.y += Math.sin(bullet.angle) * bullet.speed * dt;
+                // Recalculate angle to track player
+                bullet.angle = Math.atan2(this.player.y - bullet.y, this.player.x - bullet.x);
+            } else {
+                // Regular bullet
+                bullet.y += bullet.speed * dt;
             }
-            bullet.x += Math.cos(bullet.angle) * bullet.speed * dt;
-            bullet.y += Math.sin(bullet.angle) * bullet.speed * dt;
-            // Recalculate angle to track player
-            bullet.angle = Math.atan2(this.player.y - bullet.y, this.player.x - bullet.x);
-        } else {
-            // Regular bullet
-            bullet.y += bullet.speed * dt;
+    
+            // Check collision with player bullets
+            for (let i = this.bullets.length - 1; i >= 0; i--) {
+                if (this.checkCollision(this.bullets[i], bullet)) {
+                    this.createParticles(bullet.x, bullet.y, 5, '#FF0000');
+                    this.bullets.splice(i, 1);
+                    return false; // Remove enemy bullet
+                }
+            }
+    
+            return bullet.y < GAME_HEIGHT && bullet.x > 0 && bullet.x < GAME_WIDTH;
+        });
+    
+        // Handle constant beam damage
+        if (this.constantBeamActive) {
+            this.damageEnemiesInBeamPath();
+            this.checkConstantBeamCollisions();
         }
-        return bullet.y < GAME_HEIGHT && bullet.x > 0 && bullet.x < GAME_WIDTH;
-    });
-
+    
         // Check for collisions
         this.checkBulletCollisions();
     }
-
+    
     checkConstantBeamCollisions() {
         if (!this.constantBeamActive) return;
-
         const beamX = this.player.x + this.player.width / 2;
-        
+       
         // Check collisions with enemies
         this.enemies.forEach(enemy => {
-            if (!enemy.isDestroyed && 
-                enemy.x < beamX && 
+            if (!enemy.isDestroyed &&
+                enemy.x < beamX &&
                 enemy.x + enemy.width > beamX &&
                 enemy.y < this.player.y) {
                 this.damageEnemy(enemy);
             }
         });
-
+    
         // Check collisions with debuffs
         this.powerups = this.powerups.filter(powerup => {
             if (powerup.isDebuff &&
-                powerup.x < beamX && 
+                powerup.x < beamX &&
                 powerup.x + powerup.width > beamX &&
                 powerup.y < this.player.y) {
                 this.createParticles(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2, 10, '#FF0000');
                 this.playSound('destroyed');
                 return false; // Remove the debuff
+            }
+            return true;
+        });
+    
+        // Check collisions with enemy bullets
+        this.enemyBullets = this.enemyBullets.filter(bullet => {
+            if (bullet.x < beamX &&
+                bullet.x + bullet.width > beamX &&
+                bullet.y < this.player.y) {
+                this.createParticles(bullet.x, bullet.y, 5, '#FF0000');
+                return false; // Remove the enemy bullet
             }
             return true;
         });
@@ -1019,7 +1101,7 @@ class Game {
 
     updatePowerups(dt) {
         const currentTime = Date.now();
-
+    
         // Update existing powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             const powerup = this.powerups[i];
@@ -1029,7 +1111,7 @@ class Game {
             
             // Move powerup down
             powerup.y += this.platformSpeed * dt * this.gameSpeed;
-
+    
             // If it's a debuff, make it drift towards the player
             if (powerup.isDebuff && this.player) {
                 const dx = this.player.x - powerup.x;
@@ -1042,7 +1124,7 @@ class Game {
                     powerup.y += directionY * this.debuffDriftSpeed * dt;
                 }
             }
-
+    
             if (this.checkCollision(this.player, powerup)) {
                 if (powerup.isDebuff && this.playerShield) {
                     // If it's a debuff and the player has a shield, destroy the powerup without applying it
@@ -1064,7 +1146,50 @@ class Game {
                 this.lastDebuffSpawn = currentTime;
             }
         }
+    
+        // Nomadic platform and powerup logic
+        if (this.nomadicPlatform) {
+            // Update nomadic platform position
+            this.nomadicPlatform.y += this.currentScrollSpeed * dt;
+    
+            // Check if player is on the nomadic platform
+            if (this.player.isOnGround && this.checkCollision(this.player, this.nomadicPlatform)) {
+                this.currentScrollSpeed = 0; // Stop scrolling when player is on the platform
+            } else {
+                this.currentScrollSpeed = this.baseScrollSpeed; // Resume normal scrolling
+            }
+    
+            // Update nomadic powerup if it exists
+            if (this.nomadicPlatform.powerup) {
+                this.nomadicPlatform.powerup.y = this.nomadicPlatform.y - 30; // Keep powerup above platform
+    
+                if (this.checkCollision(this.player, this.nomadicPlatform.powerup)) {
+                    this.collectNomadicPowerup();
+                    this.nomadicPlatform.powerup = null;
+                }
+            }
+    
+            // Check if nomadic platform should be removed
+            this.nomadicPlatformDuration -= dt * 1000;
+            if (this.nomadicPlatformDuration <= 0 || this.nomadicPlatform.y > GAME_HEIGHT) {
+                this.nomadicPlatform = null;
+                this.currentScrollSpeed = this.baseScrollSpeed; // Ensure scrolling resumes
+            }
+        }
+    
+        // Check if it's time to spawn a new nomadic platform
+        if (this.score - this.lastNomadicPlatformSpawn >= 5000 && !this.nomadicPlatform) {
+            this.nomadicPlatform = this.createNomadicPlatform();
+            this.nomadicPlatformDuration = 20000; // Reset duration to 20 seconds
+            this.lastNomadicPlatformSpawn = this.score;
+        }
     }
+
+    collectNomadicPowerup() {
+        this.nomadicPowerupLevel = Math.min(this.nomadicPowerupLevel + 1, 4);
+        this.playSound('powerup');
+    }
+
 
     createPowerup(x, y, isDebuff = false) {
         let powerupPool = isDebuff 
@@ -1259,6 +1384,15 @@ class Game {
         if (!this.ctx) {
             console.error('Canvas context is not initialized');
             return;
+        }
+
+        // Draw nomadic platform and powerup
+        if (this.nomadicPlatform) {
+            this.ctx.drawImage(this.platformSprites.normal[0], this.nomadicPlatform.x, this.nomadicPlatform.y, this.nomadicPlatform.width, PLATFORM_HEIGHT);
+            if (this.nomadicPlatform.powerup) {
+                const powerupSprite = sprites.get('nomadic');
+                this.ctx.drawImage(powerupSprite, this.nomadicPlatform.powerup.x, this.nomadicPlatform.powerup.y, this.nomadicPlatform.powerup.width, this.nomadicPlatform.powerup.height);
+            }
         }
     
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1766,6 +1900,7 @@ function loadSprites() {
         { name: 'ethereum', file: 'ethereum1.png' },
         { name: 'etherLink', file: 'Etherlink.png' },
         { name: 'greenTezos', file: 'greenTezos.png' },
+        { name: 'nomadic', file: 'nomadic.png' },
         { name: 'blast', file: 'blast.png' },
         { name: 'mintTezos', file: 'slowMotion.png' },
         { name: 'tezosX', file: 'TezosX1.png' }
