@@ -42,7 +42,6 @@ let userAchievements = [];
 let gameStats = {};
 
 function renderAchievements() {
-    console.log('Current game stats:', gameStats);
     const achievementsList = document.getElementById('achievementsList');
     if (!achievementsList) {
         console.error('Achievements list element not found');
@@ -53,7 +52,6 @@ function renderAchievements() {
     achievements.forEach(achievement => {
         const isUnlocked = achievement.requirement(gameStats);
         const isAlreadyMinted = userAchievements.includes(achievement.id);
-        console.log(`Achievement ${achievement.name} unlocked:`, isUnlocked, 'Already minted:', isAlreadyMinted);
         
         const achievementElement = document.createElement('div');
         achievementElement.className = `achievement ${isUnlocked ? 'unlocked' : ''} ${isAlreadyMinted ? 'minted' : ''}`;
@@ -92,15 +90,12 @@ async function loadUserAchievements() {
         if (window.ethereum && window.ethereum.selectedAddress) {
             const web3Initialized = await initWeb3();
             if (!web3Initialized) {
-                console.log('Web3 not initialized, cannot load achievements');
                 return;
             }
             
             userAchievements = await getAchievements(window.ethereum.selectedAddress);
-            console.log('Loaded user achievements:', userAchievements);
             renderAchievements();
         } else {
-            console.log('Wallet not connected');
         }
     } catch (error) {
         console.error('Error loading achievements:', error);
