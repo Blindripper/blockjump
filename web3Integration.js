@@ -962,6 +962,10 @@ function getContract() {
   return contract;
 }
 
+function getCurrentAccount() {
+  return account;
+}
+
 
 
 async function claimPrize() {
@@ -997,5 +1001,6 @@ export {
   getAchievements,
   mintAchievement, 
   connectWallet,
-  isContractInitialized
+  isContractInitialized,
+  getCurrentAccount
 };
