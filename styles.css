@@ -71,6 +71,22 @@ header {
   margin-right: 10px;
 }
 
+.github-link {
+  position: fixed;
+  bottom: 10px;
+  right: 60px;
+  z-index: 1000;
+}
+
+.github-link img {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.github-link img:hover {
+  opacity: 1;
+}
+
 /* Game Wrapper */
 #gameWrapper {
   display: flex;
