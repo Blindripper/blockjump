@@ -42,16 +42,21 @@ let userAchievements = [];
 let gameStats = {};
 
 function renderAchievements() {
+    console.log('Current game stats:', gameStats);
     const achievementsList = document.getElementById('achievementsList');
     if (!achievementsList) {
         console.error('Achievements list element not found');
-        return;  // Exit the function if element is not available
+        return;
     }
     achievementsList.innerHTML = '';
 
     achievements.forEach(achievement => {
+        const isUnlocked = achievement.requirement(gameStats);
+        const isAlreadyMinted = userAchievements.includes(achievement.id);
+        console.log(`Achievement ${achievement.name} unlocked:`, isUnlocked, 'Already minted:', isAlreadyMinted);
+        
         const achievementElement = document.createElement('div');
-        achievementElement.className = `achievement ${achievement.requirement(gameStats) ? 'unlocked' : ''}`;
+        achievementElement.className = `achievement ${isUnlocked ? 'unlocked' : ''}`;
         achievementElement.innerHTML = `
             <div class="achievement-content">
                 <img src="https://raw.githubusercontent.com/Blindripper/blockjump/main/NFT/${achievement.image}" alt="${achievement.name}">
@@ -63,16 +68,16 @@ function renderAchievements() {
             <button class="mint-button" data-id="${achievement.id}">Mint NFT</button>
         `;
         achievementsList.appendChild(achievementElement);
-        const achievementsSection = document.getElementById('achievementsSection');
+
+        const mintButton = achievementElement.querySelector('.mint-button');
+        mintButton.style.display = isUnlocked && !isAlreadyMinted ? 'block' : 'none';
+        mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
+    });
+
+    const achievementsSection = document.getElementById('achievementsSection');
     if (achievementsSection) {
         achievementsSection.style.display = 'block';
     }
-
-
-        const mintButton = achievementElement.querySelector('.mint-button');
-        mintButton.style.display = achievement.requirement(gameStats) ? 'block' : 'none';
-        mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
-    });
 }
 
 async function mintAchievementNFT(achievementId) {
@@ -91,7 +96,7 @@ async function mintAchievementNFT(achievementId) {
 }
 
 function updateGameStats(stats) {
-    gameStats = stats;
+    gameStats = { ...gameStats, ...stats };
     renderAchievements();
 }
 
