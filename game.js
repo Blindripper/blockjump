@@ -216,6 +216,12 @@ class Game {
             this.sounds.background.loop = true;
             this.sounds.background.play().catch(error => console.warn("Error playing background music:", error));
             this.enemies = [];
+            this.enemySpawnRate = 1;
+            this.enemySpawnInterval = this.baseEnemySpawnInterval;
+            this.lastEnemySpawn = 0;
+            this.activePowerups.clear();
+            this.nomadicPowerupLevel = 0;
+
             this.enemyBullets = [];
             this.gameStarted = true;
             this.difficultyLevel = 1;
@@ -228,21 +234,20 @@ class Game {
             this.gameOver = false;
             this.blocksClimbed = 0;
             this.lastTime = performance.now();
+            this.lastPowerupScore = 0;
             this.constantBeamActive = false;
             this.powerups = [];
+            this.lastBackgroundChange = 0;
+            this.currentBackgroundIndex = 0;
+
 
             setTimeout(() => {
                 this.bottomPlatform = null;
-                console.log('Bottom platform removed after 5 seconds');
             }, 5000);
     
             await updateTryCount();
             
             if (this.debugMode) {
-                console.log('Game initialized:');
-                console.log('- Player:', this.player);
-                console.log('- Platforms:', this.platforms.length);
-                console.log('- Bottom platform present:', this.platforms.some(p => p.isBottomPlatform));
                 this.logGameState('After initialization');
             }
     
@@ -866,7 +871,6 @@ class Game {
             this.player.isOnGround = false;
             this.createJumpEffect();
     
-            console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
             
             // We'll increment blocksClimbed in handleCollisions instead of here
             
@@ -939,22 +943,18 @@ class Game {
                     // Increment blocksClimbed if the player wasn't on ground before
                     if (!wasOnGround) {
                         this.blocksClimbed++;
-                        console.log(`Blocks climbed: ${this.blocksClimbed}`);
                     }
     
-                    console.log('Player landed on platform');
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
                     // Hitting the bottom of the platform when jumping up
                     this.player.y = platform.y + platform.height;
                     this.player.velocityY = 0;
-                    console.log('Player hit bottom of platform');
                 }
     
                 if (platform.isGolden) {
                     this.handleGoldenPlatform();
                 } else if (platform.isSpike) {
                     this.gameOver = true;
-                    console.log('Game over: Player hit spike platform');
                     return;
                 }
             }
@@ -968,7 +968,7 @@ class Game {
                obj1.y < obj2.y + obj2.height &&
                obj1.y + obj1.height > obj2.y;
     }
-    
+
     
 
     handleGoldenPlatform() {
@@ -1074,7 +1074,6 @@ class Game {
         // Check if player has fallen off the screen
         if (this.player.y >= GAME_HEIGHT - this.player.height) {
             this.gameOver = true;
-            console.log('Game over: Player fell off screen');
         }
     }
 
@@ -1319,7 +1318,6 @@ class Game {
         this.powerupsCollected++;
         this.playSound('powerup');
     
-        console.log(`Applied powerup: ${type}, Active powerups:`, this.activePowerups);
     }
 
     updateParticles(dt) {
@@ -1405,7 +1403,6 @@ class Game {
                 const y = 0; // Drop from the top of the screen
                 this.powerups.push(this.createPowerup(x, y, false, true)); // Force nomadic powerup
                 this.lastPowerupScore = this.score;
-                console.log('Nomadic powerup dropped at score:', this.score);
             }
         }
     }
@@ -1650,8 +1647,6 @@ class Game {
     }
 
     drawPowerupHUD() {
-        console.log('Drawing powerup HUD');
-        console.log('Active powerups:', this.activePowerups);
     
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
@@ -1666,7 +1661,6 @@ class Game {
         Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
             xOffset -= powerupSize;
     
-            console.log(`Drawing powerup: ${type}`);
     
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
@@ -1692,7 +1686,6 @@ class Game {
             this.ctx.fillStyle = '#00FF00';
             this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
     
-            console.log(`Powerup ${type} - Remaining duration: ${remainingDuration}ms`);
     
             xOffset -= powerupSpacing; // Use the new spacing value
         });
@@ -1708,7 +1701,6 @@ class Game {
         let deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         
-        console.log('Game loop running, delta time:', deltaTime);
         
         this.update(deltaTime);
         this.draw();
@@ -1986,14 +1978,12 @@ function loadBackgrounds() {
         loadImage(`${picsUrl}bg${index + 1}.jpg`)
             .then(img => {
                 bg.image = img;
-                console.log(`Background ${index + 1} loaded successfully`);
             })
             .catch(error => { 
                 console.error(`Failed to load background ${index + 1}:`, error);
                 // Keep the fallback color
             })
     )).then(() => {
-        console.log('All backgrounds loaded');
     }).catch(error => {
         console.error('Error loading backgrounds:', error);
     });
@@ -2194,7 +2184,6 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     game.updateAchievements();  // Add this line
 
-    console.log('Game over. Start time:', gameStartTime, 'Score:', score, 'Blocks climbed:', blocksClimbed);
 
     showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
@@ -2224,7 +2213,6 @@ async function handleScoreSubmission(name) {
         // Check contract state
         const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
         const gameTries = await contract.methods.getGameTries(account).call();
-        console.log('Contract state - Last game start time:', lastGameStartTime, 'Remaining tries:', gameTries);
 
         if (parseInt(gameTries) <= 0) {
             showOverlay('No game tries remaining. Please purchase more.', null, true, 'Buy Tries');
@@ -2232,12 +2220,7 @@ async function handleScoreSubmission(name) {
         }
 
         showOverlay("Submitting score to Etherlink...");
-        console.log('Submitting score with:', {
-            name,
-            score: window.finalScore,
-            blocksClimbed: window.blocksClimbed,
-            gameStartTime: window.gameStartTime
-        });
+        
 
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         
@@ -2258,10 +2241,8 @@ async function handleScoreSubmission(name) {
 async function checkContractState() {
     try {
         const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
-        console.log('Last game start time from contract:', lastGameStartTime);
         
         const gameTries = await contract.methods.getGameTries(account).call();
-        console.log('Remaining game tries:', gameTries);
         
         // Add any other relevant contract state checks here
         
