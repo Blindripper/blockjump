@@ -51,8 +51,7 @@ class Game {
         this.debugMode = false;
         this.camera = {
             y: 0,
-            followThreshold: GAME_HEIGHT / 2,
-            startFollowingY: GAME_HEIGHT * 0.3 // Start following when player reaches 30% of screen height
+            topThreshold: GAME_HEIGHT * 0.2
         }; 
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
@@ -169,27 +168,13 @@ class Game {
     }
 
     updateCamera() {
-
-        if (this.player.y > GAME_HEIGHT - this.camera.startFollowingY) {
-            this.camera.y = 0;
-            return;
-        }
         // Calculate the top of the screen in world coordinates
         const topOfScreen = this.camera.y;
 
-        // If player is above the follow threshold, move the camera up
-        if (this.player.y < topOfScreen + this.camera.followThreshold) {
-            this.camera.y = this.player.y - this.camera.followThreshold;
+        // If player is above the top threshold, move the camera up
+        if (this.player.y < topOfScreen + this.camera.topThreshold) {
+            this.camera.y = this.player.y - this.camera.topThreshold;
         }
-
-        // Ensure camera doesn't go below 0
-        this.camera.y = Math.max(0, this.camera.y);
-
-        // Calculate the desired camera position
-        const desiredCameraY = this.player.y - (GAME_HEIGHT - this.camera.followThreshold);
-
-        // Smoothly interpolate to the desired position
-        this.camera.y += (desiredCameraY - this.camera.y) * 0.1;
 
         // Ensure camera doesn't go below 0
         this.camera.y = Math.max(0, this.camera.y);
@@ -835,8 +820,8 @@ class Game {
             this.checkConstantBeamCollisions();
         }
 
-        if (this.player.y > GAME_HEIGHT + this.camera.y) {
-            this.gameOver = true;
+        if (this.player.velocityY < 0) {
+            this.updateCamera();
         }
     }
 
@@ -1271,7 +1256,7 @@ class Game {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.save();
-    
+        this.ctx.translate(0, -this.camera.y);
         const scaleX = this.canvas.width / GAME_WIDTH;
         const scaleY = this.canvas.height / GAME_HEIGHT;
         const scale = Math.min(scaleX, scaleY);
@@ -1280,16 +1265,10 @@ class Game {
         const translateX = (this.canvas.width / scale - GAME_WIDTH) / 2;
         const translateY = (this.canvas.height / scale - GAME_HEIGHT) / 2;
         
-        // Apply initial translation and camera offset
-        this.ctx.translate(translateX, translateY);
-    
-        // Draw background (fixed to camera)
-        this.drawBackground();
-
-        // Apply camera transformation for game world
-        this.ctx.save();
-        this.ctx.translate(0, -this.camera.y);
-
+        
+        
+        
+        
         // Draw game elements
         this.drawPlatforms();
         this.drawConstantBeam();
