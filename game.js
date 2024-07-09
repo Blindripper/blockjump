@@ -266,6 +266,15 @@ class Game {
         });
     }
 
+    updateAchievements() {
+        const stats = {
+            score: this.score,
+            blocksClimbed: this.blocksClimbed,
+            powerupsCollected: this.powerupsCollected
+        };
+        updateGameStats(stats);
+    }
+
     getBackgroundName(index) {
         const backgroundNames = [
             'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
@@ -1290,7 +1299,8 @@ class Game {
                 }, 20000);
                 break;
         }
-        
+        this.powerupsCollected++;
+
         this.playSound('powerup');
     }
 
@@ -2145,17 +2155,14 @@ function showStartButton() {
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
-    // Store the game data for later use
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
 
-    updateGameStats(stats);
-
+    game.updateAchievements();  // Add this line
 
     console.log('Game over. Start time:', gameStartTime, 'Score:', score, 'Blocks climbed:', blocksClimbed);
 
-    // Show the game over overlay with the name form and Try Again button
     showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
 
