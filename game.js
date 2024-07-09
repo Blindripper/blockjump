@@ -960,7 +960,7 @@ class Game {
             }
         }
     }
-
+    
 
     checkCollision(obj1, obj2) {
         return obj1.x < obj2.x + obj2.width &&
@@ -968,7 +968,7 @@ class Game {
                obj1.y < obj2.y + obj2.height &&
                obj1.y + obj1.height > obj2.y;
     }
-
+    
     
 
     handleGoldenPlatform() {
