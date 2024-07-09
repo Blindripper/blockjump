@@ -978,7 +978,7 @@ export {
   submitScore, 
   claimPrize,
   getAchievements,
-  mintAchievement, 
+  mintAchievementNFT, 
   connectWallet,
   isContractInitialized
 };
