@@ -897,6 +897,7 @@ class Game {
         this.updateEnemies(dt);
         this.checkPlayerEnemyCollisions();
         this.spawnEnemies();
+        this.updateNomadicPlatform();
         this.updateDifficulty();
         this.updateUI();
         this.updateBackground();
@@ -1178,10 +1179,10 @@ class Game {
         }
     
         // Check if it's time to spawn a new nomadic platform
-        if (this.score - this.lastNomadicPlatformSpawn >= 5000 && !this.nomadicPlatform) {
+        if (currentTime - this.lastNomadicPlatformSpawn >= 30000 && !this.nomadicPlatform) { // 30 seconds
             this.nomadicPlatform = this.createNomadicPlatform();
             this.nomadicPlatformDuration = 20000; // Reset duration to 20 seconds
-            this.lastNomadicPlatformSpawn = this.score;
+            this.lastNomadicPlatformSpawn = currentTime;
         }
     }
 
