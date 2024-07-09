@@ -118,9 +118,9 @@ class Game {
         this.enemySpeed = 50;
         this.jump;
         this.powerupDropRate = 0.5; // 50% chance for an enemy to drop a powerup when killed
-        this.debuffDropRate = 0.1; // 10% chance for a random debuff to spawn
+        this.debuffDropRate = 0.05; // 10% chance for a random debuff to spawn
         this.lastDebuffSpawn = 0;
-        this.debuffSpawnInterval = 5000; // Spawn a debuff every 5 seconds on average
+        this.debuffSpawnInterval = 10000; // Spawn a debuff every 5 seconds on average
         this.spacecraftDropRate = 0.75; // 75% drop rate for normal spacecraft
         this.spacecraft2DropRate = 0.90; // 90% drop rate for spacecraft2
         this.activePowerups = new Map();
@@ -1136,13 +1136,18 @@ class Game {
         }
     
         // Random debuff spawn logic
-        if (currentTime - this.lastDebuffSpawn > this.debuffSpawnInterval) {
-            if (Math.random() < this.debuffDropRate) {
-                const x = Math.random() * (GAME_WIDTH - 30);
-                this.powerups.push(this.createPowerup(x, 0, true));
-                this.lastDebuffSpawn = currentTime;
-            }
+    if (currentTime - this.lastDebuffSpawn > this.debuffSpawnInterval) {
+        if (Math.random() < this.debuffDropRate) {
+            const x = Math.random() * (GAME_WIDTH - 30);
+            this.powerups.push(this.createPowerup(x, 0, true));
+            this.lastDebuffSpawn = currentTime;
+            console.log('Debuff spawned'); // Optional: for debugging
+        } else {
+            // Even if we don't spawn a debuff, update the last spawn time
+            // This prevents clustering of spawn attempts
+            this.lastDebuffSpawn = currentTime;
         }
+    }
     
     }
 
