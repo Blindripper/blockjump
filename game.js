@@ -219,7 +219,7 @@ class Game {
             }
     
             hideOverlay();
-            this.gameStartTime = Math.floor(Date.now() / 1000000); // Store as Unix timestamp (seconds)
+            this.gameStartTime = Math.floor(Date.now() / 1000); // Store as Unix timestamp (seconds)
             console.log('Game started at:', this.gameStartTime);
 
             this.gameSpeed = 1;
