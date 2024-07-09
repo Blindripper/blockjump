@@ -56,7 +56,7 @@ function renderAchievements() {
         console.log(`Achievement ${achievement.name} unlocked:`, isUnlocked, 'Already minted:', isAlreadyMinted);
         
         const achievementElement = document.createElement('div');
-        achievementElement.className = `achievement ${isUnlocked ? 'unlocked' : ''}`;
+        achievementElement.className = `achievement ${isUnlocked ? 'unlocked' : ''} ${isAlreadyMinted ? 'minted' : ''}`;
         achievementElement.innerHTML = `
             <div class="achievement-content">
                 <img src="https://raw.githubusercontent.com/Blindripper/blockjump/main/NFT/${achievement.image}" alt="${achievement.name}">
@@ -65,33 +65,20 @@ function renderAchievements() {
                     <p>${achievement.description}</p>
                 </div>
             </div>
-            <button class="mint-button" data-id="${achievement.id}">Mint NFT</button>
+            ${isAlreadyMinted ? '<span class="minted-label">Minted</span>' : '<button class="mint-button" data-id="${achievement.id}">Mint NFT</button>'}
         `;
         achievementsList.appendChild(achievementElement);
 
-        const mintButton = achievementElement.querySelector('.mint-button');
-        mintButton.style.display = isUnlocked && !isAlreadyMinted ? 'block' : 'none';
-        mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
+        if (!isAlreadyMinted) {
+            const mintButton = achievementElement.querySelector('.mint-button');
+            mintButton.style.display = isUnlocked ? 'block' : 'none';
+            mintButton.addEventListener('click', () => mintAchievementNFT(achievement.id));
+        }
     });
 
     const achievementsSection = document.getElementById('achievementsSection');
     if (achievementsSection) {
         achievementsSection.style.display = 'block';
-    }
-}
-
-async function mintAchievementNFT(achievementId) {
-    if (window.ethereum && window.ethereum.selectedAddress) {
-        const achievement = achievements.find(a => a.id === achievementId);
-        if (achievement && achievement.requirement(gameStats)) {
-            const success = await mintAchievement(window.ethereum.selectedAddress, achievementId);
-            if (success) {
-                userAchievements.push(achievementId);
-                renderAchievements();
-            }
-        } else {
-            console.log('Achievement conditions not met');
-        }
     }
 }
 
@@ -110,6 +97,7 @@ async function loadUserAchievements() {
             }
             
             userAchievements = await getAchievements(window.ethereum.selectedAddress);
+            console.log('Loaded user achievements:', userAchievements);
             renderAchievements();
         } else {
             console.log('Wallet not connected');
