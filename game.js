@@ -48,6 +48,7 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 // Game class
 class Game {
     constructor() {
+        this.prepareNextBackground();
         this.nextBackgroundIndex = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
@@ -180,7 +181,33 @@ class Game {
         this.powerups.push(this.createPowerup(x, y, false, true)); // Force nomadic powerup
     }
 
-    
+    prepareNextBackground() {
+        const nextIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
+        if (!backgrounds[nextIndex].image) {
+            const img = new Image();
+            img.onload = () => {
+                backgrounds[nextIndex].image = img;
+                this.drawBackgroundToOffscreen(nextIndex);
+            };
+            img.src = `${picsUrl}bg${nextIndex + 1}.jpg`;
+        } else {
+            this.drawBackgroundToOffscreen(nextIndex);
+        }
+        this.nextBackgroundIndex = nextIndex;
+    }
+
+    drawBackgroundToOffscreen(index) {
+        const bg = backgrounds[index];
+        if (bg.image && bg.image.complete) {
+            const pattern = this.offscreenCtx.createPattern(bg.image, 'repeat');
+            this.offscreenCtx.fillStyle = pattern;
+            this.offscreenCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        } else {
+            this.offscreenCtx.fillStyle = bg.color;
+            this.offscreenCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        }
+    }
+
 
     async initializeGame() {
         if (!checkWalletConnection()) return;
@@ -913,19 +940,20 @@ class Game {
 
     
     
-    updateBackground() {
+    updateBackground(dt) {
         const targetBackgroundIndex = Math.floor(this.score / this.backgroundChangeThreshold) % backgrounds.length;
         
-        if (targetBackgroundIndex !== this.currentBackgroundIndex) {
-            // If we've reached the prepared next background, switch to it
-            if (targetBackgroundIndex === this.nextBackgroundIndex) {
+        if (targetBackgroundIndex !== this.currentBackgroundIndex && !this.isTransitioningBackground) {
+            this.isTransitioningBackground = true;
+            this.backgroundTransitionProgress = 0;
+        }
+
+        if (this.isTransitioningBackground) {
+            this.backgroundTransitionProgress += dt * 2; // Adjust transition speed here
+            if (this.backgroundTransitionProgress >= 1) {
                 this.currentBackgroundIndex = this.nextBackgroundIndex;
-                // Prepare the next background
-                this.nextBackgroundIndex = (this.currentBackgroundIndex + 1) % backgrounds.length;
-            } else {
-                // If we've skipped backgrounds, catch up
-                this.currentBackgroundIndex = targetBackgroundIndex;
-                this.nextBackgroundIndex = (targetBackgroundIndex + 1) % backgrounds.length;
+                this.isTransitioningBackground = false;
+                this.prepareNextBackground();
             }
         }
     }
@@ -1105,15 +1133,15 @@ class Game {
     }
 
     drawBackground() {
-        const currentBg = backgrounds[this.currentBackgroundIndex];
-        if (currentBg.image && currentBg.image.complete) {
-            const pattern = this.ctx.createPattern(currentBg.image, 'repeat');
-            this.ctx.fillStyle = pattern;
-            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        if (this.isTransitioningBackground) {
+            this.ctx.globalAlpha = 1 - this.backgroundTransitionProgress;
+            this.ctx.drawImage(this.offscreenCanvas, 0, 0);
+            this.ctx.globalAlpha = this.backgroundTransitionProgress;
+            this.drawBackgroundToOffscreen(this.nextBackgroundIndex);
+            this.ctx.drawImage(this.offscreenCanvas, 0, 0);
+            this.ctx.globalAlpha = 1;
         } else {
-            // Fallback to color if image is not loaded
-            this.ctx.fillStyle = currentBg.color;
-            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            this.ctx.drawImage(this.offscreenCanvas, 0, 0);
         }
     }
 
