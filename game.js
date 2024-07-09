@@ -214,6 +214,7 @@ class Game {
             this.gameStarted = false;
             this.hasPlayerJumped = false;
             this.score = 0;
+            this.lastNomadicPlatformSpawn = 0; 
             this.player = this.createPlayer();
             this.gameRunning = true;
             this.gameOver = false;
