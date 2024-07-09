@@ -2018,9 +2018,14 @@ async function handleScoreSubmission(name) {
 
     try {
         showOverlay("Checking game state...");
-        const stateValid = await checkContractState();
-        if (!stateValid) {
-            showOverlay('Error checking game state. Please try again.', null, true, 'Try Again');
+        
+        // Check contract state
+        const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+        const gameTries = await contract.methods.getGameTries(account).call();
+        console.log('Contract state - Last game start time:', lastGameStartTime, 'Remaining tries:', gameTries);
+
+        if (parseInt(gameTries) <= 0) {
+            showOverlay('No game tries remaining. Please purchase more.', null, true, 'Buy Tries');
             return;
         }
 
