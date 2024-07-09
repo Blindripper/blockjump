@@ -797,13 +797,17 @@ class Game {
         const minWidth = 60;
         const maxWidth = 180;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
+        
+        // Reduce the probability of spike platforms
+        const spikeChance = 0.01; // 1% chance, adjust this value to your preference
+    
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: y,
             width: width,
             height: PLATFORM_HEIGHT,
-            isGolden: Math.random() < 0.1,
-            isSpike: allowSpikes && Math.random() < 0.03, // Only create spikes if allowed
+            isGolden: Math.random() < 0.1, // 10% chance for golden platforms
+            isSpike: allowSpikes && Math.random() < spikeChance, // Reduced chance for spike platforms
             spriteIndex: Math.floor(Math.random() * 2)
         };
     }
