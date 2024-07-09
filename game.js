@@ -210,8 +210,8 @@ class Game {
                 return;
             }
     
-            const gameStarted = await startGameWeb3();
-            if (!gameStarted) {
+            const { success, gameStartTime } = await startGame();
+            if (!success) {
                 console.error('Failed to start game on blockchain');
                 hideOverlay();
                 showOverlay('Failed to start game. Please try again.');
@@ -246,6 +246,11 @@ class Game {
             this.lastTime = performance.now();
             this.constantBeamActive = false;
             this.powerups = [];
+
+            setTimeout(() => {
+                this.bottomPlatform = null;
+                console.log('Bottom platform removed after 5 seconds');
+            }, 5000);
     
             await updateTryCount();
             
