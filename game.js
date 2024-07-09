@@ -897,7 +897,7 @@ class Game {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
             this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
             this.lastBackgroundChange = this.score;
-            this.spawnNomadicPlatform();
+            
         }
     }
 
