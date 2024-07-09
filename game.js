@@ -1133,13 +1133,6 @@ class Game {
             }
         }
     
-    
-        // Check if it's time to spawn a new nomadic platform
-        if (currentTime - this.lastNomadicPlatformSpawn >= 30000 && !this.nomadicPlatform) { // 30 seconds
-            this.nomadicPlatform = this.createNomadicPlatform();
-            this.nomadicPlatformDuration = 20000; // Reset duration to 20 seconds
-            this.lastNomadicPlatformSpawn = currentTime;
-        }
     }
 
     collectNomadicPowerup() {
@@ -1149,20 +1142,14 @@ class Game {
 
 
     createPowerup(x, y, isDebuff = false) {
-        if (!isDebuff) {
-            return {
-                x: x,
-                y: y,
-                width: 30,
-                height: 30,
-                type: 'nomadic'
-            };
-        }
-    
-        // Existing code for debuffs
-        let powerupPool = ['solana', 'blast', 'ethereum'];
+        let powerupPool = isDebuff 
+            ? ['solana', 'blast', 'ethereum']
+            : ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX','nomadic'];
+        
+        // Shuffle the powerup pool for better randomness
         powerupPool = this.shuffleArray(powerupPool);
-        const type = powerupPool[0];
+        
+        const type = powerupPool[0]; // Take the first item from the shuffled array
         
         return {
             x: x,
@@ -1170,9 +1157,13 @@ class Game {
             width: 30,
             height: 30,
             type: type,
-            isDebuff: true
+            isDebuff: isDebuff
         };
-    }
+    } 
+
+
+
+
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
