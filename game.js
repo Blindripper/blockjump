@@ -543,8 +543,6 @@ class Game {
         this.activePowerups.clear();
     }
 
-    
-
     checkBulletEnemyCollisions() {
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
@@ -659,8 +657,7 @@ class Game {
       }
       
     
-
-      checkPlayerEnemyCollisions() {
+    checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
           const enemy = this.enemies[i];
           if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
@@ -788,8 +785,7 @@ class Game {
         if (e.code === 'Space') this.shoot();
       }
       
-
-      jump() {
+    jump() {
         if (this.player.jumpCount < 2) {
             this.player.velocityY = this.JUMP_VELOCITY;
             this.player.jumpCount++;
@@ -838,8 +834,6 @@ class Game {
         }
     }
 
-    
-    
     updateBackground() {
         if (this.score - this.lastBackgroundChange >= this.backgroundChangeThreshold) {
             this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % 16;
@@ -892,7 +886,6 @@ class Game {
     }
 
     
-
     handleGoldenPlatform() {
         this.player.velocityY = this.JUMP_VELOCITY * 1.5;
         this.score += 15;
