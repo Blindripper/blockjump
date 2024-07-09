@@ -246,20 +246,20 @@ class Game {
     
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
-        } catch (error) {
+            } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
-        }
-    }
+             }
+            }
     
-    loadSprites() {
+        loadSprites() {
         this.enemySprite = new Image();
         this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
         this.enemyDestroyedSprite = new Image();
         this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
     }
 
-    loadSounds() {
+        loadSounds() {
         Object.values(this.sounds).forEach(sound => {
             sound.load();
             sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
@@ -690,7 +690,7 @@ class Game {
         if (enemy.health <= 0) {
             enemy.isDestroyed = true;
             enemy.destroyedTime = 0;
-            this.score += enemy.isType2 ? 300 : 100;
+            this.score += enemy.isType2 ? 600 : 200;
         }
     }
 
@@ -865,7 +865,12 @@ class Game {
             this.createJumpEffect();
     
             console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
-    
+            
+            if (this.player.y < this.lastPlatformY) {
+                this.blocksClimbed++; // Increment blocks climbed if jumping past the previous platform
+                this.lastPlatformY = this.player.y; // Update lastPlatformY for tracking
+              }
+
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
                 this.score = 0;
@@ -961,7 +966,7 @@ class Game {
 
     handleGoldenPlatform() {
         this.player.velocityY = this.JUMP_VELOCITY * 1.5;
-        this.score += 15;
+        this.score += 50;
         this.triggerScreenShake(5, 0.3);
         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 15, '#3FE1B0');
         this.playSound('powerup');
@@ -1261,7 +1266,7 @@ class Game {
                 this.enemies.forEach(enemy => {
                     enemy.isDestroyed = true;
                     enemy.destroyedTime = 0;
-                    this.score += enemy.isType2 ? 300 : 100;
+                    this.score += enemy.isType2 ? 600 : 200;
                 });
                 
                 // Clear all debuff powerups from the screen
