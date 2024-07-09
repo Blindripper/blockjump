@@ -902,21 +902,28 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   console.log('Attempting to submit score with:', { name, score, blocksClimbed, gameStartTime });
 
   try {
-      const currentTime = Date.now(); // Current time in milliseconds
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
       const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
-      console.log('Token validity period (seconds):', tokenValidityPeriod);
-      console.log('Current time (ms):', currentTime);
-      console.log('Game start time (ms):', gameStartTime);
-      console.log('Time difference (seconds):', (currentTime - gameStartTime) / 1000);
+      console.log('Token validity period:', tokenValidityPeriod);
+      console.log('Current time:', currentTime);
+      console.log('Game start time:', Math.floor(gameStartTime / 1000));
+      console.log('Time difference (seconds):', currentTime - Math.floor(gameStartTime / 1000));
 
-      if (currentTime - gameStartTime > parseInt(tokenValidityPeriod) * 1000) {
-          console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
+      if (currentTime - Math.floor(gameStartTime / 1000) > parseInt(tokenValidityPeriod)) {
+          console.error('Game session expired. Current time:', currentTime, 'Game start time:', Math.floor(gameStartTime / 1000));
           return false;
       }
 
       // Convert gameStartTime to seconds for the smart contract
       const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
       
+      // Check contract state before submission
+      const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+      console.log('Last game start time from contract:', lastGameStartTime);
+      
+      const gameTries = await contract.methods.getGameTries(account).call();
+      console.log('Remaining game tries:', gameTries);
+
       // Estimate gas before sending the transaction
       const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
       console.log('Estimated gas:', gasEstimate);
@@ -937,8 +944,15 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
               const decodedError = web3.eth.abi.decodeParameter('string', error.data);
               console.error('Decoded error:', decodedError);
           } catch (decodeError) {
-              console.error('Failed to decode error data');
+              console.error('Failed to decode error data:', decodeError);
           }
+      }
+      // Try to get more information from the contract
+      try {
+          const revertReason = await web3.eth.call(error.receipt);
+          console.error('Revert reason:', revertReason);
+      } catch (callError) {
+          console.error('Failed to get revert reason:', callError);
       }
       return false;
   }
