@@ -49,6 +49,7 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 class Game {
     constructor() {
         this.baseScrollSpeed = 65; // Base scrolling speed
+        this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
@@ -801,16 +802,15 @@ class Game {
         const maxWidth = 180;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
-        // Reduce the probability of spike platforms
-        const spikeChance = 0.01; // 1% chance, adjust this value to your preference
-    
+        const spikeChance = 0.01; // 1% chance for spike platforms
+
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: y,
             width: width,
             height: PLATFORM_HEIGHT,
-            isGolden: Math.random() < 0.1, // 10% chance for golden platforms
-            isSpike: allowSpikes && Math.random() < spikeChance, // Reduced chance for spike platforms
+            isGolden: Math.random() < 0.1,
+            isSpike: allowSpikes && Math.random() < spikeChance,
             spriteIndex: Math.floor(Math.random() * 2)
         };
     }
@@ -984,11 +984,11 @@ class Game {
     while (this.platforms.length < this.platformCount) {
         const highestPlatform = this.platforms.reduce((highest, platform) => 
             platform.y < highest.y ? platform : highest, 
-            {y: GAME_HEIGHT} // Default to screen height if no platforms exist
+            {y: GAME_HEIGHT}
         );
         
-        const newY = highestPlatform.y - this.getRandomPlatformSpacing();
-        this.platforms.push(this.createPlatform(newY, true)); // Allow spike platforms during gameplay
+        const newY = highestPlatform.y - this.minPlatformDistance - Math.random() * (PLAYER_HEIGHT * 0.5);
+        this.platforms.push(this.createPlatform(newY, true));
     }
 
     // Update blocks climbed
@@ -1043,6 +1043,13 @@ class Game {
         // Update position (use this.gameSpeed)
         this.player.x += this.player.velocityX * dt * this.gameSpeed;
         this.player.y += this.player.velocityY * dt * this.gameSpeed;
+
+        // Wrap-around logic for horizontal movement
+        if (this.player.x + this.player.width < 0) {
+            this.player.x = GAME_WIDTH;
+        } else if (this.player.x > GAME_WIDTH) {
+            this.player.x = -this.player.width;
+        }
 
         // Keep player within vertical game bounds
         this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
@@ -1498,6 +1505,21 @@ class Game {
     }
 
     checkCollision(obj1, obj2) {
+        // Check normal collision
+        if (this.normalCollision(obj1, obj2)) return true;
+
+        // Check wrap-around collision
+        const wrappedObj1 = {
+            x: obj1.x < GAME_WIDTH / 2 ? obj1.x + GAME_WIDTH : obj1.x - GAME_WIDTH,
+            y: obj1.y,
+            width: obj1.width,
+            height: obj1.height
+        };
+
+        return this.normalCollision(wrappedObj1, obj2);
+    }
+
+    normalCollision(obj1, obj2) {
         return obj1.x < obj2.x + obj2.width &&
                obj1.x + obj1.width > obj2.x &&
                obj1.y < obj2.y + obj2.height &&
@@ -1519,25 +1541,37 @@ class Game {
             console.warn('Player or its position is undefined in drawPlayer');
             return;
         }
-
-        if (this.playerShield) {
-            this.ctx.beginPath();
-            this.ctx.arc(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 
-                         Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
-            this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Golden color for the shield
-            this.ctx.lineWidth = 3;
-            this.ctx.stroke();
-        }
-
-        const playerSprite = sprites.get('player');
-        if (playerSprite && playerSprite.complete) {
-            this.ctx.drawImage(playerSprite, 
-                               Math.round(this.player.x), Math.round(this.player.y), 
-                               this.player.width, this.player.height);
-        } else {
-            this.ctx.fillStyle = '#00FF00';  // Bright green color
-            this.ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), 
-                              this.player.width, this.player.height);
+    
+        const drawPlayerAt = (x, y) => {
+            if (this.playerShield) {
+                this.ctx.beginPath();
+                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2, 
+                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Golden color for the shield
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+            }
+    
+            const playerSprite = sprites.get('player');
+            if (playerSprite && playerSprite.complete) {
+                this.ctx.drawImage(playerSprite, 
+                                   Math.round(x), Math.round(y), 
+                                   this.player.width, this.player.height);
+            } else {
+                this.ctx.fillStyle = '#00FF00';  // Bright green color
+                this.ctx.fillRect(Math.round(x), Math.round(y), 
+                                  this.player.width, this.player.height);
+            }
+        };
+    
+        // Draw main player
+        drawPlayerAt(this.player.x, this.player.y);
+    
+        // Draw wrap-around player if necessary
+        if (this.player.x + this.player.width > GAME_WIDTH) {
+            drawPlayerAt(this.player.x - GAME_WIDTH, this.player.y);
+        } else if (this.player.x < 0) {
+            drawPlayerAt(this.player.x + GAME_WIDTH, this.player.y);
         }
     }
 
