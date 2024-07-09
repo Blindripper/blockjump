@@ -52,6 +52,25 @@ header {
   height: calc(100vh - 60px); /* Adjust based on your header height */
 }
 
+.modal-content {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.modal-content section {
+  margin-bottom: 20px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content img {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
 /* Game Wrapper */
 #gameWrapper {
   display: flex;
