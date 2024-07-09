@@ -813,18 +813,17 @@ async function mintAchievement(account, achievementId) {
 async function startGame() {
   if (!isInitialized) {
       console.error('Contract not initialized');
-      return false;
+      return { success: false, gameStartTime: null };
   }
   try {
       const result = await contract.methods.startGame().send({ from: account });
       console.log('Game started successfully:', result);
-      // Set the game start time in seconds
-      window.gameStartTime = Math.floor(Date.now() / 1000);
-      console.log('Game start time set to:', window.gameStartTime);
-      return true;
+      const gameStartTime = Math.floor(Date.now() / 1000);
+      console.log('Game start time set to:', gameStartTime);
+      return { success: true, gameStartTime: gameStartTime };
   } catch (error) {
       console.error('Error starting game:', error);
-      return false;
+      return { success: false, gameStartTime: null };
   }
 }
 
