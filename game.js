@@ -1,4 +1,4 @@
-import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract } from './web3Integration.js';
+import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2020,9 +2020,17 @@ async function handleScoreSubmission(name) {
         showOverlay("Checking game state...");
         
         const contract = getContract(); // Get the contract instance
+        const account = getCurrentAccount(); // Get the current account
+
         if (!contract) {
             console.error('Contract not initialized');
             showOverlay('Error: Contract not initialized. Please refresh and try again.', null, true, 'Refresh');
+            return;
+        }
+
+        if (!account) {
+            console.error('Account not available');
+            showOverlay('Error: Account not available. Please connect your wallet and try again.', null, true, 'Connect Wallet');
             return;
         }
 
