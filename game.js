@@ -48,19 +48,13 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 // Game class
 class Game {
     constructor() {
-        this.lastFrameTime = 0;
-        this.accumulatedTime = 0;
-        this.fixedTimeStep = 1000 / 60; // 60 FPS
-        this.baseScrollSpeed = 65; // Base scrolling speed
         this.nextBackgroundIndex = 0;
+        this.baseScrollSpeed = 65; // Base scrolling speed
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
         this.debugMode = false;
-        this.currentDifficulty = 1;
-        this.targetDifficulty = 1;
-        this.difficultyTransitionRate = 0.1;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -900,7 +894,6 @@ class Game {
         dt *= this.gameSpeed;
     
         this.updateScrollSpeed();
-        this.updateDifficulty(dt)
         this.updatePlayer(dt);
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
@@ -1381,25 +1374,21 @@ class Game {
     } 
 
 
-    updateDifficulty(dt) {
-        this.targetDifficulty = Math.floor(this.score / 5000) + 1;
-        
-        // Smoothly transition to the target difficulty
-        this.currentDifficulty += (this.targetDifficulty - this.currentDifficulty) * this.difficultyTransitionRate * dt;
-
-        // Update game parameters based on current difficulty
-        this.enemySpawnRate = Math.min(5, 1 + (this.currentDifficulty - 1) * 0.5);
+    updateDifficulty() {
+        this.difficultyLevel = Math.floor(this.score / 5000) + 1;
+        this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
+    
+        // Update enemy spawn rate
+        this.enemySpawnRate = Math.min(5, Math.floor(this.score / 5000) + 1);
+    
+        // Update enemy spawn interval
         this.enemySpawnInterval = Math.max(
-            5000,
-            this.baseEnemySpawnInterval - (this.currentDifficulty - 1) * 2000
+            5000, // Minimum spawn interval of 5 seconds
+            this.baseEnemySpawnInterval - (this.difficultyLevel - 1) * 2000
         );
-        this.platformSpeed = 50 + (this.currentDifficulty - 1) * 2;
-
-        // Smoothly update enemy shoot interval
-        this.enemyShootInterval = Math.max(
-            this.minEnemyShootInterval,
-            this.maxEnemyShootInterval - (this.currentDifficulty - 1) * 1000
-        );
+    
+        // Change background
+        this.currentBackgroundIndex = Math.min(Math.floor(this.score / 5000), backgrounds.length - 1);
     }
 
 
@@ -1450,7 +1439,6 @@ class Game {
         this.drawBackground();
         
         // Draw game elements
-
         this.drawPlatforms();
         this.drawConstantBeam();
         this.drawPlayer();
@@ -1718,28 +1706,15 @@ class Game {
 
     gameLoop(currentTime) {
         if (!this.gameRunning) return;
-
-        if (!this.lastFrameTime) {
-            this.lastFrameTime = currentTime;
-        }
-
-        let deltaTime = currentTime - this.lastFrameTime;
-        this.lastFrameTime = currentTime;
-
-        // Cap deltaTime to prevent large jumps
-        if (deltaTime > 200) {
-            deltaTime = 200;
-        }
-
-        this.accumulatedTime += deltaTime;
-
-        while (this.accumulatedTime >= this.fixedTimeStep) {
-            this.update(this.fixedTimeStep / 1000);
-            this.accumulatedTime -= this.fixedTimeStep;
-        }
-
+        
+        if (!this.lastTime) this.lastTime = currentTime;
+        let deltaTime = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+        
+        
+        this.update(deltaTime);
         this.draw();
-
+        
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
