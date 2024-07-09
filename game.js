@@ -295,9 +295,16 @@ class Game {
 
     createNomadicPlatform() {
         console.log('Creating nomadic platform');
-        const platform = this.createPlatform(0, false);
-        platform.y = -PLATFORM_HEIGHT; // Start just above the screen
-        platform.isNomadic = true;
+        const platform = {
+            x: Math.random() * (GAME_WIDTH - 180),
+            y: -PLATFORM_HEIGHT,
+            width: Math.random() * (180 - 100) + 100,
+            height: PLATFORM_HEIGHT,
+            isGolden: false,
+            isSpike: false,
+            spriteIndex: Math.floor(Math.random() * 2),
+            isNomadic: true
+        };
         platform.powerup = {
             x: platform.x + platform.width / 2 - 15,
             y: platform.y - 30,
@@ -311,8 +318,8 @@ class Game {
 
     updateNomadicPlatform(dt) {
         if (this.nomadicPlatform) {
-            console.log('Updating nomadic platform, y:', this.nomadicPlatform.y);
             this.nomadicPlatform.y += this.currentScrollSpeed * dt;
+            console.log('Updating nomadic platform, y:', this.nomadicPlatform.y);
             
             // Update powerup position
             if (this.nomadicPlatform.powerup) {
@@ -324,16 +331,17 @@ class Game {
             if (this.nomadicPlatformDuration <= 0 || this.nomadicPlatform.y > GAME_HEIGHT) {
                 console.log('Removing nomadic platform');
                 this.nomadicPlatform = null;
+                this.lastNomadicPlatformSpawn = Date.now();
             }
-        }
-    
-        // Spawn new nomadic platform if needed
-        const currentTime = Date.now();
-        if (currentTime - this.lastNomadicPlatformSpawn >= 30000 && !this.nomadicPlatform) {
-            console.log('Spawning new nomadic platform');
-            this.nomadicPlatform = this.createNomadicPlatform();
-            this.nomadicPlatformDuration = 20000;
-            this.lastNomadicPlatformSpawn = currentTime;
+        } else {
+            // Spawn new nomadic platform if needed
+            const currentTime = Date.now();
+            if (currentTime - this.lastNomadicPlatformSpawn >= 30000) {
+                console.log('Spawning new nomadic platform');
+                this.nomadicPlatform = this.createNomadicPlatform();
+                this.nomadicPlatformDuration = 20000;
+                this.lastNomadicPlatformSpawn = currentTime;
+            }
         }
     }
 
