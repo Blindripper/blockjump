@@ -947,6 +947,18 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   }
 }
 
+function getContract() {
+  if (!isInitialized) {
+    console.error('Contract not initialized');
+    return null;
+  }
+  return contract;
+}
+
+function getCurrentAccount() {
+  return account;
+}
+
 
 async function claimPrize() {
   if (!isInitialized) {
@@ -972,10 +984,12 @@ async function claimPrize() {
 export { 
   initWeb3, 
   startGame, 
-  getGameTries, 
+  getGameTries,
+  getContract, 
   purchaseGameTries, 
   getHighscores, 
-  submitScore, 
+  submitScore,
+  getCurrentAccount, 
   claimPrize,
   getAchievements,
   mintAchievementNFT, 
