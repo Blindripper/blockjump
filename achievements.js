@@ -1,4 +1,4 @@
-import { getAchievements, mintAchievement, initWeb3 } from './web3Integration.js';
+import { getAchievements, mintAchievementNFT, initWeb3 } from './web3Integration.js';
 
 const achievements = [
     {
