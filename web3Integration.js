@@ -752,6 +752,8 @@ function isContractInitialized() {
   return isInitialized;
 }
 
+
+
 async function connectWallet() {
   if (!web3) {
       showOverlay('Web3 not initialized. Please refresh the page.');
@@ -907,7 +909,6 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       console.log('Game start time (ms):', gameStartTime);
       console.log('Time difference (seconds):', (currentTime - gameStartTime) / 1000);
 
-      // Convert tokenValidityPeriod to milliseconds for comparison
       if (currentTime - gameStartTime > parseInt(tokenValidityPeriod) * 1000) {
           console.error('Game session expired. Current time:', currentTime, 'Game start time:', gameStartTime);
           return false;
@@ -916,9 +917,13 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       // Convert gameStartTime to seconds for the smart contract
       const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
       
+      // Estimate gas before sending the transaction
+      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
+      console.log('Estimated gas:', gasEstimate);
+
       const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).send({
           from: account,
-          gas: 200000, // You may need to adjust this value
+          gas: Math.floor(gasEstimate * 1.2), // Increase gas limit by 20%
       });
 
       console.log('Score submitted successfully:', result);
@@ -926,7 +931,15 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   } catch (error) {
       console.error('Error in submitScore:', error);
       if (error.message) console.error('Error message:', error.message);
-      // ... rest of error handling ...
+      if (error.data) {
+          console.error('Error data:', error.data);
+          try {
+              const decodedError = web3.eth.abi.decodeParameter('string', error.data);
+              console.error('Decoded error:', decodedError);
+          } catch (decodeError) {
+              console.error('Failed to decode error data');
+          }
+      }
       return false;
   }
 }
