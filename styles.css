@@ -78,6 +78,20 @@ header {
   display: block;
 }
 
+.achievement.minted {
+  border: 2px solid gold;
+  box-shadow: 0 0 10px gold;
+}
+
+.achievement .minted-label {
+  background-color: gold;
+  color: black;
+  padding: 5px 10px;
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
 .start-button {
   background-color: #3FE1B0;
   color: #0f1624;
