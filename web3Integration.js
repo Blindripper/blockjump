@@ -958,6 +958,11 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
   }
 }
 
+function getContract() {
+  return contract;
+}
+
+
 
 async function claimPrize() {
   if (!isInitialized) {
@@ -985,7 +990,8 @@ export {
   startGame, 
   getGameTries, 
   purchaseGameTries, 
-  getHighscores, 
+  getHighscores,
+  getContract, 
   submitScore, 
   claimPrize,
   getAchievements,
