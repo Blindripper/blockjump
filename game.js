@@ -1000,14 +1000,6 @@ class Game {
         this.platforms.push(this.createPlatform(newY, true));
     }
 
-    // Update blocks climbed
-    if (this.platforms.length > 0) {
-        const lowestPlatformY = Math.min(...this.platforms.map(p => p.y));
-        const newBlocksClimbed = Math.max(0, Math.floor(-lowestPlatformY / PLATFORM_HEIGHT));
-        if (newBlocksClimbed > this.blocksClimbed) {
-            this.blocksClimbed = newBlocksClimbed;
-        }
-    }
 }
 
 
