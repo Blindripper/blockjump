@@ -293,15 +293,17 @@ class Game {
     }
 
     createNomadicPlatform() {
-        const platform = this.createPlatform(0, false); // Create platform at top of screen, no spikes
+        console.log('Creating nomadic platform');
+        const platform = this.createPlatform(0, false);
         platform.isNomadic = true;
         platform.powerup = {
-            x: platform.x + platform.width / 2 - 15, // Center the powerup on the platform
-            y: platform.y - 30, // Place powerup above the platform
+            x: platform.x + platform.width / 2 - 15,
+            y: platform.y - 30,
             width: 30,
             height: 30,
             type: 'nomadic'
         };
+        console.log('Nomadic platform created:', platform);
         return platform;
     }
 
@@ -1389,10 +1391,19 @@ class Game {
 
         // Draw nomadic platform and powerup
         if (this.nomadicPlatform) {
-            this.ctx.drawImage(this.platformSprites.normal[0], this.nomadicPlatform.x, this.nomadicPlatform.y, this.nomadicPlatform.width, PLATFORM_HEIGHT);
+            console.log('Drawing nomadic platform:', this.nomadicPlatform);
+            this.ctx.drawImage(this.platformSprites.normal[0], 
+                this.nomadicPlatform.x, 
+                this.nomadicPlatform.y, 
+                this.nomadicPlatform.width, 
+                PLATFORM_HEIGHT);
             if (this.nomadicPlatform.powerup) {
                 const powerupSprite = sprites.get('nomadic');
-                this.ctx.drawImage(powerupSprite, this.nomadicPlatform.powerup.x, this.nomadicPlatform.powerup.y, this.nomadicPlatform.powerup.width, this.nomadicPlatform.powerup.height);
+                this.ctx.drawImage(powerupSprite, 
+                    this.nomadicPlatform.powerup.x, 
+                    this.nomadicPlatform.powerup.y, 
+                    this.nomadicPlatform.powerup.width, 
+                    this.nomadicPlatform.powerup.height);
             }
         }
     
@@ -1639,21 +1650,17 @@ class Game {
 
 
     gameLoop(currentTime) {
-        if (!this.gameRunning) {
-            return;
-        }
-    
+        if (!this.gameRunning) return;
+        
         if (!this.lastTime) this.lastTime = currentTime;
-    
-        let deltaTime = currentTime - this.lastTime;
+        let deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
-    
-        // Ensure deltaTime is not too large
-        deltaTime = Math.min(deltaTime, 50); // Cap at 50ms (20 fps)
-    
-        this.update(deltaTime / 1000);
+        
+        console.log('Game loop running, delta time:', deltaTime);
+        
+        this.update(deltaTime);
         this.draw();
-    
+        
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
