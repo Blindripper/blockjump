@@ -525,6 +525,7 @@ class Game {
         const currentTime = Date.now();
         this.enemies.forEach((enemy, index) => {
             if (enemy.isDestroyed) {
+
                 enemy.destroyedTime += dt;
                 if (enemy.destroyedTime > 0.5) {
                     // Check for powerup drop
@@ -956,36 +957,42 @@ class Game {
     }
 
     updatePlatforms(dt) {
-        // Update bottom platform timer
-        if (this.gameStarted && this.bottomPlatform) {
-            this.bottomPlatformTimer += dt * this.gameSpeed;
-            if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
-                this.bottomPlatform = null;
-            }
+    // Update bottom platform timer
+    if (this.gameStarted && this.bottomPlatform) {
+        this.bottomPlatformTimer += dt * this.gameSpeed;
+        if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
+            this.bottomPlatform = null;
         }
-    
-        // Move existing platforms down
-        this.platforms.forEach(platform => {
-            platform.y += this.currentScrollSpeed * dt;
-        });
-    
-        // Remove platforms that are below the bottom of the screen
-        this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
-    
-        // Add new platforms if needed
-        while (this.platforms.length < this.platformCount) {
-            const highestPlatform = this.platforms.reduce((highest, platform) => 
-                platform.y < highest.y ? platform : highest, 
-                {y: GAME_HEIGHT} // Default to screen height if no platforms exist
-            );
-            
-            const newY = highestPlatform.y - this.getRandomPlatformSpacing();
-            this.platforms.push(this.createPlatform(newY, true)); // Allow spike platforms during gameplay
-        }
-    
-        // Update blocks climbed
-        this.blocksClimbed = Math.max(this.blocksClimbed, Math.floor(-this.platforms[0].y / PLATFORM_HEIGHT));
     }
+
+    // Move existing platforms down
+    this.platforms.forEach(platform => {
+        platform.y += this.currentScrollSpeed * dt;
+    });
+
+    // Remove platforms that are below the bottom of the screen
+    this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
+
+    // Add new platforms if needed
+    while (this.platforms.length < this.platformCount) {
+        const highestPlatform = this.platforms.reduce((highest, platform) => 
+            platform.y < highest.y ? platform : highest, 
+            {y: GAME_HEIGHT} // Default to screen height if no platforms exist
+        );
+        
+        const newY = highestPlatform.y - this.getRandomPlatformSpacing();
+        this.platforms.push(this.createPlatform(newY, true)); // Allow spike platforms during gameplay
+    }
+
+    // Update blocks climbed
+    if (this.platforms.length > 0) {
+        const lowestPlatformY = Math.min(...this.platforms.map(p => p.y));
+        const newBlocksClimbed = Math.max(0, Math.floor(-lowestPlatformY / PLATFORM_HEIGHT));
+        if (newBlocksClimbed > this.blocksClimbed) {
+            this.blocksClimbed = newBlocksClimbed;
+        }
+    }
+}
 
 
 
@@ -1141,10 +1148,24 @@ class Game {
     }
 
 
-    createPowerup(x, y, isDebuff = false) {
-        let powerupPool = isDebuff 
-            ? ['solana', 'blast', 'ethereum']
-            : ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX','nomadic'];
+    createPowerup(x, y, isDebuff = false, forceNomadic = false) {
+        if (forceNomadic) {
+            return {
+                x: x,
+                y: y,
+                width: 30,
+                height: 30,
+                type: 'nomadic',
+                isDebuff: false
+            };
+        }
+    
+        let powerupPool;
+        if (isDebuff) {
+            powerupPool = ['solana', 'blast', 'ethereum'];
+        } else {
+            powerupPool = ['bitcoin', 'greenTezos', 'etherLink', 'mintTezos', 'tezosX'];
+        }
         
         // Shuffle the powerup pool for better randomness
         powerupPool = this.shuffleArray(powerupPool);
@@ -1159,7 +1180,7 @@ class Game {
             type: type,
             isDebuff: isDebuff
         };
-    } 
+    }
 
 
 
@@ -1336,10 +1357,13 @@ class Game {
         if (this.hasPlayerJumped) {
             this.score++;
             
-            // Check if it's time to drop a powerup
+            // Check if it's time to drop a nomadic powerup
             if (this.score - this.lastPowerupScore >= 5000) {
-                this.dropPowerup();
+                const x = Math.random() * (GAME_WIDTH - 30);
+                const y = 0; // Drop from the top of the screen
+                this.powerups.push(this.createPowerup(x, y, false, true)); // Force nomadic powerup
                 this.lastPowerupScore = this.score;
+                console.log('Nomadic powerup dropped at score:', this.score);
             }
         }
     }
