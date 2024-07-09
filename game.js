@@ -37,7 +37,7 @@ const picsUrl = `${repoBaseUrl}pics/`;
 // Game constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
-const PLATFORM_HEIGHT = 38;
+const PLATFORM_HEIGHT = 43;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 45;
 const pressedKeys = {};
@@ -91,6 +91,7 @@ class Game {
         this.randomSpawnInterval = 3000;
         this.activePowerups = new Map();
         this.score = 0;
+        this.nomadicPowerupLevel = 0;
         this.blocksClimbed = 0;
         this.gameStartTime = 0;
         this.lastTime = 0;
@@ -217,6 +218,7 @@ class Game {
             this.enemies = [];
             this.enemyBullets = [];
             this.gameStarted = true;
+            this.difficultyLevel = 1;
             this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
             this.hasPlayerJumped = false;
@@ -619,7 +621,7 @@ class Game {
                     bulletHit = true;
                     enemy.isDestroyed = true;
                     enemy.destroyedTime = 0;
-                    this.score += 200;
+                    this.score += 400;
                     this.enemyDestroyedSound.currentTime = 0;
                     this.enemyDestroyedSound.play();
                 }
@@ -690,7 +692,7 @@ class Game {
         if (enemy.health <= 0) {
             enemy.isDestroyed = true;
             enemy.destroyedTime = 0;
-            this.score += enemy.isType2 ? 600 : 200;
+            this.score += enemy.isType2 ? 800 : 500;
         }
     }
 
@@ -866,11 +868,8 @@ class Game {
     
             console.log(`Jump executed. Jump count: ${this.player.jumpCount}`);
             
-            if (this.player.y < this.lastPlatformY) {
-                this.blocksClimbed++; // Increment blocks climbed if jumping past the previous platform
-                this.lastPlatformY = this.player.y; // Update lastPlatformY for tracking
-              }
-
+            // We'll increment blocksClimbed in handleCollisions instead of here
+            
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
                 this.score = 0;
@@ -920,6 +919,7 @@ class Game {
     
     handleCollisions(currentTime) {
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
+        let wasOnGround = this.player.isOnGround;
         this.player.isOnGround = false;
     
         for (let platform of platforms) {
@@ -928,13 +928,20 @@ class Game {
                 if (currentTime - this.lastFallThroughTime < this.fallThroughDelay) {
                     continue;
                 }
-
+    
                 if (this.player.velocityY > 0 && this.player.y + this.player.height - this.player.velocityY <= platform.y + 5) { // Added small tolerance
                     // Landing on top of the platform
                     this.player.y = platform.y - this.player.height + 14; // Adjust this value as needed
                     this.player.velocityY = 0;
                     this.player.isOnGround = true;
                     this.player.jumpCount = 0; // Reset jump count when landing
+    
+                    // Increment blocksClimbed if the player wasn't on ground before
+                    if (!wasOnGround) {
+                        this.blocksClimbed++;
+                        console.log(`Blocks climbed: ${this.blocksClimbed}`);
+                    }
+    
                     console.log('Player landed on platform');
                 } else if (this.player.velocityY < 0 && this.player.y >= platform.y + platform.height) {
                     // Hitting the bottom of the platform when jumping up
@@ -1211,7 +1218,8 @@ class Game {
 
     applyPowerUpEffect(type) {
         const currentTime = Date.now();
-        
+        let duration = 30000; // Default duration of 30 seconds for most powerups
+    
         switch(type) {
             case 'bitcoin':
                 this.playerShield = true;
@@ -1221,54 +1229,58 @@ class Game {
                 this.shieldTimer = setTimeout(() => { 
                     this.playerShield = false;
                     this.shieldTimer = null;
-                }, 30000);
+                    this.activePowerups.delete('bitcoin');
+                }, duration);
+                this.activePowerups.set('bitcoin', { timer: this.shieldTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
-                case 'nomadic':
-                    this.nomadicPowerupLevel = Math.min(this.nomadicPowerupLevel + 1, 4);
-                    this.playSound('powerup');
-                    break;
-
-                case 'greenTezos':
+            case 'nomadic':
+                this.nomadicPowerupLevel = Math.min(this.nomadicPowerupLevel + 1, 4);
+                // Nomadic doesn't have a duration, so we don't add it to activePowerups
+                break;
+            case 'greenTezos':
                 this.rapidFire = true;
                 this.shootingCooldown = this.normalShootCooldown * 0.3;
-                setTimeout(() => { 
+                const greenTezosTimer = setTimeout(() => { 
                     this.rapidFire = false; 
                     this.shootingCooldown = this.normalShootCooldown;
-                }, 30000);
+                    this.activePowerups.delete('greenTezos');
+                }, duration);
+                this.activePowerups.set('greenTezos', { timer: greenTezosTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
-                case 'etherLink':
+            case 'etherLink':
                 this.constantBeamActive = true;
-                setTimeout(() => { 
+                const etherLinkTimer = setTimeout(() => { 
                     this.constantBeamActive = false;
-                }, 30000);
+                    this.activePowerups.delete('etherLink');
+                }, duration);
+                this.activePowerups.set('etherLink', { timer: etherLinkTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
-                    case 'mintTezos':
-                        this.lowGravity = true;
-                        this.currentGravity = this.normalGravity * 0.5;
-                        setTimeout(() => { 
-                            this.lowGravity = false; 
-                            this.currentGravity = this.normalGravity;
-                        }, 30000);
-                        break;
-                        case 'tezosX':
-
-                        this.powerupsCollected++;
-
+            case 'mintTezos':
+                this.lowGravity = true;
+                this.currentGravity = this.normalGravity * 0.5;
+                const mintTezosTimer = setTimeout(() => { 
+                    this.lowGravity = false; 
+                    this.currentGravity = this.normalGravity;
+                    this.activePowerups.delete('mintTezos');
+                }, duration);
+                this.activePowerups.set('mintTezos', { timer: mintTezosTimer, duration: duration, maxDuration: duration, startTime: currentTime });
+                break;
+            case 'tezosX':
+                this.powerupsCollected++;
                 // Clear all enemies
                 this.enemies.forEach(enemy => {
                     enemy.isDestroyed = true;
                     enemy.destroyedTime = 0;
-                    this.score += enemy.isType2 ? 600 : 200;
+                    this.score += enemy.isType2 ? 800 : 500;
                 });
-                
                 // Clear all debuff powerups from the screen
                 this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
-                
                 // Clear all active debuffs
                 this.clearActiveDebuffs();
-                
+                // TezosX is an instant effect, so we don't add it to activePowerups
                 break;
-                case 'solana':
+            case 'solana':
+                duration = 5000; // 5 seconds duration for Solana
                 this.fastGameSpeed = true;
                 this.gameSpeed = 1.2; // 1.2x normal speed
                 this.platformSpeed = this.basePlatformSpeed * 1.2;
@@ -1276,29 +1288,38 @@ class Game {
                     this.fastGameSpeed = false;
                     this.gameSpeed = 1; // Reset to normal speed
                     this.platformSpeed = this.basePlatformSpeed; // Reset to base speed
-                }, 5000); // 5 seconds duration
-                this.activePowerups.set('solana', { timer: solanaTimer, duration: 12000 });
+                    this.activePowerups.delete('solana');
+                }, duration);
+                this.activePowerups.set('solana', { timer: solanaTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
             case 'blast':
+                duration = 10000; // 10 seconds duration for Blast
                 this.highGravity = true;
                 this.currentGravity = this.normalGravity * 1.5;
-                setTimeout(() => { 
+                const blastTimer = setTimeout(() => { 
                     this.highGravity = false; 
                     this.currentGravity = this.normalGravity;
-                }, 10000);
+                    this.activePowerups.delete('blast');
+                }, duration);
+                this.activePowerups.set('blast', { timer: blastTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
             case 'ethereum':
+                duration = 20000; // 20 seconds duration for Ethereum
                 this.slowMovement = true;
                 this.player.speed = this.normalMoveSpeed * 0.25;
-                setTimeout(() => { 
+                const ethereumTimer = setTimeout(() => { 
                     this.slowMovement = false; 
                     this.player.speed = this.normalMoveSpeed;
-                }, 20000);
+                    this.activePowerups.delete('ethereum');
+                }, duration);
+                this.activePowerups.set('ethereum', { timer: ethereumTimer, duration: duration, maxDuration: duration, startTime: currentTime });
                 break;
         }
+    
         this.powerupsCollected++;
-
         this.playSound('powerup');
+    
+        console.log(`Applied powerup: ${type}, Active powerups:`, this.activePowerups);
     }
 
     updateParticles(dt) {
@@ -1625,9 +1646,12 @@ class Game {
     }
 
     drawPowerupHUD() {
+        console.log('Drawing powerup HUD');
+        console.log('Active powerups:', this.activePowerups);
+    
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
-
+    
         const powerupSize = 20;
         const padding = 10;
         const barHeight = 5;
@@ -1638,19 +1662,25 @@ class Game {
         Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
             xOffset -= powerupSize;
     
+            console.log(`Drawing powerup: ${type}`);
+    
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
             if (powerupSprite) {
                 this.ctx.drawImage(powerupSprite, xOffset, padding, powerupSize, powerupSize);
             } else {
                 // Fallback if sprite is not available
+                console.warn(`Sprite not found for powerup: ${type}`);
                 this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(xOffset, padding, powerupSize, powerupSize);
             }
     
             // Draw duration bar
             const barWidth = powerupSize;
-            const remainingWidth = (powerup.duration / powerup.maxDuration) * barWidth;
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - powerup.startTime;
+            const remainingDuration = Math.max(0, powerup.duration - elapsedTime);
+            const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
             
             this.ctx.fillStyle = '#333333';
             this.ctx.fillRect(xOffset, padding + powerupSize + 5, barWidth, barHeight);
@@ -1658,9 +1688,11 @@ class Game {
             this.ctx.fillStyle = '#00FF00';
             this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
     
+            console.log(`Powerup ${type} - Remaining duration: ${remainingDuration}ms`);
+    
             xOffset -= powerupSpacing; // Use the new spacing value
         });
-
+    
         this.ctx.restore();
     }
 
