@@ -210,8 +210,8 @@ class Game {
                 return;
             }
     
-            const { success, gameStartTime } = await startGameWeb3();
-            if (!success) {
+            const gameStarted = await startGameWeb3();
+            if (!gameStarted) {
                 console.error('Failed to start game on blockchain');
                 hideOverlay();
                 showOverlay('Failed to start game. Please try again.');
@@ -2002,11 +2002,12 @@ function showStartButton() {
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
-
     // Store the game data for later use
     window.finalScore = score;
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
+
+    console.log('Game over. Start time:', gameStartTime, 'Score:', score, 'Blocks climbed:', blocksClimbed);
 
     // Show the game over overlay with the name form and Try Again button
     showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
