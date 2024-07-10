@@ -39,7 +39,7 @@ header {
 }
 
 .header-buttons {
-  display: flex-row-reverse;
+  display: flex;
   justify-content: flex-end; 
   align-items: center;
   gap: 10px;
