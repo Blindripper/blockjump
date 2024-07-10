@@ -208,7 +208,6 @@ class Game {
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
-            updateStartGameCount();
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
@@ -2101,6 +2100,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error loading game assets:', error);
         showOverlay('Failed to load game assets. Please refresh and try again.');
     }
+
+    updateStartGameCount();
 });
 
 async function handleWalletConnection() {
@@ -2418,13 +2419,12 @@ function hideAchievements() {
     }
 }
 
-let lastFetchTime = 0;
 let cachedStartGameCount = 0;
+let lastFetchTime = 0;
 
 async function updateStartGameCount() {
-    const contractAddress = '0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4'; // Replace with your actual contract address
+    const contractAddress = '0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4';
     const countElement = document.getElementById('startGameCount');
-
     if (!countElement) {
         console.error('Start game count element not found');
         return;
@@ -2435,7 +2435,7 @@ async function updateStartGameCount() {
 
     if (now - lastFetchTime < cacheExpiration) {
         // Use cached value if it's less than 5 minutes old
-        countElement.textContent = `StartGame Count: ${cachedStartGameCount}`;
+        countElement.textContent = `Total Games played: ${cachedStartGameCount}`;
         return;
     }
 
@@ -2446,40 +2446,19 @@ async function updateStartGameCount() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
 
+        const data = await response.json();
         if (!data.items || !Array.isArray(data.items)) {
             throw new Error('Unexpected API response structure');
         }
 
-        const startGameCount = data.items.filter(tx => tx.method === 'startgame').length;
+        const startGameCount = data.items.filter(tx => tx.method && tx.method.toLowerCase() === 'startgame').length;
 
         // Update cache
         cachedStartGameCount = startGameCount;
         lastFetchTime = now;
 
-        countElement.textContent = `StartGame Count: ${startGameCount}`;
-    } catch (error) {
-        console.error('Error fetching start game count:', error);
-        countElement.textContent = 'Error fetching count';
-    }
-
-
-    countElement.textContent = 'Fetching...';
-
-    try {
-        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}/transactions?filter=to`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        if (!data.items || !Array.isArray(data.items)) {
-            throw new Error('Unexpected API response structure');
-        }
-
-        const startGameCount = data.items.filter(tx => tx.method === 'startgame').length;
-        countElement.textContent = `StartGame Count: ${startGameCount}`;
+        countElement.textContent = `Total Games played: ${startGameCount}`;
     } catch (error) {
         console.error('Error fetching start game count:', error);
         countElement.textContent = 'Error fetching count';
