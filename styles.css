@@ -34,6 +34,7 @@ header {
   top: 0;
   z-index: 1000;
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -44,9 +45,21 @@ header {
   gap: 10px;
 }
 
-.header-content {
+.header-left {
   display: flex;
   align-items: center;
+}
+
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+#startGameCount {
+  font-size: 14px;
+  color: #fff;
 }
 
 
