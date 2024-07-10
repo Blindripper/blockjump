@@ -45,6 +45,12 @@ header {
   gap: 10px;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+
 /* Main Layout */
 .main-content {
   display: flex;
