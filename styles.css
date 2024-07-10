@@ -514,7 +514,7 @@ header {
           #startGameCount {
             position: absolute;
             top: 10px;
-            left: 10px;
+            right: 10px;
             font-size: 14px;
             color: #fff;
         }
