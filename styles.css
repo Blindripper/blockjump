@@ -510,6 +510,16 @@ header {
     height: auto;
   }
 
+  
+          #startGameCount {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 14px;
+            color: #fff;
+        }
+    
+
   #gameWrapper {
     width: 100%;
     flex-direction: column;
