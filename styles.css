@@ -34,7 +34,6 @@ header {
   top: 0;
   z-index: 1000;
   display: flex;
-  justify-content: flex-end;
   align-items: center;
 }
 
@@ -511,14 +510,13 @@ header {
   }
 
   
-          #startGameCount {
-            position: absolute;
-            top: 10px;
-            left: 800px;
-            font-size: 14px;
-            color: #fff;
-        }
-    
+  #startGameCount {
+    position: relative;
+    left: 10px;  
+    top: 10px;
+    font-size: 14px;
+    color: #fff;
+  }
 
   #gameWrapper {
     width: 100%;
