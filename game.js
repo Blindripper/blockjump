@@ -208,7 +208,7 @@ class Game {
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
-    
+            updateStartGameCount();
             this.bottomPlatform = this.createBottomPlatform();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
@@ -2415,6 +2415,74 @@ function hideAchievements() {
     const achievementsSection = document.getElementById('achievementsSection');
     if (achievementsSection) {
         achievementsSection.style.display = 'none';
+    }
+}
+
+let lastFetchTime = 0;
+let cachedStartGameCount = 0;
+
+async function updateStartGameCount() {
+    const contractAddress = '0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4'; // Replace with your actual contract address
+    const countElement = document.getElementById('startGameCount');
+
+    if (!countElement) {
+        console.error('Start game count element not found');
+        return;
+    }
+
+    const now = Date.now();
+    const cacheExpiration = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    if (now - lastFetchTime < cacheExpiration) {
+        // Use cached value if it's less than 5 minutes old
+        countElement.textContent = `StartGame Count: ${cachedStartGameCount}`;
+        return;
+    }
+
+    countElement.textContent = 'Fetching...';
+
+    try {
+        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}/transactions?filter=to`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (!data.items || !Array.isArray(data.items)) {
+            throw new Error('Unexpected API response structure');
+        }
+
+        const startGameCount = data.items.filter(tx => tx.method === 'startgame').length;
+
+        // Update cache
+        cachedStartGameCount = startGameCount;
+        lastFetchTime = now;
+
+        countElement.textContent = `StartGame Count: ${startGameCount}`;
+    } catch (error) {
+        console.error('Error fetching start game count:', error);
+        countElement.textContent = 'Error fetching count';
+    }
+
+
+    countElement.textContent = 'Fetching...';
+
+    try {
+        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}/transactions?filter=to`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (!data.items || !Array.isArray(data.items)) {
+            throw new Error('Unexpected API response structure');
+        }
+
+        const startGameCount = data.items.filter(tx => tx.method === 'startgame').length;
+        countElement.textContent = `StartGame Count: ${startGameCount}`;
+    } catch (error) {
+        console.error('Error fetching start game count:', error);
+        countElement.textContent = 'Error fetching count';
     }
 }
 
