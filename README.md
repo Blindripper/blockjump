@@ -38,7 +38,7 @@ BlockJump is an exciting blockchain-based vertical platformer game where players
 ## Technical Stack
 
 - Frontend: HTML5, CSS3, JavaScript
-- Blockchain: Etherlink (Tezos sidechain)
+- Blockchain: Etherlink (Tezos EVM compatible L2)
 - Smart Contracts: Solidity
 
 ## Installation and Setup
