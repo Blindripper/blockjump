@@ -20,7 +20,7 @@ BlockJump is an exciting blockchain-based vertical platformer game where players
 
 ## Powerups
 
-- Shield: Protects from one hit
+- Shield: Protects 
 - Rapid Fire: Increases shooting speed
 - Constant Beam: Shoot a continuous laser
 - Low Gravity: Jump higher
