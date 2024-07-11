@@ -13,7 +13,7 @@ BlockJump is an exciting blockchain-based vertical platformer game where players
 ## How to Play
 
 1. Connect your Etherlink wallet.
-2. Purchase game tries using Etherlink tokens.
+2. Purchase game tries using XTZ (0.01 XTZ per 10 tries).
 3. Use arrow keys to move and jump, space to shoot.
 4. Collect powerups, avoid enemies and spike platforms.
 5. Aim for the highest score and climb as high as you can!
