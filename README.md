@@ -24,7 +24,7 @@ BlockJump is an exciting blockchain-based vertical platformer game where players
 - Rapid Fire: Increases shooting speed
 - Constant Beam: Shoot a continuous laser
 - Low Gravity: Jump higher
-- Clear Screen: Removes all enemies and debuffs
+- TezosX: Removes all enemies and debuffs
 - Nomadic: Permanently upgrades your weapon
 
 ## Achievements
