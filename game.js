@@ -2101,7 +2101,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         showOverlay('Failed to load game assets. Please refresh and try again.');
     }
 
-    updateStartGameCount();
+    
 });
 
 async function handleWalletConnection() {
