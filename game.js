@@ -2434,7 +2434,6 @@ async function updateStartGameCount() {
     const cacheExpiration = 5 * 60 * 1000; // 5 minutes in milliseconds
 
     if (now - lastFetchTime < cacheExpiration) {
-        // Use cached value if it's less than 5 minutes old
         countElement.textContent = `Total Games played: ${cachedStartGameCount}`;
         return;
     }
@@ -2442,32 +2441,27 @@ async function updateStartGameCount() {
     countElement.textContent = 'Fetching...';
 
     try {
-        let startGameCount = 0;
-        let nextPagePath = `/api/v2/addresses/${contractAddress}/transactions?filter=to`;
-
-        while (nextPagePath) {
-            const response = await fetch(`https://explorer.etherlink.com${nextPagePath}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (!data.items || !Array.isArray(data.items)) {
-                throw new Error('Unexpected API response structure');
-            }
-
-            startGameCount += data.items.filter(tx => tx.method && tx.method.toLowerCase() === 'startgame').length;
-
-            nextPagePath = data.next_page_path;
+        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Update cache
-        cachedStartGameCount = startGameCount;
+        const data = await response.json();
+        if (!data.transactions_count) {
+            throw new Error('Unexpected API response structure');
+        }
+
+        const totalTransactions = parseInt(data.transactions_count);
+        
+        // Estimate startGame transactions (adjust this factor based on your contract's usage patterns)
+        const estimatedStartGameCount = Math.floor(totalTransactions * 0.91); // Assuming 70% of transactions are startGame
+
+        cachedStartGameCount = estimatedStartGameCount;
         lastFetchTime = now;
 
-        countElement.textContent = `Total Games played: ${startGameCount}`;
+        countElement.textContent = `Estimated Games played: ~${estimatedStartGameCount}`;
     } catch (error) {
-        console.error('Error fetching start game count:', error);
+        console.error('Error fetching transaction count:', error);
         countElement.textContent = 'Error fetching count';
     }
 }
