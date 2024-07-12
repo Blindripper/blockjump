@@ -2442,17 +2442,24 @@ async function updateStartGameCount() {
     countElement.textContent = 'Fetching...';
 
     try {
-        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}/transactions?filter=to`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        let startGameCount = 0;
+        let nextPagePath = `/api/v2/addresses/${contractAddress}/transactions?filter=to`;
 
-        const data = await response.json();
-        if (!data.items || !Array.isArray(data.items)) {
-            throw new Error('Unexpected API response structure');
-        }
+        while (nextPagePath) {
+            const response = await fetch(`https://explorer.etherlink.com${nextPagePath}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-        const startGameCount = data.items.filter(tx => tx.method && tx.method.toLowerCase() === 'startgame').length;
+            const data = await response.json();
+            if (!data.items || !Array.isArray(data.items)) {
+                throw new Error('Unexpected API response structure');
+            }
+
+            startGameCount += data.items.filter(tx => tx.method && tx.method.toLowerCase() === 'startgame').length;
+
+            nextPagePath = data.next_page_path;
+        }
 
         // Update cache
         cachedStartGameCount = startGameCount;
