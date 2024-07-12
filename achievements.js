@@ -1,4 +1,4 @@
-import { getAchievements, mintAchievement, initWeb3 } from './web3Integration.js';
+import { getAchievements, mintAchievement, initWeb3, getCurrentAccount } from './web3Integration.js';
 
 const achievements = [
     {
@@ -41,7 +41,7 @@ const achievements = [
 let userAchievements = [];
 let gameStats = {};
 
-function renderAchievements() {
+async function renderAchievements() {
     const achievementsList = document.getElementById('achievementsList');
     if (!achievementsList) {
         console.error('Achievements list element not found');
@@ -49,7 +49,7 @@ function renderAchievements() {
     }
     achievementsList.innerHTML = '';
 
-    achievements.forEach(achievement => {
+    for (const achievement of achievements) {
         const isUnlocked = achievement.requirement(gameStats);
         const isAlreadyMinted = userAchievements.includes(achievement.id);
         
@@ -70,9 +70,24 @@ function renderAchievements() {
         if (!isAlreadyMinted) {
             const mintButton = achievementElement.querySelector('.mint-button');
             mintButton.style.display = isUnlocked ? 'block' : 'none';
-            mintButton.addEventListener('click', () => mintAchievement(achievement.id));
+            mintButton.addEventListener('click', async () => {
+                try {
+                    const currentAccount = await getCurrentAccount();
+                    if (currentAccount) {
+                        await mintAchievement(currentAccount, achievement.id);
+                        await loadUserAchievements(); // Refresh achievements after minting
+                        renderAchievements(); // Re-render to update UI
+                    } else {
+                        console.error('No account available');
+                        alert('Please connect your wallet to mint achievements.');
+                    }
+                } catch (error) {
+                    console.error('Error minting achievement:', error);
+                    alert('An error occurred while minting the achievement. Please try again.');
+                }
+            });
         }
-    });
+    }
 
     const achievementsSection = document.getElementById('achievementsSection');
     if (achievementsSection) {
