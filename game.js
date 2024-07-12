@@ -2441,49 +2441,41 @@ async function updateStartGameCount() {
     countElement.textContent = 'Fetching...';
 
     try {
-        const response = await fetch(`https://explorer.etherlink.com/api/v2/addresses/${contractAddress}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        let startGameCount = 0;
+        let nextPageParams = null;
 
-        const data = await response.json();
-        if (!data.transactions_count) {
-            throw new Error('Unexpected API response structure');
-        }
+        do {
+            const url = new URL('https://explorer.etherlink.com/api/v2/transactions');
+            url.searchParams.append('filter', 'to');
+            url.searchParams.append('to', contractAddress);
+            url.searchParams.append('method', 'startGame');
+            if (nextPageParams) {
+                url.searchParams.append('block_number', nextPageParams.block_number);
+                url.searchParams.append('index', nextPageParams.index);
+            }
 
-        const totalTransactions = parseInt(data.transactions_count);
-        
-        // Estimate startGame transactions (adjust this factor based on your contract's usage patterns)
-        const estimatedStartGameCount = Math.floor(totalTransactions * 0.91); // Assuming 70% of transactions are startGame
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-        cachedStartGameCount = estimatedStartGameCount;
+            const data = await response.json();
+            if (!data.items || !Array.isArray(data.items)) {
+                throw new Error('Unexpected API response structure');
+            }
+
+            startGameCount += data.items.length;
+            nextPageParams = data.next_page_params;
+
+        } while (nextPageParams);
+
+        cachedStartGameCount = startGameCount;
         lastFetchTime = now;
 
-        countElement.textContent = `Estimated Games played: ~${estimatedStartGameCount}`;
+        countElement.textContent = `Total Games played: ${startGameCount}`;
     } catch (error) {
         console.error('Error fetching transaction count:', error);
         countElement.textContent = 'Error fetching count';
-    }
-}
-
-async function checkAndDisplayStartButton() {
-    if (!isConnected) {
-        showOverlay('Please connect wallet');
-        return;
-    }
-
-    try {
-        const tries = await getGameTries();
-        if (tries > 0) {
-            showOverlay('Ready to play?', () => {
-                game.initializeGame();
-            }, true, 'Start Game');
-        } else {
-            showOverlay('No tries left. Please purchase more.', null, true, 'Buy Tries');
-        }
-    } catch (error) {
-        console.error('Error checking Game tries:', error);
-        showOverlay('Error checking Game tries. Please try again.');
     }
 }
 
