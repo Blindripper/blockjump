@@ -2237,44 +2237,32 @@ async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
 
     try {
-        showOverlay("Checking game state...");
-        
-        const contract = getContract(); // Get the contract instance
-        const account = getCurrentAccount(); // Get the current account
-
-        if (!contract) {
-            console.error('Contract not initialized');
-            showOverlay('Error: Contract not initialized. Please refresh and try again.', null, true, 'Refresh');
-            return;
-        }
-
-        if (!account) {
-            console.error('Account not available');
-            showOverlay('Error: Account not available. Please connect your wallet and try again.', null, true, 'Connect Wallet');
-            return;
-        }
-
-        // Check contract state
-        const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
-        const gameTries = await contract.methods.getGameTries(account).call();
-
-        if (parseInt(gameTries) <= 0) {
-            showOverlay('No game tries remaining. Please purchase more.', null, true, 'Buy Tries');
-            return;
-        }
-
         showOverlay("Submitting score to Etherlink...");
         
+        const contract = getContract();
+        const account = getCurrentAccount();
+
+        if (!contract || !account) {
+            console.error('Contract not initialized or account not available');
+            showOverlay('Error: Unable to connect to the blockchain. Please refresh and try again.', null, true, 'Refresh');
+            return;
+        }
 
         const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
         
         if (submitted) {
             await updateHighscoreTable();
             showOverlay('Score submitted successfully!', async () => {
+                await updateTryCount(); // Update the try count after successful submission
                 await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
-            showOverlay('Failed to submit score. Please try again.', null, true, 'Try Again');
+            const gameTries = await getGameTries();
+            if (parseInt(gameTries) <= 0) {
+                showOverlay('No game tries remaining. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+            } else {
+                showOverlay('Failed to submit score. Please try again.', null, true, 'Try Again');
+            }
         }
     } catch (error) {
         console.error('Error during score submission:', error);
