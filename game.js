@@ -2008,6 +2008,27 @@ function loadImage(src) {
     });
 }
 
+async function checkAndDisplayStartButton() {
+    if (!isConnected) {
+        showOverlay('Please connect wallet');
+        return;
+    }
+
+    try {
+        const tries = await getGameTries();
+        if (tries > 0) {
+            showOverlay('Ready to play?', () => {
+                game.initializeGame();
+            }, true, 'Start Game');
+        } else {
+            showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+        }
+    } catch (error) {
+        console.error('Error checking Game tries:', error);
+        showOverlay('Error checking Game tries. Please try again.');
+    }
+}
+
 // UI functions
 function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset = 0.5, yOffset = 0.5) {
     const canvas = document.getElementById('gameCanvas');
@@ -2196,6 +2217,8 @@ function showStartButton() {
         game.initializeGame();
     }, true, 'Start Game');
 }
+
+
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
