@@ -2419,65 +2419,6 @@ function hideAchievements() {
     }
 }
 
-let cachedStartGameCount = 0;
-let lastFetchTime = 0;
-
-async function updateStartGameCount() {
-    const contractAddress = '0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4';
-    const countElement = document.getElementById('startGameCount');
-    if (!countElement) {
-        console.error('Start game count element not found');
-        return;
-    }
-
-    const now = Date.now();
-    const cacheExpiration = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-    if (now - lastFetchTime < cacheExpiration) {
-        countElement.textContent = `Total Games played: ${cachedStartGameCount}`;
-        return;
-    }
-
-    countElement.textContent = 'Fetching...';
-
-    try {
-        let startGameCount = 0;
-        let nextPageParams = null;
-
-        do {
-            const url = new URL('https://explorer.etherlink.com/api/v2/transactions');
-            url.searchParams.append('filter', 'to');
-            url.searchParams.append('to', contractAddress);
-            url.searchParams.append('method', 'startGame');
-            if (nextPageParams) {
-                url.searchParams.append('block_number', nextPageParams.block_number);
-                url.searchParams.append('index', nextPageParams.index);
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (!data.items || !Array.isArray(data.items)) {
-                throw new Error('Unexpected API response structure');
-            }
-
-            startGameCount += data.items.length;
-            nextPageParams = data.next_page_params;
-
-        } while (nextPageParams);
-
-        cachedStartGameCount = startGameCount;
-        lastFetchTime = now;
-
-        countElement.textContent = `Total Games played: ${startGameCount}`;
-    } catch (error) {
-        console.error('Error fetching transaction count:', error);
-        countElement.textContent = 'Error fetching count';
-    }
-}
 
 function updateClaimPrizeButton(highscores, currentAccount) {
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
