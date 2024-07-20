@@ -759,11 +759,7 @@ function isContractInitialized() {
   return isInitialized;
 }
 
-// Add this function to show a network warning
-function showNetworkWarning() {
-  // This function will be implemented in the main game file
-  console.warn('Not connected to Etherlink network');
-}
+
 
 
 
@@ -849,12 +845,7 @@ async function checkNetwork() {
     // Etherlink testnet ID (update this if it changes)
     const etherlinkTestnetId = 128123;
     
-    if (networkId !== etherlinkTestnetId) {
-      console.warn('Not connected to Etherlink network');
-      return false;
-    }
-    
-    return true;
+    return networkId === etherlinkTestnetId;
   } catch (error) {
     console.error('Error checking network:', error);
     return false;
@@ -1000,5 +991,4 @@ export {
   isContractInitialized,
   getCurrentAccount,
   checkNetwork, // Export the new function
-  showNetworkWarning // Export this function to be implemented in the main file
 };
