@@ -2138,6 +2138,7 @@ async function switchToEtherlink() {
       return;
     }
 
+    // Try to switch to the Etherlink network
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0xA709' }], // 42793 in hexadecimal
@@ -2154,14 +2155,14 @@ async function switchToEtherlink() {
           method: 'wallet_addEthereumChain',
           params: [{
             chainId: '0xA709',
-            chainName: 'Etherlink',
+            chainName: 'Etherlink Testnet',
             nativeCurrency: {
               name: 'Etherlink',
-              symbol: 'ETH', // or the correct symbol for Etherlink
+              symbol: 'ETH',
               decimals: 18
             },
-            rpcUrls: ['https://node.ghostnet.etherlink.com'], // Replace with the correct RPC URL
-            blockExplorerUrls: ['https://explorer.etherlink.com'] // Replace with the correct block explorer URL
+            rpcUrls: ['https://node.ghostnet.etherlink.com'],
+            blockExplorerUrls: ['https://testnet-explorer.etherlink.com']
           }]
         });
         // After adding the chain, try to switch to it
@@ -2175,7 +2176,6 @@ async function switchToEtherlink() {
     }
   }
 }
-
 async function handleWalletConnection() {
     try {
       if (!isConnected) {
