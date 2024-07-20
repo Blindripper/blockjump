@@ -843,18 +843,22 @@ async function startGame() {
 async function checkNetwork() {
   if (!web3) {
     console.error('Web3 not initialized');
-    return false;
+    return { isCorrect: false, currentNetwork: null, targetNetwork: null };
   }
 
   try {
     const networkId = await web3.eth.net.getId();
-    // Etherlink testnet ID (update this if it changes)
-    const etherlinkTestnetId = 42793;
+    // Correct Etherlink Chain ID
+    const etherlinkChainId = 42793;
     
-    return networkId === etherlinkTestnetId;
+    return {
+      isCorrect: networkId === etherlinkChainId,
+      currentNetwork: networkId,
+      targetNetwork: etherlinkChainId
+    };
   } catch (error) {
     console.error('Error checking network:', error);
-    return false;
+    return { isCorrect: false, currentNetwork: null, targetNetwork: null };
   }
 }
 
