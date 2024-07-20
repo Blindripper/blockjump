@@ -2140,14 +2140,39 @@ async function switchToEtherlink() {
 
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x1F3BB' }], // 128123 in hexadecimal
+      params: [{ chainId: '0xA709' }], // 42793 in hexadecimal
     });
     
     // After switching, reinitialize Web3 and reconnect
     await handleWalletConnection();
   } catch (error) {
     console.error('Failed to switch network:', error);
-    showOverlay('Failed to switch network. Please try manually and refresh the page.');
+    if (error.code === 4902) {
+      // This error code indicates that the chain has not been added to MetaMask
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0xA709',
+            chainName: 'Etherlink',
+            nativeCurrency: {
+              name: 'Etherlink',
+              symbol: 'ETH', // or the correct symbol for Etherlink
+              decimals: 18
+            },
+            rpcUrls: ['https://node.ghostnet.etherlink.com'], // Replace with the correct RPC URL
+            blockExplorerUrls: ['https://explorer.etherlink.com'] // Replace with the correct block explorer URL
+          }]
+        });
+        // After adding the chain, try to switch to it
+        await switchToEtherlink();
+      } catch (addError) {
+        console.error('Failed to add Etherlink network:', addError);
+        showOverlay('Failed to add Etherlink network. Please add it manually to your wallet.');
+      }
+    } else {
+      showOverlay(`Failed to switch network. Please try manually and refresh the page. Error: ${error.message}`);
+    }
   }
 }
 
@@ -2157,7 +2182,7 @@ async function handleWalletConnection() {
       const initResult = await initWeb3();
       if (initResult.success) {
         if (!initResult.networkStatus.isCorrect) {
-          showOverlay(`You are connected to network ${initResult.networkStatus.currentNetwork}. Please switch to Etherlink (Network ID: ${initResult.networkStatus.targetNetwork}).`, null, true, 'Switch to Etherlink');
+          showOverlay(`Please switch to Etherlink (Chain ID: ${initResult.networkStatus.targetNetwork}).`, null, true, 'Switch to Etherlink');
           return;
         }
         const connected = await connectWallet();
@@ -2177,7 +2202,7 @@ async function handleWalletConnection() {
           showOverlay('Failed to connect. Please try again.');
         }
       } else {
-        showOverlay(`Web3 initialization failed: ${initResult.error}. Please check your connection and try again.`);
+        showOverlay(`Web3 initialization failed. Please check your connection and try again. Error: ${initResult.error}`);
       }
     } else {
       // Disconnect wallet
@@ -2189,7 +2214,7 @@ async function handleWalletConnection() {
     }
   } catch (error) {
     console.error('Error in handleWalletConnection:', error);
-    showOverlay('An error occurred. Please try again.');
+    showOverlay(`An error occurred. Please try again. Error: ${error.message}`);
   }
 }
 
