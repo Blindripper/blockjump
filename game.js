@@ -2078,7 +2078,6 @@ function hideOverlay() {
 }
 
 
-// Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
     const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
@@ -2121,7 +2120,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             switchNetworkBtn.addEventListener('click', switchToEtherlink);
         }
 
-        if (!isConnected) {
+        // Check if already connected and on the correct network
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            const networkStatus = await checkNetwork();
+            if (networkStatus.isCorrect) {
+                isConnected = true;
+                await handleWalletConnection();
+            } else {
+                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+            }
+        } else if (!isConnected) {
             showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
         }
     } catch (error) {
