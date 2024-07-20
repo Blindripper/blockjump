@@ -2118,7 +2118,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Add the event listener for the network switch button here
         const switchNetworkBtn = document.getElementById('switchNetworkBtn');
         if (switchNetworkBtn) {
-            switchNetworkBtn.addEventListener('click', Etherlink);
+            switchNetworkBtn.addEventListener('click', switchToEtherlink);
         }
 
         if (!isConnected) {
