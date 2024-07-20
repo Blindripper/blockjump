@@ -847,7 +847,6 @@ async function checkNetwork() {
   }
 
   try {
-    // Use ethereum.request to get the chainId
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     const currentChainId = parseInt(chainId, 16);
     
