@@ -2186,48 +2186,6 @@ async function switchToEtherlink() {
     }
   }
 }
-async function handleWalletConnection() {
-    try {
-      if (!isConnected) {
-        const initResult = await initWeb3();
-        if (initResult.success) {
-          if (!initResult.networkStatus.isCorrect) {
-            showOverlay(`Please switch to Etherlink (Chain ID: ${initResult.networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
-            return;
-          }
-          const connected = await connectWallet();
-          if (connected) {
-            isConnected = true;
-            updateButtonState();
-            await updateTryCount();
-            await loadUserAchievements();
-            showBuyTriesButton();
-            await loadHighscores();
-            await updateHighscoreTable();
-            showAchievements();
-            await getContractBalance();
-            hideOverlay();
-            await checkAndDisplayStartButton();
-          } else {
-            showOverlay('Failed to connect. Please try again.');
-          }
-        } else {
-          showOverlay(`Web3 initialization failed. Please check your connection and try again. Error: ${initResult.error}`);
-        }
-      } else {
-        // Disconnect wallet
-        isConnected = false;
-        updateButtonState();
-        hideBuyTriesButton();
-        hideAchievements();
-        showOverlay('Wallet disconnected. Please connect to play.');
-      }
-    } catch (error) {
-      console.error('Error in handleWalletConnection:', error);
-      showOverlay(`An error occurred. Please try again. Error: ${error.message}`);
-    }
-  }
-
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
 
