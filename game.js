@@ -2182,7 +2182,7 @@ async function handleWalletConnection() {
       const initResult = await initWeb3();
       if (initResult.success) {
         if (!initResult.networkStatus.isCorrect) {
-          showOverlay(`Please switch to Etherlink (Chain ID: ${initResult.networkStatus.targetNetwork}).`, null, true, 'Switch to Etherlink');
+          showOverlay(`Please switch to Etherlink (Chain ID: ${initResult.networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
           return;
         }
         const connected = await connectWallet();
@@ -2216,7 +2216,6 @@ async function handleWalletConnection() {
     console.error('Error in handleWalletConnection:', error);
     showOverlay(`An error occurred. Please try again. Error: ${error.message}`);
   }
-}
 
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
