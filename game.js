@@ -2118,7 +2118,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Add the event listener for the network switch button here
         const switchNetworkBtn = document.getElementById('switchNetworkBtn');
         if (switchNetworkBtn) {
-            switchNetworkBtn.addEventListener('click', switchToEtherlink);
+            switchNetworkBtn.addEventListener('click', Etherlink);
         }
 
         if (!isConnected) {
@@ -2134,7 +2134,8 @@ async function switchToEtherlink() {
   try {
     const networkStatus = await checkNetwork();
     if (networkStatus.isCorrect) {
-      showOverlay('You are already connected to the Etherlink network.');
+      hideOverlay();
+      await checkAndDisplayStartButton();
       return;
     }
 
@@ -2146,6 +2147,15 @@ async function switchToEtherlink() {
     
     // After switching, reinitialize Web3 and reconnect
     await handleWalletConnection();
+
+    // Check if the network switch was successful
+    const newNetworkStatus = await checkNetwork();
+    if (newNetworkStatus.isCorrect) {
+      hideOverlay();
+      await checkAndDisplayStartButton();
+    } else {
+      showOverlay('Failed to switch to Etherlink network. Please try manually and refresh the page.');
+    }
   } catch (error) {
     console.error('Failed to switch network:', error);
     if (error.code === 4902) {
