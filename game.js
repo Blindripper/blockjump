@@ -2545,7 +2545,4 @@ function drawCanvasMessage(text) {
     message.textContent = text;
     message.className = 'canvas-message';
     document.body.appendChild(message);
-}
-
-
-
+}}
