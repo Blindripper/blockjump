@@ -732,23 +732,37 @@ const contractABI = [
 
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
-      web3 = new Web3(window.ethereum);
-      try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          contract = new web3.eth.Contract(contractABI, contractAddress);
-          isInitialized = true;  // Set this to true when initialization is successful
-          return true;
-      } catch (error) {
-          console.error('Failed to initialize Web3:', error);
-          return false;
+    web3 = new Web3(window.ethereum);
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      contract = new web3.eth.Contract(contractABI, contractAddress);
+      
+      // Check if connected to the correct network
+      const isCorrectNetwork = await checkNetwork();
+      if (!isCorrectNetwork) {
+        showNetworkWarning();
+        return false;
       }
-  } else {
+      
+      isInitialized = true;
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize Web3:', error);
       return false;
+    }
+  } else {
+    return false;
   }
 }
 
 function isContractInitialized() {
   return isInitialized;
+}
+
+// Add this function to show a network warning
+function showNetworkWarning() {
+  // This function will be implemented in the main game file
+  console.warn('Not connected to Etherlink network');
 }
 
 
@@ -821,6 +835,29 @@ async function startGame() {
   } catch (error) {
       console.error('Error starting game:', error);
       return false;
+  }
+}
+
+async function checkNetwork() {
+  if (!web3) {
+    console.error('Web3 not initialized');
+    return false;
+  }
+
+  try {
+    const networkId = await web3.eth.net.getId();
+    // Etherlink testnet ID (update this if it changes)
+    const etherlinkTestnetId = 128123;
+    
+    if (networkId !== etherlinkTestnetId) {
+      console.warn('Not connected to Etherlink network');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error checking network:', error);
+    return false;
   }
 }
 
@@ -961,5 +998,7 @@ export {
   mintAchievement, 
   connectWallet,
   isContractInitialized,
-  getCurrentAccount
+  getCurrentAccount,
+  checkNetwork, // Export the new function
+  showNetworkWarning // Export this function to be implemented in the main file
 };
