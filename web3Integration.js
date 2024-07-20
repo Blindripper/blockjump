@@ -841,10 +841,13 @@ async function startGame() {
 }
 
 async function checkNetwork() {
-  if (typeof window.ethereum === 'undefined') {
-    console.error('Ethereum object not found');
-    return { isCorrect: false, currentNetwork: null, targetNetwork: null };
-  }
+  const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+  return {
+    isCorrect: chainId === '0xA729', // Etherlink chain ID
+    currentNetwork: chainId,
+    targetNetwork: '0xA729'
+  };
+
 
   try {
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
