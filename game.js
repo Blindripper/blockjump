@@ -2155,14 +2155,14 @@ async function switchToEtherlink() {
           method: 'wallet_addEthereumChain',
           params: [{
             chainId: '0xA709',
-            chainName: 'Etherlink Testnet',
+            chainName: 'Etherlink',
             nativeCurrency: {
-              name: 'Etherlink',
-              symbol: 'ETH',
+              name: 'Tezos',
+              symbol: 'XTZ',
               decimals: 18
             },
-            rpcUrls: ['https://node.ghostnet.etherlink.com'],
-            blockExplorerUrls: ['https://testnet-explorer.etherlink.com']
+            rpcUrls: ['https://node.mainnet.etherlink.com'],
+            blockExplorerUrls: ['https://explorer.etherlink.com']
           }]
         });
         // After adding the chain, try to switch to it
