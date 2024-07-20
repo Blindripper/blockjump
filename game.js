@@ -2548,4 +2548,4 @@ function drawCanvasMessage(text) {
 }
 
 
-export { updateTryCount };
+
