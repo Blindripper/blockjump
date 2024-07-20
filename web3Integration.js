@@ -732,10 +732,9 @@ const contractABI = [
 
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
-    web3 = new Web3(window.ethereum);
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-      contract = new web3.eth.Contract(contractABI, contractAddress);
+      web3 = new Web3(window.ethereum);
       
       // Check if connected to the correct network
       const networkStatus = await checkNetwork();
@@ -744,6 +743,7 @@ async function initWeb3() {
         return { success: false, networkStatus };
       }
       
+      contract = new web3.eth.Contract(contractABI, contractAddress);
       isInitialized = true;
       return { success: true, networkStatus };
     } catch (error) {
@@ -841,20 +841,22 @@ async function startGame() {
 }
 
 async function checkNetwork() {
-  if (!web3) {
-    console.error('Web3 not initialized');
+  if (typeof window.ethereum === 'undefined') {
+    console.error('Ethereum object not found');
     return { isCorrect: false, currentNetwork: null, targetNetwork: null };
   }
 
   try {
-    // Use chainId instead of net_version
-    const chainId = await web3.eth.getChainId();
+    // Use ethereum.request to get the chainId
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const currentChainId = parseInt(chainId, 16);
+    
     // Correct Etherlink Chain ID
     const etherlinkChainId = 42793;
     
     return {
-      isCorrect: chainId === etherlinkChainId,
-      currentNetwork: chainId,
+      isCorrect: currentChainId === etherlinkChainId,
+      currentNetwork: currentChainId,
       targetNetwork: etherlinkChainId
     };
   } catch (error) {
@@ -862,6 +864,7 @@ async function checkNetwork() {
     return { isCorrect: false, currentNetwork: null, targetNetwork: null };
   }
 }
+
 
 async function getGameTries() {
   if (!isInitialized) {
