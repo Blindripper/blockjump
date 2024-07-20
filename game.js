@@ -2117,7 +2117,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Add the event listener for the network switch button here
         const switchNetworkBtn = document.getElementById('switchNetworkBtn');
         if (switchNetworkBtn) {
-            switchNetworkBtn.addEventListener('click', Etherlink);
+            switchNetworkBtn.addEventListener('click', switchToEtherlink);
         }
 
         // Check if already connected and on the correct network
@@ -2127,7 +2127,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 isConnected = true;
                 await handleWalletConnection();
             } else {
-                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
+                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
             }
         } else if (!isConnected) {
             showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
