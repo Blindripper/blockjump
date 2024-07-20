@@ -1,4 +1,4 @@
-import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork, showNetworkWarning } from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2115,6 +2115,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
+        // Add the new event listener for the network switch button
+        const switchNetworkBtn = document.getElementById('switchNetworkBtn');
+        if (switchNetworkBtn) {
+            switchNetworkBtn.addEventListener('click', switchToEtherlink);
+        }
+
         if (!isConnected) {
             showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
         }
@@ -2122,23 +2128,32 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error loading game assets:', error);
         showOverlay('Failed to load game assets. Please refresh and try again.');
     }
-
-    
 });
+
+async function switchToEtherlink() {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x1F3BB' }], // 128123 in hexadecimal
+    });
+    // After switching, reinitialize Web3 and reconnect
+    await handleWalletConnection();
+  } catch (error) {
+    console.error('Failed to switch network:', error);
+    showOverlay('Failed to switch network. Please try manually and refresh the page.');
+  }
+}
 
 async function handleWalletConnection() {
   try {
     if (!isConnected) {
-      const web3Initialized = await initWeb3();
-      if (web3Initialized) {
+      const initResult = await initWeb3();
+      if (initResult.success) {
+        if (initResult.warning) {
+          showOverlay(`Warning: ${initResult.warning}. Some features may not work correctly.`, null, true, 'Continue Anyway');
+        }
         const connected = await connectWallet();
         if (connected) {
-          const isCorrectNetwork = await checkNetwork();
-          if (!isCorrectNetwork) {
-            showNetworkWarning();
-            return;
-          }
-          
           isConnected = true;
           updateButtonState();
           await updateTryCount();
@@ -2154,7 +2169,7 @@ async function handleWalletConnection() {
           showOverlay('Failed to connect. Please try again.');
         }
       } else {
-        showOverlay('Web3 initialization failed. Please check your connection.');
+        showOverlay(`Web3 initialization failed: ${initResult.error}. Please check your connection and try again.`);
       }
     } else {
       // Disconnect wallet
