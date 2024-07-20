@@ -29,9 +29,6 @@ async function updateTryCount() {
     }
 }
 
-function showNetworkWarning() {
-  showOverlay('Please connect to the Etherlink network to play BlockJump.', null, true, 'Switch Network');
-}
 
 // Define base URL for the GitHub repository
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
