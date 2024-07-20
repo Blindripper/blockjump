@@ -759,8 +759,14 @@ function isContractInitialized() {
   return isInitialized;
 }
 
-
-
+function showNetworkWarning() {
+  const warningOverlay = document.getElementById('networkWarning');
+  if (warningOverlay) {
+    warningOverlay.style.display = 'flex';
+  } else {
+    console.error('Network warning overlay element not found');
+  }
+}
 
 
 async function connectWallet() {
@@ -991,4 +997,5 @@ export {
   isContractInitialized,
   getCurrentAccount,
   checkNetwork, // Export the new function
+  showNetworkWarning,
 };
