@@ -2141,7 +2141,7 @@ async function switchToEtherlink() {
     // Try to switch to the Etherlink network
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: 'A70B' }], // 42793 in hexadecimal
+      params: [{ chainId: '42793' }], // 42793 in hexadecimal
     });
     
     // After switching, reinitialize Web3 and reconnect
