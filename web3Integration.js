@@ -849,7 +849,7 @@ async function checkNetwork() {
   try {
     const networkId = await web3.eth.net.getId();
     // Etherlink testnet ID (update this if it changes)
-    const etherlinkTestnetId = 128123;
+    const etherlinkTestnetId = 42793;
     
     return networkId === etherlinkTestnetId;
   } catch (error) {
