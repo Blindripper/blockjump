@@ -851,7 +851,7 @@ async function checkNetwork() {
     const currentChainId = parseInt(chainId, 16);
     
     // Correct Etherlink Chain ID
-    const etherlinkChainId = '0x1F3BB';
+    const etherlinkChainId = '42793';
     
     return {
       isCorrect: currentChainId === etherlinkChainId,
