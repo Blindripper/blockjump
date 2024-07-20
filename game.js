@@ -1,4 +1,4 @@
-import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork, showNetworkWarning, switchToEtherlink } from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork, showNetworkWarning,} from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2115,7 +2115,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-        // Add the new event listener for the network switch button
+        // Add the event listener for the network switch button here
         const switchNetworkBtn = document.getElementById('switchNetworkBtn');
         if (switchNetworkBtn) {
             switchNetworkBtn.addEventListener('click', switchToEtherlink);
