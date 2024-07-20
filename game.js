@@ -1,4 +1,4 @@
-import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount } from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork, showNetworkWarning } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -27,6 +27,10 @@ async function updateTryCount() {
     } catch (error) {
         console.error('Failed to get Game tries:', error);
     }
+}
+
+function showNetworkWarning() {
+  showOverlay('Please connect to the Etherlink network to play BlockJump.', null, true, 'Switch Network');
 }
 
 // Define base URL for the GitHub repository
@@ -2126,41 +2130,47 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 async function handleWalletConnection() {
-    try {
-        if (!isConnected) {
-            const web3Initialized = await initWeb3();
-            if (web3Initialized) {
-                const connected = await connectWallet();
-                if (connected) {
-                    isConnected = true;
-                    updateButtonState();
-                    await updateTryCount();
-                    await loadUserAchievements();
-                    showBuyTriesButton();
-                    await loadHighscores();
-                    await updateHighscoreTable();
-                    showAchievements();
-                    await getContractBalance();
-                    hideOverlay();
-                    await checkAndDisplayStartButton();
-                } else {
-                    showOverlay('Failed to connect. Please try again.');
-                }
-            } else {
-                showOverlay('Web3 initialization failed. Please check your connection.');
-            }
+  try {
+    if (!isConnected) {
+      const web3Initialized = await initWeb3();
+      if (web3Initialized) {
+        const connected = await connectWallet();
+        if (connected) {
+          const isCorrectNetwork = await checkNetwork();
+          if (!isCorrectNetwork) {
+            showNetworkWarning();
+            return;
+          }
+          
+          isConnected = true;
+          updateButtonState();
+          await updateTryCount();
+          await loadUserAchievements();
+          showBuyTriesButton();
+          await loadHighscores();
+          await updateHighscoreTable();
+          showAchievements();
+          await getContractBalance();
+          hideOverlay();
+          await checkAndDisplayStartButton();
         } else {
-            // Disconnect wallet
-            isConnected = false;
-            updateButtonState();
-            hideBuyTriesButton();
-            hideAchievements();
-            showOverlay('Wallet disconnected. Please connect to play.');
+          showOverlay('Failed to connect. Please try again.');
         }
-    } catch (error) {
-        console.error('Error in handleWalletConnection:', error);
-        showOverlay('An error occurred. Please try again.');
+      } else {
+        showOverlay('Web3 initialization failed. Please check your connection.');
+      }
+    } else {
+      // Disconnect wallet
+      isConnected = false;
+      updateButtonState();
+      hideBuyTriesButton();
+      hideAchievements();
+      showOverlay('Wallet disconnected. Please connect to play.');
     }
+  } catch (error) {
+    console.error('Error in handleWalletConnection:', error);
+    showOverlay('An error occurred. Please try again.');
+  }
 }
 
 async function handleClaimPrize() {
