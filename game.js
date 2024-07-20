@@ -2132,10 +2132,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function switchToEtherlink() {
   try {
+    const networkStatus = await checkNetwork();
+    if (networkStatus.isCorrect) {
+      showOverlay('You are already connected to the Etherlink network.');
+      return;
+    }
+
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0x1F3BB' }], // 128123 in hexadecimal
     });
+    
     // After switching, reinitialize Web3 and reconnect
     await handleWalletConnection();
   } catch (error) {
@@ -2149,8 +2156,9 @@ async function handleWalletConnection() {
     if (!isConnected) {
       const initResult = await initWeb3();
       if (initResult.success) {
-        if (initResult.warning) {
-          showOverlay(`Warning: ${initResult.warning}. Some features may not work correctly.`, null, true, 'Continue Anyway');
+        if (!initResult.networkStatus.isCorrect) {
+          showOverlay(`You are connected to network ${initResult.networkStatus.currentNetwork}. Please switch to Etherlink (Network ID: ${initResult.networkStatus.targetNetwork}).`, null, true, 'Switch to Etherlink');
+          return;
         }
         const connected = await connectWallet();
         if (connected) {
