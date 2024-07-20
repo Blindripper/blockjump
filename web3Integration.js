@@ -738,20 +738,20 @@ async function initWeb3() {
       contract = new web3.eth.Contract(contractABI, contractAddress);
       
       // Check if connected to the correct network
-      const isCorrectNetwork = await checkNetwork();
-      if (!isCorrectNetwork) {
+      const networkStatus = await checkNetwork();
+      if (!networkStatus.isCorrect) {
         showNetworkWarning();
-        return false;
+        return { success: false, networkStatus };
       }
       
       isInitialized = true;
-      return true;
+      return { success: true, networkStatus };
     } catch (error) {
       console.error('Failed to initialize Web3:', error);
-      return false;
+      return { success: false, error };
     }
   } else {
-    return false;
+    return { success: false, error: 'Web3 not available' };
   }
 }
 
@@ -847,13 +847,14 @@ async function checkNetwork() {
   }
 
   try {
-    const networkId = await web3.eth.net.getId();
+    // Use chainId instead of net_version
+    const chainId = await web3.eth.getChainId();
     // Correct Etherlink Chain ID
     const etherlinkChainId = 42793;
     
     return {
-      isCorrect: networkId === etherlinkChainId,
-      currentNetwork: networkId,
+      isCorrect: chainId === etherlinkChainId,
+      currentNetwork: chainId,
       targetNetwork: etherlinkChainId
     };
   } catch (error) {
