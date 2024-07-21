@@ -734,11 +734,7 @@ async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
     try {
       web3 = new Web3(window.ethereum);
-      
-      // Check if connected to the correct network without requesting accounts
-      const networkStatus = await checkNetwork();
-      
-      return { success: true, networkStatus };
+      return { success: true };
     } catch (error) {
       console.error('Failed to initialize Web3:', error);
       return { success: false, error };
