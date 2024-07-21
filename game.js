@@ -2107,7 +2107,7 @@ async function handleAccountsChanged(accounts) {
 
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
+    const requiredElements = ['gameCanvas', 'powerupBar', 'windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
     
     if (missingElements.length > 0) {
@@ -2139,13 +2139,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
-        // Check network immediately
-        const networkStatus = await checkNetwork();
-        isCorrectNetwork = networkStatus.isCorrect;
-
-        // Initialize the game
-        game = new Game();
-    
         // Setup event listeners
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
@@ -2165,15 +2158,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.ethereum.on('accountsChanged', handleAccountsChanged);
         }
 
-        // Check if already connected
+        // Initialize the game
+        game = new Game();
+
+        // Check if already connected and on the correct network
         if (window.ethereum && window.ethereum.selectedAddress) {
-            isConnected = true;
-            if (isCorrectNetwork) {
+            const networkStatus = await checkNetwork();
+            if (networkStatus.isCorrect) {
+                console.log("Already on Etherlink network.");
+                isConnected = true;
                 await handleInitialConnection();
             } else {
+                console.log("Connected but on wrong network.");
                 showSwitchNetworkPrompt(networkStatus.targetNetwork);
             }
         } else {
+            console.log("Not connected to any wallet.");
             showConnectPrompt();
         }
 
