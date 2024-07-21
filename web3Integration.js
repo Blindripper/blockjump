@@ -731,7 +731,7 @@ const contractABI = [
 ];
 
 
-const ETHERLINK_CHAIN_ID = '0xA709'; // Etherlink mainnet chain ID (42793 in hexadecimal)
+const ETHERLINK_CHAIN_ID = '0xA729'; // Etherlink mainnet chain ID (42793 in hexadecimal)
 const ETHERLINK_RPC_URL = 'https://node.mainnet.etherlink.com'; // Etherlink mainnet RPC URL
 
 async function switchToEtherlink() {
