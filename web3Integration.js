@@ -738,10 +738,6 @@ async function initWeb3() {
       
       // Check if connected to the correct network
       const networkStatus = await checkNetwork();
-      if (!networkStatus.isCorrect) {
-        showNetworkWarning();
-        return { success: false, networkStatus };
-      }
       
       contract = new web3.eth.Contract(contractABI, contractAddress);
       isInitialized = true;
