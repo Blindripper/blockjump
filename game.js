@@ -168,12 +168,16 @@ class Game {
         this.setupEventListeners();
     }
 
+
+
     loadPlatformSprites() {
         this.platformSprites.normal[0].src = `${picsUrl}normalplat0.png`;
         this.platformSprites.normal[1].src = `${picsUrl}normalplat1.png`;
         this.platformSprites.spike.src = `${picsUrl}spikeplat1.png`;
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
+
+    
 
     dropNomadicPowerup() {
         const x = Math.random() * (GAME_WIDTH - 30);
@@ -1464,6 +1468,13 @@ class Game {
             this.ctx.lineTo(this.constantBeam.x, 0);
             this.ctx.stroke();
         }
+    }
+
+    loadSprites() {
+        this.enemySprite = new Image();
+        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
+        this.enemyDestroyedSprite = new Image();
+        this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
     }
 
     drawEnemies() {
