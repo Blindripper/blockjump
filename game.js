@@ -2124,28 +2124,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Add network change listener
         if (window.ethereum) {
-            window.ethereum.on('chainChanged', async (chainId) => {
-                const networkStatus = await checkNetwork();
-                if (networkStatus.isCorrect) {
-                    hideOverlay();
-                    isConnected = true;
-                    updateButtonState();
-                    await updateTryCount();
-                    await loadUserAchievements();
-                    showBuyTriesButton();
-                    await loadHighscores();
-                    await updateHighscoreTable();
-                    showAchievements();
-                    await getContractBalance();
-                    await checkAndDisplayStartButton();
-                } else {
-                    isConnected = false;
-                    updateButtonState();
-                    hideBuyTriesButton();
-                    hideAchievements();
-                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
-                }
-            });
+            window.ethereum.on('chainChanged', handleChainChanged);
         }
 
         // Check if already connected and on the correct network
@@ -2153,7 +2132,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const networkStatus = await checkNetwork();
             if (networkStatus.isCorrect) {
                 isConnected = true;
-                await handleWalletConnection();
+                await handleWalletConnection(true);
             } else {
                 showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
             }
@@ -2166,9 +2145,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-async function handleWalletConnection() {
+async function handleWalletConnection(alreadyConnected = false) {
     try {
-        if (!isConnected) {
+        if (!isConnected || !alreadyConnected) {
             const initResult = await initWeb3();
             if (initResult.success) {
                 const networkStatus = await checkNetwork();
@@ -2176,7 +2155,7 @@ async function handleWalletConnection() {
                     showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
                     return;
                 }
-                const connected = await connectWallet();
+                const connected = alreadyConnected || await connectWallet();
                 if (connected) {
                     isConnected = true;
                     updateButtonState();
@@ -2206,6 +2185,29 @@ async function handleWalletConnection() {
     } catch (error) {
         console.error('Error in handleWalletConnection:', error);
         showOverlay(`An error occurred. Please try again. Error: ${error.message}`);
+    }
+}
+
+async function handleChainChanged(chainId) {
+    const networkStatus = await checkNetwork();
+    if (networkStatus.isCorrect) {
+        hideOverlay();
+        isConnected = true;
+        updateButtonState();
+        await updateTryCount();
+        await loadUserAchievements();
+        showBuyTriesButton();
+        await loadHighscores();
+        await updateHighscoreTable();
+        showAchievements();
+        await getContractBalance();
+        await checkAndDisplayStartButton();
+    } else {
+        isConnected = false;
+        updateButtonState();
+        hideBuyTriesButton();
+        hideAchievements();
+        showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
     }
 }
 
