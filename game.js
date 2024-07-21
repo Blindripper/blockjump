@@ -2079,6 +2079,32 @@ function hideOverlay() {
     });
 }
 
+function showConnectPrompt() {
+    showOverlay('Please connect your wallet to play.', handleWalletConnection, true, 'Connect Wallet');
+}
+
+function showSwitchNetworkPrompt(targetNetwork) {
+    showOverlay(`Please switch to Etherlink (Chain ID: ${targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+}
+
+
+async function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+        // User disconnected their wallet
+        isConnected = false;
+        updateButtonState();
+        showConnectPrompt();
+    } else if (accounts[0] !== getCurrentAccount()) {
+        // User switched to a different account
+        isConnected = true;
+        if (isCorrectNetwork) {
+            await handleInitialConnection();
+        } else {
+            showSwitchNetworkPrompt(await getTargetNetwork());
+        }
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', async function() {
     const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
@@ -2106,6 +2132,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Hide loading message
         hideOverlay();
 
+        // Initialize Web3
+        const initResult = await initWeb3();
+        if (!initResult.success) {
+            showOverlay(`Web3 initialization failed. Please check your connection and try again. Error: ${initResult.error}`);
+            return;
+        }
+
+        // Check network immediately
+        const networkStatus = await checkNetwork();
+        isCorrectNetwork = networkStatus.isCorrect;
+
         // Initialize the game
         game = new Game();
     
@@ -2125,75 +2162,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Add network change listener
         if (window.ethereum) {
             window.ethereum.on('chainChanged', handleChainChanged);
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
         }
 
-        // Check if already connected and on the correct network
+        // Check if already connected
         if (window.ethereum && window.ethereum.selectedAddress) {
-            const networkStatus = await checkNetwork();
-            if (networkStatus.isCorrect) {
-                isConnected = true;
-                await handleWalletConnection(true);
+            isConnected = true;
+            if (isCorrectNetwork) {
+                await handleInitialConnection();
             } else {
-                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
+                showSwitchNetworkPrompt(networkStatus.targetNetwork);
             }
-        } else if (!isConnected) {
-            showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
+        } else {
+            showConnectPrompt();
         }
+
     } catch (error) {
-        console.error('Error loading game assets:', error);
-        showOverlay('Failed to load game assets. Please refresh and try again.');
+        console.error('Error in DOMContentLoaded:', error);
+        showOverlay('An error occurred while initializing the game. Please refresh and try again.');
     }
 });
 
-async function handleWalletConnection(alreadyConnected = false) {
+async function handleInitialConnection() {
     try {
-        if (!isConnected || !alreadyConnected) {
-            const initResult = await initWeb3();
-            if (initResult.success) {
-                const networkStatus = await checkNetwork();
-                if (!networkStatus.isCorrect) {
-                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
-                    return;
-                }
-                const connected = alreadyConnected || await connectWallet();
-                if (connected) {
-                    isConnected = true;
-                    updateButtonState();
-                    await updateTryCount();
-                    await loadUserAchievements();
-                    showBuyTriesButton();
-                    await loadHighscores();
-                    await updateHighscoreTable();
-                    showAchievements();
-                    await getContractBalance();
-                    hideOverlay();
-                    await checkAndDisplayStartButton();
-                } else {
-                    showOverlay('Failed to connect. Please try again.');
-                }
-            } else {
-                showOverlay(`Web3 initialization failed. Please check your connection and try again. Error: ${initResult.error}`);
-            }
-        } else {
-            // Disconnect wallet
-            isConnected = false;
-            updateButtonState();
-            hideBuyTriesButton();
-            hideAchievements();
-            showOverlay('Wallet disconnected. Please connect to play.');
-        }
-    } catch (error) {
-        console.error('Error in handleWalletConnection:', error);
-        showOverlay(`An error occurred. Please try again. Error: ${error.message}`);
-    }
-}
-
-async function handleChainChanged(chainId) {
-    const networkStatus = await checkNetwork();
-    if (networkStatus.isCorrect) {
-        hideOverlay();
-        isConnected = true;
-        updateButtonState();
         await updateTryCount();
         await loadUserAchievements();
         showBuyTriesButton();
@@ -2201,79 +2192,96 @@ async function handleChainChanged(chainId) {
         await updateHighscoreTable();
         showAchievements();
         await getContractBalance();
+        updateButtonState();
+        hideOverlay();
         await checkAndDisplayStartButton();
+    } catch (error) {
+        console.error('Error in handleInitialConnection:', error);
+        showOverlay('Error initializing game state. Please try reconnecting your wallet.');
+    }
+}
+
+async function handleWalletConnection() {
+    if (!isConnected) {
+        try {
+            const connected = await connectWallet();
+            if (connected) {
+                isConnected = true;
+                const networkStatus = await checkNetwork();
+                isCorrectNetwork = networkStatus.isCorrect;
+                if (isCorrectNetwork) {
+                    await handleInitialConnection();
+                } else {
+                    showSwitchNetworkPrompt(networkStatus.targetNetwork);
+                }
+            } else {
+                showOverlay('Failed to connect. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error connecting wallet:', error);
+            showOverlay('An error occurred while connecting. Please try again.');
+        }
     } else {
+        // Disconnect wallet
         isConnected = false;
         updateButtonState();
         hideBuyTriesButton();
         hideAchievements();
-        showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+        showConnectPrompt();
+    }
+}
+
+async function handleChainChanged(chainId) {
+    const networkStatus = await checkNetwork();
+    isCorrectNetwork = networkStatus.isCorrect;
+    if (isCorrectNetwork) {
+        if (isConnected) {
+            await handleInitialConnection();
+        } else {
+            showConnectPrompt();
+        }
+    } else {
+        showSwitchNetworkPrompt(networkStatus.targetNetwork);
     }
 }
 
 async function switchToEtherlink() {
-  try {
-    // Try to switch to the Etherlink network
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0xA729' }], // Correct Etherlink chain ID
-    });
-
-     const networkStatus = await checkNetwork();
-    if (networkStatus.isCorrect) {
-      hideOverlay();
-      await checkAndDisplayStartButton();
-      return;
-    }
-    
-    // After switching, reinitialize Web3 and reconnect
-    await initWeb3();
-    const connected = await connectWallet();
-    if (connected) {
-      isConnected = true;
-      updateButtonState();
-      await updateTryCount();
-      await loadUserAchievements();
-      showBuyTriesButton();
-      await loadHighscores();
-      await updateHighscoreTable();
-      showAchievements();
-      await getContractBalance();
-      hideOverlay();
-      await checkAndDisplayStartButton();
-    } else {
-      showOverlay('Failed to connect after switching network. Please try again.');
-    }
-  } catch (error) {
-    console.error('Failed to switch network:', error);
-    if (error.code === 4902) {
-      // This error code indicates that the chain has not been added to MetaMask
-      try {
+    try {
         await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: '0xA729', // Correct Etherlink chain ID
-            chainName: 'Etherlink',
-            nativeCurrency: {
-              name: 'Tezos',
-              symbol: 'XTZ',
-              decimals: 18
-            },
-            rpcUrls: ['https://node.mainnet.etherlink.com'],
-            blockExplorerUrls: ['https://explorer.etherlink.com']
-          }]
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0xA729' }], // Etherlink chain ID
         });
-        // After adding the chain, try to switch to it
-        await switchToEtherlink();
-      } catch (addError) {
-        console.error('Failed to add Etherlink network:', addError);
-        showOverlay('Failed to add Etherlink network. Please add it manually to your wallet.');
-      }
-    } else {
-      showOverlay(`Failed to switch network. Please try manually and refresh the page. Error: ${error.message}`);
+        // The chainChanged event will handle the rest
+    } catch (error) {
+        console.error('Failed to switch network:', error);
+        if (error.code === 4902) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0xA729',
+                        chainName: 'Etherlink',
+                        nativeCurrency: {
+                            name: 'Tezos',
+                            symbol: 'XTZ',
+                            decimals: 18
+                        },
+                        rpcUrls: ['https://node.mainnet.etherlink.com'],
+                        blockExplorerUrls: ['https://explorer.etherlink.com']
+                    }]
+                });
+                // Try switching again after adding the network
+                await switchToEtherlink();
+            } catch (addError) {
+                console.error('Failed to add Etherlink network:', addError);
+                showOverlay('Failed to add Etherlink network. Please add it manually to your wallet.');
+            }
+        } else {
+            showOverlay(`Failed to switch network. Please try manually and refresh the page. Error: ${error.message}`);
+        }
     }
-  }
 }
+
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
 
