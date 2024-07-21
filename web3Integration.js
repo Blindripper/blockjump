@@ -734,7 +734,12 @@ async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
     try {
       web3 = new Web3(window.ethereum);
-      return { success: true };
+      const networkStatus = await checkNetwork();
+      if (!networkStatus.isCorrect) {
+        showNetworkWarning();
+        return { success: false, networkStatus };
+      }
+      return { success: true, networkStatus };
     } catch (error) {
       console.error('Failed to initialize Web3:', error);
       return { success: false, error };
@@ -743,7 +748,6 @@ async function initWeb3() {
     return { success: false, error: 'Web3 not available' };
   }
 }
-
 function isContractInitialized() {
   return isInitialized;
 }
@@ -831,17 +835,16 @@ async function startGame() {
 
 async function checkNetwork() {
   try {
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-      const etherlinkChainId = '0xA729'; // Correct Etherlink chain ID
-      
-      return {
-          isCorrect: chainId === etherlinkChainId,
-          currentNetwork: chainId,
-          targetNetwork: etherlinkChainId
-      };
+    const chainId = await web3.eth.getChainId();
+    const etherlinkChainId = '0xA729'; // Etherlink chain ID in hex
+    return {
+      isCorrect: chainId === parseInt(etherlinkChainId, 16),
+      currentNetwork: '0x' + chainId.toString(16),
+      targetNetwork: etherlinkChainId
+    };
   } catch (error) {
-      console.error('Error checking network:', error);
-      return { isCorrect: false, currentNetwork: null, targetNetwork: '0xA729' };
+    console.error('Error checking network:', error);
+    return { isCorrect: false, currentNetwork: null, targetNetwork: '0xA729' };
   }
 }
 
