@@ -272,6 +272,8 @@ class Game {
 
 
 
+
+
     shoot() {
         const currentTime = Date.now();
         if (currentTime - this.lastShotTime > this.shootingCooldown) {
@@ -1476,6 +1478,57 @@ class Game {
         this.enemyDestroyedSprite = new Image();
         this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
     }
+
+    loadSounds() {
+        Object.values(this.sounds).forEach(sound => {
+            sound.load();
+            sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
+        });
+    }
+
+    updateAchievements() {
+        const stats = {
+            score: this.score,
+            blocksClimbed: this.blocksClimbed,
+            powerupsCollected: this.powerupsCollected
+        };
+        updateGameStats(stats);
+    }
+
+    getBackgroundName(index) {
+        const backgroundNames = [
+            'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
+            'Florence', 'Granada', 'Hangzhou', 'Ithaca', 'Jakarta',
+            'Kathmandu', 'Lima', 'Mumbai', 'Nairobi', 'Oxford', 'Paris'
+        ];
+        return backgroundNames[index] || 'Unknown';
+    }
+
+    playSound(soundName) {
+        if (this.sounds[soundName]) {
+            this.sounds[soundName].currentTime = 0;
+            this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
+        }
+    }
+
+    updateScrollSpeed() {
+        const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
+    
+        if (this.player.y < topThreshold) {
+            // Player is near or above the top of the screen, increase scroll speed
+            const distanceAboveThreshold = Math.max(0, topThreshold - this.player.y);
+            const speedIncreaseFactor = 1 + (distanceAboveThreshold / topThreshold) * (this.scrollSpeedIncreaseFactor - 1);
+            this.currentScrollSpeed = Math.min(
+                this.maxScrollSpeed,
+                this.baseScrollSpeed * speedIncreaseFactor
+            );
+        } else {
+            // Player is within the normal play area, use base speed
+            this.currentScrollSpeed = this.baseScrollSpeed;
+        }
+    }
+
+
 
     drawEnemies() {
         for (let enemy of this.enemies) {
