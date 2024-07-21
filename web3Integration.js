@@ -733,14 +733,11 @@ const contractABI = [
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
     try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
       web3 = new Web3(window.ethereum);
       
-      // Check if connected to the correct network
+      // Check if connected to the correct network without requesting accounts
       const networkStatus = await checkNetwork();
       
-      contract = new web3.eth.Contract(contractABI, contractAddress);
-      isInitialized = true;
       return { success: true, networkStatus };
     } catch (error) {
       console.error('Failed to initialize Web3:', error);
