@@ -732,34 +732,25 @@ const contractABI = [
 
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
-    try {
       web3 = new Web3(window.ethereum);
-      const networkStatus = await checkNetwork();
-      if (!networkStatus.isCorrect) {
-        showNetworkWarning();
-        return { success: false, networkStatus };
+      try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          contract = new web3.eth.Contract(contractABI, contractAddress);
+          isInitialized = true;  // Set this to true when initialization is successful
+          return true;
+      } catch (error) {
+          console.error('Failed to initialize Web3:', error);
+          return false;
       }
-      return { success: true, networkStatus };
-    } catch (error) {
-      console.error('Failed to initialize Web3:', error);
-      return { success: false, error };
-    }
   } else {
-    return { success: false, error: 'Web3 not available' };
+      return false;
   }
 }
+
 function isContractInitialized() {
   return isInitialized;
 }
 
-function showNetworkWarning() {
-  const warningOverlay = document.getElementById('networkWarning');
-  if (warningOverlay) {
-    warningOverlay.style.display = 'flex';
-  } else {
-    console.error('Network warning overlay element not found');
-  }
-}
 
 
 async function connectWallet() {
@@ -833,22 +824,6 @@ async function startGame() {
   }
 }
 
-async function checkNetwork() {
-  try {
-    const chainId = await web3.eth.getChainId();
-    const etherlinkChainId = '0xA729'; // Etherlink chain ID in hex
-    return {
-      isCorrect: chainId === parseInt(etherlinkChainId, 16),
-      currentNetwork: '0x' + chainId.toString(16),
-      targetNetwork: etherlinkChainId
-    };
-  } catch (error) {
-    console.error('Error checking network:', error);
-    return { isCorrect: false, currentNetwork: null, targetNetwork: '0xA729' };
-  }
-}
-
-
 async function getGameTries() {
   if (!isInitialized) {
     console.error('Contract not initialized');
@@ -913,34 +888,59 @@ async function getHighscores() {
 let isSubmitting = false;
 
 async function submitScore(name, score, blocksClimbed, gameStartTime) {
-    if (!isInitialized) {
-        console.error('Contract not initialized or account not available');
-        return false;
-    }
+  if (!isInitialized) {
+      console.error('Contract not initialized or account not available');
+      return false;
+  }
 
-    try {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
 
-        if (currentTime - Math.floor(gameStartTime / 1000) > parseInt(tokenValidityPeriod)) {
-            console.error('Game session expired.');
-            return false;
-        }
+  try {
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
 
-        const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
-        
-        const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
+      if (currentTime - Math.floor(gameStartTime / 1000) > parseInt(tokenValidityPeriod)) {
+          console.error('Game session expired. Current time:', currentTime, 'Game start time:', Math.floor(gameStartTime / 1000));
+          return false;
+      }
 
-        const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).send({
-            from: account,
-            gas: Math.floor(gasEstimate * 1.2),
-        });
+      // Convert gameStartTime to seconds for the smart contract
+      const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
+      
+      // Check contract state before submission
+      const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
+      
+      const gameTries = await contract.methods.getGameTries(account).call();
 
-        return true;
-    } catch (error) {
-        console.error('Error in submitScore:', error);
-        return false;
-    }
+      // Estimate gas before sending the transaction
+      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
+
+      const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).send({
+          from: account,
+          gas: Math.floor(gasEstimate * 1.2), // Increase gas limit by 20%
+      });
+
+      return true;
+  } catch (error) {
+      console.error('Error in submitScore:', error);
+      if (error.message) console.error('Error message:', error.message);
+      if (error.data) {
+          console.error('Error data:', error.data);
+          try {
+              const decodedError = web3.eth.abi.decodeParameter('string', error.data);
+              console.error('Decoded error:', decodedError);
+          } catch (decodeError) {
+              console.error('Failed to decode error data:', decodeError);
+          }
+      }
+      // Try to get more information from the contract
+      try {
+          const revertReason = await web3.eth.call(error.receipt);
+          console.error('Revert reason:', revertReason);
+      } catch (callError) {
+          console.error('Failed to get revert reason:', callError);
+      }
+      return false;
+  }
 }
 
 function getContract() {
@@ -986,7 +986,5 @@ export {
   mintAchievement, 
   connectWallet,
   isContractInitialized,
-  getCurrentAccount,
-  checkNetwork, // Export the new function
-  showNetworkWarning,
+  getCurrentAccount
 };
