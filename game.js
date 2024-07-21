@@ -2143,8 +2143,9 @@ async function handleWalletConnection() {
         if (!isConnected) {
             const initResult = await initWeb3();
             if (initResult.success) {
-                if (!initResult.networkStatus.isCorrect) {
-                    showOverlay(`Please switch to Etherlink (Chain ID: ${initResult.networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
+                const networkStatus = await checkNetwork();
+                if (!networkStatus.isCorrect) {
+                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
                     return;
                 }
                 const connected = await connectWallet();
