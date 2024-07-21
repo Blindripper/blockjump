@@ -2117,6 +2117,55 @@ async function handleAccountsChanged(accounts) {
         }
     }
 }
+async function checkInitialState() {
+    const networkStatus = await checkNetwork();
+    if (!networkStatus.isCorrect) {
+        showSwitchNetworkPrompt(networkStatus.targetNetwork);
+        return;
+    }
+
+    // Define isCorrectNetwork here if it should be local to this function
+    let isCorrectNetwork = true;  // Set to true if on the correct network
+
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        isConnected = true;
+        isCorrectNetwork = true;
+        await handleInitialConnection();
+    } else {
+        showConnectPrompt();
+    }
+}
+
+async function handleWalletConnection() {
+    if (!isConnected) {
+        try {
+            const connected = await connectWallet();
+            if (connected) {
+                const networkStatus = await checkNetwork();
+                if (networkStatus.isCorrect) {
+                    isConnected = true;
+                    isCorrectNetwork = true;
+                    await handleInitialConnection();
+                } else {
+                    showSwitchNetworkPrompt(networkStatus.targetNetwork);
+                }
+            } else {
+                showOverlay('Failed to connect. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error connecting wallet:', error);
+            showOverlay('An error occurred while connecting. Please try again.');
+        }
+    } else {
+        // Disconnect wallet
+        isConnected = false;
+        isCorrectNetwork = false;
+        updateButtonState();
+        hideBuyTriesButton();
+        hideAchievements();
+        showConnectPrompt();
+    }
+}
 
 // MAIN INIT
 
@@ -2204,21 +2253,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-async function checkInitialState() {
-    const networkStatus = await checkNetwork();
-    if (!networkStatus.isCorrect) {
-        showSwitchNetworkPrompt(networkStatus.targetNetwork);
-        return;
-    }
 
-    if (window.ethereum && window.ethereum.selectedAddress) {
-        isConnected = true;
-        isCorrectNetwork = true;
-        await handleInitialConnection();
-    } else {
-        showConnectPrompt();
-    }
-}
+
 
 async function handleInitialConnection() {
     try {
@@ -2243,36 +2279,9 @@ async function handleInitialConnection() {
     }
 }
 
-async function handleWalletConnection() {
-    if (!isConnected) {
-        try {
-            const connected = await connectWallet();
-            if (connected) {
-                const networkStatus = await checkNetwork();
-                if (networkStatus.isCorrect) {
-                    isConnected = true;
-                    isCorrectNetwork = true;
-                    await handleInitialConnection();
-                } else {
-                    showSwitchNetworkPrompt(networkStatus.targetNetwork);
-                }
-            } else {
-                showOverlay('Failed to connect. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error connecting wallet:', error);
-            showOverlay('An error occurred while connecting. Please try again.');
-        }
-    } else {
-        // Disconnect wallet
-        isConnected = false;
-        isCorrectNetwork = false;
-        updateButtonState();
-        hideBuyTriesButton();
-        hideAchievements();
-        showConnectPrompt();
-    }
-}
+
+
+
 
 async function handleChainChanged(chainId) {
     const networkStatus = await checkNetwork();
