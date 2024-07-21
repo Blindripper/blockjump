@@ -2142,6 +2142,9 @@ async function handleWalletConnection() {
             const connected = await connectWallet();
             if (connected) {
                 const networkStatus = await checkNetwork();
+                // Define isCorrectNetwork locally within this function
+                let isCorrectNetwork = networkStatus.isCorrect;
+
                 if (networkStatus.isCorrect) {
                     isConnected = true;
                     isCorrectNetwork = true;
@@ -2159,13 +2162,14 @@ async function handleWalletConnection() {
     } else {
         // Disconnect wallet
         isConnected = false;
-        isCorrectNetwork = false;
+        isCorrectNetwork = false; // Set isCorrectNetwork to false even on disconnect
         updateButtonState();
         hideBuyTriesButton();
         hideAchievements();
         showConnectPrompt();
     }
 }
+
 
 // MAIN INIT
 
