@@ -2139,6 +2139,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
+         // Check network status
+         if (!initResult.networkStatus.isCorrect) {
+            showSwitchNetworkPrompt(initResult.networkStatus.targetNetwork);
+            return;
+        }
+
+        isConnected = true;
+        isCorrectNetwork = true;
+
         // Setup event listeners
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
@@ -2161,19 +2170,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Initialize the game
         game = new Game();
 
-        // Check if already connected and on the correct network
+        // Check if already connected
         if (window.ethereum && window.ethereum.selectedAddress) {
-            const networkStatus = await checkNetwork();
-            if (networkStatus.isCorrect) {
-                console.log("Already on Etherlink network.");
-                isConnected = true;
-                await handleInitialConnection();
-            } else {
-                console.log("Connected but on wrong network.");
-                showSwitchNetworkPrompt(networkStatus.targetNetwork);
-            }
+            await handleInitialConnection();
         } else {
-            console.log("Not connected to any wallet.");
             showConnectPrompt();
         }
 
@@ -2208,8 +2208,8 @@ async function handleWalletConnection() {
             if (connected) {
                 isConnected = true;
                 const networkStatus = await checkNetwork();
-                isCorrectNetwork = networkStatus.isCorrect;
-                if (isCorrectNetwork) {
+                if (networkStatus.isCorrect) {
+                    isCorrectNetwork = true;
                     await handleInitialConnection();
                 } else {
                     showSwitchNetworkPrompt(networkStatus.targetNetwork);
@@ -2224,6 +2224,7 @@ async function handleWalletConnection() {
     } else {
         // Disconnect wallet
         isConnected = false;
+        isCorrectNetwork = false;
         updateButtonState();
         hideBuyTriesButton();
         hideAchievements();
