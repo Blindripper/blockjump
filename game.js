@@ -2139,15 +2139,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
-         // Check network status
-         if (!initResult.networkStatus.isCorrect) {
-            showSwitchNetworkPrompt(initResult.networkStatus.targetNetwork);
-            return;
-        }
-
-        isConnected = true;
-        isCorrectNetwork = true;
-
         // Setup event listeners
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
@@ -2170,18 +2161,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Initialize the game
         game = new Game();
 
-        // Check if already connected
-        if (window.ethereum && window.ethereum.selectedAddress) {
-            await handleInitialConnection();
-        } else {
-            showConnectPrompt();
-        }
+        // Check initial connection and network status
+        await checkInitialState();
 
     } catch (error) {
         console.error('Error in DOMContentLoaded:', error);
         showOverlay('An error occurred while initializing the game. Please refresh and try again.');
     }
 });
+
+async function checkInitialState() {
+    const networkStatus = await checkNetwork();
+    if (!networkStatus.isCorrect) {
+        showSwitchNetworkPrompt(networkStatus.targetNetwork);
+        return;
+    }
+
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        isConnected = true;
+        isCorrectNetwork = true;
+        await handleInitialConnection();
+    } else {
+        showConnectPrompt();
+    }
+}
 
 async function handleInitialConnection() {
     try {
