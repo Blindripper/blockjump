@@ -842,17 +842,17 @@ async function startGame() {
 
 async function checkNetwork() {
   try {
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    const etherlinkChainId = '0xA729'; // Correct Etherlink chain ID
-    
-    return {
-      isCorrect: chainId === etherlinkChainId,
-      currentNetwork: chainId,
-      targetNetwork: etherlinkChainId
-    };
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      const etherlinkChainId = '0xA729'; // Correct Etherlink chain ID
+      
+      return {
+          isCorrect: chainId === etherlinkChainId,
+          currentNetwork: chainId,
+          targetNetwork: etherlinkChainId
+      };
   } catch (error) {
-    console.error('Error checking network:', error);
-    return { isCorrect: false, currentNetwork: null, targetNetwork: '0xA729' };
+      console.error('Error checking network:', error);
+      return { isCorrect: false, currentNetwork: null, targetNetwork: '0xA729' };
   }
 }
 
