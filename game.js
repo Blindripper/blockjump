@@ -1,4 +1,4 @@
-import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, checkNetwork, showNetworkWarning,} from './web3Integration.js';
+import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -28,7 +28,6 @@ async function updateTryCount() {
         console.error('Failed to get Game tries:', error);
     }
 }
-
 
 // Define base URL for the GitHub repository
 const repoBaseUrl = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/';
@@ -168,16 +167,12 @@ class Game {
         this.setupEventListeners();
     }
 
-
-
     loadPlatformSprites() {
         this.platformSprites.normal[0].src = `${picsUrl}normalplat0.png`;
         this.platformSprites.normal[1].src = `${picsUrl}normalplat1.png`;
         this.platformSprites.spike.src = `${picsUrl}spikeplat1.png`;
         this.platformSprites.golden.src = `${picsUrl}jumppad.png`;
     }
-
-    
 
     dropNomadicPowerup() {
         const x = Math.random() * (GAME_WIDTH - 30);
@@ -191,13 +186,6 @@ class Game {
         if (!checkWalletConnection()) return;
     
         try {
-            // Check network immediately after initializing Web3
-            const networkStatus = await checkNetwork();
-            if (!networkStatus.isCorrect) {
-                showNetworkWarning();
-                return;
-            }
-    
             showEtherlinkWaitMessage();
     
             const currentTries = await getGameTries();
@@ -217,8 +205,7 @@ class Game {
     
             hideOverlay();
             this.gameStartTime = Date.now(); // Store full millisecond timestamp  
-    
-            // Initialize game state
+
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
             this.bottomPlatform = this.createBottomPlatform();
@@ -234,6 +221,7 @@ class Game {
             this.lastEnemySpawn = 0;
             this.activePowerups.clear();
             this.nomadicPowerupLevel = 0;
+
             this.enemyBullets = [];
             this.gameStarted = true;
             this.difficultyLevel = 1;
@@ -251,7 +239,8 @@ class Game {
             this.powerups = [];
             this.lastBackgroundChange = 0;
             this.currentBackgroundIndex = 0;
-    
+
+
             setTimeout(() => {
                 this.bottomPlatform = null;
             }, 5000);
@@ -264,12 +253,67 @@ class Game {
     
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
-        } catch (error) {
+            } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
+             }
+            }
+    
+        loadSprites() {
+        this.enemySprite = new Image();
+        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
+        this.enemyDestroyedSprite = new Image();
+        this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
+    }
+
+        loadSounds() {
+        Object.values(this.sounds).forEach(sound => {
+            sound.load();
+            sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
+        });
+    }
+
+    updateAchievements() {
+        const stats = {
+            score: this.score,
+            blocksClimbed: this.blocksClimbed,
+            powerupsCollected: this.powerupsCollected
+        };
+        updateGameStats(stats);
+    }
+
+    getBackgroundName(index) {
+        const backgroundNames = [
+            'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
+            'Florence', 'Granada', 'Hangzhou', 'Ithaca', 'Jakarta',
+            'Kathmandu', 'Lima', 'Mumbai', 'Nairobi', 'Oxford', 'Paris'
+        ];
+        return backgroundNames[index] || 'Unknown';
+    }
+
+    playSound(soundName) {
+        if (this.sounds[soundName]) {
+            this.sounds[soundName].currentTime = 0;
+            this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
         }
     }
 
+    updateScrollSpeed() {
+        const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
+    
+        if (this.player.y < topThreshold) {
+            // Player is near or above the top of the screen, increase scroll speed
+            const distanceAboveThreshold = Math.max(0, topThreshold - this.player.y);
+            const speedIncreaseFactor = 1 + (distanceAboveThreshold / topThreshold) * (this.scrollSpeedIncreaseFactor - 1);
+            this.currentScrollSpeed = Math.min(
+                this.maxScrollSpeed,
+                this.baseScrollSpeed * speedIncreaseFactor
+            );
+        } else {
+            // Player is within the normal play area, use base speed
+            this.currentScrollSpeed = this.baseScrollSpeed;
+        }
+    }
 
 
 
@@ -1472,64 +1516,6 @@ class Game {
         }
     }
 
-    loadSprites() {
-        this.enemySprite = new Image();
-        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
-        this.enemyDestroyedSprite = new Image();
-        this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
-    }
-
-    loadSounds() {
-        Object.values(this.sounds).forEach(sound => {
-            sound.load();
-            sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
-        });
-    }
-
-    updateAchievements() {
-        const stats = {
-            score: this.score,
-            blocksClimbed: this.blocksClimbed,
-            powerupsCollected: this.powerupsCollected
-        };
-        updateGameStats(stats);
-    }
-
-    getBackgroundName(index) {
-        const backgroundNames = [
-            'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
-            'Florence', 'Granada', 'Hangzhou', 'Ithaca', 'Jakarta',
-            'Kathmandu', 'Lima', 'Mumbai', 'Nairobi', 'Oxford', 'Paris'
-        ];
-        return backgroundNames[index] || 'Unknown';
-    }
-
-    playSound(soundName) {
-        if (this.sounds[soundName]) {
-            this.sounds[soundName].currentTime = 0;
-            this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
-        }
-    }
-
-    updateScrollSpeed() {
-        const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
-    
-        if (this.player.y < topThreshold) {
-            // Player is near or above the top of the screen, increase scroll speed
-            const distanceAboveThreshold = Math.max(0, topThreshold - this.player.y);
-            const speedIncreaseFactor = 1 + (distanceAboveThreshold / topThreshold) * (this.scrollSpeedIncreaseFactor - 1);
-            this.currentScrollSpeed = Math.min(
-                this.maxScrollSpeed,
-                this.baseScrollSpeed * speedIncreaseFactor
-            );
-        } else {
-            // Player is within the normal play area, use base speed
-            this.currentScrollSpeed = this.baseScrollSpeed;
-        }
-    }
-
-
-
     drawEnemies() {
         for (let enemy of this.enemies) {
             const sprite = enemy.isDestroyed ? 
@@ -2084,97 +2070,16 @@ function showEtherlinkWaitMessage() {
 
 
 function hideOverlay() {
-    const overlays = document.querySelectorAll('.game-overlay, .blockchain-wait-overlay');
-    overlays.forEach(overlay => {
-        if (overlay && overlay.parentNode) {
-            overlay.parentNode.removeChild(overlay);
-        }
-    });
-}
-
-function showConnectPrompt() {
-    showOverlay('Please connect your wallet to play.', handleWalletConnection, true, 'Connect Wallet');
-}
-
-function showSwitchNetworkPrompt(targetNetwork) {
-    showOverlay(`Please switch to Etherlink (Chain ID: ${targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
-}
-
-
-async function handleAccountsChanged(accounts) {
-    if (accounts.length === 0) {
-        // User disconnected their wallet
-        isConnected = false;
-        updateButtonState();
-        showConnectPrompt();
-    } else if (accounts[0] !== getCurrentAccount()) {
-        // User switched to a different account
-        isConnected = true;
-        if (isCorrectNetwork) {
-            await handleInitialConnection();
-        } else {
-            showSwitchNetworkPrompt(await getTargetNetwork());
-        }
-    }
-}
-async function checkInitialState() {
-    const networkStatus = await checkNetwork();
-    if (!networkStatus.isCorrect) {
-        showSwitchNetworkPrompt(networkStatus.targetNetwork);
-        return;
-    }
-
-    // Define isCorrectNetwork here if it should be local to this function
-    let isCorrectNetwork = true;  // Set to true if on the correct network
-
-    if (window.ethereum && window.ethereum.selectedAddress) {
-        isConnected = true;
-        isCorrectNetwork = true;
-        await handleInitialConnection();
-    } else {
-        showConnectPrompt();
-    }
-}
-
-async function handleWalletConnection() {
-    if (!isConnected) {
-        try {
-            const connected = await connectWallet();
-            if (connected) {
-                const networkStatus = await checkNetwork();
-                // Define isCorrectNetwork locally within this function
-                let isCorrectNetwork = networkStatus.isCorrect;
-
-                if (networkStatus.isCorrect) {
-                    isConnected = true;
-                    isCorrectNetwork = true;
-                    await handleInitialConnection();
-                } else {
-                    showSwitchNetworkPrompt(networkStatus.targetNetwork);
-                }
-            } else {
-                showOverlay('Failed to connect. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error connecting wallet:', error);
-            showOverlay('An error occurred while connecting. Please try again.');
-        }
-    } else {
-        // Disconnect wallet
-        isConnected = false;
-        isCorrectNetwork = false; // Set isCorrectNetwork to false even on disconnect
-        updateButtonState();
-        hideBuyTriesButton();
-        hideAchievements();
-        showConnectPrompt();
+    const existingOverlay = document.getElementById('game-overlay');
+    if (existingOverlay && existingOverlay.parentNode) {
+        existingOverlay.parentNode.removeChild(existingOverlay);
     }
 }
 
 
-// MAIN INIT
-
+// Main initialization
 document.addEventListener('DOMContentLoaded', async function() {
-    const requiredElements = ['gameCanvas', 'powerupBar', 'windIndicator'];
+    const requiredElements = ['gameCanvas', 'powerupBar','windIndicator'];
     const missingElements = requiredElements.filter(id => !document.getElementById(id));
     
     if (missingElements.length > 0) {
@@ -2199,13 +2104,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Hide loading message
         hideOverlay();
 
-        // Initialize Web3
-        const initResult = await initWeb3();
-        if (!initResult.success) {
-            showOverlay(`Web3 initialization failed. Please check your connection and try again. Error: ${initResult.error}`);
-            return;
-        }
-
+        // Initialize the game
+        game = new Game();
+    
         // Setup event listeners
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
@@ -2213,18 +2114,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
-        // Add the event listener for the network switch button here
-        const switchNetworkBtn = document.getElementById('switchNetworkBtn');
-        if (switchNetworkBtn) {
-            switchNetworkBtn.addEventListener('click', switchToEtherlink);
+        if (!isConnected) {
+            showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
         }
+    } catch (error) {
+        console.error('Error loading game assets:', error);
+        showOverlay('Failed to load game assets. Please refresh and try again.');
+    }
 
-        // Add network change listener
-        if (window.ethereum) {
-            window.ethereum.on('chainChanged', async (chainId) => {
-                const networkStatus = await checkNetwork();
-                if (networkStatus.isCorrect) {
-                    hideOverlay();
+    
+});
+
+async function handleWalletConnection() {
+    try {
+        if (!isConnected) {
+            const web3Initialized = await initWeb3();
+            if (web3Initialized) {
+                const connected = await connectWallet();
+                if (connected) {
                     isConnected = true;
                     updateButtonState();
                     await updateTryCount();
@@ -2234,104 +2141,27 @@ document.addEventListener('DOMContentLoaded', async function() {
                     await updateHighscoreTable();
                     showAchievements();
                     await getContractBalance();
+                    hideOverlay();
                     await checkAndDisplayStartButton();
                 } else {
-                    isConnected = false;
-                    updateButtonState();
-                    hideBuyTriesButton();
-                    hideAchievements();
-                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+                    showOverlay('Failed to connect. Please try again.');
                 }
-            });
-        }
-
-        // Initialize the game
-        game = new Game();
-
-        // Check initial connection and network status
-        await checkInitialState();
-
-    } catch (error) {
-        console.error('Error in DOMContentLoaded:', error);
-        showOverlay('An error occurred while initializing the game. Please refresh and try again.');
-    }
-});
-
-
-
-
-async function handleInitialConnection() {
-    try {
-        const connected = await connectWallet();
-        if (connected) {
-            await updateTryCount();
-            await loadUserAchievements();
-            showBuyTriesButton();
-            await loadHighscores();
-            await updateHighscoreTable();
-            showAchievements();
-            await getContractBalance();
+            } else {
+                showOverlay('Web3 initialization failed. Please check your connection.');
+            }
+        } else {
+            // Disconnect wallet
+            isConnected = false;
             updateButtonState();
-            hideOverlay();
-            await checkAndDisplayStartButton();
-        } else {
-            showConnectPrompt();
+            hideBuyTriesButton();
+            hideAchievements();
+            showOverlay('Wallet disconnected. Please connect to play.');
         }
     } catch (error) {
-        console.error('Error in handleInitialConnection:', error);
-        showOverlay('Error initializing game state. Please try reconnecting your wallet.');
+        console.error('Error in handleWalletConnection:', error);
+        showOverlay('An error occurred. Please try again.');
     }
 }
-
-
-
-
-
-async function handleChainChanged(chainId) {
-    const networkStatus = await checkNetwork();
-    isCorrectNetwork = networkStatus.isCorrect;
-    if (isCorrectNetwork) {
-        if (isConnected) {
-            await handleInitialConnection();
-        } else {
-            showConnectPrompt();
-        }
-    } else {
-        showSwitchNetworkPrompt(networkStatus.targetNetwork);
-    }
-}
-
-async function switchToEtherlink() {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0xA729' }],
-      });
-    } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0xA729',
-              chainName: 'Etherlink',
-              nativeCurrency: {
-                name: 'Tezos',
-                symbol: 'XTZ',
-                decimals: 18
-              },
-              rpcUrls: ['https://mainnet.etherlink.com'],
-              blockExplorerUrls: ['https://explorer.etherlink.com']
-            }],
-          });
-        } catch (addError) {
-          console.error('Failed to add Etherlink network:', addError);
-        }
-      }
-      console.error('Failed to switch to Etherlink network:', switchError);
-    }
-  }
 
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
@@ -2662,3 +2492,6 @@ function drawCanvasMessage(text) {
     message.className = 'canvas-message';
     document.body.appendChild(message);
 }
+
+
+export { updateTryCount };
