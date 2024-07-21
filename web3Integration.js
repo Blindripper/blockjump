@@ -730,6 +730,48 @@ const contractABI = [
   }
 ];
 
+
+const ETHERLINK_CHAIN_ID = '0xA709'; // Etherlink mainnet chain ID (42793 in hexadecimal)
+const ETHERLINK_RPC_URL = 'https://node.mainnet.etherlink.com'; // Etherlink mainnet RPC URL
+
+async function switchToEtherlink() {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: ETHERLINK_CHAIN_ID }],
+    });
+    return true;
+  } catch (switchError) {
+    // This error code indicates that the chain has not been added to MetaMask.
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: ETHERLINK_CHAIN_ID,
+              chainName: 'Etherlink Mainnet',
+              nativeCurrency: {
+                name: 'Tezos',
+                symbol: 'XTZ',
+                decimals: 18,
+              },
+              rpcUrls: [ETHERLINK_RPC_URL],
+              blockExplorerUrls: ['https://explorer.etherlink.com'],
+            },
+          ],
+        });
+        return true;
+      } catch (addError) {
+        console.error('Error adding Etherlink network:', addError);
+        return false;
+      }
+    }
+    console.error('Error switching to Etherlink network:', switchError);
+    return false;
+  }
+}
+
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
       web3 = new Web3(window.ethereum);
@@ -755,27 +797,38 @@ function isContractInitialized() {
 
 async function connectWallet() {
   if (!web3) {
-      showOverlay('Web3 not initialized. Please refresh the page.');
-      return false;
+    showOverlay('Web3 not initialized. Please refresh the page.');
+    return false;
   }
 
   try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts.length === 0) {
-          console.error('No accounts found');
-          return false;
-      }
-      account = accounts[0];
-      contract = new web3.eth.Contract(contractABI, contractAddress);
-      if (!contract.methods) {
-          console.error('Contract methods not available');
-          return false;
-      }
-      isInitialized = true;
-      return true;
-  } catch (error) {
-      console.error('Error connecting wallet:', error);
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (accounts.length === 0) {
+      console.error('No accounts found');
       return false;
+    }
+
+    // Check if the current network is Etherlink Mainnet
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== parseInt(ETHERLINK_CHAIN_ID, 16)) {
+      const switched = await switchToEtherlink();
+      if (!switched) {
+        showOverlay('Please switch to the Etherlink Mainnet in your wallet.');
+        return false;
+      }
+    }
+
+    account = accounts[0];
+    contract = new web3.eth.Contract(contractABI, contractAddress);
+    if (!contract.methods) {
+      console.error('Contract methods not available');
+      return false;
+    }
+    isInitialized = true;
+    return true;
+  } catch (error) {
+    console.error('Error connecting wallet:', error);
+    return false;
   }
 }
 
@@ -986,5 +1039,6 @@ export {
   mintAchievement, 
   connectWallet,
   isContractInitialized,
-  getCurrentAccount
+  getCurrentAccount,
+  switchToEtherlink,
 };
