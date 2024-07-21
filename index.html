@@ -156,20 +156,11 @@
             </section>
         </div>
     </div>
-
-    <!-- New div for the network warning -->
-    <div id="networkWarning" class="overlay" style="display: none;">
-        <div class="overlay-content">
-            <h2>Wrong Network</h2>
-            <p>Please connect to the Etherlink network to play BlockJump.</p>
-            <button id="switchNetworkBtn" class="game-button">Switch to Etherlink</button>
-        </div>
-    </div>
-
     <a href="https://github.com/Blindripper/blockjump" target="_blank" id="githubLink" class="github-link">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
     </a>
     <button id="soundToggle" class="sound-toggle">🔊</button>
+    
     
     <script>
         // Modal functionality
@@ -190,26 +181,6 @@
                 modal.style.display = "none";
             }
         }
-
-        // Network switching functionality
-        document.getElementById('switchNetworkBtn').addEventListener('click', async () => {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1F3BB' }], // 128123 in hexadecimal
-                });
-                document.getElementById('networkWarning').style.display = 'none';
-                // Reinitialize Web3 and reconnect after switching
-                if (typeof handleWalletConnection === 'function') {
-                    await handleWalletConnection();
-                } else {
-                    console.error('handleWalletConnection function not found');
-                }
-            } catch (error) {
-                console.error('Failed to switch network:', error);
-                alert('Failed to switch network. Please try manually and refresh the page.');
-            }
-        });
     </script>
 </body>
 </html>
