@@ -2185,16 +2185,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function handleInitialConnection() {
     try {
-        await updateTryCount();
-        await loadUserAchievements();
-        showBuyTriesButton();
-        await loadHighscores();
-        await updateHighscoreTable();
-        showAchievements();
-        await getContractBalance();
-        updateButtonState();
-        hideOverlay();
-        await checkAndDisplayStartButton();
+        const connected = await connectWallet();
+        if (connected) {
+            await updateTryCount();
+            await loadUserAchievements();
+            showBuyTriesButton();
+            await loadHighscores();
+            await updateHighscoreTable();
+            showAchievements();
+            await getContractBalance();
+            updateButtonState();
+            hideOverlay();
+            await checkAndDisplayStartButton();
+        } else {
+            showConnectPrompt();
+        }
     } catch (error) {
         console.error('Error in handleInitialConnection:', error);
         showOverlay('Error initializing game state. Please try reconnecting your wallet.');
@@ -2206,9 +2211,9 @@ async function handleWalletConnection() {
         try {
             const connected = await connectWallet();
             if (connected) {
-                isConnected = true;
                 const networkStatus = await checkNetwork();
                 if (networkStatus.isCorrect) {
+                    isConnected = true;
                     isCorrectNetwork = true;
                     await handleInitialConnection();
                 } else {
