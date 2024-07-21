@@ -2144,10 +2144,10 @@ async function handleWalletConnection() {
                     hideOverlay();
                     await checkAndDisplayStartButton();
                 } else {
-                    showOverlay('Failed to connect. Please try again.');
+                    showOverlay('Failed to connect. Please ensure you are on the Etherlink Mainnet.');
                 }
             } else {
-                showOverlay('Web3 initialization failed. Please check your connection.');
+                showOverlay('Web3 initialization failed. Please check your connection and ensure you have a compatible wallet.');
             }
         } else {
             // Disconnect wallet
