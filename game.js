@@ -187,6 +187,13 @@ class Game {
         if (!checkWalletConnection()) return;
     
         try {
+            // Check network immediately after initializing Web3
+            const networkStatus = await checkNetwork();
+            if (!networkStatus.isCorrect) {
+                showNetworkWarning();
+                return;
+            }
+    
             showEtherlinkWaitMessage();
     
             const currentTries = await getGameTries();
@@ -206,7 +213,8 @@ class Game {
     
             hideOverlay();
             this.gameStartTime = Date.now(); // Store full millisecond timestamp  
-
+    
+            // Initialize game state
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
             this.bottomPlatform = this.createBottomPlatform();
@@ -222,7 +230,6 @@ class Game {
             this.lastEnemySpawn = 0;
             this.activePowerups.clear();
             this.nomadicPowerupLevel = 0;
-
             this.enemyBullets = [];
             this.gameStarted = true;
             this.difficultyLevel = 1;
@@ -240,8 +247,7 @@ class Game {
             this.powerups = [];
             this.lastBackgroundChange = 0;
             this.currentBackgroundIndex = 0;
-
-
+    
             setTimeout(() => {
                 this.bottomPlatform = null;
             }, 5000);
@@ -254,68 +260,11 @@ class Game {
     
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
-            } catch (error) {
+        } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
-             }
-            }
-    
-        loadSprites() {
-        this.enemySprite = new Image();
-        this.enemySprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraft1small.png';
-        this.enemyDestroyedSprite = new Image();
-        this.enemyDestroyedSprite.src = 'https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/spacecraftfire.png';
-    }
-
-        loadSounds() {
-        Object.values(this.sounds).forEach(sound => {
-            sound.load();
-            sound.muted = !isSoundOn; // Set initial mute state based on isSoundOn
-        });
-    }
-
-    updateAchievements() {
-        const stats = {
-            score: this.score,
-            blocksClimbed: this.blocksClimbed,
-            powerupsCollected: this.powerupsCollected
-        };
-        updateGameStats(stats);
-    }
-
-    getBackgroundName(index) {
-        const backgroundNames = [
-            'Athens', 'Babylon', 'Carthage', 'Delphi', 'Edo',
-            'Florence', 'Granada', 'Hangzhou', 'Ithaca', 'Jakarta',
-            'Kathmandu', 'Lima', 'Mumbai', 'Nairobi', 'Oxford', 'Paris'
-        ];
-        return backgroundNames[index] || 'Unknown';
-    }
-
-    playSound(soundName) {
-        if (this.sounds[soundName]) {
-            this.sounds[soundName].currentTime = 0;
-            this.sounds[soundName].play().catch(error => console.warn("Error playing sound:", error));
         }
     }
-
-    updateScrollSpeed() {
-        const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
-    
-        if (this.player.y < topThreshold) {
-            // Player is near or above the top of the screen, increase scroll speed
-            const distanceAboveThreshold = Math.max(0, topThreshold - this.player.y);
-            const speedIncreaseFactor = 1 + (distanceAboveThreshold / topThreshold) * (this.scrollSpeedIncreaseFactor - 1);
-            this.currentScrollSpeed = Math.min(
-                this.maxScrollSpeed,
-                this.baseScrollSpeed * speedIncreaseFactor
-            );
-        } else {
-            // Player is within the normal play area, use base speed
-            this.currentScrollSpeed = this.baseScrollSpeed;
-        }
-    }
-
 
 
 
@@ -2105,6 +2054,7 @@ async function handleAccountsChanged(accounts) {
     }
 }
 
+// MAIN INIT
 
 document.addEventListener('DOMContentLoaded', async function() {
     const requiredElements = ['gameCanvas', 'powerupBar', 'windIndicator'];
@@ -2154,8 +2104,28 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Add network change listener
         if (window.ethereum) {
-            window.ethereum.on('chainChanged', handleChainChanged);
-            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', async (chainId) => {
+                const networkStatus = await checkNetwork();
+                if (networkStatus.isCorrect) {
+                    hideOverlay();
+                    isConnected = true;
+                    updateButtonState();
+                    await updateTryCount();
+                    await loadUserAchievements();
+                    showBuyTriesButton();
+                    await loadHighscores();
+                    await updateHighscoreTable();
+                    showAchievements();
+                    await getContractBalance();
+                    await checkAndDisplayStartButton();
+                } else {
+                    isConnected = false;
+                    updateButtonState();
+                    hideBuyTriesButton();
+                    hideAchievements();
+                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+                }
+            });
         }
 
         // Initialize the game
@@ -2256,40 +2226,35 @@ async function handleChainChanged(chainId) {
 
 async function switchToEtherlink() {
     try {
-        await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0xA729' }], // Etherlink chain ID
-        });
-        // The chainChanged event will handle the rest
-    } catch (error) {
-        console.error('Failed to switch network:', error);
-        if (error.code === 4902) {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: '0xA729',
-                        chainName: 'Etherlink',
-                        nativeCurrency: {
-                            name: 'Tezos',
-                            symbol: 'XTZ',
-                            decimals: 18
-                        },
-                        rpcUrls: ['https://node.mainnet.etherlink.com'],
-                        blockExplorerUrls: ['https://explorer.etherlink.com']
-                    }]
-                });
-                // Try switching again after adding the network
-                await switchToEtherlink();
-            } catch (addError) {
-                console.error('Failed to add Etherlink network:', addError);
-                showOverlay('Failed to add Etherlink network. Please add it manually to your wallet.');
-            }
-        } else {
-            showOverlay(`Failed to switch network. Please try manually and refresh the page. Error: ${error.message}`);
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0xA729' }],
+      });
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0xA729',
+              chainName: 'Etherlink',
+              nativeCurrency: {
+                name: 'Tezos',
+                symbol: 'XTZ',
+                decimals: 18
+              },
+              rpcUrls: ['https://mainnet.etherlink.com'],
+              blockExplorerUrls: ['https://explorer.etherlink.com']
+            }],
+          });
+        } catch (addError) {
+          console.error('Failed to add Etherlink network:', addError);
         }
+      }
+      console.error('Failed to switch to Etherlink network:', switchError);
     }
-}
+  }
 
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
