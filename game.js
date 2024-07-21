@@ -2119,7 +2119,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Add the event listener for the network switch button here
         const switchNetworkBtn = document.getElementById('switchNetworkBtn');
         if (switchNetworkBtn) {
-            switchNetworkBtn.addEventListener('click', switchToEtherlink);
+            switchNetworkBtn.addEventListener('click', Etherlink);
         }
 
         // Add network change listener
@@ -2143,7 +2143,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     updateButtonState();
                     hideBuyTriesButton();
                     hideAchievements();
-                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+                    showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
                 }
             });
         }
@@ -2155,7 +2155,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 isConnected = true;
                 await handleWalletConnection();
             } else {
-                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, switchToEtherlink, true, 'Switch to Etherlink');
+                showOverlay(`Please switch to Etherlink (Chain ID: ${networkStatus.targetNetwork}).`, Etherlink, true, 'Switch to Etherlink');
             }
         } else if (!isConnected) {
             showOverlay('Please connect Wallet', handleWalletConnection, true, 'Connect Wallet');
@@ -2211,18 +2211,18 @@ async function handleWalletConnection() {
 
 async function switchToEtherlink() {
   try {
-    const networkStatus = await checkNetwork();
-    if (networkStatus.isCorrect) {
-      hideOverlay();
-      await checkAndDisplayStartButton();
-      return;
-    }
-
     // Try to switch to the Etherlink network
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0xA729' }], // Correct Etherlink chain ID
     });
+
+     const networkStatus = await checkNetwork();
+    if (networkStatus.isCorrect) {
+      hideOverlay();
+      await checkAndDisplayStartButton();
+      return;
+    }
     
     // After switching, reinitialize Web3 and reconnect
     await initWeb3();
