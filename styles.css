@@ -62,6 +62,25 @@ header {
   color: #fff;
 }
 
+#addFundsModal input[type="number"] {
+  font-family: 'Orbitron', sans-serif;
+  padding: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+#addFundsModal label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--primary-color);
+}
+
+
+
 
 /* Main Layout */
 .main-content {
@@ -334,7 +353,8 @@ header {
 
 /* Style Jackpot message and Contract balance */
 .jackpot-info h3,
-#contract-balance {
+#contract-balance,
+#jump-balance {
   color: #FFD700; /* Gold color */
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); /* Subtle glow effect */
 }
