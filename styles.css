@@ -487,6 +487,7 @@ header {
   width: 90%;
   max-width: 500px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
+  overflow: hidden; /* Prevent scrollbar */
 }
 
 #buyTriesModal h2 {
@@ -507,7 +508,7 @@ header {
   width: 100%;
   padding: 15px;
   margin-bottom: 15px;
-  font-size: 16px;
+  font-size: 18px;
   background-color: #3FE1B0;
   color: #1a2333;
   border: none;
@@ -519,6 +520,16 @@ header {
 #buyTriesModal .game-button:hover {
   background-color: #2dc898;
   transform: translateY(-2px);
+}
+
+/* Highlight JUMP option */
+#buyJumpBtn {
+  background-color: #FFD700; /* Gold color */
+  color: #1a2333;
+}
+
+#buyJumpBtn:hover {
+  background-color: #FFC600; /* Slightly darker gold on hover */
 }
 
 #buyTriesModal .close {
