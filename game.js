@@ -2305,6 +2305,17 @@ async function processAddFunds(xtzAmount, jumpAmount) {
             showOverlay('Funds added successfully!', async () => {
                 await updateContractBalance();
                 hideOverlay();
+                // Check if the player has any tries left
+                const tries = await getGameTries();
+                if (tries > 0) {
+                    // If tries are available, show the start game overlay
+                    showOverlay('Ready to play?', () => {
+                        game.initializeGame();
+                    }, true, 'Start Game');
+                } else {
+                    // If no tries are left, show the buy tries overlay
+                    showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+                }
             }, true, 'OK');
         } else {
             showOverlay('Failed to add funds. Please try again.', null, true, 'OK');
