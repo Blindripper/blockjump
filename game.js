@@ -2434,6 +2434,11 @@ async function getContractBalance() {
         const data = await response.json();
         const xtzBalance = data["coin_balance"];
 
+        // Check if Web3 is initialized
+        if (typeof web3 === 'undefined' || !web3.eth) {
+            throw new Error('Web3 is not initialized');
+        }
+
         // Fetch JUMP balance
         const jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
         const jumpBalance = await jumpTokenContract.methods.balanceOf('0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB').call();
@@ -2446,6 +2451,8 @@ async function getContractBalance() {
         updateBalanceDisplay(formattedXtzBalance, formattedJumpBalance);
     } catch (error) {
         console.error('Error fetching contract balances:', error);
+        // Update display with error message
+        updateBalanceDisplay('Error', 'Error');
     }
 }
 
