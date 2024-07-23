@@ -2239,6 +2239,12 @@ async function processPurchase(useJump) {
     }
 }
 
+function showStartButton() {
+    showOverlay('Ready to play?', () => {
+        game.initializeGame();
+    }, true, 'Start Game');
+}
+
 async function updateContractBalance() {
     try {
         const balances = await getContractBalance();
