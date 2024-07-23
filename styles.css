@@ -522,13 +522,12 @@ header {
   transform: translateY(-2px);
 }
 
-/* Highlight JUMP option */
-#buyJumpBtn {
+#buyTriesModal #buyJumpBtn {  /* More specific selector */
   background-color: #FFD700; /* Gold color */
   color: #1a2333;
 }
 
-#buyJumpBtn:hover {
+#buyTriesModal #buyJumpBtn:hover {
   background-color: #FFC600; /* Slightly darker gold on hover */
 }
 
