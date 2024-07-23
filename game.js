@@ -2138,10 +2138,11 @@ async function handleWalletConnection() {
                     await updateTryCount(web3Instance);
                     await loadUserAchievements(web3Instance);
                     showBuyTriesButton();
+                    document.getElementById('addFundsBtn').style.display = 'block'; // Add this line
                     await loadHighscores(web3Instance);
                     await updateHighscoreTable(web3Instance);
                     showAchievements();
-                    await updateContractBalance(); // Add this line
+                    await updateContractBalance();
                     hideOverlay();
                     await checkAndDisplayStartButton(web3Instance);
                 } else {
@@ -2155,6 +2156,7 @@ async function handleWalletConnection() {
             isConnected = false;
             updateButtonState();
             hideBuyTriesButton();
+            document.getElementById('addFundsBtn').style.display = 'none'; // Add this line
             hideAchievements();
             showOverlay('Wallet disconnected. Please connect to play.');
         }
