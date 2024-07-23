@@ -478,6 +478,61 @@ header {
     cursor: pointer;
 }
 
+#buyTriesModal .modal-content {
+  background-color: #1a2333;
+  color: #ffffff;
+  border: 2px solid #3FE1B0;
+  border-radius: 10px;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
+}
+
+#buyTriesModal h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #3FE1B0;
+}
+
+#buyTriesModal p {
+  font-size: 18px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+#buyTriesModal .game-button {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  font-size: 18px;
+  background-color: #3FE1B0;
+  color: #1a2333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#buyTriesModal .game-button:hover {
+  background-color: #2dc898;
+  transform: translateY(-2px);
+}
+
+#buyTriesModal .close {
+  color: #3FE1B0;
+  font-size: 28px;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+}
+
+#buyTriesModal .close:hover {
+  color: #ffffff;
+}
+
 #nameForm {
   position: absolute;
   top: 50%;
