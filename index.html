@@ -110,22 +110,14 @@
     <button id="soundToggle" class="sound-toggle">🔊</button>
     
     <script>
-        // Modal functionality
-        var modal = document.getElementById("infoModal");
-        var btn = document.getElementById("infoButton");
-        var span = document.getElementsByClassName("close")[0];
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
+        document.getElementById('infoButton').addEventListener('click', function() {
+            document.getElementById('infoModal').style.display = 'block';
+        });
+    
+        // Close modal when clicking on the close button or outside the modal
         window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+            if (event.target.classList.contains('modal') || event.target.classList.contains('close')) {
+                event.target.closest('.modal').style.display = 'none';
             }
         }
     </script>
