@@ -1175,25 +1175,19 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
 }
 
 async function getContractBalance() {
-  console.log('Entering getContractBalance function');
   if (!isInitialized) {
       console.error('Contract not initialized');
       return { xtz: 0, jump: 0 };
   }
 
   try {
-      console.log('Fetching XTZ balance...');
       const xtzBalance = await contract.methods.xtzBalance().call();
-      console.log('XTZ balance fetched:', xtzBalance);
 
-      console.log('Fetching JUMP balance...');
       const jumpBalance = await contract.methods.jumpBalance().call();
-      console.log('JUMP balance fetched:', jumpBalance);
 
       const formattedXtzBalance = web3.utils.fromWei(xtzBalance, 'ether');
       const formattedJumpBalance = web3.utils.fromWei(jumpBalance, 'ether');
 
-      console.log('Formatted balances:', { xtz: formattedXtzBalance, jump: formattedJumpBalance });
 
       return {
           xtz: formattedXtzBalance,
