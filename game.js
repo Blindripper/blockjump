@@ -2141,7 +2141,7 @@ async function handleWalletConnection() {
                     await loadHighscores(web3Instance);
                     await updateHighscoreTable(web3Instance);
                     showAchievements();
-                    await getContractBalance(web3Instance); // Pass web3Instance here
+                    await updateContractBalance(); // Add this line
                     hideOverlay();
                     await checkAndDisplayStartButton(web3Instance);
                 } else {
