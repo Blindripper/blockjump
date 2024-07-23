@@ -907,7 +907,7 @@ async function initWeb3() {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       contract = new web3.eth.Contract(contractABI, contractAddress);
-      jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
+      jumpTokenContract = new web3.eth.Contract(contractABI, jumpTokenAddress);
       isInitialized = true;
       return true;
     } catch (error) {
