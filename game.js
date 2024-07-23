@@ -2525,24 +2525,6 @@ function updateClaimPrizeButton(highscores, currentAccount) {
     }
 }
 
-function formatBalance(balance) {
-    const WEI_PER_ETHER = 1e18;
-    const balanceInEther = parseFloat(balance) / WEI_PER_ETHER;
-    return numberWithCommas(balanceInEther.toFixed(2));
-}
-
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function updateBalanceDisplay(xtzBalance, jumpBalance) {
-    const xtzBalanceElement = document.getElementById("contract-balance");
-    const jumpBalanceElement = document.getElementById("jump-balance");
-    
-    xtzBalanceElement.textContent = `XTZ Balance: ${xtzBalance} XTZ`;
-    jumpBalanceElement.textContent = `JUMP Balance: ${jumpBalance} JUMP`;
-}
-
 
 function drawCanvasButton(text, onClick) {
     const button = document.createElement('button');
