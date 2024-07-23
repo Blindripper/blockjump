@@ -1,4 +1,4 @@
-import { initWeb3,isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount } from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, getJumpBalance, approveJumpSpending, addFunds, getContractBalance } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2110,6 +2110,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Setup event listeners
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
+        document.getElementById('addFundsBtn').addEventListener('click', handleAddFunds);
         document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
@@ -2175,8 +2176,9 @@ async function handleClaimPrize() {
         }
         
         if (result) {
-            showOverlay('Prize claimed! Congratz!');
+            showOverlay('Prize claimed! Congratulations!');
             await updateHighscoreTable();
+            await updateContractBalance();
         } else {
             showOverlay('Failed to claim prize. Not eligible.', 'error', 0.3);
         }
@@ -2186,17 +2188,42 @@ async function handleClaimPrize() {
     }
 }
 
+
 async function handleBuyTries() {
     if (!checkWalletConnection()) return;
 
+    const buyTriesModal = document.getElementById('buyTriesModal');
+    buyTriesModal.style.display = 'block';
+
+    const closeBtn = buyTriesModal.querySelector('.close');
+    closeBtn.onclick = () => {
+        buyTriesModal.style.display = 'none';
+    };
+
+    const buyXtzBtn = document.getElementById('buyXtzBtn');
+    const buyJumpBtn = document.getElementById('buyJumpBtn');
+
+    buyXtzBtn.onclick = async () => {
+        buyTriesModal.style.display = 'none';
+        await processPurchase(false);
+    };
+
+    buyJumpBtn.onclick = async () => {
+        buyTriesModal.style.display = 'none';
+        await processPurchase(true);
+    };
+}
+
+async function processPurchase(useJump) {
     try {
-        showOverlay("Getting Game tries from Etherlink...");
-        const purchased = await purchaseGameTries();
+        showOverlay("Processing purchase...");
+        const purchased = await purchaseGameTries(useJump);
         
         hideOverlay();
         
         if (purchased) {
-            showOverlay('10 Game tries added successfully!', async () => {
+            const triesAdded = useJump ? 20 : 10;
+            showOverlay(`${triesAdded} Game tries added successfully!`, async () => {
                 await updateTryCount();
                 updateButtonState();
                 game.draw();
@@ -2212,10 +2239,51 @@ async function handleBuyTries() {
     }
 }
 
-function showStartButton() {
-    showOverlay('Ready to play?', () => {
-        game.initializeGame();
-    }, true, 'Start Game');
+async function handleAddFunds() {
+    if (!checkWalletConnection()) return;
+
+    const addFundsModal = document.getElementById('addFundsModal');
+    addFundsModal.style.display = 'block';
+
+    const closeBtn = addFundsModal.querySelector('.close');
+    closeBtn.onclick = () => {
+        addFundsModal.style.display = 'none';
+    };
+
+    const confirmAddFundsBtn = document.getElementById('confirmAddFundsBtn');
+    confirmAddFundsBtn.onclick = async () => {
+        const xtzAmount = parseFloat(document.getElementById('xtzAmount').value) || 0;
+        const jumpAmount = parseFloat(document.getElementById('jumpAmount').value) || 0;
+
+        if (xtzAmount === 0 && jumpAmount === 0) {
+            alert('Please enter an amount for XTZ or JUMP.');
+            return;
+        }
+
+        addFundsModal.style.display = 'none';
+        await processAddFunds(xtzAmount, jumpAmount);
+    };
+}
+
+async function processAddFunds(xtzAmount, jumpAmount) {
+    try {
+        showOverlay("Adding funds...");
+        const added = await addFunds(xtzAmount, jumpAmount);
+        
+        hideOverlay();
+        
+        if (added) {
+            showOverlay('Funds added successfully!', async () => {
+                await updateContractBalance();
+                hideOverlay();
+            }, true, 'OK');
+        } else {
+            showOverlay('Failed to add funds. Please try again.', null, true, 'OK');
+        }
+    } catch (error) {
+        console.error('Failed to add funds:', error);
+        showOverlay('Error adding funds. Please try again.', null, true, 'OK');
+    }
 }
 
 
@@ -2354,7 +2422,7 @@ async function loadHighscores() {
 async function getContractBalance() {
     if (!checkWalletConnection()) return;
 
-    const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0xe5a0DE1E78feC1C6c77ab21babc4fF3b207618e4';
+    const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB';
 
     try {
         const response = await fetch(apiUrl);
