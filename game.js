@@ -1,4 +1,4 @@
-import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount,approveJumpSpending, addFunds,} from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet,getContractBalance, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount,approveJumpSpending, addFunds,} from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2129,21 +2129,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function handleWalletConnection() {
     try {
         if (!isConnected) {
-            const web3Initialized = await initWeb3();
-            if (web3Initialized) {
-                const connected = await connectWallet();
+            const web3Instance = await initWeb3();
+            if (web3Instance) {
+                const connected = await connectWallet(web3Instance);
                 if (connected) {
                     isConnected = true;
                     updateButtonState();
-                    await updateTryCount();
-                    await loadUserAchievements();
+                    await updateTryCount(web3Instance);
+                    await loadUserAchievements(web3Instance);
                     showBuyTriesButton();
-                    await loadHighscores();
-                    await updateHighscoreTable();
+                    await loadHighscores(web3Instance);
+                    await updateHighscoreTable(web3Instance);
                     showAchievements();
-                    await getContractBalance();
+                    await getContractBalance(web3Instance); // Pass web3Instance here
                     hideOverlay();
-                    await checkAndDisplayStartButton();
+                    await checkAndDisplayStartButton(web3Instance);
                 } else {
                     showOverlay('Failed to connect. Please ensure you are on the Etherlink Mainnet.');
                 }
@@ -2151,7 +2151,7 @@ async function handleWalletConnection() {
                 showOverlay('Web3 initialization failed. Please check your connection and ensure you have a compatible wallet.');
             }
         } else {
-            // Disconnect wallet
+            // Disconnect wallet logic
             isConnected = false;
             updateButtonState();
             hideBuyTriesButton();
@@ -2236,6 +2236,24 @@ async function processPurchase(useJump) {
     } catch (error) {
         console.error('Failed to purchase game tries:', error);
         showOverlay('Error purchasing Game tries. Please try again.', checkAndDisplayStartButton, true, 'OK');
+    }
+}
+
+async function updateContractBalance() {
+    try {
+        const balances = await getContractBalance();
+        const xtzBalanceElement = document.getElementById("contract-balance");
+        const jumpBalanceElement = document.getElementById("jump-balance");
+        
+        xtzBalanceElement.textContent = `XTZ Balance: ${balances.xtz} XTZ`;
+        jumpBalanceElement.textContent = `JUMP Balance: ${balances.jump} JUMP`;
+    } catch (error) {
+        console.error('Error updating contract balance:', error);
+        const xtzBalanceElement = document.getElementById("contract-balance");
+        const jumpBalanceElement = document.getElementById("jump-balance");
+        
+        xtzBalanceElement.textContent = `XTZ Balance: Error fetching`;
+        jumpBalanceElement.textContent = `JUMP Balance: Error fetching`;
     }
 }
 
@@ -2420,41 +2438,32 @@ async function loadHighscores() {
 }
 
 async function getContractBalance() {
-    if (!checkWalletConnection()) return;
-
-    const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB';
-    const jumpTokenAddress = '0x02539B1825551329B3021Fa87d463E1BBa3eda80';
+    if (!isInitialized) {
+        console.error('Contract not initialized');
+        return { xtz: 0, jump: 0 };
+    }
 
     try {
         // Fetch XTZ balance
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`Error fetching XTZ data: ${response.status}`);
-        }
-        const data = await response.json();
-        const xtzBalance = data["coin_balance"];
-
-        // Check if Web3 is initialized
-        if (typeof web3 === 'undefined' || !web3.eth) {
-            throw new Error('Web3 is not initialized');
-        }
+        const xtzBalance = await contract.methods.xtzBalance().call();
 
         // Fetch JUMP balance
-        const jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
-        const jumpBalance = await jumpTokenContract.methods.balanceOf('0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB').call();
+        const jumpBalance = await contract.methods.jumpBalance().call();
 
         // Format balances
-        const formattedXtzBalance = formatBalance(xtzBalance);
-        const formattedJumpBalance = formatBalance(jumpBalance);
+        const formattedXtzBalance = web3.utils.fromWei(xtzBalance, 'ether');
+        const formattedJumpBalance = web3.utils.fromWei(jumpBalance, 'ether');
 
-        // Update display
-        updateBalanceDisplay(formattedXtzBalance, formattedJumpBalance);
+        return {
+            xtz: formattedXtzBalance,
+            jump: formattedJumpBalance
+        };
     } catch (error) {
         console.error('Error fetching contract balances:', error);
-        // Update display with error message
-        updateBalanceDisplay('Error', 'Error');
+        return { xtz: 0, jump: 0 };
     }
 }
+
 
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
