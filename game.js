@@ -2247,19 +2247,22 @@ function showStartButton() {
 
 async function updateContractBalance() {
     try {
+        console.log('Updating contract balance...');
         const balances = await getContractBalance();
+        console.log('Received balances:', balances);
+        
         const xtzBalanceElement = document.getElementById("contract-balance");
         const jumpBalanceElement = document.getElementById("jump-balance");
         
-        xtzBalanceElement.textContent = `XTZ Balance: ${balances.xtz} XTZ`;
-        jumpBalanceElement.textContent = `JUMP Balance: ${balances.jump} JUMP`;
+        if (xtzBalanceElement && jumpBalanceElement) {
+            xtzBalanceElement.textContent = `XTZ Balance: ${balances.xtz} XTZ`;
+            jumpBalanceElement.textContent = `JUMP Balance: ${balances.jump} JUMP`;
+            console.log('Balance elements updated');
+        } else {
+            console.error('Balance elements not found in the DOM');
+        }
     } catch (error) {
         console.error('Error updating contract balance:', error);
-        const xtzBalanceElement = document.getElementById("contract-balance");
-        const jumpBalanceElement = document.getElementById("jump-balance");
-        
-        xtzBalanceElement.textContent = `XTZ Balance: Error fetching`;
-        jumpBalanceElement.textContent = `JUMP Balance: Error fetching`;
     }
 }
 
