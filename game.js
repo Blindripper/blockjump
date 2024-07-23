@@ -1,4 +1,4 @@
-import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount, getJumpBalance, approveJumpSpending, addFunds, getContractBalance } from './web3Integration.js';
+import { initWeb3, isContractInitialized, connectWallet, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount,approveJumpSpending, addFunds, getContractBalance } from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 
 let game;
@@ -2423,20 +2423,29 @@ async function getContractBalance() {
     if (!checkWalletConnection()) return;
 
     const apiUrl = 'https://explorer.etherlink.com/api/v2/addresses/0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB';
+    const jumpTokenAddress = '0x02539B1825551329B3021Fa87d463E1BBa3eda80';
 
     try {
+        // Fetch XTZ balance
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            throw new Error(`Error fetching data: ${response.status}`);
+            throw new Error(`Error fetching XTZ data: ${response.status}`);
         }
-
         const data = await response.json();
-        const coinBalance = data["coin_balance"];
+        const xtzBalance = data["coin_balance"];
 
-        const formattedBalance = formatBalance(coinBalance);
-        updateBalanceDisplay(formattedBalance);
+        // Fetch JUMP balance
+        const jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
+        const jumpBalance = await jumpTokenContract.methods.balanceOf('0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB').call();
+
+        // Format balances
+        const formattedXtzBalance = formatBalance(xtzBalance);
+        const formattedJumpBalance = formatBalance(jumpBalance);
+
+        // Update display
+        updateBalanceDisplay(formattedXtzBalance, formattedJumpBalance);
     } catch (error) {
-        console.error('Error fetching contract balance:', error);
+        console.error('Error fetching contract balances:', error);
     }
 }
 
@@ -2518,9 +2527,9 @@ function updateClaimPrizeButton(highscores, currentAccount) {
     }
 }
 
-function formatBalance(coinBalance) {
+function formatBalance(balance) {
     const WEI_PER_ETHER = 1e18;
-    const balanceInEther = parseFloat(coinBalance) / WEI_PER_ETHER;
+    const balanceInEther = parseFloat(balance) / WEI_PER_ETHER;
     return numberWithCommas(balanceInEther.toFixed(2));
 }
 
@@ -2528,9 +2537,12 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function updateBalanceDisplay(formattedBalance) {
-    const balanceElement = document.getElementById("contract-balance");
-    balanceElement.textContent = `Contract Balance: ${formattedBalance} XTZ`;
+function updateBalanceDisplay(xtzBalance, jumpBalance) {
+    const xtzBalanceElement = document.getElementById("contract-balance");
+    const jumpBalanceElement = document.getElementById("jump-balance");
+    
+    xtzBalanceElement.textContent = `XTZ Balance: ${xtzBalance} XTZ`;
+    jumpBalanceElement.textContent = `JUMP Balance: ${jumpBalance} JUMP`;
 }
 
 
