@@ -2437,33 +2437,6 @@ async function loadHighscores() {
     }
 }
 
-async function getContractBalance() {
-    if (!isInitialized) {
-        console.error('Contract not initialized');
-        return { xtz: 0, jump: 0 };
-    }
-
-    try {
-        // Fetch XTZ balance
-        const xtzBalance = await contract.methods.xtzBalance().call();
-
-        // Fetch JUMP balance
-        const jumpBalance = await contract.methods.jumpBalance().call();
-
-        // Format balances
-        const formattedXtzBalance = web3.utils.fromWei(xtzBalance, 'ether');
-        const formattedJumpBalance = web3.utils.fromWei(jumpBalance, 'ether');
-
-        return {
-            xtz: formattedXtzBalance,
-            jump: formattedJumpBalance
-        };
-    } catch (error) {
-        console.error('Error fetching contract balances:', error);
-        return { xtz: 0, jump: 0 };
-    }
-}
-
 
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
