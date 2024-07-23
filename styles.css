@@ -471,8 +471,11 @@ header {
   transition: color 0.3s ease;
 }
 
-.close:hover {
-  color: var(--text-color);
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 #nameForm {
