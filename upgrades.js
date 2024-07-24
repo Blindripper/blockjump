@@ -1,6 +1,6 @@
 // upgrades.js
 
-import { getJumpBalance } from './web3Integration.js';
+import { getJumpBalance, getCurrentAccount } from './web3Integration.js';
 
 const UPGRADES = {
     speed: [
