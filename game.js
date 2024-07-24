@@ -1664,37 +1664,41 @@ class Game {
         // HUD elements should be drawn relative to the canvas, not the game world
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
-
-         // Display current background name
+    
+        // Display current background name
         const backgroundName = this.getBackgroundName(this.currentBackgroundIndex);
+        
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = '16px Orbitron, sans-serif';
+        this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
+        this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
         this.ctx.fillText(`Location: ${backgroundName}`, 10, 90);
-
+    
         // Draw bomb count
         const bombCount = this.playerUpgrades.getEffect('bomb');
         this.ctx.fillText(`Bombs: ${bombCount}`, 10, 120);
-
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '12px Orbitron, sans-serif';
-        this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
-        this.ctx.fillText(`Blocks Climbed: ${this.blocksClimbed}`, 10, 60);
-
-        // Draw active powerups/debuffs
-        let yOffset = 90;
-        if (this.playerShield) this.drawPowerupIndicator('Shield', yOffset += 30);
-        if (this.rapidFire) this.drawPowerupIndicator('Rapid Fire', yOffset += 30);
-        if (this.constantBeamActive) this.drawPowerupIndicator('Constant Beam', yOffset += 30);
-        if (this.lowGravity) this.drawPowerupIndicator('Low Gravity', yOffset += 30);
-        if (this.highGravity) this.drawPowerupIndicator('High Gravity', yOffset += 30);
-        if (this.slowMovement) this.drawPowerupIndicator('Slow Movement', yOffset += 30);
-        if (this.gameSpeed > 1) this.drawPowerupIndicator('Fast Game', yOffset += 30);
-
+    
+        // Draw active powerups/debuffs on the right side
+        let yOffset = 30;
+        const rightMargin = this.canvas.width - 10; // 10px from the right edge
+    
+        this.ctx.textAlign = 'right'; // Align text to the right
+        if (this.playerShield) this.drawPowerupIndicator('Shield', rightMargin, yOffset += 30);
+        if (this.rapidFire) this.drawPowerupIndicator('Rapid Fire', rightMargin, yOffset += 30);
+        if (this.constantBeamActive) this.drawPowerupIndicator('Constant Beam', rightMargin, yOffset += 30);
+        if (this.lowGravity) this.drawPowerupIndicator('Low Gravity', rightMargin, yOffset += 30);
+        if (this.highGravity) this.drawPowerupIndicator('High Gravity', rightMargin, yOffset += 30);
+        if (this.slowMovement) this.drawPowerupIndicator('Slow Movement', rightMargin, yOffset += 30);
+        if (this.gameSpeed > 1) this.drawPowerupIndicator('Fast Game', rightMargin, yOffset += 30);
+    
+        this.ctx.textAlign = 'left'; // Reset text alignment
         this.ctx.restore();
     }
-
-    drawPowerupIndicator(text, y) {
+    
+    drawPowerupIndicator(text, x, y) {
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '16px Orbitron, sans-serif';
-        this.ctx.fillText(text, 10, y);
+        this.ctx.fillText(text, x, y);
     }
 
     drawPowerupHUD() {
