@@ -1,5 +1,6 @@
 import { initWeb3, isContractInitialized, connectWallet,getContractBalance, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores, submitScore, claimPrize, getContract, getCurrentAccount,approveJumpSpending, addFunds,} from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
+import { PlayerUpgrades, UPGRADES } from './upgrades.js';
 
 let game;
 let isConnected = false;
@@ -58,6 +59,8 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
+        this.playerUpgrades = new PlayerUpgrades();
+        this.bombKey = 'KeyE';
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
         this.keys = {};
@@ -762,23 +765,46 @@ class Game {
 
 
     createPlayer() {
-        return {
+        const player = {
             x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
             y: GAME_HEIGHT - PLAYER_HEIGHT - PLATFORM_HEIGHT - 1,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
+            speed: 300,
+            maxJumps: 2,
+            shieldHits: 0,
             speed: 300,
             velocityY: 0,
             velocityX: 0,
             jumpCount: 0,
             isOnGround: false
         };
+
+        // Apply upgrades
+        const speedEffect = this.playerUpgrades.getEffect('speed');
+        if (speedEffect) player.speed *= speedEffect;
+
+        const jumpEffect = this.playerUpgrades.getEffect('jump');
+        if (jumpEffect) {
+            player.maxJumps = jumpEffect.jumps;
+            this.JUMP_VELOCITY *= jumpEffect.height;
+        }
+
+        const shieldEffect = this.playerUpgrades.getEffect('shield');
+        if (shieldEffect) player.shieldHits = shieldEffect;
+
+        const rapidEffect = this.playerUpgrades.getEffect('rapid');
+        if (rapidEffect) this.shootingCooldown *= rapidEffect;
+
+        return player;
     }
 
     createJumpEffect() {
         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
         playSound('jump');
     }
+
+    
 
 
 
@@ -887,7 +913,10 @@ class Game {
             this.handleGameOver();
             return;
         }
-    
+         // Check for bomb usage
+         if (this.keys[this.bombKey] && this.playerUpgrades.useBomb()) {
+            this.activateBomb();
+        }
         if (!this.gameRunning) return;
     
         dt *= this.gameSpeed;
@@ -908,6 +937,14 @@ class Game {
         if (this.constantBeamActive) {
             this.checkConstantBeamCollisions();
         }
+    }
+
+    activateBomb() {
+        this.enemies = [];
+        this.powerups = this.powerups.filter(powerup => !powerup.isDebuff);
+        this.clearActiveDebuffs();
+        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 30, '#FF0000');
+        this.playSound('explosion');  // Add this sound to your sound effects
     }
 
     
@@ -1090,6 +1127,7 @@ class Game {
     handleGameOver() {
         this.gameRunning = false;
         this.gameOver = true;
+        this.playerUpgrades.addScore(this.score);
 
         // Stop any ongoing sounds
         Object.values(sounds).forEach(sound => {
@@ -1631,6 +1669,10 @@ class Game {
         const backgroundName = this.getBackgroundName(this.currentBackgroundIndex);
         this.ctx.fillText(`Location: ${backgroundName}`, 10, 90);
 
+        // Draw bomb count
+        const bombCount = this.playerUpgrades.getEffect('bomb');
+        this.ctx.fillText(`Bombs: ${bombCount}`, 10, 120);
+
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.font = '12px Orbitron, sans-serif';
         this.ctx.fillText(`Tez Price: ${this.score}`, 10, 30);
@@ -1940,6 +1982,80 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     document.body.appendChild(overlay);
 }
 
+function showUpgradeShop() {
+    const upgradeShop = document.getElementById('upgradeShop');
+    const availableScore = document.getElementById('availableScore');
+    const upgradeOptions = document.getElementById('upgradeOptions');
+    const startGameBtn = document.getElementById('startGameBtn');
+
+    availableScore.textContent = game.playerUpgrades.score;
+
+    upgradeOptions.innerHTML = '';
+
+    Object.entries(UPGRADES).forEach(([type, tiers]) => {
+        if (type === 'bomb') {
+            const option = createUpgradeOption(type, -1, tiers);
+            upgradeOptions.appendChild(option);
+        } else {
+            tiers.forEach((tier, index) => {
+                const option = createUpgradeOption(type, index, tier);
+                upgradeOptions.appendChild(option);
+            });
+        }
+    });
+
+    startGameBtn.onclick = () => {
+        upgradeShop.style.display = 'none';
+        game.initializeGame();
+    };
+
+    upgradeShop.style.display = 'block';
+}
+
+function createUpgradeOption(type, tier, upgradeInfo) {
+    const option = document.createElement('div');
+    option.className = 'upgrade-option';
+
+    const img = document.createElement('img');
+    img.src = `https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/${type}.jpg`;
+    option.appendChild(img);
+
+    const info = document.createElement('div');
+    info.className = 'upgrade-info';
+    info.textContent = getUpgradeDescription(type, tier, upgradeInfo);
+    option.appendChild(info);
+
+    const button = document.createElement('button');
+    button.className = 'upgrade-button';
+    button.textContent = 'Buy';
+    button.onclick = () => purchaseUpgrade(type, tier);
+    button.disabled = !game.playerUpgrades.canAfford(type, tier);
+    option.appendChild(button);
+
+    return option;
+}
+
+function getUpgradeDescription(type, tier, upgradeInfo) {
+    switch (type) {
+        case 'speed':
+            return `Speed Tier ${tier + 1}: +${(upgradeInfo.effect - 1) * 100}% speed`;
+        case 'jump':
+            return `Jump Tier ${tier + 1}: ${upgradeInfo.effect.jumps} jumps, +${(upgradeInfo.effect.height - 1) * 100}% height`;
+        case 'shield':
+            return `Shield Tier ${tier + 1}: ${upgradeInfo.effect} hit(s) protection`;
+        case 'rapid':
+            return `Rapid Fire Tier ${tier + 1}: -${(1 - upgradeInfo.effect) * 100}% cooldown`;
+        case 'bomb':
+            return `Bomb: Clear all enemies and debuffs`;
+    }
+}
+
+function purchaseUpgrade(type, tier) {
+    if (game.playerUpgrades.purchase(type, tier)) {
+        showUpgradeShop();  // Refresh the shop
+    }
+}
+
 
 // Sprite loading
 const sprites = new Map();
@@ -2017,9 +2133,7 @@ async function checkAndDisplayStartButton() {
     try {
         const tries = await getGameTries();
         if (tries > 0) {
-            showOverlay('Ready to play?', () => {
-                game.initializeGame();
-            }, true, 'Start Game');
+            showUpgradeShop();  // Show upgrade shop instead of starting the game directly
         } else {
             showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
         }
