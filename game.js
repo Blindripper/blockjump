@@ -1266,6 +1266,9 @@ class Game {
         const currentTime = Date.now();
         let duration = 30000; // Default duration of 30 seconds for most powerups
     
+        console.log('Applying powerup effect:', type); // Debug log
+
+
         switch(type) {
             case 'bitcoin':
                 this.playerShield = true;
@@ -1365,6 +1368,8 @@ class Game {
         this.powerupsCollected++;
         this.playSound('powerup');
     
+        console.log('Active powerups after applying effect:', this.activePowerups); // Debug log
+
     }
 
     updateParticles(dt) {
@@ -1459,7 +1464,6 @@ class Game {
             console.error('Canvas context is not initialized');
             return;
         }
-
     
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
@@ -1493,7 +1497,12 @@ class Game {
     
         // Draw HUD elements (fixed to screen)
         this.drawHUD();
+        
+        // Add this line to explicitly call drawPowerupHUD
         this.drawPowerupHUD();
+        
+        // Add debug logging
+        console.log('Active powerups:', this.activePowerups);
     }
 
     drawPlatforms() {
@@ -1705,6 +1714,7 @@ class Game {
     }
 
     drawPowerupHUD() {
+        console.log('Drawing powerup HUD'); // Debug log
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
       
@@ -1713,46 +1723,56 @@ class Game {
         const barHeight = 5;
         const powerupSpacing = 40; // Increased spacing between powerups
       
+        console.log('Active powerups in drawPowerupHUD:', this.activePowerups); // Debug log
+    
         // Loop through activePowerups maintaining order
+        let index = 0;
         for (const [type, powerup] of this.activePowerups.entries()) {
-          let yOffset = padding;
+            console.log('Drawing powerup:', type); // Debug log
+            let yOffset = padding;
       
-          // Calculate x position starting from right side
-          const xPosition = this.canvas.width - padding;
+            // Calculate x position starting from right side
+            const xPosition = this.canvas.width - padding;
       
-          // Adjust x position based on index and powerup size
-          const adjustedX = xPosition - (type * (powerupSize + padding));
+            // Adjust x position based on index and powerup size
+            const adjustedX = xPosition - (index * (powerupSize + padding));
       
-          // Draw powerup icon
-          const powerupSprite = sprites.get(type);
-          if (powerupSprite) {
-            this.ctx.drawImage(powerupSprite, adjustedX, yOffset, powerupSize, powerupSize);
-          } else {
-            // Fallback if sprite is not available
-            console.warn(`Sprite not found for powerup: ${type}`);
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.fillRect(adjustedX, yOffset, powerupSize, powerupSize);
-          }
+            // Draw powerup icon
+            const powerupSprite = sprites.get(type);
+            if (powerupSprite) {
+                this.ctx.drawImage(powerupSprite, adjustedX, yOffset, powerupSize, powerupSize);
+                console.log('Drew powerup sprite at:', adjustedX, yOffset); // Debug log
+            } else {
+                // Fallback if sprite is not available
+                console.warn(`Sprite not found for powerup: ${type}`);
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(adjustedX, yOffset, powerupSize, powerupSize);
+                console.log('Drew fallback rectangle for powerup at:', adjustedX, yOffset); // Debug log
+            }
       
-          // Draw duration bar
-          const barWidth = powerupSize;
-          const currentTime = Date.now();
-          const elapsedTime = currentTime - powerup.startTime;
-          const remainingDuration = Math.max(0, powerup.duration - elapsedTime);
-          const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
+            // Draw duration bar
+            const barWidth = powerupSize;
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - powerup.startTime;
+            const remainingDuration = Math.max(0, powerup.duration - elapsedTime);
+            const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
       
-          this.ctx.fillStyle = '#333333';
-          this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, barWidth, barHeight);
+            this.ctx.fillStyle = '#333333';
+            this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, barWidth, barHeight);
       
-          this.ctx.fillStyle = '#00FF00';
-          this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, remainingWidth, barHeight);
+            this.ctx.fillStyle = '#00FF00';
+            this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, remainingWidth, barHeight);
       
-          // Update yOffset for next powerup
-          yOffset += powerupSpacing;
+            console.log('Drew duration bar at:', adjustedX, yOffset + powerupSize + 2); // Debug log
+    
+            // Update yOffset for next powerup
+            yOffset += powerupSpacing;
+            index++;
         }
       
         this.ctx.restore();
-      }
+        console.log('Finished drawing powerup HUD'); // Debug log
+    }
       
 
 
