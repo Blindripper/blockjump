@@ -2033,22 +2033,16 @@ function createUpgradeOption(type, tier, upgradeInfo) {
 
     option.appendChild(imgAndInfo);
 
-    const buttonAndPrice = document.createElement('div');
-    buttonAndPrice.className = 'button-price-container';
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
 
-    const button = document.createElement('button');
-    button.className = 'upgrade-button';
-    button.textContent = 'Buy';
-    button.onclick = () => purchaseUpgrade(type, tier);
-    button.disabled = !game.playerUpgrades.canAfford(type, tier);
-    buttonAndPrice.appendChild(button);
+    const scoreButton = createBuyButton(type, tier, upgradeInfo, false);
+    const jumpButton = createBuyButton(type, tier, upgradeInfo, true);
 
-    const price = document.createElement('div');
-    price.className = 'upgrade-price';
-    price.textContent = formatPrice(type === 'bomb' ? UPGRADES.bomb.cost : upgradeInfo.cost);
-    buttonAndPrice.appendChild(price);
+    buttonContainer.appendChild(scoreButton);
+    buttonContainer.appendChild(jumpButton);
 
-    option.appendChild(buttonAndPrice);
+    option.appendChild(buttonContainer);
 
     return option;
 }
@@ -2061,6 +2055,28 @@ function formatPrice(price) {
     } else {
         return price.toString();
     }
+}
+
+function createBuyButton(type, tier, upgradeInfo, useJump) {
+    const buttonAndPrice = document.createElement('div');
+    buttonAndPrice.className = 'button-price-container';
+
+    const button = document.createElement('button');
+    button.className = 'upgrade-button';
+    button.textContent = useJump ? 'Buy with JUMP' : 'Buy with Score';
+    button.onclick = () => purchaseUpgrade(type, tier, useJump);
+    button.disabled = !game.playerUpgrades.canAfford(type, tier, useJump);
+
+    const price = document.createElement('div');
+    price.className = 'upgrade-price';
+    price.textContent = formatPrice(useJump ? 
+        (type === 'bomb' ? UPGRADES.bomb.jumpCost : upgradeInfo.jumpCost) :
+        (type === 'bomb' ? UPGRADES.bomb.cost : upgradeInfo.cost));
+
+    buttonAndPrice.appendChild(button);
+    buttonAndPrice.appendChild(price);
+
+    return buttonAndPrice;
 }
 
 function getUpgradeDescription(type, tier, upgradeInfo) {
@@ -2082,18 +2098,21 @@ function updateAvailableScoreDisplay() {
     const availableScoreHeader = document.getElementById('availableScoreHeader');
     const availableScoreShop = document.getElementById('availableScore');
     const score = game.playerUpgrades.score;
+    const jumpBalance = game.playerUpgrades.jumpBalance;
     
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = score;
+        availableScoreHeader.textContent = `Score: ${score} | JUMP: ${jumpBalance}`;
     }
     if (availableScoreShop) {
-        availableScoreShop.textContent = score;
+        availableScoreShop.textContent = `Score: ${score} | JUMP: ${jumpBalance}`;
     }
 }
 
 
-function purchaseUpgrade(type, tier) {
-    if (game.playerUpgrades.purchase(type, tier)) {
+
+async function purchaseUpgrade(type, tier, useJump) {
+    const purchased = await game.playerUpgrades.purchase(type, tier, useJump);
+    if (purchased) {
         updateAvailableScoreDisplay();
         showUpgradeShop();  // Refresh the shop
     }
