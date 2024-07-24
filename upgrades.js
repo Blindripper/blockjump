@@ -1,5 +1,7 @@
 // upgrades.js
 
+import { getJumpBalance } from './web3Integration.js';
+
 const UPGRADES = {
     speed: [
         { cost: 30000, jumpCost: 300, effect: 1.03 },
@@ -27,6 +29,7 @@ const UPGRADES = {
 class PlayerUpgrades {
     constructor() {
         this.score = 0;
+        this.jumpBalance = 0;
         this.upgrades = {
             speed: 0,
             jump: 0,
@@ -34,6 +37,17 @@ class PlayerUpgrades {
             rapid: 0,
             bomb: 0
         };
+    }
+
+    async updateJumpBalance() {
+        try {
+            const account = await getCurrentAccount();
+            if (account) {
+                this.jumpBalance = await getJumpBalance(account);
+            }
+        } catch (error) {
+            console.error('Error updating JUMP balance:', error);
+        }
     }
 
     canAfford(upgradeType, tier) {
