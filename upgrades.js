@@ -43,13 +43,27 @@ class PlayerUpgrades {
         return this.score >= UPGRADES[upgradeType][tier].cost;
     }
 
-    purchase(upgradeType, tier) {
-        if (this.canAfford(upgradeType, tier)) {
+    async purchase(upgradeType, tier, useJump) {
+        if (this.canAfford(upgradeType, tier, useJump)) {
+            const price = useJump ? 
+                (upgradeType === 'bomb' ? UPGRADES.bomb.jumpCost : UPGRADES[upgradeType][tier].jumpCost) :
+                (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][tier].cost);
+
+            if (useJump) {
+                // Call the smart contract function to add JUMP to the jackpot
+                const added = await addFunds(0, price);
+                if (!added) {
+                    console.error('Failed to add JUMP to jackpot');
+                    return false;
+                }
+                this.jumpBalance -= price;
+            } else {
+                this.score -= price;
+            }
+
             if (upgradeType === 'bomb') {
-                this.score -= UPGRADES.bomb.cost;
                 this.upgrades.bomb++;
             } else {
-                this.score -= UPGRADES[upgradeType][tier].cost;
                 this.upgrades[upgradeType] = tier + 1;
             }
             return true;
