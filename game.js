@@ -738,22 +738,27 @@ class Game {
 
       checkPlayerEnemyCollisions() {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
-          const enemy = this.enemies[i];
-          if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
-            if (this.playerShield) {
-              // Destroy enemy and update score (same logic from previous response)
-              this.destroyEnemy(enemy);
-              this.enemies.splice(i, 1); // Remove the enemy from the array
-            } else {
-              // Player doesn't have shield, end the game
-              this.gameOver = true;
-              this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
-              this.playSound('gameOver');
-              return; // Exit the function after handling the collision
+            const enemy = this.enemies[i];
+            if (!enemy.isDestroyed && this.checkPreciseCollision(this.player, enemy)) {
+                if (this.playerShield) {
+                    // Bitcoin shield active, destroy enemy without decreasing shield
+                    this.destroyEnemy(enemy);
+                    this.enemies.splice(i, 1);
+                } else if (this.player.upgradeShieldHits > 0) {
+                    // Upgrade shield active
+                    this.destroyEnemy(enemy);
+                    this.enemies.splice(i, 1);
+                    this.player.upgradeShieldHits--;
+                } else {
+                    // No shield active, end the game
+                    this.gameOver = true;
+                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    this.playSound('gameOver');
+                    return;
+                }
             }
-          }
         }
-      }
+    }
       
       
 
@@ -771,37 +776,31 @@ class Game {
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
             speed: 300,
-            maxJumps: 2,
-            shieldHits: 0,
-            speed: 300,
+            maxJumps: 2, // Default to double jump
+            upgradeShieldHits: 0, // New property for upgrade shield
             velocityY: 0,
             velocityX: 0,
             jumpCount: 0,
             isOnGround: false
         };
-
+    
         // Apply upgrades
         const speedEffect = this.playerUpgrades.getEffect('speed');
         if (speedEffect) player.speed *= speedEffect;
-
+    
         const jumpEffect = this.playerUpgrades.getEffect('jump');
         if (jumpEffect) {
-            player.maxJumps = jumpEffect.jumps;
+            player.maxJumps = jumpEffect.jumps; // This should be 3 for triple jump
             this.JUMP_VELOCITY *= jumpEffect.height;
         }
-
+    
         const shieldEffect = this.playerUpgrades.getEffect('shield');
-        if (shieldEffect) player.shieldHits = shieldEffect;
-
+        if (shieldEffect) player.upgradeShieldHits = shieldEffect;
+    
         const rapidEffect = this.playerUpgrades.getEffect('rapid');
         if (rapidEffect) this.shootingCooldown *= rapidEffect;
-
+    
         return player;
-    }
-
-    createJumpEffect() {
-        this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 10, '#3FE1B0');
-        playSound('jump');
     }
 
     
@@ -891,15 +890,12 @@ class Game {
       
 
       jump() {
-        if (this.player.jumpCount < 2) {
+        if (this.player.jumpCount < this.player.maxJumps) {
             this.player.velocityY = this.JUMP_VELOCITY;
             this.player.jumpCount++;
             this.player.isOnGround = false;
             this.createJumpEffect();
     
-            
-            // We'll increment blocksClimbed in handleCollisions instead of here
-            
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
                 this.score = 0;
@@ -1616,10 +1612,19 @@ class Game {
     
         const drawPlayerAt = (x, y) => {
             if (this.playerShield) {
+                // Draw gold circle for bitcoin shield
                 this.ctx.beginPath();
                 this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2, 
                              Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
-                this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Golden color for the shield
+                this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Gold color
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+            } else if (this.player.upgradeShieldHits > 0) {
+                // Draw blue circle for upgrade shield
+                this.ctx.beginPath();
+                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2, 
+                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)'; // Blue color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
             }
@@ -1634,6 +1639,16 @@ class Game {
                 this.ctx.fillRect(Math.round(x), Math.round(y), 
                                   this.player.width, this.player.height);
             }
+    
+            // Draw upgrade shield hit counter
+            if (this.player.upgradeShieldHits > 0) {
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = '12px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(this.player.upgradeShieldHits.toString(), 
+                                  x + this.player.width / 2, 
+                                  y - 5);
+            }
         };
     
         // Draw main player
@@ -1646,7 +1661,6 @@ class Game {
             drawPlayerAt(this.player.x + GAME_WIDTH, this.player.y);
         }
     }
-
 
     drawPowerups() {
         for (let powerup of this.powerups) {
