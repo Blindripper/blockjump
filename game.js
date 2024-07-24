@@ -876,14 +876,14 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
-            if (e.code === 'ArrowUp') {
+            if (e.code === 'ArrowUp' || e.code === 'KeyW') {
                 this.jump();
             }
             if (e.code === 'Space') {
                 e.preventDefault(); // Prevent space from triggering button clicks
                 this.shoot();
             }
-            if (e.code === 'ArrowDown' && this.player.isOnGround) {
+            if ((e.code === 'ArrowDown' || e.code === 'KeyS') && this.player.isOnGround) {
                 this.lastFallThroughTime = Date.now();
             }
         });
@@ -912,7 +912,6 @@ class Game {
     
             if (!this.hasPlayerJumped) {
                 this.hasPlayerJumped = true;
-                this.score = 0;
             }
         }
     }
@@ -1067,71 +1066,70 @@ class Game {
 
 
 
-    updatePlayer(dt) {
-        if (!this.player) {
-            console.warn('Player is null in updatePlayer');
-            return;
-        }
-
-        const currentTime = Date.now();
-
-        // Adjust player's y position based on scroll speed
-        this.player.y += this.currentScrollSpeed * dt;
-
-    
-        // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
-        this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
-        
-        if (this.highGravity && this.player.velocityY > 0) {
-            this.player.velocityY *= 1.1; // Increase downward velocity by 10%
-        }
-        
-        // Horizontal movement (adjusted for slow movement debuff)
-        let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
-        
-        if (this.keys['ArrowLeft']) {
-            this.player.velocityX = -moveSpeed;
-        } else if (this.keys['ArrowRight']) {
-            this.player.velocityX = moveSpeed;
-        } else {
-            this.player.velocityX = 0;
-        }
-
-        // Falling through platforms
-        if (this.keys['ArrowDown'] && this.player.isOnGround) {
-            this.lastFallThroughTime = currentTime;
-            this.player.isOnGround = false;
-            this.player.y += 1; // Move the player down slightly to trigger the fall
-        }
-    
-        // Update position (use this.gameSpeed)
-        this.player.x += this.player.velocityX * dt * this.gameSpeed;
-        this.player.y += this.player.velocityY * dt * this.gameSpeed;
-
-        // Wrap-around logic for horizontal movement
-        if (this.player.x + this.player.width < 0) {
-            this.player.x = GAME_WIDTH;
-        } else if (this.player.x > GAME_WIDTH) {
-            this.player.x = -this.player.width;
-        }
-
-        // Keep player within vertical game bounds
-        this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
-
-    
-        // Check for platform collisions
-        this.handleCollisions(currentTime);
-    
-        // Reset jump count when on ground
-        if (this.player.isOnGround) {
-            this.player.jumpCount = 0;
-        }
-    
-        // Check if player has fallen off the screen
-        if (this.player.y >= GAME_HEIGHT - this.player.height) {
-            this.gameOver = true;
-        }
+updatePlayer(dt) {
+    if (!this.player) {
+        console.warn('Player is null in updatePlayer');
+        return;
     }
+
+    const currentTime = Date.now();
+
+    // Adjust player's y position based on scroll speed
+    this.player.y += this.currentScrollSpeed * dt;
+
+    // Apply gravity (use this.gameSpeed instead of this.normalGameSpeed)
+    this.player.velocityY += this.currentGravity * dt * this.gameSpeed;
+    
+    if (this.highGravity && this.player.velocityY > 0) {
+        this.player.velocityY *= 1.1; // Increase downward velocity by 10%
+    }
+    
+    // Horizontal movement (adjusted for slow movement debuff)
+    let moveSpeed = this.slowMovement ? this.player.speed : this.normalMoveSpeed;
+    
+    // Check for both arrow keys and WASD
+    if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
+        this.player.velocityX = -moveSpeed;
+    } else if (this.keys['ArrowRight'] || this.keys['KeyD']) {
+        this.player.velocityX = moveSpeed;
+    } else {
+        this.player.velocityX = 0;
+    }
+
+    // Falling through platforms
+    if ((this.keys['ArrowDown'] || this.keys['KeyS']) && this.player.isOnGround) {
+        this.lastFallThroughTime = currentTime;
+        this.player.isOnGround = false;
+        this.player.y += 1; // Move the player down slightly to trigger the fall
+    }
+
+    // Update position (use this.gameSpeed)
+    this.player.x += this.player.velocityX * dt * this.gameSpeed;
+    this.player.y += this.player.velocityY * dt * this.gameSpeed;
+
+    // Wrap-around logic for horizontal movement
+    if (this.player.x + this.player.width < 0) {
+        this.player.x = GAME_WIDTH;
+    } else if (this.player.x > GAME_WIDTH) {
+        this.player.x = -this.player.width;
+    }
+
+    // Keep player within vertical game bounds
+    this.player.y = Math.max(0, Math.min(this.player.y, GAME_HEIGHT - this.player.height));
+
+    // Check for platform collisions
+    this.handleCollisions(currentTime);
+
+    // Reset jump count when on ground
+    if (this.player.isOnGround) {
+        this.player.jumpCount = 0;
+    }
+
+    // Check if player has fallen off the screen
+    if (this.player.y >= GAME_HEIGHT - this.player.height) {
+        this.gameOver = true;
+    }
+}
 
     
     handleGameOver() {
