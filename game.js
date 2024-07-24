@@ -1997,10 +1997,11 @@ function showUpgradeShop() {
             const option = createUpgradeOption(type, -1, tiers);
             upgradeOptions.appendChild(option);
         } else {
-            tiers.forEach((tier, index) => {
-                const option = createUpgradeOption(type, index, tier);
+            const currentTier = game.playerUpgrades.upgrades[type];
+            if (currentTier < tiers.length) {
+                const option = createUpgradeOption(type, currentTier, tiers[currentTier]);
                 upgradeOptions.appendChild(option);
-            });
+            }
         }
     });
 
@@ -2133,7 +2134,10 @@ async function checkAndDisplayStartButton() {
     try {
         const tries = await getGameTries();
         if (tries > 0) {
-            showUpgradeShop();  // Show upgrade shop instead of starting the game directly
+            showOverlay('Ready to play?', () => {
+                hideOverlay();
+                showUpgradeShop();
+            }, true, 'Start Game');
         } else {
             showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
         }
@@ -2445,12 +2449,14 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.blocksClimbed = blocksClimbed;
     window.gameStartTime = gameStartTime;
 
-    game.updateAchievements();  // Add this line
+    game.updateAchievements();
+    game.playerUpgrades.addScore(score);
 
-
-    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
+    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, () => {
+        hideOverlay();
+        showUpgradeShop();
+    }, true, 'Try Again', true);
 }
-
   
 async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
