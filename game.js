@@ -1457,9 +1457,11 @@ class Game {
     }
 
     updateUI() {
-        if (this.hasPlayerJumped) {
+        if (this.gameRunning) {
+            // Increment score continuously once the game is running
             this.score++;
-            
+            console.log('Score updated:', this.score); // Add this debug log
+
             // Check if it's time to drop a nomadic powerup
             if (this.score - this.lastPowerupScore >= 5000) {
                 const x = Math.random() * (GAME_WIDTH - 30);
@@ -1469,13 +1471,12 @@ class Game {
             }
         }
     
-
-     // Update score display
-     const scoreElement = document.getElementById('score');
-     if (scoreElement) {
-         scoreElement.textContent = this.score;
-     }
- }
+        // Update score display
+        const scoreElement = document.getElementById('score');
+        if (scoreElement) {
+            scoreElement.textContent = this.score;
+        }
+    }
 
     draw() {
         if (!this.ctx) {
