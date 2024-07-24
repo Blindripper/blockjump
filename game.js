@@ -2017,6 +2017,10 @@ async function showUpgradeShop() {
 function createUpgradeOption(type, tier, upgradeInfo) {
     const option = document.createElement('div');
     option.className = 'upgrade-option';
+    
+    if (game.playerUpgrades.upgrades[type] > tier) {
+        option.classList.add('purchased');
+    }
 
     const imgAndInfo = document.createElement('div');
     imgAndInfo.style.display = 'flex';
@@ -2033,6 +2037,18 @@ function createUpgradeOption(type, tier, upgradeInfo) {
     imgAndInfo.appendChild(info);
 
     option.appendChild(imgAndInfo);
+
+    if (type !== 'bomb') {
+        const tierProgress = document.createElement('div');
+        tierProgress.className = 'tier-progress';
+        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type] + 1}/${UPGRADES[type].length}`;
+        option.appendChild(tierProgress);
+    } else {
+        const bombCount = document.createElement('div');
+        bombCount.className = 'bomb-count';
+        bombCount.textContent = `Bombs: ${game.playerUpgrades.upgrades.bomb}/${UPGRADES.bomb.maxCount}`;
+        option.appendChild(bombCount);
+    }
 
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'button-container';
@@ -2101,7 +2117,7 @@ function getUpgradeDescription(type, tier, upgradeInfo) {
         case 'rapid':
             return `Rapid Fire Tier ${tier + 1}: -${((1 - upgradeInfo.effect) * 100).toFixed(1)}% cooldown`;
         case 'bomb':
-            return `Bomb: Clear all evil`;
+            return `Bomb: Clear all enemies and debuffs`;
     }
 }
 
