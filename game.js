@@ -1698,30 +1698,28 @@ class Game {
     }
 
     drawPowerupHUD() {
-    
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
     
-        const powerupSize = 20;
+        const powerupSize = 30; // Increased size for better visibility
         const padding = 10;
         const barHeight = 5;
-        const powerupSpacing = 35; // Increased spacing between powerups
-        let xOffset = this.canvas.width - padding;
+        const powerupSpacing = 40; // Increased spacing between powerups
+        let yOffset = padding;
     
-        // Draw powerups from right to left
-        Array.from(this.activePowerups.entries()).reverse().forEach(([type, powerup]) => {
-            xOffset -= powerupSize;
-    
+        // Draw powerups from top to bottom on the right side
+        Array.from(this.activePowerups.entries()).forEach(([type, powerup]) => {
+            const xPosition = this.canvas.width - padding - powerupSize;
     
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
             if (powerupSprite) {
-                this.ctx.drawImage(powerupSprite, xOffset, padding, powerupSize, powerupSize);
+                this.ctx.drawImage(powerupSprite, xPosition, yOffset, powerupSize, powerupSize);
             } else {
                 // Fallback if sprite is not available
                 console.warn(`Sprite not found for powerup: ${type}`);
                 this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(xOffset, padding, powerupSize, powerupSize);
+                this.ctx.fillRect(xPosition, yOffset, powerupSize, powerupSize);
             }
     
             // Draw duration bar
@@ -1732,13 +1730,12 @@ class Game {
             const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
             
             this.ctx.fillStyle = '#333333';
-            this.ctx.fillRect(xOffset, padding + powerupSize + 5, barWidth, barHeight);
+            this.ctx.fillRect(xPosition, yOffset + powerupSize + 2, barWidth, barHeight);
             
             this.ctx.fillStyle = '#00FF00';
-            this.ctx.fillRect(xOffset, padding + powerupSize + 5, remainingWidth, barHeight);
+            this.ctx.fillRect(xPosition, yOffset + powerupSize + 2, remainingWidth, barHeight);
     
-    
-            xOffset -= powerupSpacing; // Use the new spacing value
+            yOffset += powerupSpacing;
         });
     
         this.ctx.restore();
@@ -2041,7 +2038,7 @@ function createUpgradeOption(type, tier, upgradeInfo) {
     if (type !== 'bomb') {
         const tierProgress = document.createElement('div');
         tierProgress.className = 'tier-progress';
-        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type] + 1}/${UPGRADES[type].length}`;
+        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type]}/${UPGRADES[type].length - 1}`;
         option.appendChild(tierProgress);
     } else {
         const bombCount = document.createElement('div');
