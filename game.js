@@ -2039,17 +2039,18 @@ function createUpgradeOption(type, tier, upgradeInfo) {
 function getUpgradeDescription(type, tier, upgradeInfo) {
     switch (type) {
         case 'speed':
-            return `Speed Tier ${tier + 1}: +${(upgradeInfo.effect - 1) * 100}% speed`;
+            return `Speed Tier ${tier + 1}: +${((upgradeInfo.effect - 1) * 100).toFixed(1)}% speed`;
         case 'jump':
-            return `Jump Tier ${tier + 1}: ${upgradeInfo.effect.jumps} jumps, +${(upgradeInfo.effect.height - 1) * 100}% height`;
+            return `Jump Tier ${tier + 1}: ${upgradeInfo.effect.jumps} jumps, +${((upgradeInfo.effect.height - 1) * 100).toFixed(1)}% height`;
         case 'shield':
             return `Shield Tier ${tier + 1}: ${upgradeInfo.effect} hit(s) protection`;
         case 'rapid':
-            return `Rapid Fire Tier ${tier + 1}: -${(1 - upgradeInfo.effect) * 100}% cooldown`;
+            return `Rapid Fire Tier ${tier + 1}: -${((1 - upgradeInfo.effect) * 100).toFixed(1)}% cooldown`;
         case 'bomb':
             return `Bomb: Clear all enemies and debuffs`;
     }
 }
+
 
 function purchaseUpgrade(type, tier) {
     if (game.playerUpgrades.purchase(type, tier)) {
