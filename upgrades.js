@@ -80,13 +80,18 @@ class PlayerUpgrades {
                 (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][tier].cost);
 
             if (useJump) {
-                // Call the smart contract function to add JUMP to the jackpot
-                const added = await addFunds(0, price);
-                if (!added) {
-                    console.error('Failed to add JUMP to jackpot');
+                try {
+                    // Call the smart contract function to add JUMP to the jackpot
+                    const added = await addFunds(0, price);
+                    if (!added) {
+                        console.error('Failed to add JUMP to jackpot');
+                        return false;
+                    }
+                    this.jumpBalance -= price;
+                } catch (error) {
+                    console.error('Error adding JUMP to jackpot:', error);
                     return false;
                 }
-                this.jumpBalance -= price;
             } else {
                 this.score -= price;
             }
