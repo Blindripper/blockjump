@@ -2052,7 +2052,7 @@ function createUpgradeOption(type, tier, upgradeInfo) {
     if (type !== 'bomb') {
         const tierProgress = document.createElement('div');
         tierProgress.className = 'tier-progress';
-        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type]}/${UPGRADES[type].length - 1}`;
+        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type]}/${UPGRADES[type].length}`;
         option.appendChild(tierProgress);
     } else {
         const bombCount = document.createElement('div');
