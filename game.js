@@ -2099,10 +2099,6 @@ async function showUpgradeShop() {
     buttonContainer.style.justifyContent = 'center';
     buttonContainer.style.width = '100%';
     buttonContainer.style.marginTop = '20px';
-    buttonContainer.style.position = 'sticky';
-    buttonContainer.style.bottom = '20px';
-    buttonContainer.style.backgroundColor = '#1a2333';
-    buttonContainer.style.padding = '15px 0';
 
     // Create a new button
     const startGameBtn = document.createElement('button');
@@ -2115,7 +2111,6 @@ async function showUpgradeShop() {
     startGameBtn.style.border = 'none';
     startGameBtn.style.borderRadius = '5px';
     startGameBtn.style.cursor = 'pointer';
-    startGameBtn.style.width = '200px'; // Set a fixed width
 
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
