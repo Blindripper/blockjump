@@ -1693,6 +1693,9 @@ class Game {
     
         this.ctx.textAlign = 'left'; // Reset text alignment
         this.ctx.restore();
+
+        // Call drawPowerupHUD to display icons and bars
+    this.drawPowerupHUD();
     }
     
     drawPowerupIndicator(text, x, y) {
