@@ -22,6 +22,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Header Styles */
@@ -124,6 +125,7 @@ header {
   border-radius: 10px;
   padding: 30px;
   width: 90%;
+  height: 90vh;
   max-width: 800px;
   max-height: 80vh;
   overflow: hidden;
@@ -134,6 +136,7 @@ header {
 #upgradeOptions {
   display: flex;
   flex-wrap: wrap;
+  flex-grow: 1;
   justify-content: space-around;
   gap: 20px;
   overflow-y: auto;
@@ -184,8 +187,8 @@ header {
 }
 
 .upgrade-option img {
-  width: 85px;
-  height: 85px;
+  width: 95px;
+  height: 95px;
   margin-bottom: 10px;
   margin-top: 5px;
   align-self: center;
