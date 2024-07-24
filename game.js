@@ -1704,46 +1704,53 @@ class Game {
     drawPowerupHUD() {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
-    
+      
         const powerupSize = 30; // Increased size for better visibility
         const padding = 10;
         const barHeight = 5;
         const powerupSpacing = 40; // Increased spacing between powerups
-        let yOffset = padding;
-    
-        // Draw powerups from top to bottom on the right side
-        Array.from(this.activePowerups.entries()).forEach(([type, powerup]) => {
-            const xPosition = this.canvas.width - padding - powerupSize;
-    
-            // Draw powerup icon
-            const powerupSprite = sprites.get(type);
-            if (powerupSprite) {
-                this.ctx.drawImage(powerupSprite, xPosition, yOffset, powerupSize, powerupSize);
-            } else {
-                // Fallback if sprite is not available
-                console.warn(`Sprite not found for powerup: ${type}`);
-                this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(xPosition, yOffset, powerupSize, powerupSize);
-            }
-    
-            // Draw duration bar
-            const barWidth = powerupSize;
-            const currentTime = Date.now();
-            const elapsedTime = currentTime - powerup.startTime;
-            const remainingDuration = Math.max(0, powerup.duration - elapsedTime);
-            const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
-            
-            this.ctx.fillStyle = '#333333';
-            this.ctx.fillRect(xPosition, yOffset + powerupSize + 2, barWidth, barHeight);
-            
-            this.ctx.fillStyle = '#00FF00';
-            this.ctx.fillRect(xPosition, yOffset + powerupSize + 2, remainingWidth, barHeight);
-    
-            yOffset += powerupSpacing;
-        });
-    
+      
+        // Loop through activePowerups maintaining order
+        for (const [type, powerup] of this.activePowerups.entries()) {
+          let yOffset = padding;
+      
+          // Calculate x position starting from right side
+          const xPosition = this.canvas.width - padding;
+      
+          // Adjust x position based on index and powerup size
+          const adjustedX = xPosition - (type * (powerupSize + padding));
+      
+          // Draw powerup icon
+          const powerupSprite = sprites.get(type);
+          if (powerupSprite) {
+            this.ctx.drawImage(powerupSprite, adjustedX, yOffset, powerupSize, powerupSize);
+          } else {
+            // Fallback if sprite is not available
+            console.warn(`Sprite not found for powerup: ${type}`);
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.fillRect(adjustedX, yOffset, powerupSize, powerupSize);
+          }
+      
+          // Draw duration bar
+          const barWidth = powerupSize;
+          const currentTime = Date.now();
+          const elapsedTime = currentTime - powerup.startTime;
+          const remainingDuration = Math.max(0, powerup.duration - elapsedTime);
+          const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
+      
+          this.ctx.fillStyle = '#333333';
+          this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, barWidth, barHeight);
+      
+          this.ctx.fillStyle = '#00FF00';
+          this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, remainingWidth, barHeight);
+      
+          // Update yOffset for next powerup
+          yOffset += powerupSpacing;
+        }
+      
         this.ctx.restore();
-    }
+      }
+      
 
 
     gameLoop(currentTime) {
