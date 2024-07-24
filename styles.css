@@ -111,6 +111,12 @@ header {
   cursor: pointer;
 }
 
+#upgradeShop .game-button {
+  margin-top: 20px;
+  font-size: 18px;
+  padding: 10px 20px;
+}
+
 .upgrade-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
