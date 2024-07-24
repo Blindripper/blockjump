@@ -279,7 +279,7 @@ header {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s;
-  width: 200px; /* Set a fixed width */
+  width: 200px;
 }
 
 #startGameBtn:hover {
