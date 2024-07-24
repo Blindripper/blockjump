@@ -2108,7 +2108,7 @@ function updateAvailableScoreDisplay() {
     const jumpBalance = game.playerUpgrades.jumpBalance;
     
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = `Score: ${score} | JUMP: ${jumpBalance}`;
+        availableScoreHeader.textContent = `${score} | JUMP: ${jumpBalance}`;
     }
     if (availableScoreShop) {
         availableScoreShop.textContent = `Score: ${score} | JUMP: ${jumpBalance}`;
