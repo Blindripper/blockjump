@@ -1982,7 +1982,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     document.body.appendChild(overlay);
 }
 
-function showUpgradeShop() {
+async function showUpgradeShop() {
+    await updateAvailableScoreDisplay(); // Add this line
     const upgradeShop = document.getElementById('upgradeShop');
     const upgradeOptions = document.getElementById('upgradeOptions');
     const startGameBtn = document.getElementById('startGameBtn');
@@ -2101,17 +2102,20 @@ function getUpgradeDescription(type, tier, upgradeInfo) {
     }
 }
 
-function updateAvailableScoreDisplay() {
+async function updateAvailableScoreDisplay() {
     const availableScoreHeader = document.getElementById('availableScoreHeader');
     const availableScoreShop = document.getElementById('availableScore');
+    
+    await game.playerUpgrades.updateJumpBalance();
+    
     const score = game.playerUpgrades.score;
     const jumpBalance = game.playerUpgrades.jumpBalance;
     
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = `${score} | JUMP: ${jumpBalance}`;
+        availableScoreHeader.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
     }
     if (availableScoreShop) {
-        availableScoreShop.textContent = `Score: ${score} | JUMP: ${jumpBalance}`;
+        availableScoreShop.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
     }
 }
 
@@ -2120,7 +2124,7 @@ function updateAvailableScoreDisplay() {
 async function purchaseUpgrade(type, tier, useJump) {
     const purchased = await game.playerUpgrades.purchase(type, tier, useJump);
     if (purchased) {
-        updateAvailableScoreDisplay();
+        await updateAvailableScoreDisplay(); // Add this line
         showUpgradeShop();  // Refresh the shop
     }
 }
@@ -2328,6 +2332,7 @@ async function handleWalletConnection() {
                     updateButtonState();
                     await updateTryCount(web3Instance);
                     await loadUserAchievements(web3Instance);
+                    await updateAvailableScoreDisplay(); // Add this line
                     showBuyTriesButton();
                     document.getElementById('addFundsBtn').style.display = 'block'; // Add this line
                     await loadHighscores(web3Instance);
