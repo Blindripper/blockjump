@@ -2017,14 +2017,21 @@ function createUpgradeOption(type, tier, upgradeInfo) {
     const option = document.createElement('div');
     option.className = 'upgrade-option';
 
+    const imgAndInfo = document.createElement('div');
+    imgAndInfo.style.display = 'flex';
+    imgAndInfo.style.alignItems = 'center';
+    imgAndInfo.style.flexGrow = '1';
+
     const img = document.createElement('img');
     img.src = `https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/${type}.jpg`;
-    option.appendChild(img);
+    imgAndInfo.appendChild(img);
 
     const info = document.createElement('div');
     info.className = 'upgrade-info';
     info.textContent = getUpgradeDescription(type, tier, upgradeInfo);
-    option.appendChild(info);
+    imgAndInfo.appendChild(info);
+
+    option.appendChild(imgAndInfo);
 
     const button = document.createElement('button');
     button.className = 'upgrade-button';
