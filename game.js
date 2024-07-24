@@ -1468,7 +1468,14 @@ class Game {
                 this.lastPowerupScore = this.score;
             }
         }
-    }
+    
+
+     // Update score display
+     const scoreElement = document.getElementById('score');
+     if (scoreElement) {
+         scoreElement.textContent = this.score;
+     }
+ }
 
     draw() {
         if (!this.ctx) {
