@@ -2048,6 +2048,7 @@ function createUpgradeOption(type, tier, upgradeInfo) {
 }
 
 function formatPrice(price) {
+    if (price === undefined) return 'N/A';
     if (price >= 1000000) {
         return (price / 1000000).toFixed(1) + 'M';
     } else if (price >= 1000) {
@@ -2069,9 +2070,15 @@ function createBuyButton(type, tier, upgradeInfo, useJump) {
 
     const price = document.createElement('div');
     price.className = 'upgrade-price';
-    price.textContent = formatPrice(useJump ? 
-        (type === 'bomb' ? UPGRADES.bomb.jumpCost : upgradeInfo.jumpCost) :
-        (type === 'bomb' ? UPGRADES.bomb.cost : upgradeInfo.cost));
+
+    let priceValue;
+    if (type === 'bomb') {
+        priceValue = useJump ? UPGRADES.bomb.jumpCost : UPGRADES.bomb.cost;
+    } else {
+        priceValue = useJump ? upgradeInfo.jumpCost : upgradeInfo.cost;
+    }
+
+    price.textContent = formatPrice(priceValue);
 
     buttonAndPrice.appendChild(button);
     buttonAndPrice.appendChild(price);
