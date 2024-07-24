@@ -2118,20 +2118,75 @@ async function updateAvailableScoreDisplay() {
     console.log(`Current JUMP Balance: ${jumpBalance}`);
     
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
+        availableScoreHeader.textContent = `${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
     }
     if (availableScoreShop) {
         availableScoreShop.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
     }
 }
 
+function showUpgradeOverlay(message) {
+    const existingOverlay = document.getElementById('upgradeOverlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'upgradeOverlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '10000';
+
+    const messageBox = document.createElement('div');
+    messageBox.style.backgroundColor = '#1a2333';
+    messageBox.style.color = '#3FE1B0';
+    messageBox.style.padding = '20px';
+    messageBox.style.borderRadius = '10px';
+    messageBox.style.fontSize = '24px';
+    messageBox.style.textAlign = 'center';
+    messageBox.textContent = message;
+
+    overlay.appendChild(messageBox);
+    document.body.appendChild(overlay);
+}
+
+function hideUpgradeOverlay() {
+    const overlay = document.getElementById('upgradeOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
 
 
 async function purchaseUpgrade(type, tier, useJump) {
-    const purchased = await game.playerUpgrades.purchase(type, tier, useJump);
-    if (purchased) {
-        await updateAvailableScoreDisplay(); // Add this line
-        showUpgradeShop();  // Refresh the shop
+    showUpgradeOverlay('Upgrading...');
+    try {
+        const purchased = await game.playerUpgrades.purchase(type, tier, useJump);
+        if (purchased) {
+            await updateAvailableScoreDisplay();
+            hideUpgradeOverlay();
+            showUpgradeOverlay('Upgraded!');
+            setTimeout(() => {
+                hideUpgradeOverlay();
+                showUpgradeShop();  // Refresh the shop
+            }, 1500);  // Show "Upgraded!" message for 1.5 seconds
+        } else {
+            hideUpgradeOverlay();
+            showUpgradeOverlay('Upgrade failed. Please try again.');
+            setTimeout(hideUpgradeOverlay, 2000);
+        }
+    } catch (error) {
+        console.error('Error during upgrade:', error);
+        hideUpgradeOverlay();
+        showUpgradeOverlay('An error occurred. Please try again.');
+        setTimeout(hideUpgradeOverlay, 2000);
     }
 }
 
