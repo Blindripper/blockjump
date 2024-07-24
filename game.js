@@ -2068,7 +2068,6 @@ async function showUpgradeShop() {
     await updateAvailableScoreDisplay(); // Add this line
     const upgradeShop = document.getElementById('upgradeShop');
     const upgradeOptions = document.getElementById('upgradeOptions');
-    const startGameBtn = document.getElementById('startGameBtn');
 
     updateAvailableScoreDisplay();
 
@@ -2085,13 +2084,38 @@ async function showUpgradeShop() {
                 upgradeOptions.appendChild(option);
             }
         }
-        upgradeShop.style.display = 'block';
     });
+
+    // Create a new container for the button
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = 'startGameButtonContainer';
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'center';
+    buttonContainer.style.width = '100%';
+    buttonContainer.style.marginTop = '20px';
+
+    // Create a new button
+    const startGameBtn = document.createElement('button');
+    startGameBtn.id = 'startGameBtn';
+    startGameBtn.textContent = 'START GAME';
+    startGameBtn.style.padding = '10px 20px';
+    startGameBtn.style.fontSize = '18px';
+    startGameBtn.style.backgroundColor = '#3FE1B0';
+    startGameBtn.style.color = '#1a2333';
+    startGameBtn.style.border = 'none';
+    startGameBtn.style.borderRadius = '5px';
+    startGameBtn.style.cursor = 'pointer';
 
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
         game.initializeGame();
     };
+
+    // Add the button to the container
+    buttonContainer.appendChild(startGameBtn);
+
+    // Add the container to the upgrade shop
+    upgradeShop.appendChild(buttonContainer);
 
     upgradeShop.style.display = 'block';
 }
