@@ -57,6 +57,20 @@ header {
   gap: 10px;
 }
 
+#tryCounter, #scoreCounter {
+  font-size: 14px;
+  color: #3FE1B0;
+}
+
+#shopBtn {
+  background-color: #FFD700;
+  color: #0f1624;
+}
+
+#shopBtn:hover {
+  background-color: #FFC000;
+}
+
 #startGameCount {
   font-size: 14px;
   color: #fff;
