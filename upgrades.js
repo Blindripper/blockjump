@@ -2,13 +2,13 @@
 
 const UPGRADES = {
     speed: [
-        { cost: 30000, effect: 1.04 },
-        { cost: 60000, effect: 1.07 },
-        { cost: 90000, effect: 1.12 }
+        { cost: 30000, effect: 1.03 },
+        { cost: 60000, effect: 1.06 },
+        { cost: 90000, effect: 1.10 }
     ],
     jump: [
         { cost: 50000, effect: { jumps: 3, height: 1 } },
-        { cost: 100000, effect: { jumps: 3, height: 1.04 } },
+        { cost: 100000, effect: { jumps: 3, height: 1.03 } },
         { cost: 200000, effect: { jumps: 3, height: 1.08 } }
     ],
     shield: [
@@ -17,9 +17,9 @@ const UPGRADES = {
         { cost: 120000, effect: 3 }
     ],
     rapid: [
-        { cost: 100000, effect: 0.8 },
-        { cost: 200000, effect: 0.5 },
-        { cost: 500000, effect: 0.2}
+        { cost: 100000, effect: 0.9 },
+        { cost: 200000, effect: 0.75 },
+        { cost: 500000, effect: 0.5 }
     ],
     bomb: { cost: 50000, maxCount: 3 }
 };
