@@ -1266,7 +1266,6 @@ class Game {
         const currentTime = Date.now();
         let duration = 30000; // Default duration of 30 seconds for most powerups
     
-        console.log('Applying powerup effect:', type); // Debug log
 
 
         switch(type) {
@@ -1368,7 +1367,6 @@ class Game {
         this.powerupsCollected++;
         this.playSound('powerup');
     
-        console.log('Active powerups after applying effect:', this.activePowerups); // Debug log
 
     }
 
@@ -1502,7 +1500,6 @@ class Game {
         this.drawPowerupHUD();
         
         // Add debug logging
-        console.log('Active powerups:', this.activePowerups);
     }
 
     drawPlatforms() {
@@ -1714,40 +1711,40 @@ class Game {
     }
 
     drawPowerupHUD() {
-        console.log('Drawing powerup HUD'); // Debug log
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation
       
-        const powerupSize = 30; // Increased size for better visibility
-        const padding = 10;
-        const barHeight = 5;
-        const powerupSpacing = 40; // Increased spacing between powerups
+        const powerupSize = 30; // Size of the powerup icon
+        const padding = 10; // Padding between powerups
+        const barHeight = 5; // Height of the duration bar
+        const powerupSpacing = 40; // Vertical spacing between powerups
+        
+        // Calculate the scaling factor
+        const scaleX = this.canvas.width / GAME_WIDTH;
+        const scaleY = this.canvas.height / GAME_HEIGHT;
+        const scale = Math.min(scaleX, scaleY);
+        
+        // Calculate the offset to center the game area horizontally if needed
+        const offsetX = (this.canvas.width - GAME_WIDTH * scale) / 2;
+        
+        // Start drawing from the top-right corner of the game area, with some padding
+        let startX = offsetX + GAME_WIDTH * scale - padding - powerupSize;
+        let startY = padding;
       
-        console.log('Active powerups in drawPowerupHUD:', this.activePowerups); // Debug log
-    
-        // Loop through activePowerups maintaining order
-        let index = 0;
+        // Loop through activePowerups
         for (const [type, powerup] of this.activePowerups.entries()) {
-            console.log('Drawing powerup:', type); // Debug log
-            let yOffset = padding;
-      
-            // Calculate x position starting from right side
-            const xPosition = this.canvas.width - padding;
-      
-            // Adjust x position based on index and powerup size
-            const adjustedX = xPosition - (index * (powerupSize + padding));
+            // Calculate position for this powerup
+            const x = startX;
+            const y = startY;
       
             // Draw powerup icon
             const powerupSprite = sprites.get(type);
             if (powerupSprite) {
-                this.ctx.drawImage(powerupSprite, adjustedX, yOffset, powerupSize, powerupSize);
-                console.log('Drew powerup sprite at:', adjustedX, yOffset); // Debug log
+                this.ctx.drawImage(powerupSprite, x, y, powerupSize, powerupSize);
             } else {
                 // Fallback if sprite is not available
-                console.warn(`Sprite not found for powerup: ${type}`);
                 this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(adjustedX, yOffset, powerupSize, powerupSize);
-                console.log('Drew fallback rectangle for powerup at:', adjustedX, yOffset); // Debug log
+                this.ctx.fillRect(x, y, powerupSize, powerupSize);
             }
       
             // Draw duration bar
@@ -1758,20 +1755,22 @@ class Game {
             const remainingWidth = (remainingDuration / powerup.maxDuration) * barWidth;
       
             this.ctx.fillStyle = '#333333';
-            this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, barWidth, barHeight);
+            this.ctx.fillRect(x, y + powerupSize + 2, barWidth, barHeight);
       
             this.ctx.fillStyle = '#00FF00';
-            this.ctx.fillRect(adjustedX, yOffset + powerupSize + 2, remainingWidth, barHeight);
+            this.ctx.fillRect(x, y + powerupSize + 2, remainingWidth, barHeight);
       
-            console.log('Drew duration bar at:', adjustedX, yOffset + powerupSize + 2); // Debug log
-    
-            // Update yOffset for next powerup
-            yOffset += powerupSpacing;
-            index++;
+            // Move to the next position (to the left)
+            startX -= (powerupSize + padding);
+            
+            // If we've reached the left side, move to the next row
+            if (startX < offsetX) {
+                startX = offsetX + GAME_WIDTH * scale - padding - powerupSize;
+                startY += powerupSpacing;
+            }
         }
       
         this.ctx.restore();
-        console.log('Finished drawing powerup HUD'); // Debug log
     }
       
 
