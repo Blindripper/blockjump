@@ -125,6 +125,12 @@ header {
   margin-right: 20px;
 }
 
+.button-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .upgrade-button {
   padding: 8px 15px;
   background-color: #FFD700;
@@ -134,6 +140,7 @@ header {
   cursor: pointer;
   font-weight: bold;
   transition: all 0.3s ease;
+  margin-bottom: 5px;
 }
 
 .upgrade-button:hover {
@@ -145,6 +152,11 @@ header {
   background-color: #888;
   cursor: not-allowed;
   transform: none;
+}
+
+.upgrade-price {
+  font-size: 12px;
+  color: #3FE1B0;
 }
 
 #startGameBtn {
