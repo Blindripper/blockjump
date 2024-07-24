@@ -50,6 +50,7 @@ const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
 class Game {
     constructor() {
         this.nextBackgroundIndex = 0;
+        this.lastShieldBlockTime = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
@@ -1194,9 +1195,13 @@ class Game {
             }
     
             if (this.checkCollision(this.player, powerup)) {
-                if (powerup.isDebuff && this.playerShield) {
-                    // If it's a debuff and the player has a shield, destroy the powerup without applying it
-                    this.createParticles(powerup.x, powerup.y, 10, '#FFD700');
+                if (powerup.isDebuff && (this.playerShield || this.player.upgradeShieldHits > 0)) {
+                    // If it's a debuff and the player has any shield, destroy the powerup without applying it
+                    this.createParticles(powerup.x, powerup.y, 10, this.playerShield ? '#FFD700' : '#0000FF');
+                    if (this.player.upgradeShieldHits > 0 && !this.playerShield) {
+                        this.player.upgradeShieldHits--; // Decrease upgrade shield hits if it's not a bitcoin shield
+                    }
+                    this.lastShieldBlockTime = currentTime; // Update the last shield block time
                 } else {
                     this.applyPowerUpEffect(powerup.type);
                 }
@@ -1207,17 +1212,16 @@ class Game {
         }
     
         // Random debuff spawn logic
-    if (currentTime - this.lastDebuffSpawn > this.debuffSpawnInterval) {
-        if (Math.random() < this.debuffDropRate) {
-            const x = Math.random() * (GAME_WIDTH - 30);
-            this.powerups.push(this.createPowerup(x, 0, true));
-            this.lastDebuffSpawn = currentTime;
-        } else {
-            // Even if we don't spawn a debuff, update the last spawn time
-            this.lastDebuffSpawn = currentTime;
+        if (currentTime - this.lastDebuffSpawn > this.debuffSpawnInterval) {
+            if (Math.random() < this.debuffDropRate) {
+                const x = Math.random() * (GAME_WIDTH - 30);
+                this.powerups.push(this.createPowerup(x, 0, true));
+                this.lastDebuffSpawn = currentTime;
+            } else {
+                // Even if we don't spawn a debuff, update the last spawn time
+                this.lastDebuffSpawn = currentTime;
+            }
         }
-    }
-    
     }
 
     collectNomadicPowerup() {
@@ -1624,6 +1628,9 @@ class Game {
         }
     
         const drawPlayerAt = (x, y) => {
+            const currentTime = Date.now();
+            const flashDuration = 200; // milliseconds
+    
             if (this.playerShield) {
                 // Draw gold circle for bitcoin shield
                 this.ctx.beginPath();
@@ -1632,6 +1639,12 @@ class Game {
                 this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Gold color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
+    
+                // Flash effect when blocking debuff
+                if (currentTime - this.lastShieldBlockTime < flashDuration) {
+                    this.ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                    this.ctx.fill();
+                }
             } else if (this.player.upgradeShieldHits > 0) {
                 // Draw blue circle for upgrade shield
                 this.ctx.beginPath();
@@ -1640,6 +1653,12 @@ class Game {
                 this.ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)'; // Blue color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
+    
+                // Flash effect when blocking debuff
+                if (currentTime - this.lastShieldBlockTime < flashDuration) {
+                    this.ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
+                    this.ctx.fill();
+                }
             }
     
             const playerSprite = sprites.get('player');
