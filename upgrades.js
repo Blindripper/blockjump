@@ -50,11 +50,27 @@ class PlayerUpgrades {
         }
     }
 
-    canAfford(upgradeType, tier) {
+    canAfford(upgradeType, tier, useJump) {
+        const price = useJump ? 
+            (upgradeType === 'bomb' ? UPGRADES.bomb.jumpCost : UPGRADES[upgradeType][tier].jumpCost) :
+            (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][tier].cost);
+        
+        const balance = useJump ? this.jumpBalance : this.score;
+        
+        console.log(`Checking affordability for ${upgradeType} (Tier ${tier})`);
+        console.log(`Using JUMP: ${useJump}`);
+        console.log(`Price: ${price}`);
+        console.log(`Balance: ${balance}`);
+        
         if (upgradeType === 'bomb') {
-            return this.score >= UPGRADES.bomb.cost && this.upgrades.bomb < UPGRADES.bomb.maxCount;
+            const canAfford = balance >= price && this.upgrades.bomb < UPGRADES.bomb.maxCount;
+            console.log(`Can afford bomb: ${canAfford}`);
+            return canAfford;
         }
-        return this.score >= UPGRADES[upgradeType][tier].cost;
+        
+        const canAfford = balance >= price;
+        console.log(`Can afford: ${canAfford}`);
+        return canAfford;
     }
 
     async purchase(upgradeType, tier, useJump) {
