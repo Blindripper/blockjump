@@ -259,17 +259,22 @@ header {
   color: #3FE1B0;
 }
 
+#startGameButtonContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 20px; /* Adjust as needed */
+}
+
 #startGameBtn {
-  background-color: #3FE1B0;
-  color: #1a2333;
+  padding: 10px 20px;
   font-size: 18px;
-  padding: 12px 24px;
-  margin-top: 20px;
+  background-color: #3FE1B0; /* Match the color in the image */
+  color: #1a2333; /* Dark background color for contrast */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: center;
+  transition: background-color 0.3s;
 }
 
 #startGameBtn:hover {
