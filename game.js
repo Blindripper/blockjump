@@ -425,12 +425,23 @@ class Game {
                 bullet.y += bullet.speed * dt;
             }
     
-            // Check collision with player bullets
-            for (let i = this.bullets.length - 1; i >= 0; i--) {
-                if (this.checkCollision(this.bullets[i], bullet)) {
-                    this.createParticles(bullet.x, bullet.y, 5, '#FF0000');
-                    this.bullets.splice(i, 1);
-                    return false; // Remove enemy bullet
+            // Check collision with player
+            if (this.checkCollision(bullet, this.player)) {
+                if (this.playerShield) {
+                    // Bitcoin shield active, destroy the bullet without ending the game
+                    this.createParticles(bullet.x, bullet.y, 5, '#FFD700');
+                    return false;
+                } else if (this.player.upgradeShieldHits > 0) {
+                    // Upgrade shield active
+                    this.player.upgradeShieldHits--;
+                    this.createParticles(bullet.x, bullet.y, 5, '#0000FF');
+                    return false;
+                } else {
+                    // No shield active, end the game
+                    this.gameOver = true;
+                    this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 20, '#FF0000');
+                    this.playSound('gameOver');
+                    return false;
                 }
             }
     
@@ -744,11 +755,13 @@ class Game {
                     // Bitcoin shield active, destroy enemy without decreasing shield
                     this.destroyEnemy(enemy);
                     this.enemies.splice(i, 1);
+                    this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 10, '#FFD700');
                 } else if (this.player.upgradeShieldHits > 0) {
                     // Upgrade shield active
                     this.destroyEnemy(enemy);
                     this.enemies.splice(i, 1);
                     this.player.upgradeShieldHits--;
+                    this.createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 10, '#0000FF');
                 } else {
                     // No shield active, end the game
                     this.gameOver = true;
