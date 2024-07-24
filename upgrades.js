@@ -2,26 +2,26 @@
 
 const UPGRADES = {
     speed: [
-        { cost: 30000, effect: 1.03 },
-        { cost: 60000, effect: 1.06 },
-        { cost: 90000, effect: 1.10 }
+        { cost: 30000, jumpCost: 300, effect: 1.03 },
+        { cost: 60000, jumpCost: 600, effect: 1.06 },
+        { cost: 90000, jumpCost: 900, effect: 1.10 }
     ],
     jump: [
-        { cost: 50000, effect: { jumps: 3, height: 1 } },
-        { cost: 100000, effect: { jumps: 3, height: 1.03 } },
-        { cost: 200000, effect: { jumps: 3, height: 1.08 } }
+        { cost: 50000, jumpCost: 500, effect: { jumps: 3, height: 1 } },
+        { cost: 100000, jumpCost: 1000, effect: { jumps: 3, height: 1.03 } },
+        { cost: 200000, jumpCost: 2000, effect: { jumps: 3, height: 1.08 } }
     ],
     shield: [
-        { cost: 40000, effect: 1 },
-        { cost: 80000, effect: 2 },
-        { cost: 120000, effect: 3 }
+        { cost: 40000, jumpCost: 400, effect: 1 },
+        { cost: 80000, jumpCost: 800, effect: 2 },
+        { cost: 120000, jumpCost: 1200, effect: 3 }
     ],
     rapid: [
-        { cost: 100000, effect: 0.9 },
-        { cost: 200000, effect: 0.75 },
-        { cost: 500000, effect: 0.5 }
+        { cost: 100000, jumpCost: 1000, effect: 0.9 },
+        { cost: 200000, jumpCost: 2000, effect: 0.75 },
+        { cost: 500000, jumpCost: 5000, effect: 0.5 }
     ],
-    bomb: { cost: 50000, maxCount: 3 }
+    bomb: { cost: 50000, jumpCost: 500, maxCount: 3 }
 };
 
 class PlayerUpgrades {
