@@ -1984,11 +1984,10 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
 function showUpgradeShop() {
     const upgradeShop = document.getElementById('upgradeShop');
-    const availableScore = document.getElementById('availableScore');
     const upgradeOptions = document.getElementById('upgradeOptions');
     const startGameBtn = document.getElementById('startGameBtn');
 
-    availableScore.textContent = game.playerUpgrades.score;
+    updateAvailableScoreDisplay();
 
     upgradeOptions.innerHTML = '';
 
@@ -2003,6 +2002,7 @@ function showUpgradeShop() {
                 upgradeOptions.appendChild(option);
             }
         }
+        upgradeShop.style.display = 'block';
     });
 
     startGameBtn.onclick = () => {
@@ -2047,15 +2047,33 @@ function getUpgradeDescription(type, tier, upgradeInfo) {
         case 'rapid':
             return `Rapid Fire Tier ${tier + 1}: -${((1 - upgradeInfo.effect) * 100).toFixed(1)}% cooldown`;
         case 'bomb':
-            return `Bomb: Clear all enemies and debuffs`;
+            return `Bomb: Clear all evil`;
+    }
+}
+
+function updateAvailableScoreDisplay() {
+    const availableScoreHeader = document.getElementById('availableScoreHeader');
+    const availableScoreShop = document.getElementById('availableScore');
+    const score = game.playerUpgrades.score;
+    
+    if (availableScoreHeader) {
+        availableScoreHeader.textContent = score;
+    }
+    if (availableScoreShop) {
+        availableScoreShop.textContent = score;
     }
 }
 
 
 function purchaseUpgrade(type, tier) {
     if (game.playerUpgrades.purchase(type, tier)) {
+        updateAvailableScoreDisplay();
         showUpgradeShop();  // Refresh the shop
     }
+}
+
+function handleOpenShop() {
+    showUpgradeShop();
 }
 
 
@@ -2230,6 +2248,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('walletConnectBtn').addEventListener('click', handleWalletConnection);
         document.getElementById('buyTriesBtn').addEventListener('click', handleBuyTries);
         document.getElementById('addFundsBtn').addEventListener('click', handleAddFunds);
+        document.getElementById('shopBtn').addEventListener('click', handleOpenShop);
         document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
@@ -2452,11 +2471,9 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     game.updateAchievements();
     game.playerUpgrades.addScore(score);
+    updateAvailableScoreDisplay();
 
-    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, () => {
-        hideOverlay();
-        showUpgradeShop();
-    }, true, 'Try Again', true);
+    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
   
 async function handleScoreSubmission(name) {
@@ -2581,7 +2598,10 @@ async function loadHighscores() {
 function updateButtonState() {
     const connectButton = document.getElementById('walletConnectBtn');
     const buyButton = document.getElementById('buyTriesBtn');
+    const addFundsButton = document.getElementById('addFundsBtn');
+    const shopButton = document.getElementById('shopBtn');
     const tryCounter = document.getElementById('tryCounter');
+    const scoreCounter = document.getElementById('scoreCounter');
     
     if (connectButton) {
         if (isConnected) {
@@ -2599,12 +2619,25 @@ function updateButtonState() {
         buyButton.style.display = isConnected ? 'block' : 'none';
     }
 
+    if (addFundsButton) {
+        addFundsButton.style.display = isConnected ? 'block' : 'none';
+    }
+
+    if (shopButton) {
+        shopButton.style.display = isConnected ? 'block' : 'none';
+    }
+
     if (tryCounter) {
         tryCounter.style.display = isConnected ? 'block' : 'none';
     }
 
+    if (scoreCounter) {
+        scoreCounter.style.display = isConnected ? 'block' : 'none';
+    }
+
     if (isConnected) {
         updateTryCount();
+        updateAvailableScoreDisplay();
     }
 }
 
