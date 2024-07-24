@@ -73,7 +73,6 @@ header {
   border-radius: 50%;
 }
 
-
 .header-right {
   display: flex;
   justify-content: flex-end;
@@ -117,6 +116,7 @@ header {
   color: var(--primary-color);
 }
 
+/* Updated Upgrade Shop Styles */
 #upgradeShop .modal-content {
   background-color: #1a2333;
   color: #ffffff;
@@ -124,17 +124,35 @@ header {
   border-radius: 10px;
   padding: 30px;
   width: 90%;
-  max-width: 500px;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#upgradeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 200px);
+  padding-right: 10px;
 }
 
 .upgrade-option {
+  flex-basis: calc(50% - 20px);
+  max-width: 300px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
   border: 2px solid transparent;
   transition: all 0.3s ease;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
 }
 
 .upgrade-option.purchased {
@@ -164,27 +182,23 @@ header {
   font-size: 12px;
 }
 
-.button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.button-price-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .upgrade-option img {
-  width: 80px;
-  height: 80px;
-  margin-right: 15px;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 10px;
+  align-self: center;
 }
 
 .upgrade-info {
-  flex-grow: 1;
-  margin-right: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .button-price-container {
@@ -202,8 +216,8 @@ header {
   cursor: pointer;
   font-weight: bold;
   transition: all 0.3s ease;
-  margin-bottom: 5px;
-  width: 120px;
+  flex-grow: 1;
+  max-width: 150px;
 }
 
 .upgrade-button:nth-child(2) {
@@ -236,6 +250,7 @@ header {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
+  align-self: center;
 }
 
 #startGameBtn:hover {
@@ -243,13 +258,12 @@ header {
   transform: translateY(-2px);
 }
 
-
 /* Main Layout */
 .main-content {
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  height: calc(100vh - 60px); /* Adjust based on your header height */
+  height: calc(100vh - 60px);
 }
 
 .modal-content {
@@ -291,7 +305,7 @@ header {
 #gameWrapper {
   display: flex;
   gap: 20px;
-  width: calc(100% - 270px); /* Adjust based on achievements section width */
+  width: calc(100% - 270px);
 }
 
 .achievement.unlocked {
@@ -505,20 +519,20 @@ header {
 
 /* Highlight first place in highscore table */
 #highscoreTable .first-place {
-  background-color: rgba(255, 215, 0, 0.2); /* Semi-transparent gold */
+  background-color: rgba(255, 215, 0, 0.2);
   font-weight: bold;
 }
 
 #highscoreTable .first-place td {
-  color: #FFD700; /* Gold color */
+  color: #FFD700;
 }
 
 /* Style Jackpot message and Contract balance */
 .jackpot-info h3,
 #contract-balance,
 #jump-balance {
-  color: #FFD700; /* Gold color */
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); /* Subtle glow effect */
+  color: #FFD700;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 .jackpot-info {
@@ -526,7 +540,7 @@ header {
   padding: 10px;
   border-radius: 5px;
   margin-top: 20px;
-  background-color: rgba(255, 215, 0, 0.1); /* Semi-transparent gold background */
+  background-color: rgba(255, 215, 0, 0.1);
 }
 
 #claimPrizeBtn {
@@ -534,7 +548,8 @@ header {
     margin-top: 10px;
     margin-bottom: 20px;
     width: calc(100% - 40px);
-    max-width: 200px; }
+    max-width: 200px;
+}
 
 /* Powerup Bar */
 #powerupBar {
@@ -649,7 +664,7 @@ header {
   width: 90%;
   max-width: 500px;
   box-shadow: 0 0 20px rgba(63, 225, 176, 0.3);
-  overflow: hidden; /* Prevent scrollbar */
+  overflow: hidden;
 }
 
 #buyTriesModal h2 {
@@ -684,13 +699,13 @@ header {
   transform: translateY(-2px);
 }
 
-#buyTriesModal #buyJumpBtn {  /* More specific selector */
-  background-color: #FFD700; /* Gold color */
+#buyTriesModal #buyJumpBtn {
+  background-color: #FFD700;
   color: #1a2333;
 }
 
 #buyTriesModal #buyJumpBtn:hover {
-  background-color: #FFC600; /* Slightly darker gold on hover */
+  background-color: #FFC600;
 }
 
 #buyTriesModal .close {
@@ -713,8 +728,8 @@ header {
   background-color: rgba(26, 35, 51, 0.9);
   padding: 20px;
   border-radius: 8px;
-  z-index: 2002; /* Higher than other elements */
-  display: none; /* Initially hidden */
+  z-index: 2002;
+  display: none;
 }
 
 #nameForm.visible {
@@ -778,7 +793,6 @@ header {
     flex-direction: column;
     height: auto;
   }
-
   
   #startGameCount {
     position: relative;
@@ -803,5 +817,12 @@ header {
   #achievementsSection {
     border-radius: 8px;
     height: 90%;
+  }
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .upgrade-option {
+    flex-basis: 100%;
   }
 }
