@@ -2067,7 +2067,10 @@ function createBuyButton(type, tier, upgradeInfo, useJump) {
     button.className = 'upgrade-button';
     button.textContent = useJump ? 'Buy with JUMP' : 'Buy with Score';
     button.onclick = () => purchaseUpgrade(type, tier, useJump);
-    button.disabled = !game.playerUpgrades.canAfford(type, tier, useJump);
+    
+    const canAfford = game.playerUpgrades.canAfford(type, tier, useJump);
+    console.log(`Can afford ${type} (Tier ${tier}) with ${useJump ? 'JUMP' : 'Score'}: ${canAfford}`);
+    button.disabled = !canAfford;
 
     const price = document.createElement('div');
     price.className = 'upgrade-price';
@@ -2110,6 +2113,9 @@ async function updateAvailableScoreDisplay() {
     
     const score = game.playerUpgrades.score;
     const jumpBalance = game.playerUpgrades.jumpBalance;
+    
+    console.log(`Current Score: ${score}`);
+    console.log(`Current JUMP Balance: ${jumpBalance}`);
     
     if (availableScoreHeader) {
         availableScoreHeader.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
