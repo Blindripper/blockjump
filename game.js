@@ -2033,14 +2033,34 @@ function createUpgradeOption(type, tier, upgradeInfo) {
 
     option.appendChild(imgAndInfo);
 
+    const buttonAndPrice = document.createElement('div');
+    buttonAndPrice.className = 'button-price-container';
+
     const button = document.createElement('button');
     button.className = 'upgrade-button';
     button.textContent = 'Buy';
     button.onclick = () => purchaseUpgrade(type, tier);
     button.disabled = !game.playerUpgrades.canAfford(type, tier);
-    option.appendChild(button);
+    buttonAndPrice.appendChild(button);
+
+    const price = document.createElement('div');
+    price.className = 'upgrade-price';
+    price.textContent = formatPrice(type === 'bomb' ? UPGRADES.bomb.cost : upgradeInfo.cost);
+    buttonAndPrice.appendChild(price);
+
+    option.appendChild(buttonAndPrice);
 
     return option;
+}
+
+function formatPrice(price) {
+    if (price >= 1000000) {
+        return (price / 1000000).toFixed(1) + 'M';
+    } else if (price >= 1000) {
+        return (price / 1000).toFixed(1) + 'k';
+    } else {
+        return price.toString();
+    }
 }
 
 function getUpgradeDescription(type, tier, upgradeInfo) {
