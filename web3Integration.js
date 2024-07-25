@@ -934,12 +934,29 @@ async function bribeLeader(amount, useJump) {
       await approveJumpSpending(jumpAmount);
       await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
     } else {
-      // Send XTZ with the modified amount
+      // Send XTZ with the modified amount and gas estimation
       const xtzAmount = web3.utils.toWei(bribeAmount.toString(), 'ether');
-      await web3.eth.sendTransaction({
+      
+      // Estimate gas
+      const gasEstimate = await web3.eth.estimateGas({
         from: account,
         to: leaderAddress,
         value: xtzAmount
+      });
+
+      // Add a 20% buffer to the gas estimate
+      const gasLimit = Math.floor(gasEstimate * 1.2);
+
+      // Get current gas price
+      const gasPrice = await web3.eth.getGasPrice();
+
+      // Send transaction with estimated gas and current gas price
+      await web3.eth.sendTransaction({
+        from: account,
+        to: leaderAddress,
+        value: xtzAmount,
+        gas: gasLimit,
+        gasPrice: gasPrice
       });
     }
 
