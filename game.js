@@ -1151,10 +1151,21 @@ updatePlayer(dt) {
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
         if (bg.image && bg.image.complete) {
-            // Draw the background image
-            const pattern = this.ctx.createPattern(bg.image, 'repeat');
-            this.ctx.fillStyle = pattern;
-            this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            // Calculate scaling factors
+            const scaleX = GAME_WIDTH / bg.image.width;
+            const scaleY = GAME_HEIGHT / bg.image.height;
+            const scale = Math.max(scaleX, scaleY); // Use max to cover the entire canvas
+    
+            // Calculate dimensions of the scaled image
+            const scaledWidth = bg.image.width * scale;
+            const scaledHeight = bg.image.height * scale;
+    
+            // Calculate position to center the image
+            const x = (GAME_WIDTH - scaledWidth) / 2;
+            const y = (GAME_HEIGHT - scaledHeight) / 2;
+    
+            // Draw the scaled image
+            this.ctx.drawImage(bg.image, x, y, scaledWidth, scaledHeight);
         } else {
             // Fallback to color if image is not loaded
             this.ctx.fillStyle = bg.color;
