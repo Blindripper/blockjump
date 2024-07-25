@@ -2149,7 +2149,14 @@ function createUpgradeOption(type, tier, upgradeInfo) {
     return option;
 }
 
-function calculateMaxPrice(type, tier, useJump) {
+function calculateMaxPrice(type, useJump) {
+    if (type === 'bomb') {
+        const currentBombs = game.playerUpgrades.upgrades.bomb;
+        const remainingBombs = UPGRADES.bomb.maxCount - currentBombs;
+        const pricePerBomb = useJump ? UPGRADES.bomb.jumpCost : UPGRADES.bomb.cost;
+        return remainingBombs * pricePerBomb;
+    }
+
     let totalPrice = 0;
     const currentTier = game.playerUpgrades.upgrades[type];
     for (let i = currentTier; i < UPGRADES[type].length; i++) {
@@ -2167,11 +2174,21 @@ function createBuyMaxButton(type, tier, useJump) {
     const button = document.createElement('button');
     button.className = 'upgrade-button buy-max-button';
     button.textContent = useJump ? 'Max with JUMP' : 'Max with Score';
-    button.onclick = () => purchaseMaxUpgrade(type, tier, useJump);
     
-    const maxPrice = calculateMaxPrice(type, tier, useJump);
+    const maxPrice = calculateMaxPrice(type, useJump);
     const canAfford = game.playerUpgrades.canAfford(type, tier, useJump, maxPrice);
-    button.disabled = !canAfford;
+    
+    if (canAfford) {
+        button.classList.add('available');
+        button.style.backgroundColor = '#FFD700'; // Golden color
+        button.style.color = '#1a2333'; // Dark text for contrast
+    } else {
+        button.disabled = true;
+        button.style.backgroundColor = '#888'; // Grey out when not available
+        button.style.color = '#ccc';
+    }
+
+    button.onclick = () => purchaseMaxUpgrade(type, tier, useJump);
 
     const price = document.createElement('div');
     price.className = 'upgrade-price';
