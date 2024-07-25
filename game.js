@@ -1458,8 +1458,9 @@ updatePlayer(dt) {
         if (this.gameRunning) {
             // Increment score continuously once the game is running
             this.score++;
-            console.log('Score updated:', this.score); // Add this debug log
-
+            this.playerUpgrades.addScore(1); // Update PlayerUpgrades score
+            console.log('Score updated:', this.score);
+    
             // Check if it's time to drop a nomadic powerup
             if (this.score - this.lastPowerupScore >= 5000) {
                 const x = Math.random() * (GAME_WIDTH - 30);
@@ -1474,6 +1475,9 @@ updatePlayer(dt) {
         if (scoreElement) {
             scoreElement.textContent = this.score;
         }
+    
+        // Update available score display
+        updateAvailableScoreDisplay();
     }
 
     draw() {
@@ -2360,7 +2364,6 @@ async function updateAvailableScoreDisplay() {
     
     const score = game.playerUpgrades.score;
     const jumpBalance = game.playerUpgrades.jumpBalance;
-    
     
     if (availableScoreHeader) {
         availableScoreHeader.textContent = `${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
