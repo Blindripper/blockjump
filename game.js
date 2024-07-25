@@ -2530,7 +2530,7 @@ function loadSprite(name, fileName) {
 
 function loadSprites() {
     const spritesToLoad = [
-        { name: 'player', file: 'spacemarine.png' },
+        { name: 'player', file: 'Spacemarine.png' },
         { name: 'bitcoin', file: 'bitcoin.png' },
         { name: 'solana', file: 'solana.png' },
         { name: 'ethereum', file: 'ethereum1.png' },
