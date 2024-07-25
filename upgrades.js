@@ -50,7 +50,16 @@ class PlayerUpgrades {
         }
     }
 
-    canAfford(upgradeType, tier, useJump) {
+    canAfford(upgradeType, tier, useJump, maxPrice = null) {
+        if (maxPrice !== null) {
+            const balance = useJump ? this.jumpBalance : this.score;
+            console.log(`Checking affordability for max upgrade of ${upgradeType}`);
+            console.log(`Using JUMP: ${useJump}`);
+            console.log(`Max Price: ${maxPrice}`);
+            console.log(`Balance: ${balance}`);
+            return balance >= maxPrice;
+        }
+
         const price = useJump ? 
             (upgradeType === 'bomb' ? UPGRADES.bomb.jumpCost : UPGRADES[upgradeType][tier].jumpCost) :
             (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][tier].cost);
@@ -73,33 +82,56 @@ class PlayerUpgrades {
         return canAfford;
     }
 
-    async purchase(upgradeType, tier, useJump) {
-        if (this.canAfford(upgradeType, tier, useJump)) {
-            const price = useJump ? 
-                (upgradeType === 'bomb' ? UPGRADES.bomb.jumpCost : UPGRADES[upgradeType][tier].jumpCost) :
-                (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][tier].cost);
+    calculateMaxPrice(upgradeType, useJump) {
+        let totalPrice = 0;
+        const currentTier = this.upgrades[upgradeType];
+        
+        if (upgradeType === 'bomb') {
+            const remainingBombs = UPGRADES.bomb.maxCount - currentTier;
+            return useJump ? UPGRADES.bomb.jumpCost * remainingBombs : UPGRADES.bomb.cost * remainingBombs;
+        }
 
+        for (let i = currentTier; i < UPGRADES[upgradeType].length; i++) {
+            totalPrice += useJump ? UPGRADES[upgradeType][i].jumpCost : UPGRADES[upgradeType][i].cost;
+        }
+        return totalPrice;
+    }
+
+    async purchase(upgradeType, tier, useJump, buyMax = false) {
+        const maxTier = upgradeType === 'bomb' ? UPGRADES.bomb.maxCount : UPGRADES[upgradeType].length;
+        const startTier = this.upgrades[upgradeType];
+        const endTier = buyMax ? maxTier : tier + 1;
+
+        let totalCost = 0;
+        for (let i = startTier; i < endTier; i++) {
+            const price = useJump ? 
+                (upgradeType === 'bomb' ? UPGRADES.bomb.jumpCost : UPGRADES[upgradeType][i].jumpCost) :
+                (upgradeType === 'bomb' ? UPGRADES.bomb.cost : UPGRADES[upgradeType][i].cost);
+            totalCost += price;
+        }
+
+        if (this.canAfford(upgradeType, tier, useJump, totalCost)) {
             if (useJump) {
                 try {
                     // Call the smart contract function to add JUMP to the jackpot
-                    const added = await addFunds(0, price);
+                    const added = await addFunds(0, totalCost);
                     if (!added) {
                         console.error('Failed to add JUMP to jackpot');
                         return false;
                     }
-                    this.jumpBalance -= price;
+                    this.jumpBalance -= totalCost;
                 } catch (error) {
                     console.error('Error adding JUMP to jackpot:', error);
                     return false;
                 }
             } else {
-                this.score -= price;
+                this.score -= totalCost;
             }
 
             if (upgradeType === 'bomb') {
-                this.upgrades.bomb++;
+                this.upgrades.bomb = Math.min(this.upgrades.bomb + (endTier - startTier), UPGRADES.bomb.maxCount);
             } else {
-                this.upgrades[upgradeType] = tier + 1;
+                this.upgrades[upgradeType] = endTier;
             }
             return true;
         }
