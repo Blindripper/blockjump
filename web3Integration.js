@@ -931,22 +931,19 @@ async function bribeLeader(amount, useJump) {
     if (useJump) {
       // Send JUMP tokens
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
-      const jumpBalance = await jumpTokenContract.methods.balanceOf(account).call();
-      
-      if (web3.utils.toBN(jumpBalance).lt(web3.utils.toBN(jumpAmount))) {
-        console.error('Insufficient JUMP balance');
-        return false;
-      }
-
       await approveJumpSpending(jumpAmount);
-      await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
+      const result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
+      return result.status; // Returns true if the transaction was successful
     } else {
-      // Send XTZ (unchanged)
-      // ... (keep the existing XTZ logic here)
+      // Send XTZ
+      const xtzAmount = web3.utils.toWei(bribeAmount.toString(), 'ether');
+      const result = await web3.eth.sendTransaction({
+        from: account,
+        to: leaderAddress,
+        value: xtzAmount
+      });
+      return result.status; // Returns true if the transaction was successful
     }
-
-    // If the transaction is successful, we consider the bribe successful
-    return true;
   } catch (error) {
     console.error('Error bribing leader:', error);
     return false;
