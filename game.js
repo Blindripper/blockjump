@@ -2127,16 +2127,28 @@ async function handleBribeLeader() {
     }
   }
   
-  async function handleSuccessfulBribe() {
-    // Update the highscore table
-    await updateHighscoreTable();
+  async function handleSuccessfulBribe(amount, useJump) {
+    showOverlay('Processing bribe...');
     
-    // Show the claim prize button for the briber
-    const currentAccount = await getCurrentAccount();
-    updateClaimPrizeButton(null, currentAccount, true);
-
-    showOverlay('Bribe successful! You can now claim the prize.', checkAndDisplayStartButton, true, 'OK');
-}
+    try {
+      const result = await bribeLeader(amount, useJump);
+      
+      hideOverlay();
+      
+      if (result.success) {
+        showOverlay('Bribe successful! You are now at the top of the leaderboard!', async () => {
+          await updateHighscoreTable(result.highscores);
+          checkAndDisplayStartButton();
+        }, true, 'OK');
+      } else {
+        showOverlay('Failed to bribe. The transaction was not successful. Please check your wallet for any error messages.', null, true, 'OK');
+      }
+    } catch (error) {
+      console.error('Failed to process bribe:', error);
+      hideOverlay();
+      showOverlay(`Error processing bribe: ${error.message}. Please try again.`, null, true, 'OK');
+    }
+  }
 
 async function showUpgradeShop() {
     await game.playerUpgrades.updateJumpBalance();
@@ -2921,41 +2933,41 @@ async function checkContractState() {
 }
 
   
-async function updateHighscoreTable() {
+async function updateHighscoreTable(providedHighscores = null) {
     if (!checkWalletConnection()) return;
   
     try {
-        let highscores = await getHighscores();
+      let highscores = providedHighscores || await getHighscores();
   
-        const highscoreBody = document.getElementById('highscoreBody');
-        if (!highscoreBody) {
-            console.error('Highscore table body not found');
-            return;
+      const highscoreBody = document.getElementById('highscoreBody');
+      if (!highscoreBody) {
+        console.error('Highscore table body not found');
+        return;
+      }
+  
+      highscoreBody.innerHTML = '';
+      highscores.forEach((entry, index) => {
+        if (entry && typeof entry === 'object') {
+          const row = document.createElement('tr');
+          if (index === 0) {
+            row.classList.add('first-place');
+          }
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name || 'Anonymous'}</td>
+            <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
+            <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
+            <td>${entry.blocksClimbed || 0}</td>
+          `;
+          highscoreBody.appendChild(row);
         }
+      });
   
-        highscoreBody.innerHTML = '';
-        highscores.forEach((entry, index) => {
-            if (entry && typeof entry === 'object') {
-                const row = document.createElement('tr');
-                if (index === 0) {
-                    row.classList.add('first-place');
-                }
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name || 'Anonymous'}</td>
-                    <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-                    <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
-                    <td>${entry.blocksClimbed || 0}</td>
-                `;
-                highscoreBody.appendChild(row);
-            }
-        });
-  
-        updateClaimPrizeButton(highscores);
+      updateClaimPrizeButton(highscores);
     } catch (error) {
-        console.error('Error updating highscore table:', error);
+      console.error('Error updating highscore table:', error);
     }
-}
+  }
 
 async function loadHighscores() {
     if (!checkWalletConnection()) return;
