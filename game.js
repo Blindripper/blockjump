@@ -2127,6 +2127,45 @@ async function handleBribeLeader() {
     }
   }
 
+  async function processBribe(amount, useJump) {
+    try {
+      showOverlay("Processing bribe...");
+      console.log(`Attempting to bribe leader with ${amount} ${useJump ? 'JUMP' : 'XTZ'}`);
+      
+      const bribed = await bribeLeader(amount, useJump);
+      console.log(`Bribe result: ${bribed}`);
+      
+      hideOverlay();
+      
+      if (bribed) {
+        showOverlay('Bribe successful! Funds have been sent to the current leader.', async () => {
+          await handleSuccessfulBribe();
+        }, true, 'OK');
+      } else {
+        showOverlay('Failed to bribe. The transaction was not successful. Please check your wallet for any error messages.', null, true, 'OK');
+      }
+    } catch (error) {
+      console.error('Failed to process bribe:', error);
+      hideOverlay();
+      showOverlay(`Error processing bribe: ${error.message}. Please try again.`, null, true, 'OK');
+    }
+  }
+  
+  async function handleSuccessfulBribe() {
+    // Simulate removing the top player from the leaderboard
+    await updateHighscoreTable(true);
+    
+    // Check if the current player is now at the top
+    const highscores = await getHighscores();
+    const currentAccount = await getCurrentAccount();
+    
+    if (highscores.length > 0 && highscores[0].player.toLowerCase() === currentAccount.toLowerCase()) {
+      showOverlay('Congratulations! You are now at the top of the leaderboard!', checkAndDisplayStartButton, true, 'Start Game');
+    } else {
+      checkAndDisplayStartButton();
+    }
+  }
+
 async function showUpgradeShop() {
     await game.playerUpgrades.updateJumpBalance();
     updateAvailableScoreDisplay();
@@ -2514,25 +2553,25 @@ function loadImage(src) {
 
 async function checkAndDisplayStartButton() {
     if (!isConnected) {
-        showOverlay('Please connect wallet');
-        return;
+      showOverlay('Please connect wallet');
+      return;
     }
-
+  
     try {
-        const tries = await getGameTries();
-        if (tries > 0) {
-            showOverlay('Ready to play?', () => {
-                hideOverlay();
-                showUpgradeShop();
-            }, true, 'Start Game');
-        } else {
-            showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
-        }
+      const tries = await getGameTries();
+      if (tries > 0) {
+        showOverlay('Ready to play?', () => {
+          hideOverlay();
+          showUpgradeShop();
+        }, true, 'Start Game');
+      } else {
+        showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+      }
     } catch (error) {
-        console.error('Error checking Game tries:', error);
-        showOverlay('Error checking Game tries. Please try again.');
+      console.error('Error checking Game tries:', error);
+      showOverlay('Error checking Game tries. Please try again.');
     }
-}
+  }
 
 // UI functions
 function showBlockchainWaitMessage(message = "Waiting for Etherlink...", xOffset = 0.5, yOffset = 0.5) {
@@ -2899,59 +2938,45 @@ async function checkContractState() {
 }
 
   
-async function updateHighscoreTable() {
+async function updateHighscoreTable(removeTopPlayer = false) {
     if (!checkWalletConnection()) return;
-
+  
     try {
-        const highscores = await getHighscores();
-        let currentAccount;
-
-        if (!highscores || !Array.isArray(highscores)) {
-            console.error('Invalid highscores data:', highscores);
-            return;
+      let highscores = await getHighscores();
+  
+      if (removeTopPlayer && highscores.length > 0) {
+        highscores = highscores.slice(1); // Remove the top player
+      }
+  
+      const highscoreBody = document.getElementById('highscoreBody');
+      if (!highscoreBody) {
+        console.error('Highscore table body not found');
+        return;
+      }
+  
+      highscoreBody.innerHTML = '';
+      highscores.forEach((entry, index) => {
+        if (entry && typeof entry === 'object') {
+          const row = document.createElement('tr');
+          if (index === 0) {
+            row.classList.add('first-place');
+          }
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name || 'Anonymous'}</td>
+            <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
+            <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
+            <td>${entry.blocksClimbed || 0}</td>
+          `;
+          highscoreBody.appendChild(row);
         }
-
-        if (window.ethereum) {
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            const currentAccount = accounts[0];
-            if (currentAccount) {
-                updateClaimPrizeButton(highscores, currentAccount);
-            } else {
-            }
-        }
-
-        const highscoreBody = document.getElementById('highscoreBody');
-        if (!highscoreBody) {
-            console.error('Highscore table body not found');
-            return;
-        }
-
-        highscoreBody.innerHTML = '';
-        highscores.forEach((entry, index) => {
-            if (entry && typeof entry === 'object') {
-                const row = document.createElement('tr');
-                if (index === 0) {
-                    row.classList.add('first-place'); // Add this line to highlight first place
-                }
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name || 'Anonymous'}</td>
-                    <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-                    <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
-                    <td>${entry.blocksClimbed || 0}</td>
-                `;
-                highscoreBody.appendChild(row);
-            }
-        });
-
-        if (currentAccount) {
-            updateClaimPrizeButton(highscores, currentAccount);
-        } else {
-        }
-
+      });
+  
+      updateClaimPrizeButton(highscores);
     } catch (error) {
+      console.error('Error updating highscore table:', error);
     }
-}
+  }
 
 async function loadHighscores() {
     if (!checkWalletConnection()) return;
