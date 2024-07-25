@@ -996,6 +996,11 @@ async function bribeLeader(amount, useJump) {
     }
 
     const leader = highscores[0];
+    if (!leader || typeof leader !== 'object') {
+      console.error('Invalid leader data:', leader);
+      return { success: false, error: 'Invalid leader data' };
+    }
+
     const leaderAddress = leader.player;
     const account = await getCurrentAccount();
 
@@ -1030,12 +1035,30 @@ async function bribeLeader(amount, useJump) {
         // Start a new game session before submitting the score
         await contract.methods.startGame().send({ from: account });
 
-        const newScore = parseInt(leader.score) + 1;
-        const newBlocksClimbed = parseInt(leader.blocksClimbed) + 1;
+        // Safely access leader properties with fallback values
+        const newScore = (parseInt(leader.score) || 0) + 1;
+        const newBlocksClimbed = (parseInt(leader.blocksClimbed) || 0) + 1;
 
-        const gasEstimate = await contract.methods.submitScore("Briber", newScore.toString(), newBlocksClimbed.toString(), Math.floor(Date.now() / 1000)).estimateGas({from: account});
+        console.log('Submitting new score:', {
+          name: "Briber",
+          score: newScore.toString(),
+          blocksClimbed: newBlocksClimbed.toString(),
+          timestamp: Math.floor(Date.now() / 1000)
+        });
+
+        const gasEstimate = await contract.methods.submitScore(
+          "Briber",
+          newScore.toString(),
+          newBlocksClimbed.toString(),
+          Math.floor(Date.now() / 1000)
+        ).estimateGas({from: account});
         
-        await contract.methods.submitScore("Briber", newScore.toString(), newBlocksClimbed.toString(), Math.floor(Date.now() / 1000)).send({ 
+        await contract.methods.submitScore(
+          "Briber",
+          newScore.toString(),
+          newBlocksClimbed.toString(),
+          Math.floor(Date.now() / 1000)
+        ).send({ 
           from: account,
           gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
         });
