@@ -2111,11 +2111,11 @@ async function handleBribeLeader() {
       
       if (bribed) {
         showOverlay('Bribe successful! The leader has been removed from the top.', async () => {
-          await this.updateHighscoreTable();
+          await updateHighscoreTable();
           hideOverlay();
         }, true, 'OK');
       } else {
-        showOverlay('Failed to bribe. Please try again.', null, true, 'OK');
+        showOverlay('Failed to bribe. Insufficient funds or bribe amount too low.', null, true, 'OK');
       }
     } catch (error) {
       console.error('Failed to process bribe:', error);
