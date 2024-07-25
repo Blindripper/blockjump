@@ -3,13 +3,94 @@
 let web3;
 let contract;
 let account;
+let jumpTokenContract;
 let isInitialized = false;
+
 
 
 
 const contractAddress = '0x8CF79304Da0756a2aC92967A8bc32c6C51a734DB'; // Replace if this has changed
 const jumpTokenAddress = '0x02539B1825551329B3021Fa87d463E1BBa3eda80';
-let jumpTokenContract;
+
+
+const jumpTokenABI = [
+  // Standard ERC20 functions
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "name",
+    "outputs": [{"name": "", "type": "string"}],
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}],
+    "name": "approve",
+    "outputs": [{"name": "", "type": "bool"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [{"name": "", "type": "uint256"}],
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{"name": "_from", "type": "address"}, {"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+    "name": "transferFrom",
+    "outputs": [{"name": "", "type": "bool"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [{"name": "", "type": "uint8"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{"name": "_owner", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"name": "balance", "type": "uint256"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [{"name": "", "type": "string"}],
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+    "name": "transfer",
+    "outputs": [{"name": "", "type": "bool"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{"name": "_owner", "type": "address"}, {"name": "_spender", "type": "address"}],
+    "name": "allowance",
+    "outputs": [{"name": "", "type": "uint256"}],
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{"indexed": true, "name": "owner", "type": "address"}, {"indexed": true, "name": "spender", "type": "address"}, {"indexed": false, "name": "value", "type": "uint256"}],
+    "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{"indexed": true, "name": "from", "type": "address"}, {"indexed": true, "name": "to", "type": "address"}, {"indexed": false, "name": "value", "type": "uint256"}],
+    "name": "Transfer",
+    "type": "event"
+  }
+];
 
 const contractABI = [
   {
@@ -916,36 +997,30 @@ async function bribeLeader(amount, useJump) {
 
     const leader = highscores[0];
     const leaderAddress = leader.player;
-    const leaderScore = leader.score;
-
-    // Modify the amount to be 10000 times lower than the leader's score (for XTZ only)
-    const bribeAmount = useJump ? amount : leaderScore / 10000;
-
-    if (amount < bribeAmount) {
-      console.error('Bribe amount must be at least the required amount');
-      return false;
-    }
-
     const account = await getCurrentAccount();
 
+    let result;
+
     if (useJump) {
-      // Send JUMP tokens
+      // For JUMP token bribes
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
-      await approveJumpSpending(jumpAmount);
-      const result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
-      return result.status; // Returns true if the transaction was successful
+      
+      // Direct transfer of JUMP tokens to the leader
+      result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
     } else {
-      // Send XTZ
-      const xtzAmount = web3.utils.toWei(bribeAmount.toString(), 'ether');
-      const result = await web3.eth.sendTransaction({
+      // For XTZ bribes
+      const xtzAmount = web3.utils.toWei(amount.toString(), 'ether');
+      
+      // Direct transfer of XTZ to the leader
+      result = await web3.eth.sendTransaction({
         from: account,
         to: leaderAddress,
         value: xtzAmount,
-        gas: 500000  // Set a manual gas limit, adjust this value as needed
-
+        gas: 500000  // Set a manual gas limit, adjust if needed
       });
-      return result.status; // Returns true if the transaction was successful
     }
+
+    return result.status; // Returns true if the transaction was successful
   } catch (error) {
     console.error('Error bribing leader:', error);
     return false;
@@ -958,10 +1033,9 @@ async function initWeb3() {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       contract = new web3.eth.Contract(contractABI, contractAddress);
-      
-      // Initialize JUMP token contract
-      jumpTokenContract = new web3.eth.Contract(contractABI, jumpTokenAddress);
-      
+      jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
+      const accounts = await web3.eth.getAccounts();
+      account = accounts[0];
       isInitialized = true;
       return web3;
     } catch (error) {
