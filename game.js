@@ -2114,9 +2114,8 @@ async function handleBribeLeader() {
       hideOverlay();
       
       if (bribed) {
-        showOverlay('Bribe successful! 1st place will be removed for the current session!.', async () => {
+        showOverlay('Bribe successful! Claim Prize Button is now available!.', async () => {
           await handleSuccessfulBribe();
-          updateClaimPrizeButton(true); 
         }, true, 'OK');
       } else {
         showOverlay('Failed to bribe. The transaction was not successful. Please check your wallet for any error messages.', null, true, 'OK');
@@ -2129,19 +2128,15 @@ async function handleBribeLeader() {
   }
   
   async function handleSuccessfulBribe() {
-    // Simulate removing the top player from the leaderboard
-    await updateHighscoreTable(true);
+    // Update the highscore table
+    await updateHighscoreTable();
     
-    // Check if the current player is now at the top
-    const highscores = await getHighscores();
+    // Show the claim prize button for the briber
     const currentAccount = await getCurrentAccount();
-    
-    if (highscores.length > 0 && highscores[0].player.toLowerCase() === currentAccount.toLowerCase()) {
-      showOverlay('Congratulations! You are now at the top of the leaderboard!', checkAndDisplayStartButton, true, 'Start Game');
-    } else {
-      checkAndDisplayStartButton();
-    }
-  }
+    updateClaimPrizeButton(null, currentAccount, true);
+
+    showOverlay('Bribe successful! You can now claim the prize.', checkAndDisplayStartButton, true, 'OK');
+}
 
 async function showUpgradeShop() {
     await game.playerUpgrades.updateJumpBalance();
@@ -2705,6 +2700,17 @@ async function handleClaimPrize() {
             showOverlay('Prize claimed! Congratulations!');
             await updateHighscoreTable();
             await updateContractBalance();
+
+            // Hide the claim prize button after successful claim
+            const claimPrizeBtn = document.getElementById('claimPrizeBtn');
+            if (claimPrizeBtn) {
+                claimPrizeBtn.style.display = 'none';
+            }
+
+            // If it was a briber claim, reset the briber status
+            if (claimPrizeBtn && claimPrizeBtn.dataset.isBriber === 'true') {
+                claimPrizeBtn.dataset.isBriber = 'false';
+            }
         } else {
             showOverlay('Failed to claim prize. Not eligible.', 'error', 0.3);
         }
@@ -2915,45 +2921,41 @@ async function checkContractState() {
 }
 
   
-async function updateHighscoreTable(removeTopPlayer = false) {
+async function updateHighscoreTable() {
     if (!checkWalletConnection()) return;
   
     try {
-      let highscores = await getHighscores();
+        let highscores = await getHighscores();
   
-      if (removeTopPlayer && highscores.length > 0) {
-        highscores = highscores.slice(1); // Remove the top player
-      }
-  
-      const highscoreBody = document.getElementById('highscoreBody');
-      if (!highscoreBody) {
-        console.error('Highscore table body not found');
-        return;
-      }
-  
-      highscoreBody.innerHTML = '';
-      highscores.forEach((entry, index) => {
-        if (entry && typeof entry === 'object') {
-          const row = document.createElement('tr');
-          if (index === 0) {
-            row.classList.add('first-place');
-          }
-          row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name || 'Anonymous'}</td>
-            <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-            <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
-            <td>${entry.blocksClimbed || 0}</td>
-          `;
-          highscoreBody.appendChild(row);
+        const highscoreBody = document.getElementById('highscoreBody');
+        if (!highscoreBody) {
+            console.error('Highscore table body not found');
+            return;
         }
-      });
   
-      updateClaimPrizeButton(highscores);
+        highscoreBody.innerHTML = '';
+        highscores.forEach((entry, index) => {
+            if (entry && typeof entry === 'object') {
+                const row = document.createElement('tr');
+                if (index === 0) {
+                    row.classList.add('first-place');
+                }
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name || 'Anonymous'}</td>
+                    <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
+                    <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
+                    <td>${entry.blocksClimbed || 0}</td>
+                `;
+                highscoreBody.appendChild(row);
+            }
+        });
+  
+        updateClaimPrizeButton(highscores);
     } catch (error) {
-      console.error('Error updating highscore table:', error);
+        console.error('Error updating highscore table:', error);
     }
-  }
+}
 
 async function loadHighscores() {
     if (!checkWalletConnection()) return;
@@ -3042,14 +3044,18 @@ function hideAchievements() {
 }
 
 
-function updateClaimPrizeButton(highscores, currentAccount) {
+function updateClaimPrizeButton(highscores, currentAccount, isBriber = false) {
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
     if (claimPrizeBtn) {
-        if (isConnected && highscores && highscores.length > 0) {
+        if (isBriber) {
+            claimPrizeBtn.style.display = 'block';
+            claimPrizeBtn.dataset.isBriber = 'true';
+        } else if (highscores && highscores.length > 0) {
             const leadingAccount = highscores[0].player;
             
             if (leadingAccount && currentAccount && leadingAccount.toLowerCase() === currentAccount.toLowerCase()) {
                 claimPrizeBtn.style.display = 'block';
+                claimPrizeBtn.dataset.isBriber = 'false';
             } else {
                 claimPrizeBtn.style.display = 'none';
             }
