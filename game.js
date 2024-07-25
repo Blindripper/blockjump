@@ -2088,12 +2088,12 @@ async function handleBribeLeader() {
   
       bribeXtzBtn.onclick = async () => {
         bribeModal.style.display = 'none';
-        await this.processBribe(leaderScore, false);
+        await processBribe(leaderScore, false);
       };
   
       bribeJumpBtn.onclick = async () => {
         bribeModal.style.display = 'none';
-        await this.processBribe(leaderScore, true);
+        await processBribe(leaderScore, true);
       };
     } catch (error) {
       console.error('Error handling bribe:', error);
