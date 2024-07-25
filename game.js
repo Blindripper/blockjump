@@ -1704,12 +1704,40 @@ updatePlayer(dt) {
         for (let powerup of this.powerups) {
             const powerupSprite = sprites.get(powerup.type);
             if (powerupSprite && powerupSprite.complete && powerupSprite.naturalHeight !== 0) {
+                // Draw colored circle based on powerup type
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    powerup.x + powerup.width / 2, 
+                    powerup.y + powerup.height / 2, 
+                    powerup.width / 2 + 2, // Slightly larger than the powerup
+                    0, 
+                    2 * Math.PI
+                );
+                
+                // Set circle color based on buff/debuff
+                if (this.isDebuff(powerup.type)) {
+                    this.ctx.strokeStyle = 'red';
+                } else {
+                    this.ctx.strokeStyle = 'green';
+                }
+                
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+    
+                // Draw the powerup sprite
                 this.ctx.drawImage(powerupSprite, powerup.x, powerup.y, powerup.width, powerup.height);
             } else {
-                this.ctx.fillStyle = '#FFD700';
+                // Fallback if sprite is not loaded
+                this.ctx.fillStyle = this.isDebuff(powerup.type) ? '#FF6B6B' : '#4CAF50';
                 this.ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
             }
         }
+    }
+    
+    // Helper method to determine if a powerup is a debuff
+    isDebuff(powerupType) {
+        const debuffs = ['solana', 'blast', 'ethereum'];
+        return debuffs.includes(powerupType);
     }
 
     drawParticles() {
@@ -2502,7 +2530,7 @@ function loadSprite(name, fileName) {
 
 function loadSprites() {
     const spritesToLoad = [
-        { name: 'player', file: 'TezosLogo_Icon_Bluesmall.png' },
+        { name: 'player', file: 'spacemarine.png' },
         { name: 'bitcoin', file: 'bitcoin.png' },
         { name: 'solana', file: 'solana.png' },
         { name: 'ethereum', file: 'ethereum1.png' },
