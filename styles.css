@@ -312,6 +312,49 @@ header {
   transform: translateY(-2px);
 }
 
+/* Add these styles to your existing CSS file */
+
+#bribeLeaderBtn {
+  background-color: #FF6B6B;
+  color: white;
+}
+
+#bribeLeaderBtn:hover {
+  background-color: #FF4757;
+}
+
+#bribeModal .modal-content {
+  background-color: #1a2333;
+  color: #ffffff;
+  border: 2px solid #FF6B6B;
+}
+
+#bribeModal h2 {
+  color: #FF6B6B;
+}
+
+#bribeModal .game-button {
+  margin: 10px 0;
+  width: 100%;
+}
+
+#bribeXtzBtn {
+  background-color: #3FE1B0;
+}
+
+#bribeJumpBtn {
+  background-color: #FFD700;
+  color: #1a2333;
+}
+
+#bribeXtzBtn:hover {
+  background-color: #2dc898;
+}
+
+#bribeJumpBtn:hover {
+  background-color: #FFC600;
+}
+
 /* Main Layout */
 .main-content {
   display: flex;
