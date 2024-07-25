@@ -1135,7 +1135,6 @@ updatePlayer(dt) {
     handleGameOver() {
         this.gameRunning = false;
         this.gameOver = true;
-        this.playerUpgrades.addScore(this.score);
 
         // Stop any ongoing sounds
         Object.values(sounds).forEach(sound => {
@@ -1458,7 +1457,6 @@ updatePlayer(dt) {
         if (this.gameRunning) {
             // Increment score continuously once the game is running
             this.score++;
-            // Remove this line: this.playerUpgrades.addScore(1);
             console.log('Score updated:', this.score);
     
             // Check if it's time to drop a nomadic powerup
