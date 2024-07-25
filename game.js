@@ -2938,6 +2938,7 @@ async function updateHighscoreTable(providedHighscores = null) {
   
     try {
       let highscores = providedHighscores || await getHighscores();
+      console.log('Highscores received:', highscores);
   
       // Ensure highscores is an array
       if (!Array.isArray(highscores)) {
@@ -2958,22 +2959,29 @@ async function updateHighscoreTable(providedHighscores = null) {
       }
   
       highscoreBody.innerHTML = '';
-      highscores.forEach((entry, index) => {
-        if (entry && typeof entry === 'object') {
-          const row = document.createElement('tr');
-          if (index === 0) {
-            row.classList.add('first-place');
+      if (highscores.length === 0) {
+        console.log('No highscores to display');
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="5">No highscores available</td>';
+        highscoreBody.appendChild(row);
+      } else {
+        highscores.forEach((entry, index) => {
+          if (entry && typeof entry === 'object') {
+            const row = document.createElement('tr');
+            if (index === 0) {
+              row.classList.add('first-place');
+            }
+            row.innerHTML = `
+              <td>${index + 1}</td>
+              <td>${entry.name || 'Anonymous'}</td>
+              <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
+              <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
+              <td>${entry.blocksClimbed || 0}</td>
+            `;
+            highscoreBody.appendChild(row);
           }
-          row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name || 'Anonymous'}</td>
-            <td>${entry.player ? (entry.player.substring(0, 6) + '...' + entry.player.substring(38)) : 'N/A'}</td>
-            <td>${entry.score ? entry.score.toString().padStart(7, '0') : '0000000'}</td>
-            <td>${entry.blocksClimbed || 0}</td>
-          `;
-          highscoreBody.appendChild(row);
-        }
-      });
+        });
+      }
   
       updateClaimPrizeButton(highscores);
     } catch (error) {
