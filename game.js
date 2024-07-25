@@ -302,6 +302,24 @@ class Game {
         }
     }
 
+    createJumpEffect() {
+        // Create particles at the player's feet
+        const particleCount = 10;
+        const particleColor = '#FFFFFF'; // White particles
+    
+        for (let i = 0; i < particleCount; i++) {
+            this.createParticles(
+                this.player.x + this.player.width / 2,
+                this.player.y + this.player.height,
+                1,
+                particleColor
+            );
+        }
+    
+        // Play jump sound
+        this.playSound('jump');
+    }
+
     updateScrollSpeed() {
         const topThreshold = GAME_HEIGHT * 0.2; // 20% of screen height from the top
     
