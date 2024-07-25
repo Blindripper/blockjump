@@ -1004,21 +1004,34 @@ async function bribeLeader(amount, useJump) {
     if (useJump) {
       // For JUMP token bribes
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
-      result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
+      
+      // Estimate gas for JUMP transfer
+      const gasEstimate = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).estimateGas({from: account});
+      
+      result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ 
+        from: account,
+        gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
+      });
     } else {
       // For XTZ bribes
       const xtzAmount = web3.utils.toWei(amount.toString(), 'ether');
+      
       result = await web3.eth.sendTransaction({
         from: account,
         to: leaderAddress,
         value: xtzAmount,
-        gas: 500000  // Set a manual gas limit, adjust if needed
+        gas: 500000  // Set a manual gas limit
       });
     }
 
     if (result.status) {
       // If bribe was successful, update the highscores
-      await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).send({ from: account });
+      const gasEstimate = await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).estimateGas({from: account});
+      
+      await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).send({ 
+        from: account,
+        gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
+      });
       
       // Fetch updated highscores
       const updatedHighscores = await getHighscores();
