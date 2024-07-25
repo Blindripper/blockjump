@@ -51,7 +51,6 @@ class Game {
     constructor() {
         this.nextBackgroundIndex = 0;
         this.lastShieldBlockTime = 0;
-        this.handleBribeLeader = this.handleBribeLeader.bind(this);
         this.baseScrollSpeed = 65; // Base scrolling speed
         this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
@@ -1425,65 +1424,7 @@ updatePlayer(dt) {
         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 30, '#00FF00');
     } 
 
-    async handleBribeLeader() {
-        if (!checkWalletConnection()) return;
-      
-        try {
-          const highscores = await getHighscores();
-          if (highscores.length === 0) {
-            showOverlay('No highscores available');
-            return;
-          }
-      
-          const leaderScore = highscores[0].score;
-          const bribeModal = document.getElementById('bribeModal');
-          bribeModal.style.display = 'block';
-      
-          const closeBtn = bribeModal.querySelector('.close');
-          closeBtn.onclick = () => {
-            bribeModal.style.display = 'none';
-          };
-      
-          const bribeXtzBtn = document.getElementById('bribeXtzBtn');
-          const bribeJumpBtn = document.getElementById('bribeJumpBtn');
-      
-          bribeXtzBtn.onclick = async () => {
-            bribeModal.style.display = 'none';
-            await this.processBribe(leaderScore, false);
-          };
-      
-          bribeJumpBtn.onclick = async () => {
-            bribeModal.style.display = 'none';
-            await this.processBribe(leaderScore, true);
-          };
-        } catch (error) {
-          console.error('Error handling bribe:', error);
-          showOverlay('An error occurred while preparing the bribe. Please try again.');
-        }
-      }
-      
-      async processBribe(amount, useJump) {
-        try {
-          showOverlay("Processing bribe...");
-          const bribed = await bribeLeader(amount, useJump);
-          
-          hideOverlay();
-          
-          if (bribed) {
-            showOverlay('Bribe successful! The leader has been removed from the top.', async () => {
-              await this.updateHighscoreTable();
-              hideOverlay();
-            }, true, 'OK');
-          } else {
-            showOverlay('Failed to bribe. Please try again.', null, true, 'OK');
-          }
-        } catch (error) {
-          console.error('Failed to process bribe:', error);
-          showOverlay('Error processing bribe. Please try again.', null, true, 'OK');
-        }
-      }
-
-
+   
     updateDifficulty() {
         this.difficultyLevel = Math.floor(this.score / 5000) + 1;
         this.platformSpeed = 50 + (this.difficultyLevel - 1) * 2;
@@ -2123,6 +2064,64 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     document.body.appendChild(overlay);
 }
 
+async function handleBribeLeader() {
+    if (!checkWalletConnection()) return;
+  
+    try {
+      const highscores = await getHighscores();
+      if (highscores.length === 0) {
+        showOverlay('No highscores available');
+        return;
+      }
+  
+      const leaderScore = highscores[0].score;
+      const bribeModal = document.getElementById('bribeModal');
+      bribeModal.style.display = 'block';
+  
+      const closeBtn = bribeModal.querySelector('.close');
+      closeBtn.onclick = () => {
+        bribeModal.style.display = 'none';
+      };
+  
+      const bribeXtzBtn = document.getElementById('bribeXtzBtn');
+      const bribeJumpBtn = document.getElementById('bribeJumpBtn');
+  
+      bribeXtzBtn.onclick = async () => {
+        bribeModal.style.display = 'none';
+        await this.processBribe(leaderScore, false);
+      };
+  
+      bribeJumpBtn.onclick = async () => {
+        bribeModal.style.display = 'none';
+        await this.processBribe(leaderScore, true);
+      };
+    } catch (error) {
+      console.error('Error handling bribe:', error);
+      showOverlay('An error occurred while preparing the bribe. Please try again.');
+    }
+  }
+  
+  async function processBribe(amount, useJump) {
+    try {
+      showOverlay("Processing bribe...");
+      const bribed = await bribeLeader(amount, useJump);
+      
+      hideOverlay();
+      
+      if (bribed) {
+        showOverlay('Bribe successful! The leader has been removed from the top.', async () => {
+          await this.updateHighscoreTable();
+          hideOverlay();
+        }, true, 'OK');
+      } else {
+        showOverlay('Failed to bribe. Please try again.', null, true, 'OK');
+      }
+    } catch (error) {
+      console.error('Failed to process bribe:', error);
+      showOverlay('Error processing bribe. Please try again.', null, true, 'OK');
+    }
+  }
+
 async function showUpgradeShop() {
     await updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
@@ -2617,7 +2616,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('shopBtn').addEventListener('click', handleOpenShop);
         document.getElementById('claimPrizeBtn').addEventListener('click', handleClaimPrize);
         document.getElementById('nameForm').addEventListener('submit', handleScoreSubmission);
-        document.getElementById('bribeLeaderBtn').addEventListener('click', this.handleBribeLeader);
+        document.getElementById('bribeLeaderBtn').addEventListener('click', handleBribeLeader);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
 
         if (!isConnected) {
