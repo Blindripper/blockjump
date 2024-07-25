@@ -2102,6 +2102,7 @@ async function handleBribeLeader() {
     }
   }
   
+  
   async function processBribe(amount, useJump) {
     try {
       showOverlay("Processing bribe...");
@@ -2113,32 +2114,7 @@ async function handleBribeLeader() {
       hideOverlay();
       
       if (bribed) {
-        showOverlay('Bribe successful! Current Leader removed from 1st place!.', async () => {
-          await updateHighscoreTable();
-          hideOverlay();
-        }, true, 'OK');
-      } else {
-        showOverlay('Failed to bribe. The transaction was not successful. Please check your wallet for any error messages.', null, true, 'OK');
-      }
-    } catch (error) {
-      console.error('Failed to process bribe:', error);
-      hideOverlay();
-      showOverlay(`Error processing bribe: ${error.message}. Please try again.`, null, true, 'OK');
-    }
-  }
-
-  async function processBribe(amount, useJump) {
-    try {
-      showOverlay("Processing bribe...");
-      console.log(`Attempting to bribe leader with ${amount} ${useJump ? 'JUMP' : 'XTZ'}`);
-      
-      const bribed = await bribeLeader(amount, useJump);
-      console.log(`Bribe result: ${bribed}`);
-      
-      hideOverlay();
-      
-      if (bribed) {
-        showOverlay('Bribe successful! Funds have been sent to the current leader.', async () => {
+        showOverlay('Bribe successful! 1st place will be removed for the current session!.', async () => {
           await handleSuccessfulBribe();
         }, true, 'OK');
       } else {
