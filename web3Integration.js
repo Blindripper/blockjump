@@ -961,7 +961,7 @@ async function initWeb3() {
       contract = new web3.eth.Contract(contractABI, contractAddress);
       
       // Initialize JUMP token contract
-      jumpTokenContract = new web3.eth.Contract(jumpTokenABI, jumpTokenAddress);
+      jumpTokenContract = new web3.eth.Contract(contractABI, jumpTokenAddress);
       
       isInitialized = true;
       return web3;
