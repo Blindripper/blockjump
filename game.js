@@ -2137,12 +2137,12 @@ async function handleBribeLeader() {
       
       if (result.success) {
         if (result.error) {
-          showOverlay(`Bribe successful, but there was an issue: ${result.error}. The leaderboard may not reflect your bribe immediately.`, async () => {
+          showOverlay(`Bribe transaction successful, but there was an issue updating the score: ${result.error}. The leaderboard may not reflect your bribe immediately.`, async () => {
             await updateHighscoreTable(result.highscores);
             checkAndDisplayStartButton();
           }, true, 'OK');
         } else {
-          showOverlay('Bribe successful! You are now at the top of the leaderboard!', async () => {
+          showOverlay('Bribe successful! Your new score has been submitted. You should now be at the top of the leaderboard!', async () => {
             await updateHighscoreTable(result.highscores);
             checkAndDisplayStartButton();
           }, true, 'OK');
@@ -2151,12 +2151,12 @@ async function handleBribeLeader() {
         // Update the claim prize button visibility
         updateClaimPrizeButton(result.highscores);
       } else {
-        showOverlay(`Failed to bribe. Error: ${result.error}`, null, true, 'OK');
+        showOverlay(`Failed to complete the bribe process. Error: ${result.error}`, null, true, 'OK');
       }
     } catch (error) {
       console.error('Failed to process bribe:', error);
       hideOverlay();
-      showOverlay(`Error processing bribe: ${error.message}. Please try again.`, null, true, 'OK');
+      showOverlay(`Error during the bribe process: ${error.message}. Please try again or contact support if the issue persists.`, null, true, 'OK');
     }
   }
 
