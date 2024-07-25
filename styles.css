@@ -231,10 +231,31 @@ header {
   padding: 8px 12px;
   font-size: 12px;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.upgrade-button:not(:disabled):hover {
+  filter: brightness(110%);
+  transform: translateY(-2px);
+}
+
+.upgrade-button:disabled {
+  background-color: #888;
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 .buy-max-button {
-  background-color: #4CAF50;  /* Different color for max buttons */
+  background-color: #4CAF50;
+  color: #1a2333;
+}
+
+.buy-max-button.available {
+  background-color: #FFD700;
+  color: #1a2333;
 }
 
 .buy-max-button:hover {
@@ -244,6 +265,7 @@ header {
 .upgrade-price {
   font-size: 10px;
   margin-top: 5px;
+  color: #3FE1B0;
 }
 
 
@@ -256,11 +278,6 @@ header {
   transform: translateY(-2px);
 }
 
-.upgrade-button:disabled {
-  background-color: #888;
-  cursor: not-allowed;
-  transform: none;
-}
 
 .upgrade-price {
   font-size: 12px;
