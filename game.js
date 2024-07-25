@@ -39,8 +39,8 @@ const picsUrl = `${repoBaseUrl}pics/`;
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 43;
-const PLAYER_WIDTH = 35;
-const PLAYER_HEIGHT = 45;
+const PLAYER_WIDTH = 70;
+const PLAYER_HEIGHT = 90;
 const pressedKeys = {};
 const SHIELD_WIDTH = PLAYER_WIDTH * 1.1; 
 const SHIELD_HEIGHT = PLAYER_HEIGHT *1.1;
@@ -818,9 +818,6 @@ class Game {
     }
 
     
-
-
-
     createBottomPlatform() {
         return {
             x: 0,
@@ -1651,8 +1648,8 @@ updatePlayer(dt) {
             if (this.playerShield) {
                 // Draw gold circle for bitcoin shield
                 this.ctx.beginPath();
-                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2, 
-                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.arc(x + PLAYER_WIDTH / 2, y + PLAYER_HEIGHT / 2, 
+                             Math.max(PLAYER_WIDTH, PLAYER_HEIGHT) / 2 + 5, 0, Math.PI * 2);
                 this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Gold color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
@@ -1665,8 +1662,8 @@ updatePlayer(dt) {
             } else if (this.player.upgradeShieldHits > 0) {
                 // Draw blue circle for upgrade shield
                 this.ctx.beginPath();
-                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2, 
-                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.arc(x + PLAYER_WIDTH / 2, y + PLAYER_HEIGHT / 2, 
+                             Math.max(PLAYER_WIDTH, PLAYER_HEIGHT) / 2 + 5, 0, Math.PI * 2);
                 this.ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)'; // Blue color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
@@ -1682,11 +1679,11 @@ updatePlayer(dt) {
             if (playerSprite && playerSprite.complete) {
                 this.ctx.drawImage(playerSprite, 
                                    Math.round(x), Math.round(y), 
-                                   this.player.width, this.player.height);
+                                   PLAYER_WIDTH, PLAYER_HEIGHT);
             } else {
                 this.ctx.fillStyle = '#00FF00';  // Bright green color
                 this.ctx.fillRect(Math.round(x), Math.round(y), 
-                                  this.player.width, this.player.height);
+                                  PLAYER_WIDTH, PLAYER_HEIGHT);
             }
     
             // Draw upgrade shield hit counter
@@ -1695,7 +1692,7 @@ updatePlayer(dt) {
                 this.ctx.font = '12px Arial';
                 this.ctx.textAlign = 'center';
                 this.ctx.fillText(this.player.upgradeShieldHits.toString(), 
-                                  x + this.player.width / 2, 
+                                  x + PLAYER_WIDTH / 2, 
                                   y - 5);
             }
         };
@@ -1704,7 +1701,7 @@ updatePlayer(dt) {
         drawPlayerAt(this.player.x, this.player.y);
     
         // Draw wrap-around player if necessary
-        if (this.player.x + this.player.width > GAME_WIDTH) {
+        if (this.player.x + PLAYER_WIDTH > GAME_WIDTH) {
             drawPlayerAt(this.player.x - GAME_WIDTH, this.player.y);
         } else if (this.player.x < 0) {
             drawPlayerAt(this.player.x + GAME_WIDTH, this.player.y);
