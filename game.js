@@ -2105,20 +2105,24 @@ async function handleBribeLeader() {
   async function processBribe(amount, useJump) {
     try {
       showOverlay("Processing bribe...");
+      
+      // Call the bribeLeader function from web3Integration.js
       const bribed = await bribeLeader(amount, useJump);
       
       hideOverlay();
       
       if (bribed) {
+        // Only show success message if the transaction was successful
         showOverlay('Bribe successful! The leader has been removed from the top.', async () => {
           await updateHighscoreTable();
           hideOverlay();
         }, true, 'OK');
       } else {
-        showOverlay('Failed to bribe. Insufficient funds or bribe amount too low.', null, true, 'OK');
+        showOverlay('Failed to bribe. The transaction was not successful.', null, true, 'OK');
       }
     } catch (error) {
       console.error('Failed to process bribe:', error);
+      hideOverlay();
       showOverlay('Error processing bribe. Please try again.', null, true, 'OK');
     }
   }
