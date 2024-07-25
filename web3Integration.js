@@ -931,6 +931,13 @@ async function bribeLeader(amount, useJump) {
     if (useJump) {
       // Send JUMP tokens (unchanged logic)
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
+      const jumpBalance = await jumpTokenContract.methods.balanceOf(account).call();
+      
+      if (web3.utils.toBN(jumpBalance).lt(web3.utils.toBN(jumpAmount))) {
+        console.error('Insufficient JUMP balance');
+        return false;
+      }
+
       await approveJumpSpending(jumpAmount);
       await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
     } else {
@@ -949,6 +956,17 @@ async function bribeLeader(amount, useJump) {
 
       // Get current gas price
       const gasPrice = await web3.eth.getGasPrice();
+
+      // Calculate total cost (bribe amount + gas cost)
+      const gasCost = web3.utils.toBN(gasLimit).mul(web3.utils.toBN(gasPrice));
+      const totalCost = web3.utils.toBN(xtzAmount).add(gasCost);
+
+      // Check if the account has sufficient balance
+      const balance = await web3.eth.getBalance(account);
+      if (web3.utils.toBN(balance).lt(totalCost)) {
+        console.error('Insufficient XTZ balance');
+        return false;
+      }
 
       // Send transaction with estimated gas and current gas price
       await web3.eth.sendTransaction({
