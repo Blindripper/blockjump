@@ -1234,20 +1234,20 @@ async function purchaseGameTries(useJump) {
 
 async function getHighscores() {
   if (!isInitialized) {
-      console.error('Contract not initialized');
-      return [];
+    console.error('Contract not initialized');
+    return [];
   }
   try {
-      const highscores = await contract.methods.getHighscores().call();
-      return highscores.map(score => ({
-          player: score.player,
-          name: score.name,
-          score: parseInt(score.score),
-          blocksClimbed: parseInt(score.blocksClimbed)
-      }));
+    const highscores = await contract.methods.getHighscores().call();
+    return highscores.map(score => ({
+      player: score.player,
+      name: score.name,
+      score: parseInt(score.score),
+      blocksClimbed: parseInt(score.blocksClimbed)
+    }));
   } catch (error) {
-      console.error('Error getting highscores:', error);
-      return [];
+    console.error('Error getting highscores:', error);
+    return [];
   }
 }
 
