@@ -2113,7 +2113,7 @@ async function handleBribeLeader() {
       hideOverlay();
       
       if (bribed) {
-        showOverlay('Bribe successful! Funds have been sent to the current leader.', async () => {
+        showOverlay('Bribe successful! Current Leader removed from 1st place!.', async () => {
           await updateHighscoreTable();
           hideOverlay();
         }, true, 'OK');
