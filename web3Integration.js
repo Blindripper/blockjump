@@ -1239,12 +1239,18 @@ async function getHighscores() {
   }
   try {
     const highscores = await contract.methods.getHighscores().call();
-    return highscores.map(score => ({
-      player: score.player,
-      name: score.name,
-      score: parseInt(score.score),
-      blocksClimbed: parseInt(score.blocksClimbed)
-    }));
+    console.log('Raw highscores data:', highscores);
+
+    // The contract likely returns an array of structs, which Web3 converts to an array of objects
+    // We need to filter out any empty entries and map the data to our expected format
+    return highscores
+      .filter(score => score.player !== '0x0000000000000000000000000000000000000000')
+      .map(score => ({
+        player: score.player,
+        name: score.name,
+        score: parseInt(score.score),
+        blocksClimbed: parseInt(score.blocksClimbed)
+      }));
   } catch (error) {
     console.error('Error getting highscores:', error);
     return [];
