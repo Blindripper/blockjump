@@ -163,7 +163,7 @@ header {
   max-width: 300px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 15px;
+  padding: 20px;
   padding-top: 25px;
   display: flex;
   flex-direction: column;
@@ -214,10 +214,10 @@ header {
 }
 
 .button-container {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 15px;
 }
 
 .button-price-container {
@@ -227,17 +227,25 @@ header {
 }
 
 .upgrade-button {
-  padding: 8px 15px;
-  background-color: #FFD700;
-  color: #1a2333;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  flex-grow: 1;
-  max-width: 150px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
 }
+
+.buy-max-button {
+  background-color: #4CAF50;  /* Different color for max buttons */
+}
+
+.buy-max-button:hover {
+  background-color: #45a049;
+}
+
+.upgrade-price {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
 
 .upgrade-button:nth-child(2) {
   background-color: #3FE1B0;
