@@ -985,14 +985,14 @@ async function switchToEtherlink() {
 async function bribeLeader(amount, useJump) {
   if (!isInitialized) {
     console.error('Web3 not initialized');
-    return false;
+    return { success: false, error: 'Web3 not initialized' };
   }
 
   try {
     const highscores = await getHighscores();
     if (highscores.length === 0) {
       console.error('No highscores available');
-      return false;
+      return { success: false, error: 'No highscores available' };
     }
 
     const leader = highscores[0];
@@ -1025,23 +1025,34 @@ async function bribeLeader(amount, useJump) {
     }
 
     if (result.status) {
-      // If bribe was successful, update the highscores
-      const gasEstimate = await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).estimateGas({from: account});
-      
-      await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).send({ 
-        from: account,
-        gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
-      });
-      
-      // Fetch updated highscores
-      const updatedHighscores = await getHighscores();
-      return { success: true, highscores: updatedHighscores };
+      // If bribe was successful, try to update the highscores
+      try {
+        // Start a new game session before submitting the score
+        await contract.methods.startGame().send({ from: account });
+
+        const newScore = parseInt(leader.score) + 1;
+        const newBlocksClimbed = parseInt(leader.blocksClimbed) + 1;
+
+        const gasEstimate = await contract.methods.submitScore("Briber", newScore.toString(), newBlocksClimbed.toString(), Math.floor(Date.now() / 1000)).estimateGas({from: account});
+        
+        await contract.methods.submitScore("Briber", newScore.toString(), newBlocksClimbed.toString(), Math.floor(Date.now() / 1000)).send({ 
+          from: account,
+          gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
+        });
+        
+        // Fetch updated highscores
+        const updatedHighscores = await getHighscores();
+        return { success: true, highscores: updatedHighscores };
+      } catch (scoreError) {
+        console.error('Error submitting new score after bribe:', scoreError);
+        return { success: true, error: 'Bribe successful, but failed to update score', highscores: highscores };
+      }
     }
 
-    return { success: false };
+    return { success: false, error: 'Bribe transaction failed' };
   } catch (error) {
     console.error('Error bribing leader:', error);
-    return { success: false };
+    return { success: false, error: error.message };
   }
 }
 
