@@ -1457,7 +1457,6 @@ updatePlayer(dt) {
         if (this.gameRunning) {
             // Increment score continuously once the game is running
             this.score++;
-            console.log('Score updated:', this.score);
     
             // Check if it's time to drop a nomadic powerup
             if (this.score - this.lastPowerupScore >= 5000) {
@@ -2106,10 +2105,8 @@ async function handleBribeLeader() {
   async function processBribe(amount, useJump) {
     try {
       showOverlay("Processing bribe...");
-      console.log(`Attempting to bribe leader with ${amount} ${useJump ? 'JUMP' : 'XTZ'}`);
       
       const bribed = await bribeLeader(amount, useJump);
-      console.log(`Bribe result: ${bribed}`);
       
       hideOverlay();
       
@@ -2650,7 +2647,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             preloadSounds()
         ]);
 
-        console.log('All assets loaded successfully');
 
         // Hide loading message
         hideOverlay();
@@ -2961,11 +2957,9 @@ async function updateHighscoreTable(providedHighscores = null) {
   
     try {
       let highscores = providedHighscores || await getHighscores();
-      console.log('Highscores received:', highscores);
   
       // Check if highscores is the Web3 contract instance
       if (highscores && highscores._requestManager) {
-        console.log('Received Web3 contract instance instead of highscores. Fetching highscores again.');
         highscores = await getHighscores();
       }
   
@@ -2983,7 +2977,6 @@ async function updateHighscoreTable(providedHighscores = null) {
   
       highscoreBody.innerHTML = '';
       if (highscores.length === 0) {
-        console.log('No highscores to display');
         const row = document.createElement('tr');
         row.innerHTML = '<td colspan="5">No highscores available</td>';
         highscoreBody.appendChild(row);
