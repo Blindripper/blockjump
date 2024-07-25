@@ -1004,14 +1004,10 @@ async function bribeLeader(amount, useJump) {
     if (useJump) {
       // For JUMP token bribes
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
-      
-      // Direct transfer of JUMP tokens to the leader
       result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
     } else {
       // For XTZ bribes
       const xtzAmount = web3.utils.toWei(amount.toString(), 'ether');
-      
-      // Direct transfer of XTZ to the leader
       result = await web3.eth.sendTransaction({
         from: account,
         to: leaderAddress,
@@ -1020,10 +1016,19 @@ async function bribeLeader(amount, useJump) {
       });
     }
 
-    return result.status; // Returns true if the transaction was successful
+    if (result.status) {
+      // If bribe was successful, update the highscores
+      await contract.methods.submitScore("Briber", leader.score + 1, leader.blocksClimbed + 1, Math.floor(Date.now() / 1000)).send({ from: account });
+      
+      // Fetch updated highscores
+      const updatedHighscores = await getHighscores();
+      return { success: true, highscores: updatedHighscores };
+    }
+
+    return { success: false };
   } catch (error) {
     console.error('Error bribing leader:', error);
-    return false;
+    return { success: false };
   }
 }
 
