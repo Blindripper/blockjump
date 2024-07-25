@@ -901,6 +901,56 @@ async function switchToEtherlink() {
   }
 }
 
+async function bribeLeader(amount, useJump) {
+  if (!isInitialized) {
+    console.error('Web3 not initialized');
+    return false;
+  }
+
+  try {
+    const highscores = await getHighscores();
+    if (highscores.length === 0) {
+      console.error('No highscores available');
+      return false;
+    }
+
+    const leader = highscores[0];
+    const leaderAddress = leader.player;
+    const leaderScore = leader.score;
+
+    // Modify the amount to be 10000 times lower than the leader's score (for XTZ only)
+    const bribeAmount = useJump ? amount : leaderScore / 10000;
+
+    if (amount < bribeAmount) {
+      console.error('Bribe amount must be at least the required amount');
+      return false;
+    }
+
+    const account = await getCurrentAccount();
+
+    if (useJump) {
+      // Send JUMP tokens (unchanged logic)
+      const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
+      await approveJumpSpending(jumpAmount);
+      await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ from: account });
+    } else {
+      // Send XTZ with the modified amount
+      const xtzAmount = web3.utils.toWei(bribeAmount.toString(), 'ether');
+      await web3.eth.sendTransaction({
+        from: account,
+        to: leaderAddress,
+        value: xtzAmount
+      });
+    }
+
+    // If the transaction is successful, we consider the bribe successful
+    return true;
+  } catch (error) {
+    console.error('Error bribing leader:', error);
+    return false;
+  }
+}
+
 async function initWeb3() {
   if (typeof window.ethereum !== 'undefined') {
     web3 = new Web3(window.ethereum);
@@ -1040,6 +1090,8 @@ async function mintAchievement(account, achievementId) {
     return false;
   }
 }
+
+
 
 async function startGame() {
   if (!isInitialized) {
@@ -1249,4 +1301,5 @@ export {
   approveJumpSpending,
   addFunds,
   getContractBalance,
+  bribeLeader,
 };
