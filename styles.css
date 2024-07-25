@@ -856,8 +856,8 @@ header {
 /* Info and Sound Buttons */
 .info-button, .sound-toggle {
   position: fixed;
-  width: 75px;
-  height: 75px;
+  width: 25px;
+  height: 25px;
   background-color: var(--primary-color);
   color: var(--background-color);
   border: none;
