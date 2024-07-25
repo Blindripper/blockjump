@@ -2658,44 +2658,44 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function handleWalletConnection() {
     try {
-        if (!isConnected) {
-            const web3Instance = await initWeb3();
-            if (web3Instance) {
-                const connected = await connectWallet(web3Instance);
-                if (connected) {
-                    isConnected = true;
-                    updateButtonState();
-                    await updateTryCount(web3Instance);
-                    await loadUserAchievements(web3Instance);
-                    await updateAvailableScoreDisplay(); // Add this line
-                    showBuyTriesButton();
-                    document.getElementById('addFundsBtn').style.display = 'block'; // Add this line
-                    await loadHighscores(web3Instance);
-                    await updateHighscoreTable(web3Instance);
-                    showAchievements();
-                    await updateContractBalance();
-                    hideOverlay();
-                    await checkAndDisplayStartButton(web3Instance);
-                } else {
-                    showOverlay('Failed to connect. Please ensure you are on the Etherlink Mainnet.');
-                }
-            } else {
-                showOverlay('Web3 initialization failed. Please check your connection and ensure you have a compatible wallet.');
-            }
-        } else {
-            // Disconnect wallet logic
-            isConnected = false;
+      if (!isConnected) {
+        const web3Instance = await initWeb3();
+        if (web3Instance) {
+          const connected = await connectWallet(web3Instance);
+          if (connected) {
+            isConnected = true;
             updateButtonState();
-            hideBuyTriesButton();
-            document.getElementById('addFundsBtn').style.display = 'none'; // Add this line
-            hideAchievements();
-            showOverlay('Wallet disconnected. Please connect to play.');
+            await updateTryCount(web3Instance);
+            await loadUserAchievements(web3Instance);
+            await updateAvailableScoreDisplay();
+            showBuyTriesButton();
+            document.getElementById('addFundsBtn').style.display = 'block';
+            const highscores = await getHighscores();
+            await updateHighscoreTable(highscores);
+            showAchievements();
+            await updateContractBalance();
+            hideOverlay();
+            await checkAndDisplayStartButton(web3Instance);
+          } else {
+            showOverlay('Failed to connect. Please ensure you are on the Etherlink Mainnet.');
+          }
+        } else {
+          showOverlay('Web3 initialization failed. Please check your connection and ensure you have a compatible wallet.');
         }
+      } else {
+        // Disconnect wallet logic
+        isConnected = false;
+        updateButtonState();
+        hideBuyTriesButton();
+        document.getElementById('addFundsBtn').style.display = 'none';
+        hideAchievements();
+        showOverlay('Wallet disconnected. Please connect to play.');
+      }
     } catch (error) {
-        console.error('Error in handleWalletConnection:', error);
-        showOverlay('An error occurred. Please try again.');
+      console.error('Error in handleWalletConnection:', error);
+      showOverlay('An error occurred. Please try again.');
     }
-}
+  }
 
 async function handleClaimPrize() {
     if (!checkWalletConnection()) return;
@@ -2940,16 +2940,16 @@ async function updateHighscoreTable(providedHighscores = null) {
       let highscores = providedHighscores || await getHighscores();
       console.log('Highscores received:', highscores);
   
+      // Check if highscores is the Web3 contract instance
+      if (highscores && highscores._requestManager) {
+        console.log('Received Web3 contract instance instead of highscores. Fetching highscores again.');
+        highscores = await getHighscores();
+      }
+  
       // Ensure highscores is an array
       if (!Array.isArray(highscores)) {
         console.error('Highscores is not an array:', highscores);
-        // If it's an object, try to convert it to an array
-        if (typeof highscores === 'object' && highscores !== null) {
-          highscores = Object.values(highscores);
-        } else {
-          // If conversion is not possible, use an empty array
-          highscores = [];
-        }
+        highscores = [];
       }
   
       const highscoreBody = document.getElementById('highscoreBody');
