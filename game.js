@@ -1458,7 +1458,7 @@ updatePlayer(dt) {
         if (this.gameRunning) {
             // Increment score continuously once the game is running
             this.score++;
-            this.playerUpgrades.addScore(1); // Update PlayerUpgrades score
+            // Remove this line: this.playerUpgrades.addScore(1);
             console.log('Score updated:', this.score);
     
             // Check if it's time to drop a nomadic powerup
@@ -1476,8 +1476,7 @@ updatePlayer(dt) {
             scoreElement.textContent = this.score;
         }
     
-        // Update available score display
-        updateAvailableScoreDisplay();
+        
     }
 
     draw() {
@@ -2127,11 +2126,10 @@ async function handleBribeLeader() {
   }
 
 async function showUpgradeShop() {
-    await updateAvailableScoreDisplay();
+    await game.playerUpgrades.updateJumpBalance();
+    updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
     const upgradeOptions = document.getElementById('upgradeOptions');
-
-    updateAvailableScoreDisplay();
 
     upgradeOptions.innerHTML = '';
 
@@ -2840,8 +2838,8 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     window.gameStartTime = gameStartTime;
 
     game.updateAchievements();
-    game.playerUpgrades.addScore(score);
-    updateAvailableScoreDisplay();
+    game.playerUpgrades.addScore(score);  // Add the score to PlayerUpgrades here
+    updateAvailableScoreDisplay();  // Update the display after adding the score
 
     showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
 }
