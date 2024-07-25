@@ -984,20 +984,17 @@ async function switchToEtherlink() {
 
 async function bribeLeader(amount, useJump) {
   if (!isInitialized) {
-    console.error('Web3 not initialized');
     return { success: false, error: 'Web3 not initialized' };
   }
 
   try {
     const highscores = await getHighscores();
     if (!Array.isArray(highscores) || highscores.length === 0) {
-      console.error('Invalid or empty highscores:', highscores);
       return { success: false, error: 'Invalid or empty highscores' };
     }
 
     const leader = highscores[0];
     if (!leader || typeof leader !== 'object') {
-      console.error('Invalid leader data:', leader);
       return { success: false, error: 'Invalid leader data' };
     }
 
@@ -1007,44 +1004,28 @@ async function bribeLeader(amount, useJump) {
     let result;
 
     if (useJump) {
-      // For JUMP token bribes
       const jumpAmount = web3.utils.toWei(amount.toString(), 'ether');
-      
-      // Estimate gas for JUMP transfer
       const gasEstimate = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).estimateGas({from: account});
-      
       result = await jumpTokenContract.methods.transfer(leaderAddress, jumpAmount).send({ 
         from: account,
-        gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
+        gas: Math.floor(gasEstimate * 1.2)
       });
     } else {
-      // For XTZ bribes
       const xtzAmount = web3.utils.toWei(amount.toString(), 'ether');
-      
       result = await web3.eth.sendTransaction({
         from: account,
         to: leaderAddress,
         value: xtzAmount,
-        gas: 500000  // Set a manual gas limit
+        gas: 500000
       });
     }
 
     if (result.status) {
-      // If bribe was successful, try to update the highscores
       try {
-        // Start a new game session before submitting the score
         await contract.methods.startGame().send({ from: account });
 
-        // Safely access leader properties with fallback values
         const newScore = (parseInt(leader.score) || 0) + 1;
         const newBlocksClimbed = (parseInt(leader.blocksClimbed) || 0) + 1;
-
-        console.log('Submitting new score:', {
-          name: "Briber",
-          score: newScore.toString(),
-          blocksClimbed: newBlocksClimbed.toString(),
-          timestamp: Math.floor(Date.now() / 1000)
-        });
 
         const gasEstimate = await contract.methods.submitScore(
           "Briber",
@@ -1060,25 +1041,21 @@ async function bribeLeader(amount, useJump) {
           Math.floor(Date.now() / 1000)
         ).send({ 
           from: account,
-          gas: Math.floor(gasEstimate * 1.2) // Increase gas limit by 20%
+          gas: Math.floor(gasEstimate * 1.2)
         });
         
-        // Fetch updated highscores
         const updatedHighscores = await getHighscores();
         if (!Array.isArray(updatedHighscores) || updatedHighscores.length === 0) {
-          console.error('Invalid or empty updated highscores:', updatedHighscores);
           return { success: true, error: 'Bribe successful, but failed to fetch updated highscores', highscores: highscores };
         }
         return { success: true, highscores: updatedHighscores };
       } catch (scoreError) {
-        console.error('Error submitting new score after bribe:', scoreError);
         return { success: true, error: 'Bribe successful, but failed to update score', highscores: highscores };
       }
     }
 
     return { success: false, error: 'Bribe transaction failed' };
   } catch (error) {
-    console.error('Error bribing leader:', error);
     return { success: false, error: error.message };
   }
 }
@@ -1290,7 +1267,6 @@ async function getHighscores() {
   }
   try {
     const highscores = await contract.methods.getHighscores().call();
-    console.log('Raw highscores data:', highscores);
 
     // The contract likely returns an array of structs, which Web3 converts to an array of objects
     // We need to filter out any empty entries and map the data to our expected format
