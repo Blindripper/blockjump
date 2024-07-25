@@ -2939,6 +2939,18 @@ async function updateHighscoreTable(providedHighscores = null) {
     try {
       let highscores = providedHighscores || await getHighscores();
   
+      // Ensure highscores is an array
+      if (!Array.isArray(highscores)) {
+        console.error('Highscores is not an array:', highscores);
+        // If it's an object, try to convert it to an array
+        if (typeof highscores === 'object' && highscores !== null) {
+          highscores = Object.values(highscores);
+        } else {
+          // If conversion is not possible, use an empty array
+          highscores = [];
+        }
+      }
+  
       const highscoreBody = document.getElementById('highscoreBody');
       if (!highscoreBody) {
         console.error('Highscore table body not found');
