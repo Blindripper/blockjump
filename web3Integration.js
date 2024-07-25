@@ -940,7 +940,9 @@ async function bribeLeader(amount, useJump) {
       const result = await web3.eth.sendTransaction({
         from: account,
         to: leaderAddress,
-        value: xtzAmount
+        value: xtzAmount,
+        gas: 500000  // Set a manual gas limit, adjust this value as needed
+
       });
       return result.status; // Returns true if the transaction was successful
     }
