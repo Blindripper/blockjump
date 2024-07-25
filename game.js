@@ -2116,6 +2116,7 @@ async function handleBribeLeader() {
       if (bribed) {
         showOverlay('Bribe successful! 1st place will be removed for the current session!.', async () => {
           await handleSuccessfulBribe();
+          updateClaimPrizeButton(true); 
         }, true, 'OK');
       } else {
         showOverlay('Failed to bribe. The transaction was not successful. Please check your wallet for any error messages.', null, true, 'OK');
