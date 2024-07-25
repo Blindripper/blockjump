@@ -2137,19 +2137,32 @@ async function handleBribeLeader() {
       
       if (result.success) {
         if (result.error) {
-          showOverlay(`Bribe transaction successful, but there was an issue updating the score: ${result.error}. The leaderboard may not reflect your bribe immediately.`, async () => {
-            await updateHighscoreTable(result.highscores);
+          showOverlay(`Bribe transaction successful, but there was an issue: ${result.error}. The leaderboard may not reflect your bribe immediately.`, async () => {
+            if (Array.isArray(result.highscores)) {
+              await updateHighscoreTable(result.highscores);
+            } else {
+              await updateHighscoreTable(); // Fetch fresh highscores
+            }
             checkAndDisplayStartButton();
           }, true, 'OK');
         } else {
           showOverlay('Bribe successful! Your new score has been submitted. You should now be at the top of the leaderboard!', async () => {
-            await updateHighscoreTable(result.highscores);
+            if (Array.isArray(result.highscores)) {
+              await updateHighscoreTable(result.highscores);
+            } else {
+              await updateHighscoreTable(); // Fetch fresh highscores
+            }
             checkAndDisplayStartButton();
           }, true, 'OK');
         }
         
         // Update the claim prize button visibility
-        updateClaimPrizeButton(result.highscores);
+        if (Array.isArray(result.highscores)) {
+          updateClaimPrizeButton(result.highscores);
+        } else {
+          const freshHighscores = await getHighscores();
+          updateClaimPrizeButton(freshHighscores);
+        }
       } else {
         showOverlay(`Failed to complete the bribe process. Error: ${result.error}`, null, true, 'OK');
       }
@@ -3086,28 +3099,39 @@ function hideAchievements() {
 }
 
 
-function updateClaimPrizeButton(highscores, currentAccount, isBriber = false) {
+async function updateClaimPrizeButton(highscores) {
     const claimPrizeBtn = document.getElementById('claimPrizeBtn');
-    if (claimPrizeBtn) {
-        if (isBriber) {
-            claimPrizeBtn.style.display = 'block';
-            claimPrizeBtn.dataset.isBriber = 'true';
-        } else if (highscores && highscores.length > 0) {
-            const leadingAccount = highscores[0].player;
-            
-            if (leadingAccount && currentAccount && leadingAccount.toLowerCase() === currentAccount.toLowerCase()) {
-                claimPrizeBtn.style.display = 'block';
-                claimPrizeBtn.dataset.isBriber = 'false';
-            } else {
-                claimPrizeBtn.style.display = 'none';
-            }
-        } else {
-            claimPrizeBtn.style.display = 'none';
-        }
-    } else {
-        console.error('Claim prize button not found in the DOM');
+    if (!claimPrizeBtn) {
+      console.error('Claim prize button not found in the DOM');
+      return;
     }
-}
+  
+    try {
+      const currentAccount = await getCurrentAccount();
+      if (!currentAccount) {
+        console.error('No current account available');
+        claimPrizeBtn.style.display = 'none';
+        return;
+      }
+  
+      if (!Array.isArray(highscores) || highscores.length === 0) {
+        console.error('Invalid or empty highscores:', highscores);
+        claimPrizeBtn.style.display = 'none';
+        return;
+      }
+  
+      const leadingAccount = highscores[0].player;
+      
+      if (leadingAccount && leadingAccount.toLowerCase() === currentAccount.toLowerCase()) {
+        claimPrizeBtn.style.display = 'block';
+      } else {
+        claimPrizeBtn.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Error updating claim prize button:', error);
+      claimPrizeBtn.style.display = 'none';
+    }
+  }
 
 
 function drawCanvasButton(text, onClick) {
