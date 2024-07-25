@@ -990,9 +990,9 @@ async function bribeLeader(amount, useJump) {
 
   try {
     const highscores = await getHighscores();
-    if (highscores.length === 0) {
-      console.error('No highscores available');
-      return { success: false, error: 'No highscores available' };
+    if (!Array.isArray(highscores) || highscores.length === 0) {
+      console.error('Invalid or empty highscores:', highscores);
+      return { success: false, error: 'Invalid or empty highscores' };
     }
 
     const leader = highscores[0];
@@ -1065,6 +1065,10 @@ async function bribeLeader(amount, useJump) {
         
         // Fetch updated highscores
         const updatedHighscores = await getHighscores();
+        if (!Array.isArray(updatedHighscores) || updatedHighscores.length === 0) {
+          console.error('Invalid or empty updated highscores:', updatedHighscores);
+          return { success: true, error: 'Bribe successful, but failed to fetch updated highscores', highscores: highscores };
+        }
         return { success: true, highscores: updatedHighscores };
       } catch (scoreError) {
         console.error('Error submitting new score after bribe:', scoreError);
