@@ -2521,13 +2521,8 @@ async function updateAvailableScoreDisplay() {
   
     console.log('Updating available score display:', { score, jumpBalance });
   
-    console.log('jumpBalance type:', typeof jumpBalance); // Added to check data type
-  
     const formattedScore = formatPrice(score);
-    const jumpBalanceNumber = Number(jumpBalance); // Convert to number
-    console.log('jumpBalanceNumber:', jumpBalanceNumber); // Added to check conversion
-  
-    const formattedJumpBalance = formatPrice(jumpBalanceNumber.toFixed(2)); // Limit decimal places
+    const formattedJumpBalance = formatPrice(jumpBalance);
   
     if (availableScoreHeader) {
       availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
@@ -2540,7 +2535,17 @@ async function updateAvailableScoreDisplay() {
   function formatPrice(price) {
     if (typeof price !== 'number' || isNaN(price)) {
       return 'N/A';
-    }}
+    }
+  
+    // Formatting logic here, returning a string
+    if (price >= 1000000) {
+      return (price / 1000000).toFixed(1) + 'M';
+    } else if (price >= 1000) {
+      return (price / 1000).toFixed(1) + 'k';
+    } else {
+      return price.toString();
+    }
+  }
 
 
 
