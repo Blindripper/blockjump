@@ -3035,55 +3035,80 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const checkpointReward = checkpointManager.getAccumulatedReward();
     const totalScore = score + checkpointReward;
 
-
-    window.finalScore = totalScore; // Ensure this is set correctly
+    window.finalScore = totalScore;
 
     const gameOverInfo = `
-        <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over!</h2>
-        <p>Score: ${score}</p>
-        <p>Blocks Climbed: ${blocksClimbed}</p>
-        <p>Checkpoint Reward: ${checkpointReward}</p>
-        <p>Total Score: ${totalScore}</p>
+        <div id="gameOverContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div id="nameFormContainer" style="margin-bottom: 20px;"></div>
+            <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over!</h2>
+            <p>Score: ${score}</p>
+            <p>Blocks Climbed: ${blocksClimbed}</p>
+            <p>Checkpoint Reward: ${checkpointReward}</p>
+            <p>Total Score: ${totalScore}</p>
+        </div>
     `;
 
-    showOverlay(gameOverInfo, null, false, '', true);
+    showOverlay(gameOverInfo, null, false, '', false);
 
-    // Update the submit score button text and add Claim Score button
+    const nameForm = document.createElement('form');
+    nameForm.id = 'nameForm';
+    nameForm.style.display = 'flex';
+    nameForm.style.flexDirection = 'column';
+    nameForm.style.alignItems = 'center';
+    nameForm.style.gap = '10px';
+    nameForm.style.marginBottom = '20px';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.id = 'nameInput';
+    nameInput.placeholder = 'Enter your name';
+    nameInput.required = true;
+    nameInput.maxLength = 10;
+    nameInput.style.marginBottom = '10px';
+    nameInput.style.padding = '5px';
+    nameInput.style.fontSize = '16px';
+
     const buttonsContainer = document.createElement('div');
     buttonsContainer.style.display = 'flex';
     buttonsContainer.style.justifyContent = 'space-between';
-    buttonsContainer.style.marginTop = '20px';
+    buttonsContainer.style.width = '100%';
 
     const submitButton = document.createElement('button');
     submitButton.textContent = 'Submit and Claim';
     submitButton.className = 'game-button';
-    submitButton.onclick = () => handleScoreSubmission(document.getElementById('nameInput').value);
-
-    const claimScoreBtn = document.createElement('button');
-    claimScoreBtn.textContent = 'Claim Score';
-    claimScoreBtn.className = 'game-button';
-    claimScoreBtn.onclick = () => {
-        if (isNaN(totalScore) || typeof totalScore !== 'number') {
-            console.error('Invalid total score:', totalScore);
-            totalScore = 0; // Set to 0 if invalid
-        }
-        claimScore(totalScore);
+    submitButton.onclick = (e) => {
+        e.preventDefault();
+        handleScoreSubmission(nameInput.value);
     };
 
-    const tryAgainBtn = document.createElement('button');
-    tryAgainBtn.textContent = 'Try Again';
-    tryAgainBtn.className = 'game-button';
-    tryAgainBtn.onclick = () => {
+    const claimScoreAndTryAgainBtn = document.createElement('button');
+    claimScoreAndTryAgainBtn.textContent = 'Claim Score and Try Again';
+    claimScoreAndTryAgainBtn.className = 'game-button';
+    claimScoreAndTryAgainBtn.onclick = async () => {
+        await claimScore(totalScore);
         hideOverlay();
         game.initializeGame();
     };
 
-    buttonsContainer.appendChild(submitButton);
-    buttonsContainer.appendChild(claimScoreBtn);
-    buttonsContainer.appendChild(tryAgainBtn);
+    const shopBtn = document.createElement('button');
+    shopBtn.textContent = 'Shop';
+    shopBtn.className = 'game-button';
+    shopBtn.onclick = () => {
+        hideOverlay();
+        showUpgradeShop();
+    };
 
-    const nameForm = document.getElementById('nameForm');
+    buttonsContainer.appendChild(submitButton);
+    buttonsContainer.appendChild(claimScoreAndTryAgainBtn);
+    buttonsContainer.appendChild(shopBtn);
+
+    nameForm.appendChild(nameInput);
     nameForm.appendChild(buttonsContainer);
+
+    const nameFormContainer = document.getElementById('nameFormContainer');
+    if (nameFormContainer) {
+        nameFormContainer.appendChild(nameForm);
+    }
 }
   
 async function handleScoreSubmission(name) {
