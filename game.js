@@ -2056,20 +2056,25 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     contentContainer.style.display = 'flex';
     contentContainer.style.flexDirection = 'column';
     contentContainer.style.alignItems = 'center';
-    contentContainer.style.maxWidth = '80%';
+    contentContainer.style.maxWidth = '90%';
 
-    const messageElement = document.createElement('div');
-    Object.assign(messageElement.style, {
-        color: '#3FE1B0',
-        fontSize: '24px',
-        fontFamily: 'Orbitron, sans-serif',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: '20px'
-    });
+    // Create "Game Over!" text
+    const gameOverText = document.createElement('h2');
+    gameOverText.textContent = 'Game Over!';
+    gameOverText.style.color = '#3FE1B0';
+    gameOverText.style.fontSize = '36px';
+    gameOverText.style.marginBottom = '10px';
+    contentContainer.appendChild(gameOverText);
 
-    messageElement.innerHTML = message.replace(/\n/g, '<br>'); // Replace newlines with <br> tags
-    contentContainer.appendChild(messageElement);
+    // Format the stats message
+    const statsMessage = message.replace('Game Over!\n', '').replace(/\n/g, ' ');
+    const statsElement = document.createElement('p');
+    statsElement.textContent = statsMessage;
+    statsElement.style.color = '#FFFFFF';
+    statsElement.style.fontSize = '18px';
+    statsElement.style.marginBottom = '20px';
+    statsElement.style.textAlign = 'center';
+    contentContainer.appendChild(statsElement);
 
     if (includeNameForm) {
         const nameForm = createNameForm();
@@ -2086,28 +2091,23 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 function createNameForm() {
     const nameForm = document.createElement('form');
     nameForm.id = 'nameForm';
-    Object.assign(nameForm.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px',
-        width: '100%'
-    });
+    nameForm.style.display = 'flex';
+    nameForm.style.flexDirection = 'column';
+    nameForm.style.alignItems = 'center';
+    nameForm.style.width = '100%';
+    nameForm.style.marginTop = '20px';
 
     const nameInput = document.createElement('input');
-    Object.assign(nameInput, {
-        type: 'text',
-        id: 'nameInput',
-        placeholder: 'Enter your name',
-        required: true,
-        maxLength: 10
-    });
-    Object.assign(nameInput.style, {
-        marginBottom: '10px',
-        padding: '5px',
-        fontSize: '16px',
-        width: '100%'
-    });
+    nameInput.type = 'text';
+    nameInput.id = 'nameInput';
+    nameInput.placeholder = 'Enter your name';
+    nameInput.required = true;
+    nameInput.maxLength = 10;
+    nameInput.style.width = '100%';
+    nameInput.style.padding = '10px';
+    nameInput.style.marginBottom = '15px';
+    nameInput.style.fontSize = '16px';
+    nameInput.style.textAlign = 'center';
 
     const buttonContainer = document.createElement('div');
     buttonContainer.style.display = 'flex';
@@ -2116,15 +2116,15 @@ function createNameForm() {
     buttonContainer.style.width = '100%';
 
     const submitButton = createButton('Submit and Claim', () => handleScoreSubmission(nameInput.value));
-    const claimScoreButton = createButton('Claim Score', () => claimScore(window.finalScore + checkpointManager.getAccumulatedReward()));
-    const tryAgainButton = createButton('Try Again', () => {
+    const claimScoreButton = createButton('Claim Score and Try Again', () => claimScore(window.finalScore + checkpointManager.getAccumulatedReward()));
+    const shopButton = createButton('Shop', () => {
         hideOverlay();
-        game.initializeGame();
+        showUpgradeShop();
     });
 
     buttonContainer.appendChild(submitButton);
     buttonContainer.appendChild(claimScoreButton);
-    buttonContainer.appendChild(tryAgainButton);
+    buttonContainer.appendChild(shopButton);
 
     nameForm.appendChild(nameInput);
     nameForm.appendChild(buttonContainer);
@@ -2137,11 +2137,9 @@ function createButton(text, onClick) {
     button.textContent = text;
     button.className = 'game-button';
     button.onclick = onClick;
-    Object.assign(button.style, {
-        padding: '10px 20px',
-        fontSize: '16px',
-        marginTop: '10px'
-    });
+    button.style.padding = '10px 20px';
+    button.style.fontSize = '16px';
+    button.style.margin = '5px';
     return button;
 }
 
