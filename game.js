@@ -2296,15 +2296,13 @@ async function handleBribeLeader() {
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
     const upgradeOptions = document.getElementById('upgradeOptions');
-    const buttonContainer = document.getElementById('startGameButtonContainer');
 
-    if (!upgradeShop || !upgradeOptions || !buttonContainer) {
+    if (!upgradeShop || !upgradeOptions) {
         console.error('Required elements not found');
         return;
     }
 
     upgradeOptions.innerHTML = '';
-    buttonContainer.innerHTML = ''; // Clear existing buttons
 
     // Populate upgrade options
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
@@ -2320,16 +2318,22 @@ async function handleBribeLeader() {
         }
     });
 
-    // Create a single Start Game button
+    // Create a single Start Game button and append it to upgradeOptions
     const startGameBtn = document.createElement('button');
     startGameBtn.id = 'startGameBtn';
     startGameBtn.textContent = 'START GAME';
     startGameBtn.className = 'game-button';
+    startGameBtn.style.width = '100%';
+    startGameBtn.style.marginTop = '20px';
+    startGameBtn.style.padding = '15px';
+    startGameBtn.style.fontSize = '18px';
+    startGameBtn.style.backgroundColor = '#3FE1B0';
+    startGameBtn.style.color = '#1a2333';
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
         game.initializeGame();
     };
-    buttonContainer.appendChild(startGameBtn);
+    upgradeOptions.appendChild(startGameBtn);
 
     upgradeShop.style.display = 'block';
 
