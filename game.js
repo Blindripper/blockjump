@@ -2540,16 +2540,7 @@ async function updateAvailableScoreDisplay() {
   function formatPrice(price) {
     if (typeof price !== 'number' || isNaN(price)) {
       return 'N/A';
-    }
-    if (price >= 1000000) {
-      return (price / 1000000).toFixed(1) + 'M';
-    } else if (price >= 1000) {
-      return (price / 1000).toFixed(1) + 'k';
-    } else {
-      return price.toString();
-    }
-  }
-  
+    }}
 
 
 
