@@ -2280,40 +2280,34 @@ async function handleBribeLeader() {
         return;
     }
 
-    upgradeOptions.innerHTML = '';
-
-    // Create header with balances
-    const header = document.createElement('div');
-    header.className = 'shop-header';
-    header.innerHTML = `
-        <div class="balance-info">
-            <span><i class="fas fa-coins"></i> $Score: ${game.playerUpgrades.score}</span>
-            <span><img src="${picsUrl}jump-icon.png" alt="JUMP" class="jump-icon"> JUMP: ${game.playerUpgrades.jumpBalance}</span>
+    upgradeOptions.innerHTML = `
+        <div class="shop-header">
+            <h2>Upgrade Shop</h2>
+            <div class="balance-info">
+                <span>$Score: ${formatPrice(game.playerUpgrades.score)}</span>
+                <span>JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}</span>
+            </div>
+        </div>
+        <div id="upgradesContainer" class="upgrades-grid"></div>
+        <div class="start-game-container">
+            <button id="startGameBtn" class="start-game-button">START GAME</button>
         </div>
     `;
-    upgradeOptions.appendChild(header);
 
-    // Create a container for the upgrades
-    const upgradesContainer = document.createElement('div');
-    upgradesContainer.id = 'upgradesContainer';
-    upgradesContainer.className = 'upgrades-grid';
+    const upgradesContainer = document.getElementById('upgradesContainer');
 
-    // Populate upgrade options
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
-        const currentTier = game.playerUpgrades.upgrades[type];
-        const maxTier = type === 'bomb' ? UPGRADES.bomb.maxCount : tiers.length;
-        const option = createUpgradeCard(type, currentTier, tiers[currentTier], maxTier);
-        upgradesContainer.appendChild(option);
+        if (type === 'bomb') {
+            upgradesContainer.appendChild(createUpgradeCard(type, -1, tiers));
+        } else {
+            const currentTier = game.playerUpgrades.upgrades[type];
+            if (currentTier < tiers.length) {
+                upgradesContainer.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
+            }
+        }
     });
 
-    upgradeOptions.appendChild(upgradesContainer);
-
-    // Create Start Game button
-    const startGameBtn = document.createElement('button');
-    startGameBtn.id = 'startGameBtn';
-    startGameBtn.textContent = 'START GAME';
-    startGameBtn.className = 'start-game-button';
-    startGameBtn.onclick = () => {
+    document.getElementById('startGameBtn').onclick = () => {
         upgradeShop.style.display = 'none';
         showEtherlinkWaitMessage();
         game.initializeGame().then(() => {
@@ -2324,37 +2318,35 @@ async function handleBribeLeader() {
         });
     };
 
-    const startGameContainer = document.createElement('div');
-    startGameContainer.className = 'start-game-container';
-    startGameContainer.appendChild(startGameBtn);
-    upgradeOptions.appendChild(startGameContainer);
-
     upgradeShop.style.display = 'flex';
 }
 
-function createUpgradeCard(type, currentTier, upgradeInfo, maxTier) {
+function createUpgradeCard(type, tier, upgradeInfo) {
     const card = document.createElement('div');
     card.className = 'upgrade-card';
     
-    const progress = (currentTier / maxTier) * 100;
+    const maxTier = type === 'bomb' ? UPGRADES.bomb.maxCount : UPGRADES[type].length;
+    const currentTier = type === 'bomb' ? game.playerUpgrades.upgrades.bomb : tier + 1;
+    const progress = ((currentTier - 1) / maxTier) * 100;
     
     card.innerHTML = `
         <img src="${picsUrl}${type}.jpg" alt="${type} upgrade" class="upgrade-icon">
-        <h3>${getUpgradeTitle(type, currentTier)}</h3>
-        <p>${getUpgradeDescription(type, currentTier, upgradeInfo)}</p>
+        <h3>${getUpgradeTitle(type, tier)}</h3>
+        <p>${getUpgradeDescription(type, tier, upgradeInfo)}</p>
         <div class="tier-progress">
             <div class="progress-bar" style="width: ${progress}%"></div>
-            <span>Tier ${currentTier + 1}/${maxTier}</span>
+            <span>Tier ${currentTier}/${maxTier}</span>
         </div>
         <div class="button-container">
-            ${createBuyButton(type, currentTier, upgradeInfo, false).outerHTML}
-            ${createBuyButton(type, currentTier, upgradeInfo, true).outerHTML}
+            ${createBuyButton(type, tier, upgradeInfo, false).outerHTML}
+            ${createBuyButton(type, tier, upgradeInfo, true).outerHTML}
         </div>
-        <button class="max-button" onclick="purchaseMaxUpgrade('${type}', ${currentTier}, false)">Max</button>
+        <button class="max-button" onclick="purchaseMaxUpgrade('${type}', ${tier}, false)">Max</button>
     `;
     
     return card;
 }
+
 
 function createUpgradeOption(type, tier, upgradeInfo) {
     const option = document.createElement('div');
@@ -2405,7 +2397,17 @@ function calculateMaxPrice(type, useJump) {
     return totalPrice;
 }
 
+function createBuyButton(type, tier, upgradeInfo, useJump) {
+    const button = document.createElement('button');
+    button.className = 'upgrade-button';
+    button.textContent = useJump ? 'Buy with JUMP' : 'Buy with Score';
+    button.onclick = () => purchaseUpgrade(type, tier, useJump);
+    
+    const price = useJump ? upgradeInfo.jumpCost : upgradeInfo.cost;
+    button.disabled = !game.playerUpgrades.canAfford(type, tier, useJump);
 
+    return button;
+}
 
 function createBuyMaxButton(type, tier, useJump) {
     const buttonAndPrice = document.createElement('div');
