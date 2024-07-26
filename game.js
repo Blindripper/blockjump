@@ -2046,11 +2046,17 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
         zIndex: '2000',
         padding: '20px'
     });
+
+    const contentContainer = document.createElement('div');
+    contentContainer.style.display = 'flex';
+    contentContainer.style.flexDirection = 'column';
+    contentContainer.style.alignItems = 'center';
+    contentContainer.style.maxWidth = '80%';
 
     const messageElement = document.createElement('div');
     Object.assign(messageElement.style, {
@@ -2059,113 +2065,84 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontFamily: 'Orbitron, sans-serif',
         fontWeight: 'bold',
         textAlign: 'center',
-        maxWidth: '80%',
-        marginTop: 'auto', 
-        marginBottom: 'auto'
+        marginBottom: '20px'
     });
 
     messageElement.innerHTML = message.replace(/\n/g, '<br>'); // Replace newlines with <br> tags
-    overlay.appendChild(messageElement);
+    contentContainer.appendChild(messageElement);
 
     if (includeNameForm) {
-        const nameForm = document.createElement('form');
-        nameForm.id = 'nameForm';
-        Object.assign(nameForm.style, {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            padding: '20px',
-            borderRadius: '10px',
-            marginTop: 'auto'
-        });
-
-        const nameInput = document.createElement('input');
-        Object.assign(nameInput, {
-            type: 'text',
-            id: 'nameInput',
-            placeholder: 'Enter your name',
-            required: true,
-            maxLength: 10
-        });
-        Object.assign(nameInput.style, {
-            marginBottom: '10px',
-            padding: '5px',
-            fontSize: '16px'
-        });
-
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.gap = '10px';
-
-        const submitButton = document.createElement('button');
-        submitButton.type = 'submit';
-        submitButton.textContent = 'Submit and Claim'; // Changed from 'Submit Score'
-        submitButton.className = 'game-button';
-
-        const claimScoreButton = document.createElement('button');
-        claimScoreButton.type = 'button';
-        claimScoreButton.textContent = 'Claim Score';
-        claimScoreButton.className = 'game-button';
-        claimScoreButton.onclick = (e) => {
-            e.preventDefault();
-            if (typeof claimScore === 'function') {
-                claimScore(window.finalScore + checkpointManager.getAccumulatedReward());
-            } else {
-                console.error('claimScore is not a function');
-            }
-        };
-
-        const tryAgainButton = document.createElement('button');
-        tryAgainButton.type = 'button';
-        tryAgainButton.textContent = 'Try Again';
-        tryAgainButton.className = 'game-button';
-        tryAgainButton.onclick = (e) => {
-            e.preventDefault();
-            hideOverlay();
-            if (typeof game.initializeGame === 'function') {
-                game.initializeGame();
-            } else {
-                console.error('game.initializeGame is not a function');
-            }
-        };
-
-        buttonContainer.appendChild(submitButton);
-        buttonContainer.appendChild(claimScoreButton);
-        buttonContainer.appendChild(tryAgainButton);
-
-        nameForm.appendChild(nameInput);
-        nameForm.appendChild(buttonContainer);
-
-        nameForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const name = nameInput.value.trim();
-            if (name) {
-                if (typeof handleScoreSubmission === 'function') {
-                    await handleScoreSubmission(name);
-                } else {
-                    console.error('handleScoreSubmission is not a function');
-                }
-            }
-        };
-
-        overlay.appendChild(nameForm);
+        const nameForm = createNameForm();
+        contentContainer.appendChild(nameForm);
     } else if (includeButton) {
-        const button = document.createElement('button');
-        button.textContent = buttonText;
-        button.className = 'game-button';
-        button.onclick = async () => {
-            if (callback && typeof callback === 'function') {
-                await callback();
-            } else if (buttonText === 'Buy Tries') {
-                await handleBuyTries();
-            }
-        };
-        overlay.appendChild(button);
+        const button = createButton(buttonText, callback);
+        contentContainer.appendChild(button);
     }
 
+    overlay.appendChild(contentContainer);
     document.body.appendChild(overlay);
+}
+
+function createNameForm() {
+    const nameForm = document.createElement('form');
+    nameForm.id = 'nameForm';
+    Object.assign(nameForm.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px',
+        width: '100%'
+    });
+
+    const nameInput = document.createElement('input');
+    Object.assign(nameInput, {
+        type: 'text',
+        id: 'nameInput',
+        placeholder: 'Enter your name',
+        required: true,
+        maxLength: 10
+    });
+    Object.assign(nameInput.style, {
+        marginBottom: '10px',
+        padding: '5px',
+        fontSize: '16px',
+        width: '100%'
+    });
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'center';
+    buttonContainer.style.gap = '10px';
+    buttonContainer.style.width = '100%';
+
+    const submitButton = createButton('Submit and Claim', () => handleScoreSubmission(nameInput.value));
+    const claimScoreButton = createButton('Claim Score', () => claimScore(window.finalScore + checkpointManager.getAccumulatedReward()));
+    const tryAgainButton = createButton('Try Again', () => {
+        hideOverlay();
+        game.initializeGame();
+    });
+
+    buttonContainer.appendChild(submitButton);
+    buttonContainer.appendChild(claimScoreButton);
+    buttonContainer.appendChild(tryAgainButton);
+
+    nameForm.appendChild(nameInput);
+    nameForm.appendChild(buttonContainer);
+
+    return nameForm;
+}
+
+function createButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'game-button';
+    button.onclick = onClick;
+    Object.assign(button.style, {
+        padding: '10px 20px',
+        fontSize: '16px',
+        marginTop: '10px'
+    });
+    return button;
 }
 
 async function handleBribeLeader() {
