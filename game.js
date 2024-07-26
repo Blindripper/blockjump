@@ -2282,31 +2282,37 @@ async function handleBribeLeader() {
 
     upgradeOptions.innerHTML = '';
 
+    // Create header with balances
+    const header = document.createElement('div');
+    header.className = 'shop-header';
+    header.innerHTML = `
+        <div class="balance-info">
+            <span><i class="fas fa-coins"></i> $Score: ${game.playerUpgrades.score}</span>
+            <span><img src="${picsUrl}jump-icon.png" alt="JUMP" class="jump-icon"> JUMP: ${game.playerUpgrades.jumpBalance}</span>
+        </div>
+    `;
+    upgradeOptions.appendChild(header);
+
     // Create a container for the upgrades
     const upgradesContainer = document.createElement('div');
     upgradesContainer.id = 'upgradesContainer';
+    upgradesContainer.className = 'upgrades-grid';
 
     // Populate upgrade options
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
-        if (type === 'bomb') {
-            const option = createUpgradeOption(type, -1, tiers);
-            upgradesContainer.appendChild(option);
-        } else {
-            const currentTier = game.playerUpgrades.upgrades[type];
-            if (currentTier < tiers.length) {
-                const option = createUpgradeOption(type, currentTier, tiers[currentTier]);
-                upgradesContainer.appendChild(option);
-            }
-        }
+        const currentTier = game.playerUpgrades.upgrades[type];
+        const maxTier = type === 'bomb' ? UPGRADES.bomb.maxCount : tiers.length;
+        const option = createUpgradeCard(type, currentTier, tiers[currentTier], maxTier);
+        upgradesContainer.appendChild(option);
     });
 
     upgradeOptions.appendChild(upgradesContainer);
 
-    // Create a single Start Game button and append it to upgradeOptions
+    // Create Start Game button
     const startGameBtn = document.createElement('button');
     startGameBtn.id = 'startGameBtn';
     startGameBtn.textContent = 'START GAME';
-    startGameBtn.className = 'game-button';
+    startGameBtn.className = 'start-game-button';
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
         showEtherlinkWaitMessage();
@@ -2317,33 +2323,37 @@ async function handleBribeLeader() {
             showOverlay('Failed to start game. Please try again.');
         });
     };
-    upgradeOptions.appendChild(startGameBtn);
+
+    const startGameContainer = document.createElement('div');
+    startGameContainer.className = 'start-game-container';
+    startGameContainer.appendChild(startGameBtn);
+    upgradeOptions.appendChild(startGameContainer);
 
     upgradeShop.style.display = 'flex';
-    upgradeShop.style.justifyContent = 'center';
-    upgradeShop.style.alignItems = 'center';
+}
 
-    const modalContent = upgradeShop.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.style.width = '90%';
-        modalContent.style.maxWidth = '1200px';
-        modalContent.style.height = '90%';
-        modalContent.style.maxHeight = '800px';
-        modalContent.style.overflow = 'hidden';
-    }
-
-    upgradeOptions.style.display = 'grid';
-    upgradeOptions.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
-    upgradeOptions.style.gap = '20px';
-    upgradeOptions.style.padding = '20px';
-    upgradeOptions.style.overflow = 'hidden';
-
-
-    // Remove any Start Game button outside the shop
-    const outsideStartGameBtn = document.querySelector('button:not(#upgradeShop button)');
-    if (outsideStartGameBtn && outsideStartGameBtn.textContent.trim().toLowerCase() === 'start game') {
-        outsideStartGameBtn.remove();
-    }
+function createUpgradeCard(type, currentTier, upgradeInfo, maxTier) {
+    const card = document.createElement('div');
+    card.className = 'upgrade-card';
+    
+    const progress = (currentTier / maxTier) * 100;
+    
+    card.innerHTML = `
+        <img src="${picsUrl}${type}.jpg" alt="${type} upgrade" class="upgrade-icon">
+        <h3>${getUpgradeTitle(type, currentTier)}</h3>
+        <p>${getUpgradeDescription(type, currentTier, upgradeInfo)}</p>
+        <div class="tier-progress">
+            <div class="progress-bar" style="width: ${progress}%"></div>
+            <span>Tier ${currentTier + 1}/${maxTier}</span>
+        </div>
+        <div class="button-container">
+            ${createBuyButton(type, currentTier, upgradeInfo, false).outerHTML}
+            ${createBuyButton(type, currentTier, upgradeInfo, true).outerHTML}
+        </div>
+        <button class="max-button" onclick="purchaseMaxUpgrade('${type}', ${currentTier}, false)">Max</button>
+    `;
+    
+    return card;
 }
 
 function createUpgradeOption(type, tier, upgradeInfo) {
