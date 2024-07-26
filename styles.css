@@ -117,38 +117,174 @@ header {
   color: var(--primary-color);
 }
 
-
-
-/* Updated Upgrade Shop Styles */
 #upgradeShop {
   display: none;
   position: fixed;
   z-index: 5001;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 80vw;
-  height: 80vh;
-  max-width: 1200px;
-  max-height: 800px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.8);
-  border-radius: 10px;
-  overflow: hidden;
+  overflow: auto;
 }
 
 #upgradeShop .modal-content {
   background-color: #1a2333;
-  color: #ffffff;
-  border: 2px solid #3FE1B0;
-  border-radius: 10px;
-  padding: 30px;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #3FE1B0;
   width: 90%;
   max-width: 1200px;
   height: 90%;
-  max-height: 800px;
+  color: #ffffff;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
 }
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: rgba(63, 225, 176, 0.1);
+  border-radius: 5px;
+}
+
+.balance-info {
+  font-size: 18px;
+  display: flex;
+  gap: 20px;
+}
+
+.jump-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.upgrades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 20px;
+}
+
+.upgrade-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.upgrade-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(63, 225, 176, 0.3);
+}
+
+.upgrade-icon {
+  width: 80px;
+  height: 80px;
+  align-self: center;
+  margin-bottom: 10px;
+}
+
+.tier-progress {
+  margin-top: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #3FE1B0;
+  transition: width 0.3s ease;
+}
+
+.tier-progress span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.upgrade-button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.max-button {
+  margin-top: 10px;
+  background-color: #FFD700;
+  color: #1a2333;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.max-button:hover {
+  background-color: #FFC000;
+}
+
+.start-game-container {
+  position: sticky;
+  bottom: 20px;
+  text-align: center;
+}
+
+.start-game-button {
+  padding: 15px 30px;
+  font-size: 24px;
+  background-color: #3FE1B0;
+  color: #1a2333;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.start-game-button:hover {
+  background-color: #2dc898;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .upgrades-grid {
+      grid-template-columns: 1fr;
+  }
+  
+  .start-game-container {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+  }
+}
+
+
+
+
 
 #upgradeOptions {
   display: grid;
@@ -281,13 +417,7 @@ header {
   transform: translateY(-2px);
 }
 
-/* Ensure buttons are stacked vertically on smaller screens */
-@media (max-width: 768px) {
-  .button-container {
-    grid-template-columns: 1fr;
-  }
 
-}
 
 .upgrade-option .tier-progress {
   position: absolute;
