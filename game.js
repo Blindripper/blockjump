@@ -2209,6 +2209,7 @@ async function handleBribeLeader() {
     if (!checkWalletConnection()) return;
 
     try {
+        console.log('Claiming score:', totalScore);
         game.playerUpgrades.addScore(totalScore);
         checkpointManager.resetAccumulatedReward();
         updateAvailableScoreDisplay();
@@ -2525,13 +2526,30 @@ async function updateAvailableScoreDisplay() {
     const score = game.playerUpgrades.score;
     const jumpBalance = game.playerUpgrades.jumpBalance;
     
+    console.log('Updating available score display:', { score, jumpBalance });
+    
+    const formattedScore = formatPrice(score);
+    const formattedJumpBalance = formatPrice(jumpBalance);
+    
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = `${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
+        availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
     if (availableScoreShop) {
-        availableScoreShop.textContent = `Score: ${formatPrice(score)} | JUMP: ${formatPrice(jumpBalance)}`;
+        availableScoreShop.textContent = `Score: ${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
-    game.playerUpgrades.updatePlayerScoreDisplay();
+}
+
+function formatPrice(price) {
+    if (typeof price !== 'number' || isNaN(price)) {
+        return 'N/A';
+    }
+    if (price >= 1000000) {
+        return (price / 1000000).toFixed(1) + 'M';
+    } else if (price >= 1000) {
+        return (price / 1000).toFixed(1) + 'k';
+    } else {
+        return price.toString();
+    }
 }
 
 
