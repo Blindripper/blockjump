@@ -2176,7 +2176,7 @@ async function handleBribeLeader() {
     }
   }
   
-  function claimScore(totalScore) {
+  async function claimScore(totalScore) {
     if (!checkWalletConnection()) return;
 
     try {
@@ -2186,8 +2186,15 @@ async function handleBribeLeader() {
         }
         game.playerUpgrades.addScore(totalScore);
         checkpointManager.resetAccumulatedReward();
-        updateAvailableScoreDisplay();
-        showOverlay('Score claimed successfully!', checkAndDisplayStartButton, true, 'Play Again');
+        await updateAvailableScoreDisplay();
+        
+        // Check for available tries
+        const currentTries = await getGameTries();
+        if (currentTries <= 0) {
+            showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+        } else {
+            showOverlay('Score claimed successfully!', checkAndDisplayStartButton, true, 'Play Again');
+        }
     } catch (error) {
         console.error('Error claiming score:', error);
         showOverlay('An error occurred while claiming the score. Please try again.', null, true, 'Try Again');
@@ -2524,7 +2531,7 @@ async function updateAvailableScoreDisplay() {
       availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
     if (availableScoreShop) {
-      availableScoreShop.textContent = `Score: ${formattedScore} | JUMP: ${formattedJumpBalance}`;
+      availableScoreShop.textContent = `$Score: ${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
   }
   
@@ -3063,10 +3070,10 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     const scoreInfo = document.createElement('div');
     scoreInfo.innerHTML = `
-        <p>Score: ${score}</p>
+        <p>Tezos Price: ${score}</p>
         <p>Blocks Climbed: ${blocksClimbed}</p>
         <p>Checkpoint Reward: ${checkpointReward}</p>
-        <p>Total Score: ${totalScore}</p>
+        <p>Total $Score: ${totalScore}</p>
     `;
 
     gameOverContainer.appendChild(title);
@@ -3124,12 +3131,11 @@ function createGameOverForm(totalScore) {
     };
 
     const claimScoreAndTryAgainBtn = document.createElement('button');
-    claimScoreAndTryAgainBtn.textContent = 'Claim Score and Try Again';
+    claimScoreAndTryAgainBtn.textContent = 'Claim $Score and Try Again';
     claimScoreAndTryAgainBtn.className = 'game-button';
     claimScoreAndTryAgainBtn.onclick = async () => {
         await claimScore(totalScore);
-        hideOverlay();
-        game.initializeGame();
+        
     };
 
     const shopBtn = document.createElement('button');
