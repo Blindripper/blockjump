@@ -2461,17 +2461,6 @@ async function purchaseMaxUpgrade(type, tier, useJump) {
 
 
 
-function formatPrice(price) {
-    if (price === undefined) return 'N/A';
-    if (price >= 1000000) {
-        return (price / 1000000).toFixed(1) + 'M';
-    } else if (price >= 1000) {
-        return (price / 1000).toFixed(1) + 'k';
-    } else {
-        return price.toString();
-    }
-}
-
 function createBuyButton(type, tier, upgradeInfo, useJump) {
     const buttonAndPrice = document.createElement('div');
     buttonAndPrice.className = 'button-price-container';
