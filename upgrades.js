@@ -43,12 +43,17 @@ class PlayerUpgrades {
         try {
             const account = await getCurrentAccount();
             if (account) {
-                this.jumpBalance = await getJumpBalance(account);
+              this.jumpBalance = await getJumpBalance(account);
+              console.log('Updated jumpBalance:', this.jumpBalance); // For debugging
+            } else {
+              console.error('No account found');
+              this.jumpBalance = 0; // Or handle this case appropriately
             }
-        } catch (error) {
+          } catch (error) {
             console.error('Error updating JUMP balance:', error);
+            this.jumpBalance = 0; // Or handle this case appropriately
+          }
         }
-    }
 
     canAfford(upgradeType, tier, useJump, maxPrice = null) {
         if (maxPrice !== null) {
