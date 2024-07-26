@@ -184,6 +184,7 @@ header {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  font-family: 'Orbitron', sans-serif;
   align-items: center;
   text-align: center;
   padding: 20px;
@@ -201,12 +202,15 @@ header {
   color: #3FE1B0;
   font-size: 36px;
   margin-bottom: 20px;
+  text-shadow: 0 0 10px #3FE1B0;
 }
 
 .game-overlay p {
   color: #e0e0e0;
   font-size: 18px;
   margin-bottom: 10px;
+  text-shadow: 0 0 5px #FFFFFF;
+
 }
 
 #nameForm {
