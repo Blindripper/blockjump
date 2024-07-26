@@ -137,19 +137,33 @@ class PlayerUpgrades {
     }
 
     addScore(amount) {
+        console.log('Adding score:', amount, 'Current score:', this.score);
+        if (typeof amount !== 'number' || isNaN(amount)) {
+            console.error('Invalid score amount:', amount);
+            return;
+        }
         this.score += amount;
         this.updatePlayerScoreDisplay();
     }
 
     updatePlayerScoreDisplay() {
+        console.log('Updating score display. Current score:', this.score);
         const availableScoreElement = document.getElementById('availableScore');
         const availableScoreHeader = document.getElementById('availableScoreHeader');
+        const formattedScore = this.formatScore(this.score);
         if (availableScoreElement) {
-            availableScoreElement.textContent = this.score;
+            availableScoreElement.textContent = formattedScore;
         }
         if (availableScoreHeader) {
-            availableScoreHeader.textContent = this.score;
+            availableScoreHeader.textContent = formattedScore;
         }
+    }
+
+    formatScore(score) {
+        if (typeof score !== 'number' || isNaN(score)) {
+            return 'N/A';
+        }
+        return score.toLocaleString();
     }
 
     useBomb() {
