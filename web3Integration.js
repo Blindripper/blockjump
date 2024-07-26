@@ -1292,7 +1292,6 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
       return false;
   }
 
-
   try {
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
       const tokenValidityPeriod = await contract.methods.TOKEN_VALIDITY_PERIOD().call();
@@ -1302,22 +1301,41 @@ async function submitScore(name, score, blocksClimbed, gameStartTime) {
           return false;
       }
 
-      // Convert gameStartTime to seconds for the smart contract
-      const gameStartTimeSeconds = Math.floor(gameStartTime / 1000);
-      
-      // Check contract state before submission
-      const lastGameStartTime = await contract.methods.lastGameStartTime(account).call();
-      
-      const gameTries = await contract.methods.getGameTries(account).call();
+      // Ensure all parameters are properly defined and formatted
+      const formattedName = name || 'Anonymous';
+      const formattedScore = Math.floor(score) || 0;
+      const formattedBlocksClimbed = Math.floor(blocksClimbed) || 0;
+      const formattedGameStartTime = Math.floor(gameStartTime / 1000) || 0;
+
+      // Log the formatted parameters for debugging
+      console.log('Formatted parameters:', {
+          name: formattedName,
+          score: formattedScore,
+          blocksClimbed: formattedBlocksClimbed,
+          gameStartTime: formattedGameStartTime
+      });
 
       // Estimate gas before sending the transaction
-      const gasEstimate = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).estimateGas({ from: account });
+      const gasEstimate = await contract.methods.submitScore(
+          formattedName,
+          formattedScore,
+          formattedBlocksClimbed,
+          formattedGameStartTime
+      ).estimateGas({ from: account });
 
-      const result = await contract.methods.submitScore(name, score, blocksClimbed, gameStartTimeSeconds).send({
+      console.log('Gas estimate:', gasEstimate);
+
+      const result = await contract.methods.submitScore(
+          formattedName,
+          formattedScore,
+          formattedBlocksClimbed,
+          formattedGameStartTime
+      ).send({
           from: account,
           gas: Math.floor(gasEstimate * 1.2), // Increase gas limit by 20%
       });
 
+      console.log('Transaction result:', result);
       return true;
   } catch (error) {
       console.error('Error in submitScore:', error);
