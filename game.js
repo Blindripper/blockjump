@@ -813,7 +813,11 @@ class Game {
             velocityY: 0,
             velocityX: 0,
             jumpCount: 0,
-            isOnGround: false
+            isOnGround: false,
+            isMovingLeft: false,
+            isMovingRight: false,
+            isShooting: false,
+            lastDirection: 'right',
         };
     
         // Apply upgrades
@@ -1087,6 +1091,13 @@ updatePlayer(dt) {
         return;
     }
 
+    // Update player state
+    this.player.isMovingLeft = this.keys['ArrowLeft'] || this.keys['KeyA'];
+    this.player.isMovingRight = this.keys['ArrowRight'] || this.keys['KeyD'];
+    this.player.isShooting = this.keys['Space'];
+
+    if (this.player.isMovingLeft) this.player.lastDirection = 'left';
+    if (this.player.isMovingRight) this.player.lastDirection = 'right';
     const currentTime = Date.now();
 
     // Adjust player's y position based on scroll speed
@@ -1666,8 +1677,8 @@ updatePlayer(dt) {
             if (this.playerShield) {
                 // Draw gold circle for bitcoin shield
                 this.ctx.beginPath();
-                this.ctx.arc(x + PLAYER_WIDTH / 2, y + PLAYER_HEIGHT / 2, 
-                             Math.max(PLAYER_WIDTH, PLAYER_HEIGHT) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2,
+                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
                 this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; // Gold color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
@@ -1680,8 +1691,8 @@ updatePlayer(dt) {
             } else if (this.player.upgradeShieldHits > 0) {
                 // Draw blue circle for upgrade shield
                 this.ctx.beginPath();
-                this.ctx.arc(x + PLAYER_WIDTH / 2, y + PLAYER_HEIGHT / 2, 
-                             Math.max(PLAYER_WIDTH, PLAYER_HEIGHT) / 2 + 5, 0, Math.PI * 2);
+                this.ctx.arc(x + this.player.width / 2, y + this.player.height / 2,
+                             Math.max(this.player.width, this.player.height) / 2 + 5, 0, Math.PI * 2);
                 this.ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)'; // Blue color
                 this.ctx.lineWidth = 3;
                 this.ctx.stroke();
@@ -1693,15 +1704,33 @@ updatePlayer(dt) {
                 }
             }
     
-            const playerSprite = sprites.get('player');
+            // Determine which sprite to use based on player state
+            let spriteKey;
+            if (this.player.isShooting) {
+                if (this.player.isMovingLeft) {
+                    spriteKey = 'playerLeftShooting';
+                } else if (this.player.isMovingRight) {
+                    spriteKey = 'playerRightShooting';
+                } else {
+                    spriteKey = 'playerShootingStance';
+                }
+            } else if (this.player.isMovingLeft) {
+                spriteKey = 'playerLeftMove';
+            } else if (this.player.isMovingRight) {
+                spriteKey = 'playerRightMove';
+            } else {
+                spriteKey = 'playerStance';
+            }
+    
+            const playerSprite = sprites.get(spriteKey);
             if (playerSprite && playerSprite.complete) {
-                this.ctx.drawImage(playerSprite, 
-                                   Math.round(x), Math.round(y), 
-                                   PLAYER_WIDTH, PLAYER_HEIGHT);
+                this.ctx.drawImage(playerSprite,
+                                   Math.round(x), Math.round(y),
+                                   this.player.width, this.player.height);
             } else {
                 this.ctx.fillStyle = '#00FF00';  // Bright green color
-                this.ctx.fillRect(Math.round(x), Math.round(y), 
-                                  PLAYER_WIDTH, PLAYER_HEIGHT);
+                this.ctx.fillRect(Math.round(x), Math.round(y),
+                                  this.player.width, this.player.height);
             }
     
             // Draw upgrade shield hit counter
@@ -1709,8 +1738,8 @@ updatePlayer(dt) {
                 this.ctx.fillStyle = 'white';
                 this.ctx.font = '12px Arial';
                 this.ctx.textAlign = 'center';
-                this.ctx.fillText(this.player.upgradeShieldHits.toString(), 
-                                  x + PLAYER_WIDTH / 2, 
+                this.ctx.fillText(this.player.upgradeShieldHits.toString(),
+                                  x + this.player.width / 2,
                                   y - 5);
             }
         };
@@ -1719,7 +1748,7 @@ updatePlayer(dt) {
         drawPlayerAt(this.player.x, this.player.y);
     
         // Draw wrap-around player if necessary
-        if (this.player.x + PLAYER_WIDTH > GAME_WIDTH) {
+        if (this.player.x + this.player.width > GAME_WIDTH) {
             drawPlayerAt(this.player.x - GAME_WIDTH, this.player.y);
         } else if (this.player.x < 0) {
             drawPlayerAt(this.player.x + GAME_WIDTH, this.player.y);
@@ -2556,7 +2585,12 @@ function loadSprite(name, fileName) {
 
 function loadSprites() {
     const spritesToLoad = [
-        { name: 'player', file: 'Spacemarine.png' },
+        { name: 'playerStance', file: 'stance.png' },
+        { name: 'playerLeftMove', file: 'leftmove.png' },
+        { name: 'playerRightMove', file: 'rightmove.png' },
+        { name: 'playerRightShooting', file: 'rightshooting.png' },
+        { name: 'playerLeftShooting', file: 'leftshooting.png' },
+        { name: 'playerShootingStance', file: 'shootingstance.png' },
         { name: 'bitcoin', file: 'bitcoin.png' },
         { name: 'solana', file: 'solana.png' },
         { name: 'ethereum', file: 'ethereum1.png' },
