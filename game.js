@@ -2295,10 +2295,26 @@ async function handleBribeLeader() {
     await game.playerUpgrades.updateJumpBalance();
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
+    if (!upgradeShop) {
+        console.error('Upgrade shop element not found');
+        return;
+    }
+
     const upgradeOptions = document.getElementById('upgradeOptions');
-    const buttonContainer = document.getElementById('shopButtonContainer');
+    if (!upgradeOptions) {
+        console.error('Upgrade options element not found');
+        return;
+    }
 
     upgradeOptions.innerHTML = '';
+
+    let buttonContainer = document.getElementById('shopButtonContainer');
+    if (!buttonContainer) {
+        // Create the button container if it doesn't exist
+        buttonContainer = document.createElement('div');
+        buttonContainer.id = 'shopButtonContainer';
+        upgradeShop.appendChild(buttonContainer);
+    }
     buttonContainer.innerHTML = ''; // Clear existing buttons
 
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
@@ -2326,7 +2342,8 @@ async function handleBribeLeader() {
     buttonContainer.appendChild(startGameBtn);
 
     // Check if we're coming from the game over screen
-    if (document.getElementById('game-overlay') && document.getElementById('game-overlay').style.display !== 'none') {
+    const gameOverOverlay = document.getElementById('game-overlay');
+    if (gameOverOverlay && gameOverOverlay.style.display !== 'none') {
         // Create "Return to Game Over" button
         const returnToGameOverBtn = document.createElement('button');
         returnToGameOverBtn.textContent = 'Return to Game Over';
@@ -2338,10 +2355,12 @@ async function handleBribeLeader() {
     upgradeShop.style.display = 'block';
 }
 
-
+// Make sure this function is also defined
 function closeShop() {
     const upgradeShop = document.getElementById('upgradeShop');
-    upgradeShop.style.display = 'none';
+    if (upgradeShop) {
+        upgradeShop.style.display = 'none';
+    }
     
     // Ensure the game over overlay is still visible
     const gameOverOverlay = document.getElementById('game-overlay');
