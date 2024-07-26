@@ -2513,37 +2513,39 @@ function getUpgradeDescription(type, tier, upgradeInfo) {
 async function updateAvailableScoreDisplay() {
     const availableScoreHeader = document.getElementById('availableScoreHeader');
     const availableScoreShop = document.getElementById('availableScore');
-    
+  
     await game.playerUpgrades.updateJumpBalance();
-    
+  
     const score = game.playerUpgrades.score;
     const jumpBalance = game.playerUpgrades.jumpBalance;
-    
+  
     console.log('Updating available score display:', { score, jumpBalance });
-    
+  
     const formattedScore = formatPrice(score);
-    const formattedJumpBalance = formatPrice(jumpBalance);
-    
+    const jumpBalanceNumber = Number(jumpBalance); // Convert to number
+    const formattedJumpBalance = formatPrice(jumpBalanceNumber.toFixed(2)); // Limit decimal places
+  
     if (availableScoreHeader) {
-        availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
+      availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
     if (availableScoreShop) {
-        availableScoreShop.textContent = `Score: ${formattedScore} | JUMP: ${formattedJumpBalance}`;
+      availableScoreShop.textContent = `Score: ${formattedScore} | JUMP: ${formattedJumpBalance}`;
     }
-}
-
-function formatPrice(price) {
+  }
+  
+  function formatPrice(price) {
     if (typeof price !== 'number' || isNaN(price)) {
-        return 'N/A';
+      return 'N/A';
     }
     if (price >= 1000000) {
-        return (price / 1000000).toFixed(1) + 'M';
+      return (price / 1000000).toFixed(1) + 'M';
     } else if (price >= 1000) {
-        return (price / 1000).toFixed(1) + 'k';
+      return (price / 1000).toFixed(1) + 'k';
     } else {
-        return price.toString();
+      return price.toString();
     }
-}
+  }
+  
 
 
 
