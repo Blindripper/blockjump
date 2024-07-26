@@ -2083,7 +2083,6 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     overlay.appendChild(gameOverContainer);
     document.body.appendChild(overlay);
 
-    console.log('Overlay created with message:', message); // Add this for debugging
 }
 
 function createNameForm() {
@@ -3039,30 +3038,59 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     window.finalScore = totalScore;
 
-    const gameOverInfo = `
-        <div id="gameOverContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            <div id="nameFormContainer" style="margin-bottom: 20px;"></div>
-            <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over!</h2>
-            <p>Score: ${score}</p>
-            <p>Blocks Climbed: ${blocksClimbed}</p>
-            <p>Checkpoint Reward: ${checkpointReward}</p>
-            <p>Total Score: ${totalScore}</p>
-        </div>
+    showOverlay("", null, false, '', false); // We'll add content manually
+
+    const overlay = document.getElementById('game-overlay');
+    if (!overlay) {
+        console.error('Game overlay not found');
+        return;
+    }
+
+    const gameOverContainer = document.getElementById('gameOverContainer');
+    if (!gameOverContainer) {
+        console.error('Game over container not found');
+        return;
+    }
+
+    // Clear existing content
+    gameOverContainer.innerHTML = '';
+
+    // Create and append game over content
+    const title = document.createElement('h2');
+    title.textContent = 'Game Over!';
+    title.style.color = '#3FE1B0';
+    title.style.marginBottom = '20px';
+
+    const scoreInfo = document.createElement('div');
+    scoreInfo.innerHTML = `
+        <p>Score: ${score}</p>
+        <p>Blocks Climbed: ${blocksClimbed}</p>
+        <p>Checkpoint Reward: ${checkpointReward}</p>
+        <p>Total Score: ${totalScore}</p>
     `;
 
-    showOverlay(gameOverInfo, null, false, '', false);
+    gameOverContainer.appendChild(title);
+    gameOverContainer.appendChild(scoreInfo);
+
     createGameOverForm(totalScore);
 }
 
+
 // Create a new function to generate the game over form
 function createGameOverForm(totalScore) {
+    const gameOverContainer = document.getElementById('gameOverContainer');
+    if (!gameOverContainer) {
+        console.error('Game over container not found');
+        return;
+    }
+
     const nameForm = document.createElement('form');
     nameForm.id = 'nameForm';
     nameForm.style.display = 'flex';
     nameForm.style.flexDirection = 'column';
     nameForm.style.alignItems = 'center';
     nameForm.style.gap = '10px';
-    nameForm.style.marginBottom = '20px';
+    nameForm.style.marginTop = '20px';
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -3110,13 +3138,8 @@ function createGameOverForm(totalScore) {
     nameForm.appendChild(nameInput);
     nameForm.appendChild(buttonsContainer);
 
-    const nameFormContainer = document.getElementById('nameFormContainer');
-    if (nameFormContainer) {
-        nameFormContainer.innerHTML = ''; // Clear any existing content
-        nameFormContainer.appendChild(nameForm);
-    }
+    gameOverContainer.appendChild(nameForm);
 }
-
   
 async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
