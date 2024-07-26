@@ -179,24 +179,27 @@ header {
 }
 
 /* Game Over Overlay Styles */
+/* Game Over Overlay Styles */
 .game-overlay {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  padding: 20px;
 }
 
 .game-overlay > div {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 80%;
+  width: 100%;
+  max-width: 500px;
 }
 
 .game-overlay h2 {
   color: #3FE1B0;
-  font-size: 28px;
+  font-size: 36px;
   margin-bottom: 20px;
 }
 
@@ -206,19 +209,11 @@ header {
   margin-bottom: 10px;
 }
 
-.game-overlay .game-button {
-  margin-top: 20px;
-  padding: 12px 24px;
-  font-size: 16px;
-  min-width: 200px;
-}
-
 #nameForm {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 300px;
   margin-top: 20px;
 }
 
@@ -228,17 +223,42 @@ header {
   margin-bottom: 15px;
   font-size: 16px;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border: none;
+  border-radius: 5px;
 }
 
-#nameForm .game-button {
-  margin-top: 10px;
+.button-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
 }
 
-/* Ensure buttons are centered and stacked vertically on smaller screens */
+.game-overlay .game-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  width: 100%;
+  background-color: #3FE1B0;
+  color: #1a2333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.game-overlay .game-button:hover {
+  background-color: #2dc898;
+  transform: translateY(-2px);
+}
+
+/* Ensure buttons are stacked vertically on smaller screens */
 @media (max-width: 768px) {
-  .game-overlay > div {
-    width: 90%;
+  .button-container {
+    grid-template-columns: 1fr;
   }
+
 
   .game-overlay .game-button {
     width: 100%;
