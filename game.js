@@ -2535,9 +2535,17 @@ async function updateAvailableScoreDisplay() {
     }
   }
   
+
+  
   function formatPrice(price) {
     console.log('price in formatPrice:', price); // Added to check input
-    if (typeof price !== 'number' || isNaN(price)) {
+  
+    // Ensure price is a number
+    if (typeof price === 'string') {
+      price = parseFloat(price);
+    }
+  
+    if (isNaN(price)) {
       return 'N/A';
     }
   
@@ -2550,6 +2558,7 @@ async function updateAvailableScoreDisplay() {
       return price.toString();
     }
   }
+  
 
 
 
