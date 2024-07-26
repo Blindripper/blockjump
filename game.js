@@ -2052,39 +2052,31 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         padding: '20px'
     });
 
-    const contentContainer = document.createElement('div');
-    contentContainer.style.display = 'flex';
-    contentContainer.style.flexDirection = 'column';
-    contentContainer.style.alignItems = 'center';
-    contentContainer.style.maxWidth = '90%';
+    const gameOverContainer = document.createElement('div');
+    gameOverContainer.id = 'gameOverContainer';
+    gameOverContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;';
 
-    // Create "Game Over!" text
-    const gameOverText = document.createElement('h2');
-    gameOverText.textContent = 'Game Over!';
-    gameOverText.style.color = '#3FE1B0';
-    gameOverText.style.fontSize = '36px';
-    gameOverText.style.marginBottom = '10px';
-    contentContainer.appendChild(gameOverText);
+    const nameFormContainer = document.createElement('div');
+    nameFormContainer.id = 'nameFormContainer';
+    nameFormContainer.style.marginBottom = '20px';
 
-    // Format the stats message
-    const statsMessage = message.replace('Game Over!\n', '').replace(/\n/g, ' ');
-    const statsElement = document.createElement('p');
-    statsElement.textContent = statsMessage;
-    statsElement.style.color = '#FFFFFF';
-    statsElement.style.fontSize = '18px';
-    statsElement.style.marginBottom = '20px';
-    statsElement.style.textAlign = 'center';
-    contentContainer.appendChild(statsElement);
+    const gameOverContent = `
+        <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over</h2>
+        <p>${message.replace('Game Over!\n', '').replace(/\n/g, '</p><p>')}</p>
+    `;
+
+    gameOverContainer.innerHTML = gameOverContent;
 
     if (includeNameForm) {
         const nameForm = createNameForm();
-        contentContainer.appendChild(nameForm);
+        nameFormContainer.appendChild(nameForm);
     } else if (includeButton) {
         const button = createButton(buttonText, callback);
-        contentContainer.appendChild(button);
+        nameFormContainer.appendChild(button);
     }
 
-    overlay.appendChild(contentContainer);
+    gameOverContainer.insertBefore(nameFormContainer, gameOverContainer.children[1]);
+    overlay.appendChild(gameOverContainer);
     document.body.appendChild(overlay);
 }
 
@@ -2095,7 +2087,6 @@ function createNameForm() {
     nameForm.style.flexDirection = 'column';
     nameForm.style.alignItems = 'center';
     nameForm.style.width = '100%';
-    nameForm.style.marginTop = '20px';
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
