@@ -141,22 +141,20 @@ header {
 }
 
 .shop-header {
-  background-color: #1a2333;
+  text-align: center;
   padding: 20px;
   color: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   border-bottom: 1px solid #3FE1B0;
 }
 
 .shop-header h2 {
-  margin: 0;
+  margin: 0 0 10px 0;
   color: #3FE1B0;
 }
 
 .balance-info {
   display: flex;
+  justify-content: center;
   gap: 20px;
 }
 
@@ -219,16 +217,20 @@ header {
   margin-top: 10px;
 }
 
+.upgrade-card .upgrade-button,
+.upgrade-card .max-button {
+    flex: 1;
+    margin: 0 5px;
+    padding: 8px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .upgrade-card .upgrade-button {
-  flex: 1;
-  margin: 0 5px;
-  padding: 8px;
-  font-size: 14px;
   background-color: #3FE1B0;
   color: #1a2333;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
 .upgrade-card .upgrade-button:disabled {
@@ -237,15 +239,16 @@ header {
 }
 
 .upgrade-card .max-button {
-  width: 100%;
-  margin-top: 10px;
   background-color: #FFD700;
   color: #1a2333;
-  border: none;
-  padding: 8px;
-  border-radius: 5px;
-  cursor: pointer;
 }
+
+.upgrade-card .upgrade-button:disabled,
+.upgrade-card .max-button:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
+
 
 .start-game-container {
   background-color: #1a2333;
