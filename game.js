@@ -2210,6 +2210,10 @@ async function handleBribeLeader() {
 
     try {
         console.log('Claiming score:', totalScore);
+        if (isNaN(totalScore) || typeof totalScore !== 'number') {
+            console.error('Invalid total score:', totalScore);
+            totalScore = 0; // Set to 0 if invalid
+        }
         game.playerUpgrades.addScore(totalScore);
         checkpointManager.resetAccumulatedReward();
         updateAvailableScoreDisplay();
@@ -3021,6 +3025,10 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const checkpointReward = checkpointManager.getAccumulatedReward();
     const totalScore = score + checkpointReward;
 
+    console.log('Game Over - Scores:', { score, checkpointReward, totalScore, blocksClimbed });
+
+    window.finalScore = totalScore; // Ensure this is set correctly
+
     const gameOverInfo = `
         <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over!</h2>
         <p>Score: ${score}</p>
@@ -3045,7 +3053,13 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const claimScoreBtn = document.createElement('button');
     claimScoreBtn.textContent = 'Claim Score';
     claimScoreBtn.className = 'game-button';
-    claimScoreBtn.onclick = () => claimScore(totalScore);
+    claimScoreBtn.onclick = () => {
+        if (isNaN(totalScore) || typeof totalScore !== 'number') {
+            console.error('Invalid total score:', totalScore);
+            totalScore = 0; // Set to 0 if invalid
+        }
+        claimScore(totalScore);
+    };
 
     const tryAgainBtn = document.createElement('button');
     tryAgainBtn.textContent = 'Try Again';
