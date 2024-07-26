@@ -2520,9 +2520,12 @@ async function updateAvailableScoreDisplay() {
     const jumpBalance = game.playerUpgrades.jumpBalance;
   
     console.log('Updating available score display:', { score, jumpBalance });
+    console.log('jumpBalance type:', typeof jumpBalance); // Added to check data type
   
     const formattedScore = formatPrice(score);
     const formattedJumpBalance = formatPrice(jumpBalance);
+  
+    console.log('formattedJumpBalance:', formattedJumpBalance); // Added to check formatted value
   
     if (availableScoreHeader) {
       availableScoreHeader.textContent = `${formattedScore} | JUMP: ${formattedJumpBalance}`;
@@ -2533,11 +2536,12 @@ async function updateAvailableScoreDisplay() {
   }
   
   function formatPrice(price) {
+    console.log('price in formatPrice:', price); // Added to check input
     if (typeof price !== 'number' || isNaN(price)) {
       return 'N/A';
     }
   
-    // Formatting logic here, returning a string
+    // Formatting logic here
     if (price >= 1000000) {
       return (price / 1000000).toFixed(1) + 'M';
     } else if (price >= 1000) {
