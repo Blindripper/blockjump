@@ -178,16 +178,23 @@ header {
   box-shadow: 0 0 10px rgba(63, 225, 176, 0.5);
 }
 
-/* Game Over Overlay Styles */
+
 /* Game Over Overlay Styles */
 .game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-family: 'Orbitron', sans-serif;
   align-items: center;
   text-align: center;
   padding: 20px;
+  font-family: 'Orbitron', sans-serif;
+  z-index: 2000;
 }
 
 .game-overlay > div {
@@ -210,8 +217,7 @@ header {
   font-size: 18px;
   margin-bottom: 10px;
   text-shadow: 0 0 5px #FFFFFF;
-
-}
+}  
 
 #nameForm {
   display: flex;
@@ -250,7 +256,9 @@ header {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s;
+  margin-top: 10px;
 }
+
 
 .game-overlay .game-button:hover {
   background-color: #2dc898;
@@ -263,11 +271,6 @@ header {
     grid-template-columns: 1fr;
   }
 
-
-  .game-overlay .game-button {
-    width: 100%;
-    margin-top: 10px;
-  }
 }
 
 .upgrade-option .tier-progress {
@@ -613,23 +616,6 @@ header {
   object-fit: contain;
 }
 
-.game-overlay {
-  position: absolute;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.game-overlay div {
-  color: #3FE1B0;
-  font-size: 24px;
-  font-family: 'Orbitron', sans-serif;
-  font-weight: bold;
-  text-align: center;
-  max-width: 80%;
-}
 
 #gameInfo {
   width: 100%;
