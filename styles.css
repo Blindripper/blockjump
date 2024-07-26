@@ -136,41 +136,21 @@ header {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: rgba(26, 35, 51, 0.95); /* Slightly transparent background */
-
-}
-
-.shop-header {
-  text-align: center;
-  padding: 20px;
-  color: #ffffff;
-  border-bottom: 1px solid #3FE1B0;
-}
-
-.shop-header h2 {
-  margin: 0 0 10px 0;
-  color: #3FE1B0;
-}
-
-.balance-info {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
 }
 
 .upgrades-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 20px;
   padding: 20px 0;
-  overflow-y: auto;
-  flex-grow: 1;
 }
 
 .upgrade-card {
-  background-color: rgba(255, 255, 255, 0.15); /* Increased opacity for better visibility */
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 15px;
+  width: 250px;
   display: flex;
   flex-direction: column;
 }
@@ -219,23 +199,18 @@ header {
 
 .upgrade-card .upgrade-button,
 .upgrade-card .max-button {
-    flex: 1;
-    margin: 0 5px;
-    padding: 8px;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  flex: 1;
+  margin: 0 5px;
+  padding: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .upgrade-card .upgrade-button {
   background-color: #3FE1B0;
   color: #1a2333;
-}
-
-.upgrade-card .upgrade-button:disabled {
-  background-color: #888;
-  cursor: not-allowed;
 }
 
 .upgrade-card .max-button {
@@ -245,16 +220,14 @@ header {
 
 .upgrade-card .upgrade-button:disabled,
 .upgrade-card .max-button:disabled {
-    background-color: #888;
-    cursor: not-allowed;
+  background-color: #888;
+  color: #ccc;
+  cursor: not-allowed;
 }
 
-
 .start-game-container {
-  background-color: #1a2333;
-  padding: 20px;
+  margin-top: 20px;
   text-align: center;
-  border-top: 1px solid #3FE1B0;
 }
 
 .start-game-button {
