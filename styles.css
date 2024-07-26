@@ -131,7 +131,7 @@ header {
 
 #upgradeShop .modal-content {
   background-color: #1a2333;
-  margin: 5% auto;
+  margin: 2% auto;
   padding: 20px;
   border: 1px solid #3FE1B0;
   width: 90%;
@@ -153,16 +153,15 @@ header {
   border-radius: 5px;
 }
 
-.balance-info {
-  font-size: 18px;
-  display: flex;
-  gap: 20px;
+.shop-header h2 {
+  margin: 0;
+  color: #3FE1B0;
 }
 
-.jump-icon {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
+.balance-info {
+  font-size: 16px;
+  display: flex;
+  gap: 20px;
 }
 
 .upgrades-grid {
@@ -230,6 +229,21 @@ header {
   margin: 0 5px;
   padding: 8px;
   font-size: 14px;
+  background-color: #3FE1B0;
+  color: #1a2333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upgrade-button:hover:not(:disabled) {
+  background-color: #2dc898;
+}
+
+.upgrade-button:disabled {
+  background-color: #888;
+  cursor: not-allowed;
 }
 
 .max-button {
@@ -248,9 +262,8 @@ header {
 }
 
 .start-game-container {
-  position: sticky;
-  bottom: 20px;
   text-align: center;
+  margin-top: 20px;
 }
 
 .start-game-button {
@@ -269,16 +282,19 @@ header {
   transform: scale(1.05);
 }
 
+
 @media (max-width: 768px) {
   .upgrades-grid {
       grid-template-columns: 1fr;
   }
   
-  .start-game-container {
-      position: fixed;
-      bottom: 20px;
-      left: 0;
-      right: 0;
+  .shop-header {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+  
+  .balance-info {
+      margin-top: 10px;
   }
 }
 
