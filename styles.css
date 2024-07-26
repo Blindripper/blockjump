@@ -566,16 +566,14 @@ header {
   font-family: 'Orbitron', sans-serif;
   font-weight: bold;
   font-size: 14px;
-  background-color: var(--primary-color);
-  color: var(--background-color);
-  padding: 8px 15px;
+  background-color: #3FE1B0;
+  color: #0f1624;
+  padding: 10px 15px;
   border: none;
-  border-radius: 25px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-right: 10px;
+  margin: 0 5px;
 }
 
 .game-button:hover {
