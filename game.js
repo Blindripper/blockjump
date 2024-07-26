@@ -2334,22 +2334,23 @@ async function handleBribeLeader() {
         }
     });
 
-    // Move the existing functional Start Game button into the shop
-    const existingStartGameBtn = document.getElementById('startGameBtn');
-    if (existingStartGameBtn) {
-        buttonContainer.appendChild(existingStartGameBtn);
-    } else {
-        // If it doesn't exist, create a new one
-        const startGameBtn = document.createElement('button');
-        startGameBtn.id = 'startGameBtn';
-        startGameBtn.textContent = 'Start Game';
-        startGameBtn.className = 'game-button';
-        startGameBtn.onclick = () => {
-            upgradeShop.style.display = 'none';
-            game.initializeGame();
-        };
-        buttonContainer.appendChild(startGameBtn);
-    }
+    // Create a new Start Game button
+    const startGameBtn = document.createElement('button');
+    startGameBtn.id = 'startGameBtn';
+    startGameBtn.textContent = 'START GAME';
+    startGameBtn.className = 'game-button';
+    startGameBtn.style.padding = '10px 20px';
+    startGameBtn.style.fontSize = '16px';
+    startGameBtn.style.backgroundColor = '#3FE1B0';
+    startGameBtn.style.color = '#1a2333';
+    startGameBtn.style.border = 'none';
+    startGameBtn.style.borderRadius = '5px';
+    startGameBtn.style.cursor = 'pointer';
+    startGameBtn.onclick = () => {
+        upgradeShop.style.display = 'none';
+        game.initializeGame();
+    };
+    buttonContainer.appendChild(startGameBtn);
 
     // Check if we're coming from the game over screen
     const gameOverOverlay = document.getElementById('game-overlay');
@@ -2364,6 +2365,12 @@ async function handleBribeLeader() {
     }
 
     upgradeShop.style.display = 'block';
+
+    // Remove any Start Game button outside the shop
+    const outsideStartGameBtn = document.querySelector('button:not(#upgradeShop button)');
+    if (outsideStartGameBtn && outsideStartGameBtn.textContent.trim().toLowerCase() === 'start game') {
+        outsideStartGameBtn.remove();
+    }
 }
 
 function createUpgradeOption(type, tier, upgradeInfo) {
