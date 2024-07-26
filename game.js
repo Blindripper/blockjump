@@ -2295,29 +2295,15 @@ async function handleBribeLeader() {
     await game.playerUpgrades.updateJumpBalance();
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
-    if (!upgradeShop) {
-        console.error('Upgrade shop element not found');
-        return;
-    }
-
     const upgradeOptions = document.getElementById('upgradeOptions');
-    if (!upgradeOptions) {
-        console.error('Upgrade options element not found');
+    const buttonContainer = document.getElementById('startGameButtonContainer');
+
+    if (!upgradeShop || !upgradeOptions || !buttonContainer) {
+        console.error('Required elements not found');
         return;
     }
 
     upgradeOptions.innerHTML = '';
-
-    // Find or create the button container within the upgrade shop modal
-    let buttonContainer = upgradeShop.querySelector('#shopButtonContainer');
-    if (!buttonContainer) {
-        buttonContainer = document.createElement('div');
-        buttonContainer.id = 'shopButtonContainer';
-        buttonContainer.style.marginTop = '20px';
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.justifyContent = 'center';
-        upgradeShop.appendChild(buttonContainer);
-    }
     buttonContainer.innerHTML = ''; // Clear existing buttons
 
     // Populate upgrade options
@@ -2334,35 +2320,16 @@ async function handleBribeLeader() {
         }
     });
 
-    // Create a new Start Game button
+    // Create a single Start Game button
     const startGameBtn = document.createElement('button');
     startGameBtn.id = 'startGameBtn';
     startGameBtn.textContent = 'START GAME';
     startGameBtn.className = 'game-button';
-    startGameBtn.style.padding = '10px 20px';
-    startGameBtn.style.fontSize = '16px';
-    startGameBtn.style.backgroundColor = '#3FE1B0';
-    startGameBtn.style.color = '#1a2333';
-    startGameBtn.style.border = 'none';
-    startGameBtn.style.borderRadius = '5px';
-    startGameBtn.style.cursor = 'pointer';
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
         game.initializeGame();
     };
     buttonContainer.appendChild(startGameBtn);
-
-    // Check if we're coming from the game over screen
-    const gameOverOverlay = document.getElementById('game-overlay');
-    if (gameOverOverlay && gameOverOverlay.style.display !== 'none') {
-        // Create "Return to Game Over" button
-        const returnToGameOverBtn = document.createElement('button');
-        returnToGameOverBtn.textContent = 'Return to Game Over';
-        returnToGameOverBtn.className = 'game-button';
-        returnToGameOverBtn.style.marginLeft = '10px';
-        returnToGameOverBtn.onclick = closeShop;
-        buttonContainer.appendChild(returnToGameOverBtn);
-    }
 
     upgradeShop.style.display = 'block';
 
