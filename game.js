@@ -2293,14 +2293,8 @@ async function handleBribeLeader() {
     const upgradesGrid = document.getElementById('upgradesGrid');
 
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
-        if (type === 'bomb') {
-            upgradesGrid.appendChild(createUpgradeCard(type, -1, tiers));
-        } else {
-            const currentTier = game.playerUpgrades.upgrades[type];
-            if (currentTier < tiers.length) {
-                upgradesGrid.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
-            }
-        }
+        const currentTier = game.playerUpgrades.upgrades[type];
+        upgradesGrid.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
     });
 
     document.getElementById('startGameBtn').onclick = () => {
@@ -2324,6 +2318,10 @@ function createUpgradeCard(type, tier, upgradeInfo) {
     const maxTier = type === 'bomb' ? UPGRADES.bomb.maxCount : UPGRADES[type].length;
     const currentTier = type === 'bomb' ? game.playerUpgrades.upgrades.bomb : tier;
     const progress = (currentTier / maxTier) * 100;
+    const isMaxed = currentTier === maxTier;
+    
+    const canAffordScore = game.playerUpgrades.canAfford(type, tier, false);
+    const canAffordJump = game.playerUpgrades.canAfford(type, tier, true);
     
     card.innerHTML = `
         <img src="${picsUrl}${type}.jpg" alt="${type} upgrade" class="upgrade-icon">
@@ -2334,24 +2332,26 @@ function createUpgradeCard(type, tier, upgradeInfo) {
             <span>Tier ${currentTier}/${maxTier}</span>
         </div>
         <div class="button-container">
-            <button class="upgrade-button buy-score">Buy with Score</button>
-            <button class="upgrade-button buy-jump">Buy with JUMP</button>
+            <button class="upgrade-button buy-score" ${isMaxed || !canAffordScore ? 'disabled' : ''}>Buy with Score</button>
+            <button class="upgrade-button buy-jump" ${isMaxed || !canAffordJump ? 'disabled' : ''}>Buy with JUMP</button>
         </div>
         <div class="button-container">
-            <button class="max-button max-score">Max with Score</button>
-            <button class="max-button max-jump">Max with JUMP</button>
+            <button class="max-button max-score" ${isMaxed || !canAffordScore ? 'disabled' : ''}>Max with Score</button>
+            <button class="max-button max-jump" ${isMaxed || !canAffordJump ? 'disabled' : ''}>Max with JUMP</button>
         </div>
     `;
     
-    const buyScoreBtn = card.querySelector('.buy-score');
-    const buyJumpBtn = card.querySelector('.buy-jump');
-    const maxScoreBtn = card.querySelector('.max-score');
-    const maxJumpBtn = card.querySelector('.max-jump');
+    if (!isMaxed) {
+        const buyScoreBtn = card.querySelector('.buy-score');
+        const buyJumpBtn = card.querySelector('.buy-jump');
+        const maxScoreBtn = card.querySelector('.max-score');
+        const maxJumpBtn = card.querySelector('.max-jump');
 
-    buyScoreBtn.onclick = () => purchaseUpgrade(type, tier, false);
-    buyJumpBtn.onclick = () => purchaseUpgrade(type, tier, true);
-    maxScoreBtn.onclick = () => purchaseMaxUpgrade(type, tier, false);
-    maxJumpBtn.onclick = () => purchaseMaxUpgrade(type, tier, true);
+        buyScoreBtn.onclick = () => purchaseUpgrade(type, tier, false);
+        buyJumpBtn.onclick = () => purchaseUpgrade(type, tier, true);
+        maxScoreBtn.onclick = () => purchaseMaxUpgrade(type, tier, false);
+        maxJumpBtn.onclick = () => purchaseMaxUpgrade(type, tier, true);
+    }
 
     return card;
 }
