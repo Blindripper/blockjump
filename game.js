@@ -2060,7 +2060,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginTop: '190px',
+        marginTop: '50px', // Reduced from 190px to move content up
         marginBottom: '20px'
     });
 
@@ -2101,8 +2101,21 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
         const submitButton = document.createElement('button');
         submitButton.type = 'submit';
-        submitButton.textContent = 'Submit Score';
+        submitButton.textContent = 'Submit and Claim'; // Changed from 'Submit Score'
         submitButton.className = 'game-button';
+
+        const claimScoreButton = document.createElement('button');
+        claimScoreButton.type = 'button';
+        claimScoreButton.textContent = 'Claim Score';
+        claimScoreButton.className = 'game-button';
+        claimScoreButton.onclick = (e) => {
+            e.preventDefault();
+            if (typeof claimScore === 'function') {
+                claimScore(window.finalScore + checkpointManager.getAccumulatedReward());
+            } else {
+                console.error('claimScore is not a function');
+            }
+        };
 
         const tryAgainButton = document.createElement('button');
         tryAgainButton.type = 'button';
@@ -2119,6 +2132,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         };
 
         buttonContainer.appendChild(submitButton);
+        buttonContainer.appendChild(claimScoreButton);
         buttonContainer.appendChild(tryAgainButton);
 
         nameForm.appendChild(nameInput);
@@ -2986,28 +3000,47 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const checkpointReward = checkpointManager.getAccumulatedReward();
     const totalScore = score + checkpointReward;
 
-    showOverlay(`Game Over!\nScore: ${score}\nBlocks Climbed: ${blocksClimbed}\nCheckpoint Reward: ${checkpointReward}\nTotal Score: ${totalScore}`, null, false, '', true);
+    const gameOverInfo = `
+        <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over!</h2>
+        <p>Score: ${score}</p>
+        <p>Blocks Climbed: ${blocksClimbed}</p>
+        <p>Checkpoint Reward: ${checkpointReward}</p>
+        <p>Total Score: ${totalScore}</p>
+    `;
 
-    // Update the submit score button text
-    const submitScoreBtn = document.getElementById('submitScore');
-    if (submitScoreBtn) {
-        submitScoreBtn.textContent = 'Submit and Claim';
-    }
+    showOverlay(gameOverInfo, null, false, '', true);
 
-    // Add a "Claim Score" button
+    // Update the submit score button text and add Claim Score button
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.style.display = 'flex';
+    buttonsContainer.style.justifyContent = 'space-between';
+    buttonsContainer.style.marginTop = '20px';
+
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit and Claim';
+    submitButton.className = 'game-button';
+    submitButton.onclick = () => handleScoreSubmission(document.getElementById('nameInput').value);
+
     const claimScoreBtn = document.createElement('button');
     claimScoreBtn.textContent = 'Claim Score';
+    claimScoreBtn.className = 'game-button';
     claimScoreBtn.onclick = () => claimScore(totalScore);
-    document.getElementById('gameOverButtons').appendChild(claimScoreBtn);
-}
 
-function claimScore(totalScore) {
-    game.playerUpgrades.addScore(totalScore);
-    checkpointManager.resetAccumulatedReward();
-    updateAvailableScoreDisplay();
-    showOverlay('Score claimed successfully!', checkAndDisplayStartButton, true, 'Play Again');
-}
+    const tryAgainBtn = document.createElement('button');
+    tryAgainBtn.textContent = 'Try Again';
+    tryAgainBtn.className = 'game-button';
+    tryAgainBtn.onclick = () => {
+        hideOverlay();
+        game.initializeGame();
+    };
 
+    buttonsContainer.appendChild(submitButton);
+    buttonsContainer.appendChild(claimScoreBtn);
+    buttonsContainer.appendChild(tryAgainBtn);
+
+    const nameForm = document.getElementById('nameForm');
+    nameForm.appendChild(buttonsContainer);
+}
   
 async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
