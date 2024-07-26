@@ -2322,8 +2322,8 @@ function createUpgradeCard(type, tier, upgradeInfo) {
     card.className = 'upgrade-card';
     
     const maxTier = type === 'bomb' ? UPGRADES.bomb.maxCount : UPGRADES[type].length;
-    const currentTier = type === 'bomb' ? game.playerUpgrades.upgrades.bomb : tier + 1;
-    const progress = ((currentTier - 1) / maxTier) * 100;
+    const currentTier = type === 'bomb' ? game.playerUpgrades.upgrades.bomb : tier;
+    const progress = (currentTier / maxTier) * 100;
     
     card.innerHTML = `
         <img src="${picsUrl}${type}.jpg" alt="${type} upgrade" class="upgrade-icon">
@@ -2337,16 +2337,21 @@ function createUpgradeCard(type, tier, upgradeInfo) {
             <button class="upgrade-button buy-score">Buy with Score</button>
             <button class="upgrade-button buy-jump">Buy with JUMP</button>
         </div>
-        <button class="max-button">Max</button>
+        <div class="button-container">
+            <button class="max-button max-score">Max with Score</button>
+            <button class="max-button max-jump">Max with JUMP</button>
+        </div>
     `;
     
     const buyScoreBtn = card.querySelector('.buy-score');
     const buyJumpBtn = card.querySelector('.buy-jump');
-    const maxBtn = card.querySelector('.max-button');
+    const maxScoreBtn = card.querySelector('.max-score');
+    const maxJumpBtn = card.querySelector('.max-jump');
 
     buyScoreBtn.onclick = () => purchaseUpgrade(type, tier, false);
     buyJumpBtn.onclick = () => purchaseUpgrade(type, tier, true);
-    maxBtn.onclick = () => purchaseMaxUpgrade(type, tier, false);
+    maxScoreBtn.onclick = () => purchaseMaxUpgrade(type, tier, false);
+    maxJumpBtn.onclick = () => purchaseMaxUpgrade(type, tier, true);
 
     return card;
 }
