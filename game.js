@@ -3084,6 +3084,11 @@ function createGameOverForm(totalScore) {
         return;
     }
 
+    // Create a spacer div to push the form lower
+    const spacer = document.createElement('div');
+    spacer.style.flexGrow = '1';
+    gameOverContainer.appendChild(spacer);
+
     const nameForm = document.createElement('form');
     nameForm.id = 'nameForm';
     nameForm.style.display = 'flex';
@@ -3091,6 +3096,7 @@ function createGameOverForm(totalScore) {
     nameForm.style.alignItems = 'center';
     nameForm.style.gap = '10px';
     nameForm.style.marginTop = '20px';
+    nameForm.style.width = '100%'; // Ensure the form takes full width
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -3101,11 +3107,13 @@ function createGameOverForm(totalScore) {
     nameInput.style.marginBottom = '10px';
     nameInput.style.padding = '5px';
     nameInput.style.fontSize = '16px';
+    nameInput.style.width = '80%'; // Make the input wider
 
     const buttonsContainer = document.createElement('div');
     buttonsContainer.style.display = 'flex';
     buttonsContainer.style.justifyContent = 'space-between';
-    buttonsContainer.style.width = '100%';
+    buttonsContainer.style.width = '80%'; // Match the width of the input
+    buttonsContainer.style.flexWrap = 'wrap'; // Allow buttons to wrap on smaller screens
 
     const submitButton = document.createElement('button');
     submitButton.textContent = 'Submit and Claim';
@@ -3131,6 +3139,13 @@ function createGameOverForm(totalScore) {
         showUpgradeShop();
     };
 
+    // Apply consistent styling to all buttons
+    [submitButton, claimScoreAndTryAgainBtn, shopBtn].forEach(btn => {
+        btn.style.flex = '1 0 30%'; // Allow buttons to grow and shrink, but maintain a minimum width
+        btn.style.margin = '5px';
+        btn.style.minWidth = '120px'; // Ensure buttons don't get too small on narrow screens
+    });
+
     buttonsContainer.appendChild(submitButton);
     buttonsContainer.appendChild(claimScoreAndTryAgainBtn);
     buttonsContainer.appendChild(shopBtn);
@@ -3139,6 +3154,11 @@ function createGameOverForm(totalScore) {
     nameForm.appendChild(buttonsContainer);
 
     gameOverContainer.appendChild(nameForm);
+
+    // Add some bottom padding to ensure the form isn't too close to the bottom of the screen
+    const bottomPadding = document.createElement('div');
+    bottomPadding.style.height = '20px';
+    gameOverContainer.appendChild(bottomPadding);
 }
   
 async function handleScoreSubmission(name) {
