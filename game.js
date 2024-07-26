@@ -2060,8 +2060,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginTop: '20px', 
-        marginBottom: '20px'
+        marginTop: 'auto', 
+        marginBottom: 'auto'
     });
 
     messageElement.innerHTML = message.replace(/\n/g, '<br>'); // Replace newlines with <br> tags
