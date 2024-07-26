@@ -2308,11 +2308,14 @@ async function handleBribeLeader() {
 
     upgradeOptions.innerHTML = '';
 
-    let buttonContainer = document.getElementById('shopButtonContainer');
+    // Find or create the button container within the upgrade shop modal
+    let buttonContainer = upgradeShop.querySelector('#shopButtonContainer');
     if (!buttonContainer) {
-        // Create the button container if it doesn't exist
         buttonContainer = document.createElement('div');
         buttonContainer.id = 'shopButtonContainer';
+        buttonContainer.style.marginTop = '20px';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'space-around';
         upgradeShop.appendChild(buttonContainer);
     }
     buttonContainer.innerHTML = ''; // Clear existing buttons
