@@ -53,6 +53,10 @@ class PlayerUpgrades {
     canAfford(upgradeType, tier, useJump, maxPrice = null) {
         if (maxPrice !== null) {
             const balance = useJump ? this.jumpBalance : this.score;
+            console.log(`Checking affordability for max upgrade of ${upgradeType}`);
+            console.log(`Using JUMP: ${useJump}`);
+            console.log(`Max Price: ${maxPrice}`);
+            console.log(`Balance: ${balance}`);
             return balance >= maxPrice;
         }
 
@@ -62,13 +66,19 @@ class PlayerUpgrades {
         
         const balance = useJump ? this.jumpBalance : this.score;
         
+        console.log(`Checking affordability for ${upgradeType} (Tier ${tier})`);
+        console.log(`Using JUMP: ${useJump}`);
+        console.log(`Price: ${price}`);
+        console.log(`Balance: ${balance}`);
         
         if (upgradeType === 'bomb') {
             const canAfford = balance >= price && this.upgrades.bomb < UPGRADES.bomb.maxCount;
+            console.log(`Can afford bomb: ${canAfford}`);
             return canAfford;
         }
         
         const canAfford = balance >= price;
+        console.log(`Can afford: ${canAfford}`);
         return canAfford;
     }
 
@@ -138,6 +148,18 @@ class PlayerUpgrades {
 
     addScore(amount) {
         this.score += amount;
+        this.updateAvailableScoreDisplay();
+    }
+
+    updateAvailableScoreDisplay() {
+        const availableScoreElement = document.getElementById('availableScore');
+        const availableScoreHeader = document.getElementById('availableScoreHeader');
+        if (availableScoreElement) {
+            availableScoreElement.textContent = this.score;
+        }
+        if (availableScoreHeader) {
+            availableScoreHeader.textContent = this.score;
+        }
     }
 
     useBomb() {
