@@ -2294,7 +2294,10 @@ async function handleBribeLeader() {
     startGameBtn.style.color = '#1a2333';
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
+        showEtherlinkWaitMessage(); // Show the message before initializing the game
         game.initializeGame();
+        hideOverlay(); // Hide the overlay after game initialization
+
     };
     upgradeOptions.appendChild(startGameBtn);
 
