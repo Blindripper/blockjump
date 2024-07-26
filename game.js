@@ -2310,9 +2310,13 @@ async function handleBribeLeader() {
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
         showEtherlinkWaitMessage(); // Show the message before initializing the game
-        game.initializeGame();
-        hideOverlay(); // Hide the overlay after game initialization
-
+        game.initializeGame().then(() => {
+            // Only hide the overlay after the game has finished initializing
+            hideOverlay();
+        }).catch(error => {
+            console.error('Error initializing game:', error);
+            showOverlay('Failed to start game. Please try again.');
+        });
     };
     upgradeOptions.appendChild(startGameBtn);
 
