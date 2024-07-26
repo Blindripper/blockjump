@@ -2521,8 +2521,12 @@ async function updateAvailableScoreDisplay() {
   
     console.log('Updating available score display:', { score, jumpBalance });
   
+    console.log('jumpBalance type:', typeof jumpBalance); // Added to check data type
+  
     const formattedScore = formatPrice(score);
     const jumpBalanceNumber = Number(jumpBalance); // Convert to number
+    console.log('jumpBalanceNumber:', jumpBalanceNumber); // Added to check conversion
+  
     const formattedJumpBalance = formatPrice(jumpBalanceNumber.toFixed(2)); // Limit decimal places
   
     if (availableScoreHeader) {
