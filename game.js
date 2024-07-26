@@ -2320,6 +2320,24 @@ async function handleBribeLeader() {
     upgradeOptions.appendChild(startGameBtn);
 
     upgradeShop.style.display = 'flex';
+    upgradeShop.style.justifyContent = 'center';
+    upgradeShop.style.alignItems = 'center';
+
+    const modalContent = upgradeShop.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.style.width = '90%';
+        modalContent.style.maxWidth = '1200px';
+        modalContent.style.height = '90%';
+        modalContent.style.maxHeight = '800px';
+        modalContent.style.overflow = 'hidden';
+    }
+
+    upgradeOptions.style.display = 'grid';
+    upgradeOptions.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+    upgradeOptions.style.gap = '20px';
+    upgradeOptions.style.padding = '20px';
+    upgradeOptions.style.overflow = 'hidden';
+
 
     // Remove any Start Game button outside the shop
     const outsideStartGameBtn = document.querySelector('button:not(#upgradeShop button)');
@@ -2336,44 +2354,30 @@ function createUpgradeOption(type, tier, upgradeInfo) {
         option.classList.add('purchased');
     }
 
-    const img = document.createElement('img');
-    img.src = `https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/${type}.jpg`;
-    img.style.width = '60px';
-    img.style.height = '60px';
-    img.style.marginBottom = '10px';
+    const content = `
+        <div class="upgrade-header">
+            <img src="https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/${type}.jpg" alt="${type} upgrade">
+            <div class="upgrade-info">
+                <h3>${getUpgradeTitle(type, tier)}</h3>
+                <p>${getUpgradeDescription(type, tier, upgradeInfo)}</p>
+            </div>
+        </div>
+        <div class="button-container">
+            ${createBuyButton(type, tier, upgradeInfo, false).outerHTML}
+            ${createBuyButton(type, tier, upgradeInfo, true).outerHTML}
+        </div>
+    `;
 
-    const info = document.createElement('div');
-    info.className = 'upgrade-info';
-    info.textContent = getUpgradeDescription(type, tier, upgradeInfo);
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'button-container';
-
-    const scoreButton = createBuyButton(type, tier, upgradeInfo, false);
-    const jumpButton = createBuyButton(type, tier, upgradeInfo, true);
-
-    buttonContainer.appendChild(scoreButton);
-    buttonContainer.appendChild(jumpButton);
-
-    option.appendChild(img);
-    option.appendChild(info);
-
-    if (type !== 'bomb') {
-        const tierProgress = document.createElement('div');
-        tierProgress.className = 'tier-progress';
-        tierProgress.textContent = `Tier ${game.playerUpgrades.upgrades[type]}/${UPGRADES[type].length}`;
-        option.appendChild(tierProgress);
-    } else {
-        const bombCount = document.createElement('div');
-        bombCount.className = 'bomb-count';
-        bombCount.textContent = `Bombs: ${game.playerUpgrades.upgrades.bomb}/${UPGRADES.bomb.maxCount}`;
-        option.appendChild(bombCount);
-    }
-
-    option.appendChild(buttonContainer);
-
+    option.innerHTML = content;
     return option;
 }
+
+function getUpgradeTitle(type, tier) {
+    return `${type.charAt(0).toUpperCase() + type.slice(1)} Tier ${tier + 1}`;
+}
+
+
+
 
 function calculateMaxPrice(type, useJump) {
     if (type === 'bomb') {
