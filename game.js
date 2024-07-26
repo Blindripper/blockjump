@@ -2060,7 +2060,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         fontWeight: 'bold',
         textAlign: 'center',
         maxWidth: '80%',
-        marginTop: '50px', // Reduced from 190px to move content up
+        marginTop: '20px', 
         marginBottom: '20px'
     });
 
@@ -2078,7 +2078,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             padding: '20px',
             borderRadius: '10px',
-            marginTop: '20px'
+            marginTop: 'auto'
         });
 
         const nameInput = document.createElement('input');
@@ -2205,6 +2205,19 @@ async function handleBribeLeader() {
     }
   }
   
+  function claimScore(totalScore) {
+    if (!checkWalletConnection()) return;
+
+    try {
+        game.playerUpgrades.addScore(totalScore);
+        checkpointManager.resetAccumulatedReward();
+        updateAvailableScoreDisplay();
+        showOverlay('Score claimed successfully!', checkAndDisplayStartButton, true, 'Play Again');
+    } catch (error) {
+        console.error('Error claiming score:', error);
+        showOverlay('An error occurred while claiming the score. Please try again.', null, true, 'Try Again');
+    }
+}
   
   async function processBribe(amount, useJump) {
     try {
