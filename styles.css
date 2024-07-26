@@ -172,6 +172,7 @@ header {
 .upgrade-card h3 {
   margin: 0 0 10px 0;
   text-align: center;
+  color: #FFD700;
 }
 
 .upgrade-card .tier-progress {
