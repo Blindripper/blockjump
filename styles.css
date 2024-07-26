@@ -118,23 +118,24 @@ header {
 }
 
 #upgradeShop {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.9);
   z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .shop-content {
   background-color: rgba(26, 35, 51, 0.95);
   padding: 20px;
   border-radius: 10px;
-  max-width: 90%;
+  width: 90%;
+  max-width: 1200px;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
@@ -143,29 +144,30 @@ header {
 }
 
 .upgrades-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
   width: 100%;
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
-
 .upgrade-card {
-  background-color: rgba(255, 255, 255, 0.15);
+  width: 220px;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 15px;
-  width: 280px;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .upgrade-card img {
-  width: 100px;
-  height: 100px;
-  align-self: center;
+  width: 80px;
+  height: 80px;
   margin-bottom: 10px;
 }
+
 
 .upgrade-card h3 {
   margin: 0 0 10px 0;
@@ -200,6 +202,14 @@ header {
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
+}
+
+.upgrade-button, .max-button {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .upgrade-card .upgrade-button,
@@ -237,15 +247,13 @@ header {
 }
 
 .start-game-button {
-  padding: 15px 30px;
-  font-size: 24px;
+  padding: 10px 20px;
+  font-size: 18px;
   background-color: #3FE1B0;
   color: #1a2333;
   border: none;
-  z-index: 10000; /* Ensure it's above other elements */
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .start-game-button:hover {
@@ -260,9 +268,8 @@ header {
 
   .shop-header {
     text-align: center;
-    padding: 20px;
-    color: #ffffff;
-    width: 100%; /* Ensure it takes full width */
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .shop-header h2 {
@@ -388,10 +395,10 @@ header {
 }
 
 .button-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  gap: 5px;
 }
 
 .game-overlay .game-button {
