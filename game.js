@@ -2273,14 +2273,8 @@ async function handleBribeLeader() {
     await game.playerUpgrades.updateJumpBalance();
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
-    const upgradeOptions = document.getElementById('upgradeOptions');
-
-    if (!upgradeShop || !upgradeOptions) {
-        console.error('Required elements not found');
-        return;
-    }
-
-    upgradeOptions.innerHTML = `
+    
+    upgradeShop.innerHTML = `
         <div class="shop-header">
             <h2>Upgrade Shop</h2>
             <div class="balance-info">
@@ -2288,21 +2282,21 @@ async function handleBribeLeader() {
                 <span>JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}</span>
             </div>
         </div>
-        <div id="upgradesContainer" class="upgrades-grid"></div>
+        <div id="upgradesGrid" class="upgrades-grid"></div>
         <div class="start-game-container">
             <button id="startGameBtn" class="start-game-button">START GAME</button>
         </div>
     `;
 
-    const upgradesContainer = document.getElementById('upgradesContainer');
+    const upgradesGrid = document.getElementById('upgradesGrid');
 
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
         if (type === 'bomb') {
-            upgradesContainer.appendChild(createUpgradeCard(type, -1, tiers));
+            upgradesGrid.appendChild(createUpgradeCard(type, -1, tiers));
         } else {
             const currentTier = game.playerUpgrades.upgrades[type];
             if (currentTier < tiers.length) {
-                upgradesContainer.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
+                upgradesGrid.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
             }
         }
     });
