@@ -2060,12 +2060,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     nameFormContainer.id = 'nameFormContainer';
     nameFormContainer.style.marginBottom = '20px';
 
-    const gameOverContent = `
-        <h2 style="color: #3FE1B0; margin-bottom: 20px;">Game Over</h2>
-        <p>${message.replace('Game Over!\n', '').replace(/\n/g, '</p><p>')}</p>
-    `;
-
-    gameOverContainer.innerHTML = gameOverContent;
+    
 
     if (includeNameForm) {
         const nameForm = createNameForm();
