@@ -124,53 +124,48 @@ header {
   display: none;
   position: fixed;
   z-index: 5001;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  height: 80vh;
+  max-width: 1200px;
+  max-height: 800px;
+  background-color: rgba(0,0,0,0.8);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 #upgradeShop .modal-content {
-  background-color: #1a2333;
-  color: #ffffff;
-  border: 2px solid #3FE1B0;
-  border-radius: 10px;
-  padding: 30px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 #upgradeOptions {
-  display: flex;
-  flex-wrap: wrap;
   flex-grow: 1;
-  justify-content: space-around;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#upgradesContainer {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   overflow-y: auto;
-  max-height: calc(80vh - 200px);
   padding-right: 10px;
 }
 
 .upgrade-option {
-  flex-basis: calc(50% - 20px);
-  max-width: 300px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 20px;
-  padding-top: 25px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
 }
 
 .upgrade-option.purchased {
@@ -392,7 +387,8 @@ header {
 }
 
 #startGameBtn {
-  padding: 10px 20px;
+  margin-top: 20px;
+  padding: 15px;
   font-size: 18px;
   background-color: #3FE1B0;
   color: #1a2333;
@@ -400,7 +396,6 @@ header {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s;
-  width: 200px;
 }
 
 #startGameBtn:hover {
