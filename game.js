@@ -261,6 +261,8 @@ class Game {
             } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
+        } finally {
+            hideOverlay(); 
              }
             }
     
@@ -2806,6 +2808,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function handleWalletConnection() {
     try {
       if (!isConnected) {
+        showEtherlinkWaitMessage(); 
         const web3Instance = await initWeb3();
         if (web3Instance) {
           const connected = await connectWallet(web3Instance);
@@ -2932,7 +2935,10 @@ async function processPurchase(useJump) {
 
 function showStartButton() {
     showOverlay('Ready to play?', () => {
-        game.initializeGame();
+        showEtherlinkWaitMessage(); // Add this line
+        game.initializeGame().finally(() => {
+            hideOverlay(); // Ensure overlay is hidden after game initialization
+        });
     }, true, 'Start Game');
 }
 
