@@ -1,6 +1,7 @@
 import { initWeb3, isContractInitialized, connectWallet,getContractBalance, startGame as startGameWeb3, getGameTries, purchaseGameTries, getHighscores,bribeLeader, submitScore, claimPrize, getContract, getCurrentAccount,approveJumpSpending, addFunds,} from './web3Integration.js';
 import { loadUserAchievements, updateGameStats } from './achievements.js';
 import { PlayerUpgrades, UPGRADES } from './upgrades.js';
+import { checkpointManager } from './checkpointManager.js';
 
 let game;
 let isConnected = false;
@@ -941,6 +942,11 @@ class Game {
             this.handleGameOver();
             return;
         }
+
+        // Check for checkpoints
+        checkpointManager.checkCheckpoint(this.blocksClimbed);
+
+
          // Check for bomb usage
          if (this.keys[this.bombKey] && this.playerUpgrades.useBomb()) {
             this.activateBomb();
@@ -951,6 +957,7 @@ class Game {
     
         this.updateScrollSpeed();
         this.updatePlayer(dt);
+        
         this.updatePlatforms(dt);
         this.updatePowerups(dt);
         this.updateParticles(dt);
@@ -2976,16 +2983,31 @@ async function processAddFunds(xtzAmount, jumpAmount) {
 
 
 function handleGameOver(score, blocksClimbed, gameStartTime) {
-    window.finalScore = score;
-    window.blocksClimbed = blocksClimbed;
-    window.gameStartTime = gameStartTime;
+    const checkpointReward = checkpointManager.getAccumulatedReward();
+    const totalScore = score + checkpointReward;
 
-    game.updateAchievements();
-    game.playerUpgrades.addScore(score);  // Add the score to PlayerUpgrades here
-    updateAvailableScoreDisplay();  // Update the display after adding the score
+    showOverlay(`Game Over!\nScore: ${score}\nBlocks Climbed: ${blocksClimbed}\nCheckpoint Reward: ${checkpointReward}\nTotal Score: ${totalScore}`, null, false, '', true);
 
-    showOverlay(`<h2>Game Over</h2>Tezos Price: ${score}<br>Blocks Climbed: ${blocksClimbed}`, null, false, '', true);
+    // Update the submit score button text
+    const submitScoreBtn = document.getElementById('submitScore');
+    if (submitScoreBtn) {
+        submitScoreBtn.textContent = 'Submit and Claim';
+    }
+
+    // Add a "Claim Score" button
+    const claimScoreBtn = document.createElement('button');
+    claimScoreBtn.textContent = 'Claim Score';
+    claimScoreBtn.onclick = () => claimScore(totalScore);
+    document.getElementById('gameOverButtons').appendChild(claimScoreBtn);
 }
+
+function claimScore(totalScore) {
+    game.playerUpgrades.addScore(totalScore);
+    checkpointManager.resetAccumulatedReward();
+    updateAvailableScoreDisplay();
+    showOverlay('Score claimed successfully!', checkAndDisplayStartButton, true, 'Play Again');
+}
+
   
 async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
@@ -3002,12 +3024,17 @@ async function handleScoreSubmission(name) {
             return;
         }
 
-        const submitted = await submitScore(name, window.finalScore, window.blocksClimbed, window.gameStartTime);
+        const checkpointReward = checkpointManager.getAccumulatedReward();
+        const totalScore = window.finalScore + checkpointReward;
+
+        const submitted = await submitScore(name, totalScore, window.blocksClimbed, window.gameStartTime);
         
         if (submitted) {
+            game.playerUpgrades.addScore(totalScore);
+            checkpointManager.resetAccumulatedReward();
             await updateHighscoreTable();
-            showOverlay('Score submitted successfully!', async () => {
-                await updateTryCount(); // Update the try count after successful submission
+            showOverlay('Score submitted and claimed successfully!', async () => {
+                await updateTryCount();
                 await checkAndDisplayStartButton();
             }, true, 'Play Again');
         } else {
