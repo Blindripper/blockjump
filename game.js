@@ -2334,12 +2334,20 @@ function createUpgradeCard(type, tier, upgradeInfo) {
             <span>Tier ${currentTier}/${maxTier}</span>
         </div>
         <div class="button-container">
-            ${createBuyButton(type, tier, upgradeInfo, false).outerHTML}
-            ${createBuyButton(type, tier, upgradeInfo, true).outerHTML}
+            <button class="upgrade-button buy-score">Buy with Score</button>
+            <button class="upgrade-button buy-jump">Buy with JUMP</button>
         </div>
-        <button class="max-button" onclick="purchaseMaxUpgrade('${type}', ${tier}, false)">Max</button>
+        <button class="max-button">Max</button>
     `;
     
+    const buyScoreBtn = card.querySelector('.buy-score');
+    const buyJumpBtn = card.querySelector('.buy-jump');
+    const maxBtn = card.querySelector('.max-button');
+
+    buyScoreBtn.onclick = () => purchaseUpgrade(type, tier, false);
+    buyJumpBtn.onclick = () => purchaseUpgrade(type, tier, true);
+    maxBtn.onclick = () => purchaseMaxUpgrade(type, tier, false);
+
     return card;
 }
 
@@ -2590,7 +2598,7 @@ async function purchaseUpgrade(type, tier, useJump) {
             setTimeout(() => {
                 hideUpgradeOverlay();
                 showUpgradeShop();  // Refresh the shop
-            }, 1500);  // Show "Upgraded!" message for 1.5 seconds
+            }, 1500);
         } else {
             hideUpgradeOverlay();
             showUpgradeOverlay('Upgrade failed. Please try again.');
