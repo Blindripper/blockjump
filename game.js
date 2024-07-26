@@ -2480,36 +2480,6 @@ async function purchaseMaxUpgrade(type, tier, useJump) {
 
 
 
-function createBuyButton(type, tier, upgradeInfo, useJump) {
-    const buttonAndPrice = document.createElement('div');
-    buttonAndPrice.className = 'button-price-container';
-
-    const button = document.createElement('button');
-    button.className = 'upgrade-button';
-    button.textContent = useJump ? 'Buy with JUMP' : 'Buy with Score';
-    button.onclick = () => purchaseUpgrade(type, tier, useJump);
-    
-    const canAfford = game.playerUpgrades.canAfford(type, tier, useJump);
-    button.disabled = !canAfford;
-
-    const price = document.createElement('div');
-    price.className = 'upgrade-price';
-
-    let priceValue;
-    if (type === 'bomb') {
-        priceValue = useJump ? UPGRADES.bomb.jumpCost : UPGRADES.bomb.cost;
-    } else {
-        priceValue = useJump ? upgradeInfo.jumpCost : upgradeInfo.cost;
-    }
-
-    price.textContent = formatPrice(priceValue);
-
-    buttonAndPrice.appendChild(button);
-    buttonAndPrice.appendChild(price);
-
-    return buttonAndPrice;
-}
-
 function getUpgradeDescription(type, tier, upgradeInfo) {
     switch (type) {
         case 'speed':
