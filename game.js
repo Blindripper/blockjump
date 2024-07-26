@@ -2279,8 +2279,7 @@ async function handleBribeLeader() {
             <div class="shop-header">
                 <h2>Upgrade Shop</h2>
                 <div class="balance-info">
-                    <span>$Score: ${formatPrice(game.playerUpgrades.score)}</span>
-                    <span>JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}</span>
+                    $Score: ${formatPrice(game.playerUpgrades.score)} | JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}
                 </div>
             </div>
             <div id="upgradesGrid" class="upgrades-grid"></div>
