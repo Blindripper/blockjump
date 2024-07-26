@@ -2275,16 +2275,18 @@ async function handleBribeLeader() {
     const upgradeShop = document.getElementById('upgradeShop');
     
     upgradeShop.innerHTML = `
-        <div class="shop-header">
-            <h2>Upgrade Shop</h2>
-            <div class="balance-info">
-                <span>$Score: ${formatPrice(game.playerUpgrades.score)}</span>
-                <span>JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}</span>
+        <div class="shop-content">
+            <div class="shop-header">
+                <h2>Upgrade Shop</h2>
+                <div class="balance-info">
+                    <span>$Score: ${formatPrice(game.playerUpgrades.score)}</span>
+                    <span>JUMP: ${formatPrice(game.playerUpgrades.jumpBalance)}</span>
+                </div>
             </div>
-        </div>
-        <div id="upgradesGrid" class="upgrades-grid"></div>
-        <div class="start-game-container">
-            <button id="startGameBtn" class="start-game-button">START GAME</button>
+            <div id="upgradesGrid" class="upgrades-grid"></div>
+            <div class="start-game-container">
+                <button id="startGameBtn" class="start-game-button">START GAME</button>
+            </div>
         </div>
     `;
 
