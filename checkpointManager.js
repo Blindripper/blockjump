@@ -39,9 +39,24 @@ class CheckpointManager {
         messageDiv.style.fontWeight = 'bold';
         messageDiv.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
         messageDiv.style.zIndex = '1000';
-
+        messageDiv.style.textAlign = 'center';
+        messageDiv.style.width = '100%';
+        messageDiv.style.pointerEvents = 'none'; // Ensure it doesn't interfere with game interactions
+    
+        // Get the game canvas
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) {
+            console.error('Game canvas not found');
+            return;
+        }
+    
+        // Position the message relative to the canvas
+        const canvasRect = canvas.getBoundingClientRect();
+        messageDiv.style.top = `${canvasRect.top + canvasRect.height / 2}px`;
+        messageDiv.style.left = `${canvasRect.left + canvasRect.width / 2}px`;
+    
         document.body.appendChild(messageDiv);
-
+    
         // Remove the message after 3 seconds
         setTimeout(() => {
             document.body.removeChild(messageDiv);
