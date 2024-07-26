@@ -127,28 +127,29 @@ header {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .shop-content {
+  background-color: rgba(26, 35, 51, 0.95);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: center; /* This centers the child elements horizontally */
-  height: 100%;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  align-items: center;
 }
 
 .upgrades-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  padding: 25px 0;
-  width: 100%; /* Ensure it takes full width */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  width: 100%;
+  margin: 20px 0;
 }
+
 
 .upgrade-card {
   background-color: rgba(255, 255, 255, 0.15);
@@ -241,6 +242,7 @@ header {
   background-color: #3FE1B0;
   color: #1a2333;
   border: none;
+  z-index: 10000; /* Ensure it's above other elements */
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
