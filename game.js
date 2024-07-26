@@ -2296,8 +2296,10 @@ async function handleBribeLeader() {
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
     const upgradeOptions = document.getElementById('upgradeOptions');
+    const buttonContainer = document.getElementById('shopButtonContainer');
 
     upgradeOptions.innerHTML = '';
+    buttonContainer.innerHTML = ''; // Clear existing buttons
 
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
         if (type === 'bomb') {
@@ -2312,10 +2314,26 @@ async function handleBribeLeader() {
         }
     });
 
-    // Modify the Start Game button to close the shop and return to the game over screen
-    const startGameBtn = document.getElementById('startGameBtn');
-    startGameBtn.textContent = 'Close Shop';
-    startGameBtn.onclick = closeShop;
+    // Create "Start Game" button
+    const startGameBtn = document.createElement('button');
+    startGameBtn.id = 'startGameBtn';
+    startGameBtn.textContent = 'Start Game';
+    startGameBtn.className = 'game-button';
+    startGameBtn.onclick = () => {
+        upgradeShop.style.display = 'none';
+        game.initializeGame();
+    };
+    buttonContainer.appendChild(startGameBtn);
+
+    // Check if we're coming from the game over screen
+    if (document.getElementById('game-overlay') && document.getElementById('game-overlay').style.display !== 'none') {
+        // Create "Return to Game Over" button
+        const returnToGameOverBtn = document.createElement('button');
+        returnToGameOverBtn.textContent = 'Return to Game Over';
+        returnToGameOverBtn.className = 'game-button';
+        returnToGameOverBtn.onclick = closeShop;
+        buttonContainer.appendChild(returnToGameOverBtn);
+    }
 
     upgradeShop.style.display = 'block';
 }
