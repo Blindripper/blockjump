@@ -2058,11 +2058,18 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     gameOverContainer.id = 'gameOverContainer';
     gameOverContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;';
 
+    // Add this block to display the message
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.style.color = '#3FE1B0';
+    messageElement.style.fontSize = '24px';
+    messageElement.style.textAlign = 'center';
+    messageElement.style.marginBottom = '20px';
+    gameOverContainer.appendChild(messageElement);
+
     const nameFormContainer = document.createElement('div');
     nameFormContainer.id = 'nameFormContainer';
     nameFormContainer.style.marginBottom = '20px';
-
-    
 
     if (includeNameForm) {
         const nameForm = createNameForm();
@@ -2072,9 +2079,11 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         nameFormContainer.appendChild(button);
     }
 
-    gameOverContainer.insertBefore(nameFormContainer, gameOverContainer.children[1]);
+    gameOverContainer.appendChild(nameFormContainer);
     overlay.appendChild(gameOverContainer);
     document.body.appendChild(overlay);
+
+    console.log('Overlay created with message:', message); // Add this for debugging
 }
 
 function createNameForm() {
