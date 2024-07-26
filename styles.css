@@ -193,8 +193,12 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 500px;
+  justify-content: center;
+  height: 100%;
+}
+
+.game-overlay #nameForm {
+  margin: 20px 0;
 }
 
 .game-overlay h2 {
