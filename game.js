@@ -2282,36 +2282,35 @@ async function handleBribeLeader() {
 
     upgradeOptions.innerHTML = '';
 
+    // Create a container for the upgrades
+    const upgradesContainer = document.createElement('div');
+    upgradesContainer.id = 'upgradesContainer';
+
     // Populate upgrade options
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
         if (type === 'bomb') {
             const option = createUpgradeOption(type, -1, tiers);
-            upgradeOptions.appendChild(option);
+            upgradesContainer.appendChild(option);
         } else {
             const currentTier = game.playerUpgrades.upgrades[type];
             if (currentTier < tiers.length) {
                 const option = createUpgradeOption(type, currentTier, tiers[currentTier]);
-                upgradeOptions.appendChild(option);
+                upgradesContainer.appendChild(option);
             }
         }
     });
+
+    upgradeOptions.appendChild(upgradesContainer);
 
     // Create a single Start Game button and append it to upgradeOptions
     const startGameBtn = document.createElement('button');
     startGameBtn.id = 'startGameBtn';
     startGameBtn.textContent = 'START GAME';
     startGameBtn.className = 'game-button';
-    startGameBtn.style.width = '100%';
-    startGameBtn.style.marginTop = '20px';
-    startGameBtn.style.padding = '15px';
-    startGameBtn.style.fontSize = '18px';
-    startGameBtn.style.backgroundColor = '#3FE1B0';
-    startGameBtn.style.color = '#1a2333';
     startGameBtn.onclick = () => {
         upgradeShop.style.display = 'none';
-        showEtherlinkWaitMessage(); // Show the message before initializing the game
+        showEtherlinkWaitMessage();
         game.initializeGame().then(() => {
-            // Only hide the overlay after the game has finished initializing
             hideOverlay();
         }).catch(error => {
             console.error('Error initializing game:', error);
@@ -2320,7 +2319,7 @@ async function handleBribeLeader() {
     };
     upgradeOptions.appendChild(startGameBtn);
 
-    upgradeShop.style.display = 'block';
+    upgradeShop.style.display = 'flex';
 
     // Remove any Start Game button outside the shop
     const outsideStartGameBtn = document.querySelector('button:not(#upgradeShop button)');
@@ -2337,21 +2336,27 @@ function createUpgradeOption(type, tier, upgradeInfo) {
         option.classList.add('purchased');
     }
 
-    const imgAndInfo = document.createElement('div');
-    imgAndInfo.style.display = 'flex';
-    imgAndInfo.style.alignItems = 'center';
-    imgAndInfo.style.flexGrow = '1';
-
     const img = document.createElement('img');
     img.src = `https://raw.githubusercontent.com/Blindripper/blockjump/main/pics/${type}.jpg`;
-    imgAndInfo.appendChild(img);
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.marginBottom = '10px';
 
     const info = document.createElement('div');
     info.className = 'upgrade-info';
     info.textContent = getUpgradeDescription(type, tier, upgradeInfo);
-    imgAndInfo.appendChild(info);
 
-    option.appendChild(imgAndInfo);
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+
+    const scoreButton = createBuyButton(type, tier, upgradeInfo, false);
+    const jumpButton = createBuyButton(type, tier, upgradeInfo, true);
+
+    buttonContainer.appendChild(scoreButton);
+    buttonContainer.appendChild(jumpButton);
+
+    option.appendChild(img);
+    option.appendChild(info);
 
     if (type !== 'bomb') {
         const tierProgress = document.createElement('div');
@@ -2364,19 +2369,6 @@ function createUpgradeOption(type, tier, upgradeInfo) {
         bombCount.textContent = `Bombs: ${game.playerUpgrades.upgrades.bomb}/${UPGRADES.bomb.maxCount}`;
         option.appendChild(bombCount);
     }
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'button-container';
-
-    const scoreButton = createBuyButton(type, tier, upgradeInfo, false);
-    const jumpButton = createBuyButton(type, tier, upgradeInfo, true);
-    const scoreMaxButton = createBuyMaxButton(type, tier, false);
-    const jumpMaxButton = createBuyMaxButton(type, tier, true);
-
-    buttonContainer.appendChild(scoreButton);
-    buttonContainer.appendChild(jumpButton);
-    buttonContainer.appendChild(scoreMaxButton);
-    buttonContainer.appendChild(jumpMaxButton);
 
     option.appendChild(buttonContainer);
 
