@@ -148,10 +148,10 @@ class PlayerUpgrades {
 
     addScore(amount) {
         this.score += amount;
-        this.updateAvailableScoreDisplay();
+        this.updatePlayerScoreDisplay();
     }
 
-    updateAvailableScoreDisplay() {
+    updatePlayerScoreDisplay() {
         const availableScoreElement = document.getElementById('availableScore');
         const availableScoreHeader = document.getElementById('availableScoreHeader');
         if (availableScoreElement) {
