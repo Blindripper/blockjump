@@ -2291,7 +2291,7 @@ async function handleBribeLeader() {
     }
   }
 
-async function showUpgradeShop() {
+  async function showUpgradeShop() {
     await game.playerUpgrades.updateJumpBalance();
     updateAvailableScoreDisplay();
     const upgradeShop = document.getElementById('upgradeShop');
@@ -2312,13 +2312,29 @@ async function showUpgradeShop() {
         }
     });
 
-    // Add click event listener to the Start Game button
-    document.getElementById('startGameBtn').onclick = () => {
-        upgradeShop.style.display = 'none';
-        game.initializeGame();
-    };
+    // Modify the Start Game button to close the shop and return to the game over screen
+    const startGameBtn = document.getElementById('startGameBtn');
+    startGameBtn.textContent = 'Close Shop';
+    startGameBtn.onclick = closeShop;
 
     upgradeShop.style.display = 'block';
+}
+
+
+function closeShop() {
+    const upgradeShop = document.getElementById('upgradeShop');
+    upgradeShop.style.display = 'none';
+    
+    // Ensure the game over overlay is still visible
+    const gameOverOverlay = document.getElementById('game-overlay');
+    if (gameOverOverlay) {
+        gameOverOverlay.style.display = 'flex';
+    }
+    
+    // Recreate the game over form to ensure all buttons are available
+    if (window.finalScore !== undefined) {
+        createGameOverForm(window.finalScore);
+    }
 }
 
 function createUpgradeOption(type, tier, upgradeInfo) {
@@ -3049,7 +3065,11 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     `;
 
     showOverlay(gameOverInfo, null, false, '', false);
+    createGameOverForm(totalScore);
+}
 
+// Create a new function to generate the game over form
+function createGameOverForm(totalScore) {
     const nameForm = document.createElement('form');
     nameForm.id = 'nameForm';
     nameForm.style.display = 'flex';
@@ -3094,7 +3114,6 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     shopBtn.textContent = 'Shop';
     shopBtn.className = 'game-button';
     shopBtn.onclick = () => {
-        hideOverlay();
         showUpgradeShop();
     };
 
@@ -3107,9 +3126,11 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
 
     const nameFormContainer = document.getElementById('nameFormContainer');
     if (nameFormContainer) {
+        nameFormContainer.innerHTML = ''; // Clear any existing content
         nameFormContainer.appendChild(nameForm);
     }
 }
+
   
 async function handleScoreSubmission(name) {
     if (!checkWalletConnection()) return;
