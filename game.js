@@ -695,6 +695,17 @@ class Game {
                 return true;
             });
 
+            // Check collisions with missiles
+            this.enemyBullets = this.enemyBullets.filter(enemyBullet => {
+                if (enemyBullet.angle !== undefined && this.checkCollision(bullet, enemyBullet)) {
+                    bulletHit = true;
+                    this.createParticles(enemyBullet.x, enemyBullet.y, 10, '#FFA500'); // Orange particles for missile destruction
+                    this.playSound('destroyed');
+                    return false; // Remove the missile
+                }
+                return true;
+            });
+
             return !bulletHit;
         });
     
