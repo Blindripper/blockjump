@@ -211,13 +211,12 @@ class Game {
             }
     
             hideOverlay();
-            this.gameStartTime = Date.now(); // Store full millisecond timestamp  
+            this.gameStartTime = Date.now();
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
             this.createBottomPlatform();
             this.platforms = this.createInitialPlatforms();
-            this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
             this.player.y = this.bottomPlatform.y - this.player.height;
             this.resetPowerupEffects();
@@ -233,11 +232,9 @@ class Game {
             this.enemyBullets = [];
             this.gameStarted = true;
             this.difficultyLevel = 1;
-            this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
             this.hasPlayerJumped = false;
             this.score = 0;
-            this.player = this.createPlayer();
             this.gameRunning = true;
             this.gameOver = false;
             this.blocksClimbed = 0;
@@ -248,26 +245,34 @@ class Game {
             this.lastBackgroundChange = 0;
             this.currentBackgroundIndex = 0;
 
-
-            setTimeout(() => {
-                this.bottomPlatform = null;
-            }, 5000);
-    
             await updateTryCount();
             
             if (this.debugMode) {
-                this.logGameState('After initialization');
+                this.logDebugInfo('After initialization');
             }
     
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
-            } catch (error) {
+        } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
         } finally {
             hideOverlay(); 
-             }
-            }
+        }
+    }
+
+    logDebugInfo(stage) {
+        console.log(`=== Debug Info: ${stage} ===`);
+        console.log('Game dimensions:', GAME_WIDTH, GAME_HEIGHT);
+        console.log('Player position:', this.player.x, this.player.y);
+        console.log('Bottom platform:', this.bottomPlatform);
+        console.log('Number of platforms:', this.platforms.length);
+        console.log('Game speed:', this.gameSpeed);
+        console.log('Platform speed:', this.platformSpeed);
+        console.log('Current scroll speed:', this.currentScrollSpeed);
+        console.log('===========================');
+    }
+
     
         loadSprites() {
         this.enemySprite = new Image();
@@ -1945,9 +1950,12 @@ updatePlayer(dt) {
         let deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         
-        
         this.update(deltaTime);
         this.draw();
+        
+        if (this.debugMode && Math.random() < 0.01) { // Log every ~100 frames
+            this.logDebugInfo('During game loop');
+        }
         
         requestAnimationFrame((time) => this.gameLoop(time));
     }
