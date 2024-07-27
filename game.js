@@ -53,7 +53,8 @@ class Game {
         this.nextBackgroundIndex = 0;
         this.lastShieldBlockTime = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
-        this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
+        this.minPlatformDistance = PLAYER_HEIGHT * 1.2; // Minimum vertical distance between platforms
+        this.maxPlatformDistance = PLAYER_HEIGHT * 2.2; // Add a maximum distance
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
@@ -113,7 +114,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 25;
+        this.platformCount = 40;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -858,40 +859,35 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        let lastY = GAME_HEIGHT; // Start from the bottom of the screen
+        let lastY = GAME_HEIGHT;
     
-        while (lastY > -GAME_HEIGHT) { // Generate platforms up to one screen height above the visible area
+        while (lastY > -GAME_HEIGHT) {
             lastY -= this.getRandomPlatformSpacing();
-            platforms.push(this.createPlatform(lastY, false)); // Pass false to disallow spike platforms
+            platforms.push(this.createPlatform(lastY));
         }
     
         return platforms;
     }
 
     
-    createPlatform(y, allowSpikes = true) {
+    createPlatform(y) {
         const minWidth = 60;
         const maxWidth = 180;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
-        const spikeChance = 0.01; // 1% chance for spike platforms
-
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: y,
             width: width,
             height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: allowSpikes && Math.random() < spikeChance,
+            isSpike: Math.random() < 0.05,
             spriteIndex: Math.floor(Math.random() * 2)
         };
     }
 
     getRandomPlatformSpacing() {
-        // Adjust these values to control the vertical spacing between platforms
-        const minSpacing = PLAYER_HEIGHT * 1.2;
-        const maxSpacing = PLAYER_HEIGHT * 2.2;
-        return Math.random() * (maxSpacing - minSpacing) + minSpacing;
+        return Math.random() * (this.maxPlatformDistance - this.minPlatformDistance) + this.minPlatformDistance;
     }
     
 
@@ -1063,34 +1059,25 @@ class Game {
     }
 
     updatePlatforms(dt) {
-    // Update bottom platform timer
-    if (this.gameStarted && this.bottomPlatform) {
-        this.bottomPlatformTimer += dt * this.gameSpeed;
-        if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
-            this.bottomPlatform = null;
+        // Move existing platforms down
+        this.platforms.forEach(platform => {
+            platform.y += this.currentScrollSpeed * dt;
+        });
+
+        // Remove platforms that are below the bottom of the screen
+        this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
+
+        // Add new platforms if needed
+        while (this.platforms.length < this.platformCount) {
+            const highestPlatform = this.platforms.reduce((highest, platform) => 
+                platform.y < highest.y ? platform : highest, 
+                {y: GAME_HEIGHT}
+            );
+            
+            const newY = highestPlatform.y - this.getRandomPlatformSpacing();
+            this.platforms.push(this.createPlatform(newY));
         }
     }
-
-    // Move existing platforms down
-    this.platforms.forEach(platform => {
-        platform.y += this.currentScrollSpeed * dt;
-    });
-
-    // Remove platforms that are below the bottom of the screen
-    this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
-
-    // Add new platforms if needed
-    while (this.platforms.length < this.platformCount) {
-        const highestPlatform = this.platforms.reduce((highest, platform) => 
-            platform.y < highest.y ? platform : highest, 
-            {y: GAME_HEIGHT}
-        );
-        
-        const newY = highestPlatform.y - this.minPlatformDistance - Math.random() * (PLAYER_HEIGHT * 0.5);
-        this.platforms.push(this.createPlatform(newY, true));
-    }
-
-}
 
 
 
