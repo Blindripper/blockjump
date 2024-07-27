@@ -1066,7 +1066,7 @@ class Game {
     
 
     handleGoldenPlatform() {
-        this.player.velocityY = this.JUMP_VELOCITY * 1.5;
+        this.player.velocityY = this.JUMP_VELOCITY * 1.2;
         this.score += 50;
         this.triggerScreenShake(5, 0.3);
         this.createParticles(this.player.x + this.player.width / 2, this.player.y + this.player.height, 15, '#3FE1B0');
