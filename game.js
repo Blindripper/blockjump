@@ -215,7 +215,8 @@ class Game {
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
-            this.bottomPlatform = this.createBottomPlatform();
+            this.createBottomPlatform();
+            this.platforms = this.createInitialPlatforms();
             this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
             this.player.y = this.bottomPlatform.y - this.player.height;
@@ -855,13 +856,13 @@ class Game {
         };
     }
 
+   
     createInitialPlatforms() {
         const platforms = [];
-        let y = GAME_HEIGHT - PLATFORM_HEIGHT;
+        let y = GAME_HEIGHT - this.platformHeight * 2; // Start above the bottom platform
 
         for (let i = 0; i < this.platformCount; i++) {
-            const platform = this.createPlatform(y);
-            platforms.push(platform);
+            platforms.push(this.createPlatform(y));
             y -= this.getRandomPlatformSpacing();
         }
 
