@@ -3186,7 +3186,7 @@ async function handleScoreSubmission(name) {
         const checkpointReward = checkpointManager.getAccumulatedReward();
         const totalScore = window.finalScore + checkpointReward;
 
-        const submitted = await submitScore(name, totalScore, window.blocksClimbed, window.gameStartTime);
+        const submitted = await submitScore(name, totalScore, game.blocksClimbed, window.gameStartTime);
         
         if (submitted) {
             game.playerUpgrades.addScore(totalScore);
