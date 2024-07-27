@@ -846,16 +846,13 @@ class Game {
 
     
     createBottomPlatform() {
-        return {
+        this.bottomPlatform = {
             x: 0,
-            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, 
+            y: GAME_HEIGHT - this.platformHeight,
             width: GAME_WIDTH,
-            height: PLATFORM_HEIGHT,
-            isSafe: true,
-            isBottomPlatform: true 
-
+            height: this.platformHeight,
+            isBottom: true
         };
-
     }
 
     createInitialPlatforms() {
@@ -873,15 +870,15 @@ class Game {
 
     
     createPlatform(y) {
-        const minWidth = GAME_WIDTH * 0.2; // 20% of screen width
-        const maxWidth = GAME_WIDTH * 0.4; // 40% of screen width
+        const minWidth = this.platformWidth * 0.7;
+        const maxWidth = this.platformWidth * 1.3;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: y,
             width: width,
-            height: PLATFORM_HEIGHT,
+            height: this.platformHeight,
             isGolden: Math.random() < 0.1,
             isSpike: Math.random() < 0.05,
             spriteIndex: Math.floor(Math.random() * 2)
@@ -1066,11 +1063,6 @@ class Game {
     }
 
     updatePlatforms(dt) {
-        if (!Array.isArray(this.platforms)) {
-            console.error('this.platforms is not an array:', this.platforms);
-            this.platforms = []; // Reset to an empty array if it's not an array
-        }
-
         // Move existing platforms down
         this.platforms.forEach(platform => {
             platform.y += this.currentScrollSpeed * dt;
@@ -1088,6 +1080,14 @@ class Game {
             
             const newY = highestPlatform.y - this.getRandomPlatformSpacing();
             this.platforms.push(this.createPlatform(newY));
+        }
+
+        // Update bottom platform position if scrolling is implemented
+        if (this.bottomPlatform) {
+            this.bottomPlatform.y += this.currentScrollSpeed * dt;
+            if (this.bottomPlatform.y > GAME_HEIGHT) {
+                this.createBottomPlatform(); // Reset bottom platform if it goes off-screen
+            }
         }
     }
 
@@ -1567,8 +1567,8 @@ updatePlayer(dt) {
     }
 
     drawPlatforms() {
+        // Draw regular platforms
         for (let platform of this.platforms) {
-            // Only draw platforms that are within or partially within the screen
             if (platform.y + platform.height > 0 && platform.y < GAME_HEIGHT) {
                 let sprite;
                 if (platform.isSpike) {
@@ -1579,10 +1579,22 @@ updatePlayer(dt) {
                     sprite = this.platformSprites.normal[platform.spriteIndex];
                 }
     
-                this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
+                this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, platform.height);
             }
         }
+        
+        // Draw bottom platform
+        if (this.bottomPlatform) {
+            this.ctx.fillStyle = '#3FE1B0'; // You can change this color
+            this.ctx.fillRect(
+                this.bottomPlatform.x, 
+                this.bottomPlatform.y, 
+                this.bottomPlatform.width, 
+                this.bottomPlatform.height
+            );
+        }
     }
+
 
     drawBullets() {
         this.ctx.fillStyle = '#00FF00';
