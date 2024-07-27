@@ -859,14 +859,16 @@ class Game {
     }
 
     createInitialPlatforms() {
-        this.platforms = [];
-        let y = GAME_HEIGHT - PLATFORM_HEIGHT; // Start from the bottom of the screen
+        const platforms = [];
+        let y = GAME_HEIGHT - PLATFORM_HEIGHT;
 
         for (let i = 0; i < this.platformCount; i++) {
             const platform = this.createPlatform(y);
-            this.platforms.push(platform);
+            platforms.push(platform);
             y -= this.getRandomPlatformSpacing();
         }
+
+        return platforms;
     }
 
     
@@ -1001,6 +1003,11 @@ class Game {
 
     
     handleCollisions(currentTime) {
+        if (!Array.isArray(this.platforms)) {
+            console.error('this.platforms is not an array:', this.platforms);
+            this.platforms = []; // Reset to an empty array if it's not an array
+        }
+    
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         let wasOnGround = this.player.isOnGround;
         this.player.isOnGround = false;
@@ -1059,6 +1066,11 @@ class Game {
     }
 
     updatePlatforms(dt) {
+        if (!Array.isArray(this.platforms)) {
+            console.error('this.platforms is not an array:', this.platforms);
+            this.platforms = []; // Reset to an empty array if it's not an array
+        }
+
         // Move existing platforms down
         this.platforms.forEach(platform => {
             platform.y += this.currentScrollSpeed * dt;
