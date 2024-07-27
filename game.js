@@ -114,7 +114,8 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 40;
+        this.platformCount = 15;
+        this.visiblePlatformCount = 8; // Number of platforms visible on screen at once
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -858,21 +859,20 @@ class Game {
     }
 
     createInitialPlatforms() {
-        const platforms = [];
-        let lastY = GAME_HEIGHT;
-    
-        while (lastY > -GAME_HEIGHT) {
-            lastY -= this.getRandomPlatformSpacing();
-            platforms.push(this.createPlatform(lastY));
+        this.platforms = [];
+        let y = GAME_HEIGHT - PLATFORM_HEIGHT; // Start from the bottom of the screen
+
+        for (let i = 0; i < this.platformCount; i++) {
+            const platform = this.createPlatform(y);
+            this.platforms.push(platform);
+            y -= this.getRandomPlatformSpacing();
         }
-    
-        return platforms;
     }
 
     
     createPlatform(y) {
-        const minWidth = 60;
-        const maxWidth = 180;
+        const minWidth = GAME_WIDTH * 0.2; // 20% of screen width
+        const maxWidth = GAME_WIDTH * 0.4; // 40% of screen width
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
         return {
@@ -1065,7 +1065,7 @@ class Game {
         });
 
         // Remove platforms that are below the bottom of the screen
-        this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
+        this.platforms = this.platforms.filter(platform => platform.y < GAME_HEIGHT);
 
         // Add new platforms if needed
         while (this.platforms.length < this.platformCount) {
@@ -1569,10 +1569,6 @@ updatePlayer(dt) {
     
                 this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
             }
-        }
-        
-        if (this.bottomPlatform) {
-            this.ctx.drawImage(this.platformSprites.normal[0], this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, PLATFORM_HEIGHT);
         }
     }
 
