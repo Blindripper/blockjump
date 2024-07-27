@@ -58,7 +58,7 @@ class Game {
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
-        this.debugMode = false;
+        this.debugMode = true;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -854,18 +854,21 @@ class Game {
             height: this.platformHeight,
             isBottom: true
         };
+        console.log('Bottom platform created:', this.bottomPlatform);
     }
 
    
     createInitialPlatforms() {
         const platforms = [];
-        let y = GAME_HEIGHT - this.platformHeight * 2; // Start above the bottom platform
+        let y = GAME_HEIGHT - this.platformHeight * 3; // Start higher above the bottom platform
 
         for (let i = 0; i < this.platformCount; i++) {
-            platforms.push(this.createPlatform(y));
+            const platform = this.createPlatform(y);
+            platforms.push(platform);
             y -= this.getRandomPlatformSpacing();
         }
 
+        console.log(`${platforms.length} initial platforms created`);
         return platforms;
     }
 
@@ -1070,10 +1073,13 @@ class Game {
         });
 
         // Remove platforms that are below the bottom of the screen
+        const initialCount = this.platforms.length;
         this.platforms = this.platforms.filter(platform => platform.y < GAME_HEIGHT);
+        const removedCount = initialCount - this.platforms.length;
 
         // Add new platforms if needed
-        while (this.platforms.length < this.platformCount) {
+        const addedCount = this.platformCount - this.platforms.length;
+        for (let i = 0; i < addedCount; i++) {
             const highestPlatform = this.platforms.reduce((highest, platform) => 
                 platform.y < highest.y ? platform : highest, 
                 {y: GAME_HEIGHT}
@@ -1083,11 +1089,16 @@ class Game {
             this.platforms.push(this.createPlatform(newY));
         }
 
-        // Update bottom platform position if scrolling is implemented
+        if (this.debugMode) {
+            console.log(`Platforms updated: ${removedCount} removed, ${addedCount} added. Total: ${this.platforms.length}`);
+        }
+
+        // Update bottom platform position
         if (this.bottomPlatform) {
             this.bottomPlatform.y += this.currentScrollSpeed * dt;
             if (this.bottomPlatform.y > GAME_HEIGHT) {
                 this.createBottomPlatform(); // Reset bottom platform if it goes off-screen
+                console.log('Bottom platform reset');
             }
         }
     }
@@ -1568,33 +1579,33 @@ updatePlayer(dt) {
     }
 
     drawPlatforms() {
+        let drawnCount = 0;
         // Draw regular platforms
         for (let platform of this.platforms) {
             if (platform.y + platform.height > 0 && platform.y < GAME_HEIGHT) {
-                let sprite;
-                if (platform.isSpike) {
-                    sprite = this.platformSprites.spike;
-                } else if (platform.isGolden) {
-                    sprite = this.platformSprites.golden;
-                } else {
-                    sprite = this.platformSprites.normal[platform.spriteIndex];
-                }
-    
-                this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, platform.height);
+                this.ctx.fillStyle = platform.isGolden ? '#FFD700' : (platform.isSpike ? '#FF0000' : '#3FE1B0');
+                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                drawnCount++;
             }
         }
         
         // Draw bottom platform
         if (this.bottomPlatform) {
-            this.ctx.fillStyle = '#3FE1B0'; // You can change this color
+            this.ctx.fillStyle = '#3FE1B0';
             this.ctx.fillRect(
                 this.bottomPlatform.x, 
                 this.bottomPlatform.y, 
                 this.bottomPlatform.width, 
                 this.bottomPlatform.height
             );
+            drawnCount++;
+        }
+
+        if (this.debugMode) {
+            console.log(`Platforms drawn: ${drawnCount}`);
         }
     }
+
 
 
     drawBullets() {
