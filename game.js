@@ -53,12 +53,11 @@ class Game {
         this.nextBackgroundIndex = 0;
         this.lastShieldBlockTime = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
-        this.minPlatformDistance = PLAYER_HEIGHT * 1.2; // Minimum vertical distance between platforms
-        this.maxPlatformDistance = PLAYER_HEIGHT * 2.2; // Add a maximum distance
+        this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
-        this.debugMode = true;
+        this.debugMode = false;
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
@@ -114,8 +113,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 15;
-        this.visiblePlatformCount = 8; // Number of platforms visible on screen at once
+        this.platformCount = 25;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -211,12 +209,12 @@ class Game {
             }
     
             hideOverlay();
-            this.gameStartTime = Date.now();
+            this.gameStartTime = Date.now(); // Store full millisecond timestamp  
 
             this.gameSpeed = 1;
             this.platformSpeed = this.basePlatformSpeed;
-            this.createBottomPlatform();
-            this.platforms = this.createInitialPlatforms();
+            this.bottomPlatform = this.createBottomPlatform();
+            this.bottomPlatformTimer = 0;
             this.player = this.createPlayer();
             this.player.y = this.bottomPlatform.y - this.player.height;
             this.resetPowerupEffects();
@@ -232,9 +230,11 @@ class Game {
             this.enemyBullets = [];
             this.gameStarted = true;
             this.difficultyLevel = 1;
+            this.platforms = this.createInitialPlatforms();
             this.gameStarted = false;
             this.hasPlayerJumped = false;
             this.score = 0;
+            this.player = this.createPlayer();
             this.gameRunning = true;
             this.gameOver = false;
             this.blocksClimbed = 0;
@@ -245,34 +245,26 @@ class Game {
             this.lastBackgroundChange = 0;
             this.currentBackgroundIndex = 0;
 
+
+            setTimeout(() => {
+                this.bottomPlatform = null;
+            }, 5000);
+    
             await updateTryCount();
             
             if (this.debugMode) {
-                this.logDebugInfo('After initialization');
+                this.logGameState('After initialization');
             }
     
             // Start the game loop
             requestAnimationFrame((time) => this.gameLoop(time));
-        } catch (error) {
+            } catch (error) {
             console.error('Error initializing game:', error);
             showOverlay('Error starting game. Please try again.');
         } finally {
             hideOverlay(); 
-        }
-    }
-
-    logDebugInfo(stage) {
-        console.log(`=== Debug Info: ${stage} ===`);
-        console.log('Game dimensions:', GAME_WIDTH, GAME_HEIGHT);
-        console.log('Player position:', this.player.x, this.player.y);
-        console.log('Bottom platform:', this.bottomPlatform);
-        console.log('Number of platforms:', this.platforms.length);
-        console.log('Game speed:', this.gameSpeed);
-        console.log('Platform speed:', this.platformSpeed);
-        console.log('Current scroll speed:', this.currentScrollSpeed);
-        console.log('===========================');
-    }
-
+             }
+            }
     
         loadSprites() {
         this.enemySprite = new Image();
@@ -852,50 +844,54 @@ class Game {
 
     
     createBottomPlatform() {
-        this.bottomPlatform = {
+        return {
             x: 0,
-            y: GAME_HEIGHT - this.platformHeight,
+            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, 
             width: GAME_WIDTH,
-            height: this.platformHeight,
-            isBottom: true
+            height: PLATFORM_HEIGHT,
+            isSafe: true,
+            isBottomPlatform: true 
+
         };
-        console.log('Bottom platform created:', this.bottomPlatform);
+
     }
 
-   
     createInitialPlatforms() {
         const platforms = [];
-        let y = GAME_HEIGHT - this.platformHeight * 3; // Start higher above the bottom platform
-
-        for (let i = 0; i < this.platformCount; i++) {
-            const platform = this.createPlatform(y);
-            platforms.push(platform);
-            y -= this.getRandomPlatformSpacing();
+        let lastY = GAME_HEIGHT; // Start from the bottom of the screen
+    
+        while (lastY > -GAME_HEIGHT) { // Generate platforms up to one screen height above the visible area
+            lastY -= this.getRandomPlatformSpacing();
+            platforms.push(this.createPlatform(lastY, false)); // Pass false to disallow spike platforms
         }
-
-        console.log(`${platforms.length} initial platforms created`);
+    
         return platforms;
     }
 
     
-    createPlatform(y) {
-        const minWidth = this.platformWidth * 0.7;
-        const maxWidth = this.platformWidth * 1.3;
+    createPlatform(y, allowSpikes = true) {
+        const minWidth = 60;
+        const maxWidth = 180;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
+        const spikeChance = 0.01; // 1% chance for spike platforms
+
         return {
             x: Math.random() * (GAME_WIDTH - width),
             y: y,
             width: width,
-            height: this.platformHeight,
+            height: PLATFORM_HEIGHT,
             isGolden: Math.random() < 0.1,
-            isSpike: Math.random() < 0.05,
+            isSpike: allowSpikes && Math.random() < spikeChance,
             spriteIndex: Math.floor(Math.random() * 2)
         };
     }
 
     getRandomPlatformSpacing() {
-        return Math.random() * (this.maxPlatformDistance - this.minPlatformDistance) + this.minPlatformDistance;
+        // Adjust these values to control the vertical spacing between platforms
+        const minSpacing = PLAYER_HEIGHT * 1.2;
+        const maxSpacing = PLAYER_HEIGHT * 2.2;
+        return Math.random() * (maxSpacing - minSpacing) + minSpacing;
     }
     
 
@@ -1009,11 +1005,6 @@ class Game {
 
     
     handleCollisions(currentTime) {
-        if (!Array.isArray(this.platforms)) {
-            console.error('this.platforms is not an array:', this.platforms);
-            this.platforms = []; // Reset to an empty array if it's not an array
-        }
-    
         const platforms = [this.bottomPlatform, ...this.platforms].filter(Boolean);
         let wasOnGround = this.player.isOnGround;
         this.player.isOnGround = false;
@@ -1072,41 +1063,34 @@ class Game {
     }
 
     updatePlatforms(dt) {
-        // Move existing platforms down
-        this.platforms.forEach(platform => {
-            platform.y += this.currentScrollSpeed * dt;
-        });
-
-        // Remove platforms that are below the bottom of the screen
-        const initialCount = this.platforms.length;
-        this.platforms = this.platforms.filter(platform => platform.y < GAME_HEIGHT);
-        const removedCount = initialCount - this.platforms.length;
-
-        // Add new platforms if needed
-        const addedCount = this.platformCount - this.platforms.length;
-        for (let i = 0; i < addedCount; i++) {
-            const highestPlatform = this.platforms.reduce((highest, platform) => 
-                platform.y < highest.y ? platform : highest, 
-                {y: GAME_HEIGHT}
-            );
-            
-            const newY = highestPlatform.y - this.getRandomPlatformSpacing();
-            this.platforms.push(this.createPlatform(newY));
-        }
-
-        if (this.debugMode) {
-            console.log(`Platforms updated: ${removedCount} removed, ${addedCount} added. Total: ${this.platforms.length}`);
-        }
-
-        // Update bottom platform position
-        if (this.bottomPlatform) {
-            this.bottomPlatform.y += this.currentScrollSpeed * dt;
-            if (this.bottomPlatform.y > GAME_HEIGHT) {
-                this.createBottomPlatform(); // Reset bottom platform if it goes off-screen
-                console.log('Bottom platform reset');
-            }
+    // Update bottom platform timer
+    if (this.gameStarted && this.bottomPlatform) {
+        this.bottomPlatformTimer += dt * this.gameSpeed;
+        if (this.bottomPlatformTimer >= this.bottomPlatformDuration) {
+            this.bottomPlatform = null;
         }
     }
+
+    // Move existing platforms down
+    this.platforms.forEach(platform => {
+        platform.y += this.currentScrollSpeed * dt;
+    });
+
+    // Remove platforms that are below the bottom of the screen
+    this.platforms = this.platforms.filter(platform => platform.y <= GAME_HEIGHT);
+
+    // Add new platforms if needed
+    while (this.platforms.length < this.platformCount) {
+        const highestPlatform = this.platforms.reduce((highest, platform) => 
+            platform.y < highest.y ? platform : highest, 
+            {y: GAME_HEIGHT}
+        );
+        
+        const newY = highestPlatform.y - this.minPlatformDistance - Math.random() * (PLAYER_HEIGHT * 0.5);
+        this.platforms.push(this.createPlatform(newY, true));
+    }
+
+}
 
 
 
@@ -1584,34 +1568,26 @@ updatePlayer(dt) {
     }
 
     drawPlatforms() {
-        let drawnCount = 0;
-        // Draw regular platforms
         for (let platform of this.platforms) {
+            // Only draw platforms that are within or partially within the screen
             if (platform.y + platform.height > 0 && platform.y < GAME_HEIGHT) {
-                this.ctx.fillStyle = platform.isGolden ? '#FFD700' : (platform.isSpike ? '#FF0000' : '#3FE1B0');
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-                drawnCount++;
+                let sprite;
+                if (platform.isSpike) {
+                    sprite = this.platformSprites.spike;
+                } else if (platform.isGolden) {
+                    sprite = this.platformSprites.golden;
+                } else {
+                    sprite = this.platformSprites.normal[platform.spriteIndex];
+                }
+    
+                this.ctx.drawImage(sprite, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
             }
         }
         
-        // Draw bottom platform
         if (this.bottomPlatform) {
-            this.ctx.fillStyle = '#3FE1B0';
-            this.ctx.fillRect(
-                this.bottomPlatform.x, 
-                this.bottomPlatform.y, 
-                this.bottomPlatform.width, 
-                this.bottomPlatform.height
-            );
-            drawnCount++;
-        }
-
-        if (this.debugMode) {
-            console.log(`Platforms drawn: ${drawnCount}`);
+            this.ctx.drawImage(this.platformSprites.normal[0], this.bottomPlatform.x, this.bottomPlatform.y, this.bottomPlatform.width, PLATFORM_HEIGHT);
         }
     }
-
-
 
     drawBullets() {
         this.ctx.fillStyle = '#00FF00';
@@ -1950,12 +1926,9 @@ updatePlayer(dt) {
         let deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         
+        
         this.update(deltaTime);
         this.draw();
-        
-        if (this.debugMode && Math.random() < 0.01) { // Log every ~100 frames
-            this.logDebugInfo('During game loop');
-        }
         
         requestAnimationFrame((time) => this.gameLoop(time));
     }
