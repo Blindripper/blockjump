@@ -53,7 +53,7 @@ class Game {
         this.nextBackgroundIndex = 0;
         this.lastShieldBlockTime = 0;
         this.baseScrollSpeed = 65; // Base scrolling speed
-        this.minPlatformDistance = PLAYER_HEIGHT * 1.5; // Minimum vertical distance between platforms
+        this.minPlatformDistance = PLAYER_HEIGHT * 1.2; // Minimum vertical distance between platforms
         this.currentScrollSpeed = this.baseScrollSpeed;
         this.maxScrollSpeed = this.baseScrollSpeed * 2; // Maximum scrolling speed
         this.scrollSpeedIncreaseFactor = 1.5; // How much to increase the speed
@@ -113,7 +113,7 @@ class Game {
         this.difficultyLevel = 1;
         this.platformSpeed = 65;
         this.bottomPlatform = null;
-        this.platformCount = 25;
+        this.platformCount = 40;
         this.player = null;
         this.gameStarted = false;
         this.bullets = [];
@@ -858,11 +858,11 @@ class Game {
 
     createInitialPlatforms() {
         const platforms = [];
-        let lastY = GAME_HEIGHT; // Start from the bottom of the screen
+        let lastY = GAME_HEIGHT;
     
-        while (lastY > -GAME_HEIGHT) { // Generate platforms up to one screen height above the visible area
+        while (lastY > 0) { // Only generate platforms within the visible screen
             lastY -= this.getRandomPlatformSpacing();
-            platforms.push(this.createPlatform(lastY, false)); // Pass false to disallow spike platforms
+            platforms.push(this.createPlatform(lastY, false));
         }
     
         return platforms;
@@ -871,7 +871,7 @@ class Game {
     
     createPlatform(y, allowSpikes = true) {
         const minWidth = 60;
-        const maxWidth = 180;
+        const maxWidth = 150;
         const width = Math.random() * (maxWidth - minWidth) + minWidth;
         
         const spikeChance = 0.01; // 1% chance for spike platforms
@@ -890,7 +890,7 @@ class Game {
     getRandomPlatformSpacing() {
         // Adjust these values to control the vertical spacing between platforms
         const minSpacing = PLAYER_HEIGHT * 1.2;
-        const maxSpacing = PLAYER_HEIGHT * 2.2;
+        const maxSpacing = PLAYER_HEIGHT * 1.8;
         return Math.random() * (maxSpacing - minSpacing) + minSpacing;
     }
     
