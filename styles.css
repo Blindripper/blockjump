@@ -160,6 +160,8 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: auto;
+  min-height: 300px;
 }
 
 .upgrade-card img {
@@ -212,6 +214,22 @@ header {
   border-radius: 5px;
   cursor: pointer;
 }
+
+.upgrade-card .upgrade-price {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #FFD700; /* Gold color for pricing */
+}
+
+.upgrade-card .upgrade-price p {
+  margin: 2px 0;
+}
+
+.upgrade-card .button-container {
+  margin-top: 5px;
+}
+
 
 .upgrade-card .upgrade-button,
 .upgrade-card .max-button {
