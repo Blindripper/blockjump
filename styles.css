@@ -1135,6 +1135,10 @@ header {
 }
 
 .share-button {
+  position: absolute;
+  top: 20px; /* Adjust this value to move the button higher or lower */
+  left: 50%;
+  transform: translateX(-50%);
   background-color: #1DA1F2;
   color: white;
   border: none;
@@ -1144,15 +1148,16 @@ header {
   font-size: 16px;
   font-family: 'Orbitron', sans-serif;
   transition: background-color 0.3s, transform 0.3s;
+  z-index: 1000; /* Ensure it's above other elements */
 }
 
 .share-button:hover {
   background-color: #1991DB;
-  transform: translateY(-2px);
+  transform: translateX(-50%) translateY(-2px);
 }
 
 .share-button:active {
-  transform: translateY(1px);
+  transform: translateX(-50%) translateY(1px);
 }
 
 @media (max-width: 1200px) {
