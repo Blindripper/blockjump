@@ -134,39 +134,74 @@ header {
   background-color: rgba(26, 35, 51, 0.95);
   padding: 20px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 1200px;
-  max-height: 90vh;
-  overflow-y: auto;
+  width: 95%; /* Increased from 90% to allow more horizontal space */
+  max-width: 1400px; /* Increased to accommodate all cards in one row */
+  height: 90vh; /* Set a fixed height */
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden; /* Hide overflow to prevent scrollbars */
 }
 
 .upgrades-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Prevent wrapping to new line */
   justify-content: center;
-  gap: 20px;
+  gap: 10px; /* Reduced gap to fit all cards */
   width: 100%;
   margin-bottom: 20px;
 }
 
 .upgrade-card {
-  width: 220px;
+  width: 18%; /* Adjust to fit 5 cards in a row with some margin */
+  min-width: 200px; /* Ensure cards don't get too small */
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 380px;
+  justify-content: space-between; /* Distribute content evenly */
+  height: auto; /* Allow height to adjust based on content */
 }
 
 .upgrade-card img {
-  width: 80px;
-  height: 80px;
+  width: 60px; /* Slightly reduced size */
+  height: 60px;
   margin-bottom: 10px;
+}
+
+.upgrade-card h3 {
+  font-size: 16px; /* Slightly reduced font size */
+  margin-bottom: 5px;
+}
+
+.upgrade-card p {
+  font-size: 12px; /* Reduced font size for description */
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.upgrade-card .tier-progress {
+  width: 100%;
+  height: 20px; /* Slightly reduced height */
+  margin-bottom: 10px;
+}
+
+.upgrade-card .button-container {
+  width: 100%;
+}
+
+.upgrade-card .upgrade-button,
+.upgrade-card .max-button {
+  padding: 6px; /* Reduced padding */
+  font-size: 12px; /* Reduced font size */
+}
+
+/* Adjust the start game button to ensure it's always visible */
+.start-game-container {
+  margin-top: auto; /* Push to the bottom of the shop content */
+  padding-top: 20px;
 }
 
 .upgrade-card h3 {
