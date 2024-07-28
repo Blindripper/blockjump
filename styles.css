@@ -440,13 +440,6 @@ header {
   text-shadow: 0 0 5px #FFFFFF;
 }  
 
-#nameForm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 50%;
-  margin-top: 10px;
-}
 
 #nameInput {
   width: 100%;
@@ -1084,6 +1077,7 @@ header {
   position: absolute;
   top: 50%;
   left: 50%;
+  width: 50%;
   transform: translate(-50%, -50%);
   background-color: rgba(26, 35, 51, 0.9);
   padding: 20px;
