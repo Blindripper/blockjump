@@ -1148,9 +1148,37 @@ header {
   }
 }
 
+.share-button {
+  background-color: #1DA1F2; /* X (Twitter) blue color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: 'Orbitron', sans-serif;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.share-button:hover {
+  background-color: #1991DB;
+  transform: translateY(-2px);
+}
+
+.share-button:active {
+  transform: translateY(1px);
+}
+
+
 /* Media query for smaller screens */
 @media (max-width: 768px) {
   .upgrade-option {
     flex-basis: 100%;
   }
+
+  .share-button {
+    font-size: 14px;
+    padding: 8px 16px;
+}
 }
