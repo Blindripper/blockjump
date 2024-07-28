@@ -660,9 +660,11 @@ header {
 
 .main-content {
   display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  height: calc(100vh - 60px);
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 60px); /* Adjust based on your header height */
+  padding: 0;
+  overflow: hidden;
 }
 
 .modal-content {
@@ -702,8 +704,11 @@ header {
 
 #gameWrapper {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
   gap: 20px;
-  width: calc(100% - 270px);
 }
 
 .achievement.unlocked {
@@ -767,30 +772,23 @@ header {
   color: #ffffff;
 }
 
-#leftSidebar {
-  width: 450px;
-  flex-shrink: 0;
-  background-color: rgba(26, 35, 51, 0.9);
-  border-radius: 8px;
-  padding: 15px;
-  margin-right: 15px;
+#leftSidebar, #achievementsSection {
+  flex: 0 0 auto;
+  height: 100%;
+  overflow-y: auto;
 }
 
 #gameContainer {
-  flex: 1;
-  max-width: 1100px;
-  width: 100%;
-  height: calc(100vh - 100px);
+  flex: 1 1 auto;
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  background: rgba(31, 42, 64, 0.8);
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   flex-direction: column;
-  margin-left: 20px;
-  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 #gameLogo {
@@ -799,18 +797,18 @@ header {
 }
 
 #canvasContainer {
-  position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #gameCanvas {
-  width: 100%;
-  height: calc(100% - 180px);
-  aspect-ratio: auto;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(63, 225, 176, 0.5);
-  margin-bottom: 10px;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 
@@ -1176,6 +1174,13 @@ header {
     flex-direction: column;
     height: auto;
   }
+
+  #leftSidebar, #achievementsSection {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    margin-bottom: 20px;
+  }
   
   #startGameCount {
     position: relative;
@@ -1189,6 +1194,21 @@ header {
     width: 100%;
     flex-direction: column;
     margin-right: 20px;
+  }
+
+  #canvasContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #gameContainer {
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%; /* Maintain aspect ratio */
+    position: relative;
   }
 
   #leftSidebar, #gameContainer, #achievementsSection {
