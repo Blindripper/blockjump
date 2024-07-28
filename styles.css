@@ -1149,7 +1149,7 @@ header {
 }
 
 .share-button {
-  background-color: #1DA1F2; /* X (Twitter) blue color */
+  background-color: hsl(0, 0%, 0%); /* X (Twitter) blue color */
   color: white;
   border: none;
   padding: 10px 20px;
