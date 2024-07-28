@@ -2302,9 +2302,14 @@ async function handleBribeLeader() {
 
     const upgradesGrid = document.getElementById('upgradesGrid');
 
+   
     Object.entries(UPGRADES).forEach(([type, tiers]) => {
         const currentTier = game.playerUpgrades.upgrades[type];
-        upgradesGrid.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
+        if (type === 'bomb') {
+            upgradesGrid.appendChild(createUpgradeCard(type, currentTier, UPGRADES.bomb));
+        } else if (Array.isArray(tiers) && currentTier < tiers.length) {
+            upgradesGrid.appendChild(createUpgradeCard(type, currentTier, tiers[currentTier]));
+        }
     });
 
     document.getElementById('startGameBtn').onclick = () => {
@@ -2330,6 +2335,16 @@ function createUpgradeCard(type, tier, upgradeInfo) {
     const progress = (currentTier / maxTier) * 100;
     const isMaxed = currentTier === maxTier;
     
+    // Handle different structures for 'bomb' and other upgrades
+    let cost, jumpCost;
+    if (type === 'bomb') {
+        cost = UPGRADES.bomb.cost;
+        jumpCost = UPGRADES.bomb.jumpCost;
+    } else {
+        cost = upgradeInfo?.cost;
+        jumpCost = upgradeInfo?.jumpCost;
+    }
+    
     const canAffordScore = game.playerUpgrades.canAfford(type, tier, false);
     const canAffordJump = game.playerUpgrades.canAfford(type, tier, true);
     
@@ -2342,8 +2357,8 @@ function createUpgradeCard(type, tier, upgradeInfo) {
             <span>Tier ${currentTier}/${maxTier}</span>
         </div>
         <div class="upgrade-price">
-            <p>Cost: ${formatPrice(upgradeInfo.cost)} Score</p>
-            <p>or ${formatPrice(upgradeInfo.jumpCost)} JUMP</p>
+            <p>Cost: ${formatPrice(cost)} Score</p>
+            <p>or ${formatPrice(jumpCost)} JUMP</p>
         </div>
         <div class="button-container">
             <button class="upgrade-button buy-score" ${isMaxed || !canAffordScore ? 'disabled' : ''}>Buy with Score</button>
