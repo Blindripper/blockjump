@@ -476,7 +476,7 @@ header {
 .game-overlay .game-button {
   padding: 12px 24px;
   font-size: 16px;
-  width: 100%;
+  width: 50%;
   background-color: #3FE1B0;
   color: #1a2333;
   border: none;
