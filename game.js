@@ -37,8 +37,8 @@ const soundUrl = `${repoBaseUrl}sound/`;
 const picsUrl = `${repoBaseUrl}pics/`;
 
 // Game constants
-const GAME_WIDTH = 1600;
-const GAME_HEIGHT = 1200;
+const GAME_WIDTH = 800;
+const GAME_HEIGHT = 600;
 const PLATFORM_HEIGHT = 43;
 const PLAYER_WIDTH = 45;
 const PLAYER_HEIGHT = 75;
@@ -2045,29 +2045,31 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         console.error('Game canvas not found');
         return;
     }
-    const canvasRect = canvas.getBoundingClientRect();
+    const canvasContainer = canvas.closest('#canvasContainer') || canvas.parentElement;
+    const containerRect = canvasContainer.getBoundingClientRect();
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
     overlay.className = 'game-overlay';
     Object.assign(overlay.style, {
         position: 'absolute',
-        left: `${canvasRect.left}px`,
-        top: `${canvasRect.top}px`,
-        width: `${canvasRect.width}px`,
-        height: `${canvasRect.height}px`,
+        left: '0',
+        top: '0',
+        width: '100%',
+        height: '100%',
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: '2000',
-        padding: '20px'
+        padding: '20px',
+        boxSizing: 'border-box'
     });
 
     const gameOverContainer = document.createElement('div');
     gameOverContainer.id = 'gameOverContainer';
-    gameOverContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;';
+    gameOverContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;';
 
     // Add this block to display the message
     const messageElement = document.createElement('div');
@@ -2092,8 +2094,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
     gameOverContainer.appendChild(nameFormContainer);
     overlay.appendChild(gameOverContainer);
-    document.body.appendChild(overlay);
-
+    canvasContainer.appendChild(overlay);
 }
 
 function createNameForm() {
