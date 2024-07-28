@@ -25,31 +25,7 @@ body {
   overflow: hidden;
 }
 
-#nameForm {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(26, 35, 51, 0.9);
-  padding: 20px;
-  border-radius: 8px;
-  z-index: 2002;
-  display: none;
-}
 
-#nameForm.visible {
-  display: block;
-}
-
-#nameInput {
-  font-family: 'Orbitron', sans-serif;
-  padding: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 4px;
-}
 
 /* Header Styles */
 header {
@@ -492,6 +468,32 @@ header {
 .game-overlay .game-button:hover {
   background-color: #2dc898;
   transform: translateY(-2px);
+}
+
+.game-overlay #nameForm {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(26, 35, 51, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 2002;
+  display: none;
+}
+
+.game-overlay #nameForm.visible {
+  display: block;
+}
+
+.game-overlay #nameInput {
+  font-family: 'Orbitron', sans-serif;
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
 }
 
 .upgrade-option .tier-progress {
