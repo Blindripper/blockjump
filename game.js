@@ -3081,6 +3081,9 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     gameOverContainer.appendChild(scoreInfo);
 
     createGameOverForm(totalScore);
+
+    const shareButton = createShareButton();
+    gameOverContainer.appendChild(shareButton);
 }
 
 
@@ -3399,6 +3402,21 @@ async function updateClaimPrizeButton(highscores) {
       claimPrizeBtn.style.display = 'none';
     }
   }
+
+  function shareOnX(score, blocksClimbed) {
+    const tweetText = encodeURIComponent(`I just scored ${score} points and climbed ${blocksClimbed} blocks in #BlockJump! Can you beat my score? Play now at https://blindripper.github.io/blockjump/? #Tezos #XTZ #Tez #Etherlink`);
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+    window.open(tweetUrl, '_blank');
+}
+
+// Add this function to create the share button
+function createShareButton() {
+    const shareButton = document.createElement('button');
+    shareButton.textContent = 'Share on X';
+    shareButton.className = 'share-button';
+    shareButton.onclick = () => shareOnX(window.finalScore, window.blocksClimbed);
+    return shareButton;
+}
 
 
 function drawCanvasButton(text, onClick) {
