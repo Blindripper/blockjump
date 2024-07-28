@@ -857,7 +857,7 @@ class Game {
     createBottomPlatform() {
         return {
             x: 0,
-            y: GAME_HEIGHT - PLATFORM_HEIGHT - 1, 
+            y: GAME_HEIGHT - PLATFORM_HEIGHT, 
             width: GAME_WIDTH,
             height: PLATFORM_HEIGHT,
             isSafe: true,
