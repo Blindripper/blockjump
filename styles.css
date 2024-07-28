@@ -1136,7 +1136,7 @@ header {
 
 .share-button {
   position: absolute;
-  top: 20px; /* Adjust this value to move the button higher or lower */
+  bottom: 250px; /* Adjust this value to move the button higher or lower */
   left: 50%;
   transform: translateX(-50%);
   background-color: #1DA1F2;
