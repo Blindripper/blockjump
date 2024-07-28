@@ -37,8 +37,8 @@ const soundUrl = `${repoBaseUrl}sound/`;
 const picsUrl = `${repoBaseUrl}pics/`;
 
 // Game constants
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 600;
+const GAME_WIDTH = 1600;
+const GAME_HEIGHT = 1200;
 const PLATFORM_HEIGHT = 43;
 const PLAYER_WIDTH = 45;
 const PLAYER_HEIGHT = 75;
