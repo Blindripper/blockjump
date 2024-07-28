@@ -2050,7 +2050,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     const containerRect = canvasContainer.getBoundingClientRect();
 
     // Adjust these values to fine-tune the position
-    const rightOffset = 200; // pixels to move right
+    const rightOffset = 800; // pixels to move right
     const downOffset = 100;  // pixels to move down
 
     const overlay = document.createElement('div');
