@@ -790,7 +790,7 @@ header {
 }
 
 #gameLogo {
-  height: 80px; /* Adjust as needed */
+  height: 70px; /* Adjust as needed */
   width: auto;
 }
 
@@ -808,7 +808,7 @@ header {
   width: auto;
   height: auto;
   object-fit: contain;
-  margin-top: 30px;
+  margin-top: 45px;
 }
 
 #gameInfo {
