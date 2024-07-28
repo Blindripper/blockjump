@@ -770,7 +770,7 @@ header {
 
 #leftSidebar, #achievementsSection {
   flex: 0 0 auto;
-  width: 250px; /* Adjust as needed */
+  width: 500px; /* Adjust as needed */
   height: 100%;
   overflow-y: auto;
 }
