@@ -3088,7 +3088,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const title = document.createElement('h2');
     title.textContent = 'Game Over!';
     title.style.color = '#3FE1B0';
-    title.style.marginTop = '270px';
+    title.style.marginTop = '200px';
 
     const scoreInfo = document.createElement('div');
     scoreInfo.innerHTML = `
