@@ -415,6 +415,7 @@ header {
   text-align: center;
   font-family: 'Orbitron', sans-serif;
   z-index: 2000;
+  margin-top: 10px;
 }
 
 .game-overlay > div {
