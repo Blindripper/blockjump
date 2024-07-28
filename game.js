@@ -2046,17 +2046,17 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         return;
     }
     const canvasContainer = canvas.closest('#canvasContainer') || canvas.parentElement;
-    const containerRect = canvasContainer.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
     overlay.className = 'game-overlay';
     Object.assign(overlay.style, {
         position: 'absolute',
-        left: '0',
-        top: '0',
-        width: '50%',
-        height: '50%',
+        left: `${canvasRect.left - canvasContainer.offsetLeft}px`,
+        top: `${canvasRect.top - canvasContainer.offsetTop}px`,
+        width: `${canvasRect.width}px`,
+        height: `${canvasRect.height}px`,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
@@ -2071,7 +2071,6 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     gameOverContainer.id = 'gameOverContainer';
     gameOverContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;';
 
-    // Add this block to display the message
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
     messageElement.style.color = '#3FE1B0';
@@ -2111,7 +2110,7 @@ function createNameForm() {
     nameInput.placeholder = 'Enter your name';
     nameInput.required = true;
     nameInput.maxLength = 10;
-    nameInput.style.width = '100%';
+    nameInput.style.width = '80%';
     nameInput.style.padding = '10px';
     nameInput.style.marginBottom = '15px';
     nameInput.style.fontSize = '16px';
@@ -2119,7 +2118,8 @@ function createNameForm() {
 
     const buttonContainer = document.createElement('div');
     buttonContainer.style.display = 'flex';
-    buttonContainer.style.justifyContent = 'center';
+    buttonContainer.style.flexDirection = 'column';
+    buttonContainer.style.alignItems = 'center';
     buttonContainer.style.gap = '10px';
     buttonContainer.style.width = '100%';
 
@@ -2148,9 +2148,9 @@ function createButton(text, onClick) {
     button.style.padding = '10px 20px';
     button.style.fontSize = '16px';
     button.style.margin = '5px';
+    button.style.width = '80%';
     return button;
 }
-
 async function handleBribeLeader() {
     if (!checkWalletConnection()) return;
   
