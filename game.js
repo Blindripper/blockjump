@@ -2050,7 +2050,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
     // Adjust these values to fine-tune the position
     const rightOffset = 90; // pixels to move right
-    const downOffset = 63;  // pixels to move down
+    const downOffset = 65;  // pixels to move down
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
@@ -3093,7 +3093,7 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const title = document.createElement('h2');
     title.textContent = 'Game Over!';
     title.style.color = '#3FE1B0';
-    title.style.marginTop = '200px';
+    title.style.marginTop = '120px';
 
     const scoreInfo = document.createElement('div');
     scoreInfo.innerHTML = `
