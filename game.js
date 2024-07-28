@@ -2341,6 +2341,10 @@ function createUpgradeCard(type, tier, upgradeInfo) {
             <div class="progress-bar" style="width: ${progress}%"></div>
             <span>Tier ${currentTier}/${maxTier}</span>
         </div>
+        <div class="upgrade-price">
+            <p>Cost: ${formatPrice(upgradeInfo.cost)} Score</p>
+            <p>or ${formatPrice(upgradeInfo.jumpCost)} JUMP</p>
+        </div>
         <div class="button-container">
             <button class="upgrade-button buy-score" ${isMaxed || !canAffordScore ? 'disabled' : ''}>Buy with Score</button>
             <button class="upgrade-button buy-jump" ${isMaxed || !canAffordJump ? 'disabled' : ''}>Buy with JUMP</button>
@@ -2365,7 +2369,6 @@ function createUpgradeCard(type, tier, upgradeInfo) {
 
     return card;
 }
-
 
 function createUpgradeOption(type, tier, upgradeInfo) {
     const option = document.createElement('div');
