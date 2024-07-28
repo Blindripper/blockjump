@@ -2060,8 +2060,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         position: 'absolute',
         left: `${rightOffset}px`,
         top: `${downOffset}px`,
-        width: `${canvasRect.width - rightOffset}px`,
-        height: `${canvasRect.height - downOffset}px`,
+        width: `${canvasRect.width}px`,
+        height: `${canvasRect.height}px`,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         flexDirection: 'column',
@@ -2069,7 +2069,8 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
         alignItems: 'center',
         zIndex: '2000',
         padding: '20px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        transform: `translate(-${rightOffset}px, -${downOffset}px)` // This will maintain the overlay's position relative to the canvas
     });
 
     const gameOverContainer = document.createElement('div');
