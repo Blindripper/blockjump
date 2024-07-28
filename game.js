@@ -2047,14 +2047,15 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
     }
     const canvasContainer = canvas.closest('#canvasContainer') || canvas.parentElement;
     const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = canvasContainer.getBoundingClientRect();
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
     overlay.className = 'game-overlay';
     Object.assign(overlay.style, {
         position: 'absolute',
-        left: `${canvasRect.left - canvasContainer.offsetLeft}px`,
-        top: `${canvasRect.top - canvasContainer.offsetTop}px`,
+        left: `${canvasRect.left - containerRect.left}px`,
+        top: `${canvasRect.top - containerRect.top}px`,
         width: `${canvasRect.width}px`,
         height: `${canvasRect.height}px`,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
