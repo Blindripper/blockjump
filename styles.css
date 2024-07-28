@@ -161,7 +161,7 @@ header {
   flex-direction: column;
   align-items: center;
   height: auto;
-  min-height: 300px;
+  min-height: 250px;
 }
 
 .upgrade-card img {
