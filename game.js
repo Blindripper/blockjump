@@ -3045,6 +3045,8 @@ function handleGameOver(score, blocksClimbed, gameStartTime) {
     const totalScore = score + checkpointReward;
 
     window.finalScore = totalScore;
+    window.blocksClimbed = blocksClimbed;
+
 
     showOverlay("", null, false, '', false); // We'll add content manually
 
@@ -3404,12 +3406,19 @@ async function updateClaimPrizeButton(highscores) {
   }
 
   function shareOnX(score, blocksClimbed) {
-    const tweetText = encodeURIComponent(`I just scored ${score} points and climbed ${blocksClimbed} blocks in #BlockJump! Can you beat my score? Play now at https://blindripper.github.io/blockjump/? #Tezos #XTZ #Tez #Etherlink`);
+    const tweetText = encodeURIComponent(`I just scored ${score} points and climbed ${blocksClimbed} blocks in #BlockJump!
+
+Can you beat my score? 
+
+Play now at https://blindripper.github.io/blockjump/ 
+
+#Tezos #XTZ #Tez #Etherlink`);
+
     const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
     window.open(tweetUrl, '_blank');
 }
 
-// Add this function to create the share button
+// The rest of your social share code remains the same
 function createShareButton() {
     const shareButton = document.createElement('button');
     shareButton.textContent = 'Share on X';
@@ -3417,7 +3426,6 @@ function createShareButton() {
     shareButton.onclick = () => shareOnX(window.finalScore, window.blocksClimbed);
     return shareButton;
 }
-
 
 function drawCanvasButton(text, onClick) {
     const button = document.createElement('button');
