@@ -470,7 +470,7 @@ header {
   transform: translateY(-2px);
 }
 
-.game-overlay #nameForm {
+#nameForm {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -483,11 +483,11 @@ header {
   display: none;
 }
 
-.game-overlay #nameForm.visible {
+#nameForm.visible {
   display: block;
 }
 
-.game-overlay #nameInput {
+#nameInput {
   font-family: 'Orbitron', sans-serif;
   padding: 10px;
   margin-bottom: 10px;
