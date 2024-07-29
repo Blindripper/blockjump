@@ -797,6 +797,7 @@ header {
   align-items: center;
   min-height: 80vh; /* Ensures the game takes up most of the viewport height */
   margin: 0 auto;
+  margin-bottom: 25px;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -820,7 +821,7 @@ header {
   width: auto;
   height: auto;
   object-fit: contain;
-  margin-top: 45px;
+  margin-top: 20px;
 }
 
 #gameInfo {
