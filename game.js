@@ -2050,7 +2050,7 @@ function showOverlay(message, callback = null, includeButton = false, buttonText
 
     // Adjust these values to fine-tune the position
     const rightOffset = 90; // pixels to move right
-    const downOffset = 67;  // pixels to move down
+    const downOffset = 42;  // pixels to move down
 
     const overlay = document.createElement('div');
     overlay.id = 'game-overlay';
