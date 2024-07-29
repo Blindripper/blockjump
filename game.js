@@ -61,7 +61,7 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.isConnected = false;
-        this.playerUpgrades = new PlayerUpgrades();
+        this.players = new Players();
         this.bombKey = 'KeyE';
         this.minEnemyShootInterval = 2000; // Minimum 2 seconds between shots
         this.maxEnemyShootInterval = 10000; // Maximum 10 seconds between shots
@@ -453,8 +453,8 @@ class Game {
                     // Bitcoin shield active, destroy the bullet without ending the game
                     this.createParticles(bullet.x, bullet.y, 5, '#FFD700');
                     return false;
-                } else if (this.player.upgradeShieldHits > 0) {
-                    // Upgrade shield active
+                } else if (this.player.ShieldHits > 0) {
+                    //  shield active
                     this.player.upgradeShieldHits--;
                     this.createParticles(bullet.x, bullet.y, 5, '#0000FF');
                     return false;
@@ -2318,15 +2318,21 @@ async function handleBribeLeader() {
         }
     });
 
-    document.getElementById('startGameBtn').onclick = () => {
+    document.getElementById('startGameBtn').onclick = async () => {
         upgradeShop.style.display = 'none';
         showEtherlinkWaitMessage();
-        game.initializeGame().then(() => {
+        const currentTries = await getGameTries();
+        if (currentTries <= 0) {
             hideOverlay();
-        }).catch(error => {
-            console.error('Error initializing game:', error);
-            showOverlay('Failed to start game. Please try again.');
-        });
+            showOverlay('No tries left. Please purchase more.', handleBuyTries, true, 'Buy Tries');
+        } else {
+            game.initializeGame().then(() => {
+                hideOverlay();
+            }).catch(error => {
+                console.error('Error initializing game:', error);
+                showOverlay('Failed to start game. Please try again.');
+            });
+        }
     };
 
     upgradeShop.style.display = 'flex';
