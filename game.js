@@ -1178,21 +1178,32 @@ updatePlayer(dt) {
 }
 
     
-    handleGameOver() {
-        this.gameRunning = false;
-        this.gameOver = true;
+handleGameOver() {
+    this.gameRunning = false;
+    this.gameOver = true;
 
-        // Stop any ongoing sounds
-        Object.values(sounds).forEach(sound => {
-            sound.pause();
-            sound.currentTime = 0;
-        });
-        
-    
-        this.playSound('gameOver');
-        window.gameStartTime = this.gameStartTime; // Ensure this is set correctly
-        handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
-    }
+    // Stop any ongoing sounds
+    Object.values(sounds).forEach(sound => {
+        sound.pause();
+        sound.currentTime = 0;
+    });
+
+    this.playSound('gameOver');
+    window.gameStartTime = this.gameStartTime; // Ensure this is set correctly
+
+    // Update game stats before calling handleGameOver function
+    // Make sure to import updateGameStats from achievements.js
+    updateGameStats({
+        score: this.score,
+        blocksClimbed: this.blocksClimbed,
+        powerupsCollected: this.powerupsCollected
+    });
+
+    // Add console log for debugging
+    console.log("Game Over Stats:", { score: this.score, blocksClimbed: this.blocksClimbed, powerupsCollected: this.powerupsCollected });
+
+    handleGameOver(this.score, this.blocksClimbed, this.gameStartTime);
+}
 
     drawBackground() {
         const bg = backgrounds[this.currentBackgroundIndex];
