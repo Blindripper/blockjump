@@ -67,7 +67,9 @@ header {
 }
 
 .header-left {
-  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add some space between the JUMP link and the bridge image */
 }
 
 #jumpLink {
@@ -77,12 +79,12 @@ header {
   color: var(--primary-color);
   font-weight: bold;
   transition: opacity 0.3s ease;
-  margin: 0 5px;
 }
 
 #jumpLink:hover {
   opacity: 0.8;
 }
+
 
 #jumpLink span {
   margin-right: 10px;
@@ -92,8 +94,22 @@ header {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  margin: 0 5px;
+  margin-left: 5px;
+}
 
+#bridgeLink {
+  display: flex;
+  align-items: center;
+}
+
+#bridgeImage {
+  width: 40px; /* Adjust the size as needed */
+  height: auto;
+  transition: opacity 0.3s ease;
+}
+
+#bridgeImage:hover {
+  opacity: 0.8;
 }
 
 .header-right {
