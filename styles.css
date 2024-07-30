@@ -103,8 +103,8 @@ header {
 }
 
 #bridgeImage {
-  width: 40px; /* Adjust the size as needed */
-  height: auto;
+  width: 90px; /* Adjust the size as needed */
+  height: 60px;
   transition: opacity 0.3s ease;
 }
 
