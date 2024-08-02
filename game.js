@@ -995,8 +995,6 @@ class Game {
         this.playSound('explosion');  // Add this sound to your sound effects
     }
 
-    
-    
     updateBackground() {
         const targetBackgroundIndex = Math.floor(this.score / this.backgroundChangeThreshold) % backgrounds.length;
         
@@ -1102,8 +1100,6 @@ class Game {
     }
 
 }
-
-
 
 updatePlayer(dt) {
     if (!this.player) {
@@ -1229,9 +1225,6 @@ handleGameOver() {
             this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         }
     }
-
-
-    
 
     updatePowerups(dt) {
         const currentTime = Date.now();
@@ -2008,8 +2001,6 @@ function toggleSound() {
     }
 }
 
-
-
 function enableSound() {
     Object.values(sounds).forEach(sound => {
         sound.muted = false;
@@ -2438,9 +2429,6 @@ function getUpgradeTitle(type, tier) {
     return `${type.charAt(0).toUpperCase() + type.slice(1)} Tier ${tier + 1}`;
 }
 
-
-
-
 function calculateMaxPrice(type, useJump) {
     if (type === 'bomb') {
         const currentBombs = game.playerUpgrades.upgrades.bomb;
@@ -2538,8 +2526,6 @@ async function purchaseMaxUpgrade(type, tier, useJump) {
     }
 }
 
-
-
 function getUpgradeDescription(type, tier, upgradeInfo) {
     switch (type) {
         case 'speed':
@@ -2577,9 +2563,7 @@ async function updateAvailableScoreDisplay() {
     }
   }
   
-
-  
-  function formatPrice(price) {
+function formatPrice(price) {
   
     // Ensure price is a number
     if (typeof price === 'string') {
@@ -2600,9 +2584,6 @@ async function updateAvailableScoreDisplay() {
     }
   }
   
-
-
-
 function showUpgradeOverlay(message) {
     const existingOverlay = document.getElementById('upgradeOverlay');
     if (existingOverlay) {
@@ -3078,9 +3059,6 @@ async function processAddFunds(xtzAmount, jumpAmount) {
     }
 }
 
-
-
-
 function handleGameOver(score, blocksClimbed, gameStartTime) {
     const checkpointReward = checkpointManager.getAccumulatedReward();
     const totalScore = score + checkpointReward;
@@ -3494,6 +3472,5 @@ function drawCanvasMessage(text) {
     message.className = 'canvas-message';
     document.body.appendChild(message);
 }
-
 
 export { updateTryCount };
